@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,6 +28,7 @@ interface PostFeedProps {
 
 export default function PostFeed({ profileId }: PostFeedProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [newPost, setNewPost] = useState("");
 
   const { data: activeProfile } = useQuery({
@@ -116,7 +118,7 @@ export default function PostFeed({ profileId }: PostFeedProps) {
             <form onSubmit={handleCreatePost}>
               <div className="flex items-start space-x-4">
                 <Avatar>
-                  <AvatarImage src={activeProfile.profileImageUrl || ""} />
+                  <AvatarImage src={user?.profileImageUrl || ""} />
                   <AvatarFallback>{activeProfile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">

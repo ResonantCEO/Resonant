@@ -8,14 +8,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
-  const profileId = parseInt(id || "0");
+  
+  const { data: activeProfile } = useQuery({
+    queryKey: ["/api/profiles/active"],
+  });
+
+  // If no ID is provided, use the active profile ID
+  const profileId = id ? parseInt(id) : activeProfile?.id;
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: [`/api/profiles/${profileId}`],
-  });
-
-  const { data: activeProfile } = useQuery({
-    queryKey: ["/api/profiles/active"],
+    enabled: !!profileId, // Only run query when we have a profile ID
   });
 
   if (profileLoading) {

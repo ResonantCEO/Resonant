@@ -188,7 +188,7 @@ export default function Sidebar() {
             <Button
               variant="ghost"
               className="w-full justify-start bg-blue-500 text-white hover:bg-blue-600"
-              onClick={() => setLocation("/")}
+              onClick={() => setLocation("/profile")}
             >
               <Home className="w-5 h-5 mr-3" />
               Profile

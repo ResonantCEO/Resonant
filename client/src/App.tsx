@@ -19,6 +19,7 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/profile" component={Profile} />
           <Route path="/profile/:id" component={Profile} />
         </>
       )}

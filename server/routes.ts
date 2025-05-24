@@ -1,0 +1,334 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
+import { z } from "zod";
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth middleware
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Profile routes
+  app.get('/api/profiles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const profiles = await storage.getProfilesByUserId(userId);
+      res.json(profiles);
+    } catch (error) {
+      console.error("Error fetching profiles:", error);
+      res.status(500).json({ message: "Failed to fetch profiles" });
+    }
+  });
+
+  app.get('/api/profiles/active', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const profile = await storage.getActiveProfile(userId);
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching active profile:", error);
+      res.status(500).json({ message: "Failed to fetch active profile" });
+    }
+  });
+
+  app.post('/api/profiles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const profileData = insertProfileSchema.parse({
+        ...req.body,
+        userId,
+      });
+      
+      const profile = await storage.createProfile(profileData);
+      res.json(profile);
+    } catch (error) {
+      console.error("Error creating profile:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid profile data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create profile" });
+      }
+    }
+  });
+
+  app.put('/api/profiles/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Verify ownership
+      const existingProfile = await storage.getProfile(profileId);
+      if (!existingProfile || existingProfile.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const updates = req.body;
+      const profile = await storage.updateProfile(profileId, updates);
+      res.json(profile);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  app.post('/api/profiles/:id/activate', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Verify ownership
+      const profile = await storage.getProfile(profileId);
+      if (!profile || profile.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      await storage.setActiveProfile(userId, profileId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error activating profile:", error);
+      res.status(500).json({ message: "Failed to activate profile" });
+    }
+  });
+
+  app.get('/api/profiles/search', isAuthenticated, async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query) {
+        return res.json([]);
+      }
+      
+      const profiles = await storage.searchProfiles(query);
+      res.json(profiles);
+    } catch (error) {
+      console.error("Error searching profiles:", error);
+      res.status(500).json({ message: "Failed to search profiles" });
+    }
+  });
+
+  app.get('/api/profiles/:id', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const profile = await storage.getProfile(profileId);
+      
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  // Friend routes
+  app.get('/api/friends', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const friends = await storage.getFriends(activeProfile.id);
+      res.json(friends);
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+      res.status(500).json({ message: "Failed to fetch friends" });
+    }
+  });
+
+  app.get('/api/friend-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const requests = await storage.getFriendRequests(activeProfile.id);
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching friend requests:", error);
+      res.status(500).json({ message: "Failed to fetch friend requests" });
+    }
+  });
+
+  app.post('/api/friend-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const { addresseeId } = req.body;
+      
+      // Check if friendship already exists
+      const existingFriendship = await storage.getFriendshipStatus(activeProfile.id, addresseeId);
+      if (existingFriendship) {
+        return res.status(400).json({ message: "Friendship already exists" });
+      }
+
+      const friendship = await storage.sendFriendRequest(activeProfile.id, addresseeId);
+      res.json(friendship);
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      res.status(500).json({ message: "Failed to send friend request" });
+    }
+  });
+
+  app.post('/api/friend-requests/:id/accept', isAuthenticated, async (req: any, res) => {
+    try {
+      const friendshipId = parseInt(req.params.id);
+      const friendship = await storage.acceptFriendRequest(friendshipId);
+      res.json(friendship);
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+      res.status(500).json({ message: "Failed to accept friend request" });
+    }
+  });
+
+  app.post('/api/friend-requests/:id/reject', isAuthenticated, async (req: any, res) => {
+    try {
+      const friendshipId = parseInt(req.params.id);
+      const friendship = await storage.rejectFriendRequest(friendshipId);
+      res.json(friendship);
+    } catch (error) {
+      console.error("Error rejecting friend request:", error);
+      res.status(500).json({ message: "Failed to reject friend request" });
+    }
+  });
+
+  // Post routes
+  app.get('/api/posts', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const posts = await storage.getFeedPosts(activeProfile.id);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      res.status(500).json({ message: "Failed to fetch posts" });
+    }
+  });
+
+  app.get('/api/profiles/:id/posts', async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      let viewerProfileId: number | undefined;
+
+      // Get viewer's active profile if authenticated
+      if (req.user) {
+        const viewerProfile = await storage.getActiveProfile(req.user.claims.sub);
+        viewerProfileId = viewerProfile?.id;
+      }
+
+      const posts = await storage.getPosts(profileId, viewerProfileId);
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching profile posts:", error);
+      res.status(500).json({ message: "Failed to fetch profile posts" });
+    }
+  });
+
+  app.post('/api/posts', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const postData = insertPostSchema.parse({
+        ...req.body,
+        profileId: activeProfile.id,
+      });
+
+      const post = await storage.createPost(postData);
+      res.json(post);
+    } catch (error) {
+      console.error("Error creating post:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid post data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create post" });
+      }
+    }
+  });
+
+  app.post('/api/posts/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const isLiked = await storage.isPostLikedByProfile(postId, activeProfile.id);
+      if (isLiked) {
+        await storage.unlikePost(postId, activeProfile.id);
+        res.json({ liked: false });
+      } else {
+        await storage.likePost(postId, activeProfile.id);
+        res.json({ liked: true });
+      }
+    } catch (error) {
+      console.error("Error toggling post like:", error);
+      res.status(500).json({ message: "Failed to toggle post like" });
+    }
+  });
+
+  // Comment routes
+  app.get('/api/posts/:id/comments', async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const comments = await storage.getComments(postId);
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      res.status(500).json({ message: "Failed to fetch comments" });
+    }
+  });
+
+  app.post('/api/posts/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const commentData = insertCommentSchema.parse({
+        ...req.body,
+        postId,
+        profileId: activeProfile.id,
+      });
+
+      const comment = await storage.createComment(commentData);
+      res.json(comment);
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid comment data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create comment" });
+      }
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}

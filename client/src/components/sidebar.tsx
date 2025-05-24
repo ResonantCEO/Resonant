@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import CreateProfileModal from "./create-profile-modal";
-import { useState, useRef } from "react";
-import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, Camera } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -15,8 +14,6 @@ export default function Sidebar() {
   const [, setLocation] = useLocation();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Helper function to format user's display name
   const getUserDisplayName = () => {
@@ -100,59 +97,7 @@ export default function Sidebar() {
     }
   };
 
-  // Handle profile picture upload
-  const uploadProfilePictureMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('profileImage', file);
-      return await apiRequest("POST", "/api/user/profile-image", formData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      toast({
-        title: "Profile Picture Updated",
-        description: "Your profile picture has been successfully updated.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload profile picture",
-        variant: "destructive",
-      });
-    },
-  });
 
-  const handleProfilePictureClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid File Type",
-          description: "Please select an image file.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File Too Large",
-          description: "Please select an image smaller than 5MB.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      uploadProfilePictureMutation.mutate(file);
-    }
-  };
 
   return (
     <div className="w-80 bg-white shadow-lg border-r border-neutral-200 hidden lg:block">
@@ -169,24 +114,10 @@ export default function Sidebar() {
         {activeProfile && user && (
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-center space-x-3">
-              <div className="relative">
-                <Avatar 
-                  className="w-12 h-12 border-2 border-blue-500 cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={handleProfilePictureClick}
-                >
-                  <AvatarImage src={user.profileImageUrl || ""} />
-                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                </Avatar>
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                     onClick={handleProfilePictureClick}>
-                  <Camera className="w-4 h-4 text-white" />
-                </div>
-                {uploadProfilePictureMutation.isPending && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                )}
-              </div>
+              <Avatar className="w-12 h-12 border-2 border-blue-500">
+                <AvatarImage src={user.profileImageUrl || ""} />
+                <AvatarFallback>{getUserInitials()}</AvatarFallback>
+              </Avatar>
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
                   <span className="font-semibold text-neutral-900">{getUserDisplayName()}</span>
@@ -318,15 +249,7 @@ export default function Sidebar() {
         open={showCreateModal} 
         onOpenChange={setShowCreateModal} 
       />
-      
-      {/* Hidden file input for profile picture upload */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept="image/*"
-        className="hidden"
-      />
+
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
@@ -30,6 +30,7 @@ interface ProfileHeaderProps {
 export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Helper function to format user's display name
   const getUserDisplayName = () => {
@@ -119,6 +120,62 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     sendFriendRequestMutation.mutate(profile.id);
   };
 
+  // Handle profile picture upload
+  const uploadProfilePictureMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+      return await apiRequest("POST", "/api/user/profile-image", formData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({
+        title: "Profile Picture Updated",
+        description: "Your profile picture has been successfully updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload profile picture",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleProfilePictureClick = () => {
+    if (isOwn) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      uploadProfilePictureMutation.mutate(file);
+    }
+  };
+
   const renderActionButtons = () => {
     if (isOwn) {
       return (
@@ -184,20 +241,32 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
           <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Profile Picture */}
             <div className="relative -mt-20">
-              <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
-                <AvatarImage src={isOwn && user?.profileImageUrl ? user.profileImageUrl : profile.profileImageUrl || ""} />
-                <AvatarFallback className="text-2xl">
-                  {isOwn ? getUserInitials() : profile.name.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {isOwn && (
-                <Button
-                  size="sm"
-                  className="absolute bottom-2 right-2 rounded-full w-8 h-8 p-0 bg-neutral-600 hover:bg-neutral-700"
+              <div className="relative">
+                <Avatar 
+                  className={`w-32 h-32 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                  onClick={handleProfilePictureClick}
                 >
-                  <Camera className="w-4 h-4" />
-                </Button>
-              )}
+                  <AvatarImage src={isOwn && user?.profileImageUrl ? user.profileImageUrl : profile.profileImageUrl || ""} />
+                  <AvatarFallback className="text-2xl">
+                    {isOwn ? getUserInitials() : profile.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {isOwn && (
+                  <>
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                      onClick={handleProfilePictureClick}
+                    >
+                      <Camera className="w-8 h-8 text-white" />
+                    </div>
+                    {uploadProfilePictureMutation.isPending && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Profile Details */}
@@ -271,6 +340,17 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
           </div>
         </Tabs>
       </div>
+      
+      {/* Hidden file input for profile picture upload */}
+      {isOwn && (
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="image/*"
+          className="hidden"
+        />
+      )}
     </>
   );
 }

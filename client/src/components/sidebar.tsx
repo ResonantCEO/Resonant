@@ -8,10 +8,31 @@ import CreateProfileModal from "./create-profile-modal";
 import { useState } from "react";
 import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock } from "lucide-react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Sidebar() {
   const [, setLocation] = useLocation();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const { user } = useAuth();
+
+  // Helper function to format user's display name
+  const getUserDisplayName = () => {
+    if (!user) return "";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    return `${firstName} ${lastName}`.trim() || user.email;
+  };
+
+  // Helper function to get user initials
+  const getUserInitials = () => {
+    if (!user) return "";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    }
+    return user.email ? user.email.charAt(0).toUpperCase() : "";
+  };
 
   const { data: profiles = [] } = useQuery({
     queryKey: ["/api/profiles"],
@@ -88,16 +109,16 @@ export default function Sidebar() {
         </div>
 
         {/* Active Profile Display */}
-        {activeProfile && (
+        {activeProfile && user && (
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               <Avatar className="w-12 h-12 border-2 border-blue-500">
-                <AvatarImage src={activeProfile.profileImageUrl || ""} />
-                <AvatarFallback>{activeProfile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarImage src={user.profileImageUrl || ""} />
+                <AvatarFallback>{getUserInitials()}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-neutral-900">{activeProfile.name}</span>
+                  <span className="font-semibold text-neutral-900">{getUserDisplayName()}</span>
                   <Badge className={`${getProfileTypeColor(activeProfile.type)} text-white text-xs`}>
                     {getProfileTypeName(activeProfile.type)}
                   </Badge>

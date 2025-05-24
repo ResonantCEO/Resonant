@@ -20,6 +20,7 @@ import {
   Clock
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ProfileHeaderProps {
   profile: any;
@@ -28,6 +29,26 @@ interface ProfileHeaderProps {
 
 export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Helper function to format user's display name
+  const getUserDisplayName = () => {
+    if (!user) return profile.name || "";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    return `${firstName} ${lastName}`.trim() || user.email || profile.name;
+  };
+
+  // Helper function to get user initials
+  const getUserInitials = () => {
+    if (!user) return profile.name?.slice(0, 2).toUpperCase() || "";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    }
+    return user.email ? user.email.charAt(0).toUpperCase() : profile.name?.slice(0, 2).toUpperCase() || "";
+  };
   const [activeTab, setActiveTab] = useState("posts");
 
   const { data: friendshipStatus } = useQuery({

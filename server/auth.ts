@@ -145,6 +145,12 @@ export function setupAuth(app: Express) {
 
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    res.json({ id: req.user!.id, email: req.user!.email });
+    res.json({ 
+      id: req.user!.id, 
+      email: req.user!.email,
+      firstName: req.user!.firstName,
+      lastName: req.user!.lastName,
+      profileImageUrl: req.user!.profileImageUrl
+    });
   });
 }

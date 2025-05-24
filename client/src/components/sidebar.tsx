@@ -152,7 +152,7 @@ export default function Sidebar() {
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-neutral-900">{profile.name}</span>
+                    <span className="font-medium text-neutral-900">{getUserDisplayName()}</span>
                     <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
                       {getProfileTypeName(profile.type)}
                     </Badge>

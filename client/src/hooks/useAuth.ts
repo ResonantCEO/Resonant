@@ -6,6 +6,8 @@ export function useAuth() {
     retry: false,
     staleTime: 0, // Always fetch fresh data
     gcTime: 0, // Don't cache the response
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   return {

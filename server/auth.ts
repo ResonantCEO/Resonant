@@ -45,9 +45,9 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
+    new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
       try {
-        const user = await storage.getUserByUsername(username);
+        const user = await storage.getUserByEmail(email);
         if (!user || !(await comparePasswords(password, user.password))) {
           return done(null, false);
         } else {
@@ -71,12 +71,7 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { username, email, password, firstName, lastName } = req.body;
-      
-      const existingUser = await storage.getUserByUsername(username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
+      const { email, password, firstName, lastName } = req.body;
 
       const existingEmail = await storage.getUserByEmail(email);
       if (existingEmail) {
@@ -84,7 +79,6 @@ export function setupAuth(app: Express) {
       }
 
       const user = await storage.createUser({
-        username,
         email,
         password: await hashPassword(password),
         firstName,
@@ -93,7 +87,7 @@ export function setupAuth(app: Express) {
 
       req.login(user, (err) => {
         if (err) return next(err);
-        res.status(201).json({ id: user.id, username: user.username, email: user.email });
+        res.status(201).json({ id: user.id, email: user.email });
       });
     } catch (error) {
       console.error("Registration error:", error);
@@ -102,7 +96,7 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    res.status(200).json({ id: req.user!.id, username: req.user!.username, email: req.user!.email });
+    res.status(200).json({ id: req.user!.id, email: req.user!.email });
   });
 
   app.post("/api/logout", (req, res, next) => {
@@ -114,6 +108,6 @@ export function setupAuth(app: Express) {
 
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    res.json({ id: req.user!.id, username: req.user!.username, email: req.user!.email });
+    res.json({ id: req.user!.id, email: req.user!.email });
   });
 }

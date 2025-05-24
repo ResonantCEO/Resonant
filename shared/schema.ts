@@ -28,7 +28,6 @@ export const sessions = pgTable(
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: varchar("email").unique().notNull(),
-  username: varchar("username").unique().notNull(),
   password: varchar("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
@@ -163,7 +162,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 
 export const loginUserSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Valid email is required"),
   password: z.string().min(1, "Password is required"),
 });
 

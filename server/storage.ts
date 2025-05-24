@@ -154,7 +154,7 @@ export class DatabaseStorage implements IStorage {
 
   // Friendship operations
   async getFriends(profileId: number): Promise<Profile[]> {
-    const friendships = await db
+    const friendshipResults = await db
       .select({
         profile: profiles,
       })
@@ -168,7 +168,7 @@ export class DatabaseStorage implements IStorage {
       )
       .where(eq(friendships.status, "accepted"));
 
-    return friendships.map(f => f.profile);
+    return friendshipResults.map(f => f.profile);
   }
 
   async getFriendRequests(profileId: number): Promise<{ profile: Profile; friendship: Friendship }[]> {

@@ -151,15 +151,17 @@ export default function Sidebar() {
                   <AvatarFallback>{profile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-1">
                     <span className="font-medium text-neutral-900">{getUserDisplayName()}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      {getVisibilityIcon(profile.visibility)}
+                      <span className="text-xs text-neutral-600 capitalize">{profile.visibility}</span>
+                    </div>
                     <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
                       {getProfileTypeName(profile.type)}
                     </Badge>
-                  </div>
-                  <div className="flex items-center space-x-2 mt-1">
-                    {getVisibilityIcon(profile.visibility)}
-                    <span className="text-xs text-neutral-600 capitalize">{profile.visibility}</span>
                   </div>
                 </div>
               </div>

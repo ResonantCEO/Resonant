@@ -23,7 +23,7 @@ interface CreateProfileModalProps {
 
 export default function CreateProfileModal({ open, onOpenChange }: CreateProfileModalProps) {
   const { toast } = useToast();
-  const [profileType, setProfileType] = useState<string>("");
+  const [profileType, setProfileType] = useState<string>("audience");
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
 
@@ -50,7 +50,7 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
   });
 
   const handleClose = () => {
-    setProfileType("");
+    setProfileType("audience");
     setName("");
     setBio("");
     onOpenChange(false);
@@ -91,41 +91,18 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
             <Label className="text-sm font-medium text-neutral-700 mb-2 block">
               Profile Type
             </Label>
-            <RadioGroup value={profileType} onValueChange={setProfileType}>
-              <div className="space-y-3">
-                <Label
-                  htmlFor="artist"
-                  className="flex items-center space-x-3 p-3 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50"
-                >
-                  <RadioGroupItem value="artist" id="artist" />
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-artist-green rounded-full flex items-center justify-center">
-                      <Music className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-neutral-900">Artist</p>
-                      <p className="text-sm text-neutral-600">For musicians, bands, and performers</p>
-                    </div>
-                  </div>
-                </Label>
-
-                <Label
-                  htmlFor="venue"
-                  className="flex items-center space-x-3 p-3 border border-neutral-200 rounded-lg cursor-pointer hover:bg-neutral-50"
-                >
-                  <RadioGroupItem value="venue" id="venue" />
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-venue-red rounded-full flex items-center justify-center">
-                      <Building className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-neutral-900">Venue</p>
-                      <p className="text-sm text-neutral-600">For clubs, theaters, and event spaces</p>
-                    </div>
-                  </div>
-                </Label>
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <Music className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="font-medium text-neutral-900">Audience Member</p>
+                  <p className="text-sm text-neutral-600">Your primary profile for discovering music and connecting with friends</p>
+                </div>
               </div>
-            </RadioGroup>
+              <p className="text-xs text-blue-600 mt-2">Start with your audience profile. You can create artist and venue profiles later!</p>
+            </div>
           </div>
 
           <div>

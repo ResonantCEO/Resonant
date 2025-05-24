@@ -185,9 +185,9 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
             {/* Profile Picture */}
             <div className="relative -mt-20">
               <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
-                <AvatarImage src={profile.profileImageUrl || ""} />
+                <AvatarImage src={isOwn && user?.profileImageUrl ? user.profileImageUrl : profile.profileImageUrl || ""} />
                 <AvatarFallback className="text-2xl">
-                  {profile.name.slice(0, 2).toUpperCase()}
+                  {isOwn ? getUserInitials() : profile.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               {isOwn && (
@@ -204,7 +204,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
             <div className="flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">{profile.name}</h1>
+                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">{isOwn ? getUserDisplayName() : profile.name}</h1>
                   <div className="flex items-center space-x-4 text-neutral-600 mb-4">
                     <span className="flex items-center">
                       <Users className="w-4 h-4 mr-2" />

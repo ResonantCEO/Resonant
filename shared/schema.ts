@@ -24,10 +24,12 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Primary user table (required for Replit Auth)
+// Primary user table
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(), // Replit user ID
-  email: varchar("email").unique(),
+  id: serial("id").primaryKey(),
+  email: varchar("email").unique().notNull(),
+  username: varchar("username").unique().notNull(),
+  password: varchar("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -38,7 +40,7 @@ export const users = pgTable("users", {
 // Profiles table - supports multiple profile types per user
 export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   type: varchar("type").notNull(), // 'audience', 'artist', 'venue'
   name: varchar("name").notNull(),
   bio: text("bio"),
@@ -155,8 +157,14 @@ export const commentsRelations = relations(comments, ({ one }) => ({
 
 // Schema exports for validation
 export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const loginUserSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export const insertProfileSchema = createInsertSchema(profiles).omit({
@@ -187,7 +195,8 @@ export const insertCommentSchema = createInsertSchema(comments).omit({
 });
 
 // Type exports
-export type UpsertUser = z.infer<typeof insertUserSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type LoginUser = z.infer<typeof loginUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertProfile = z.infer<typeof insertProfileSchema>;
 export type Profile = typeof profiles.$inferSelect;

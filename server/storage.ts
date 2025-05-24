@@ -6,7 +6,7 @@ import {
   postLikes,
   comments,
   type User,
-  type UpsertUser,
+  type InsertUser,
   type Profile,
   type InsertProfile,
   type Post,
@@ -21,14 +21,16 @@ import { db } from "./db";
 import { eq, and, or, desc, count, sql } from "drizzle-orm";
 
 export interface IStorage {
-  // User operations (required for Replit Auth)
-  getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
   
   // Profile operations
   getProfile(id: number): Promise<Profile | undefined>;
-  getProfilesByUserId(userId: string): Promise<Profile[]>;
-  getActiveProfile(userId: string): Promise<Profile | undefined>;
+  getProfilesByUserId(userId: number): Promise<Profile[]>;
+  getActiveProfile(userId: number): Promise<Profile | undefined>;
   createProfile(profile: InsertProfile): Promise<Profile>;
   updateProfile(id: number, updates: Partial<InsertProfile>): Promise<Profile>;
   setActiveProfile(userId: string, profileId: number): Promise<void>;
@@ -61,23 +63,26 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // User operations (required for Replit Auth)
-  async getUser(id: string): Promise<User | undefined> {
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(userData: InsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
       .returning();
     return user;
   }

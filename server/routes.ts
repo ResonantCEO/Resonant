@@ -53,7 +53,7 @@ export function registerRoutes(app: Express): Server {
 
   app.post('/api/profiles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const profileData = insertProfileSchema.parse({
         ...req.body,
         userId,
@@ -74,7 +74,7 @@ export function registerRoutes(app: Express): Server {
   app.put('/api/profiles/:id', isAuthenticated, async (req: any, res) => {
     try {
       const profileId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Verify ownership
       const existingProfile = await storage.getProfile(profileId);
@@ -94,7 +94,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/profiles/:id/activate', isAuthenticated, async (req: any, res) => {
     try {
       const profileId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Verify ownership
       const profile = await storage.getProfile(profileId);
@@ -144,7 +144,7 @@ export function registerRoutes(app: Express): Server {
   // Friend routes
   app.get('/api/friends', isAuthenticated, async (req: any, res) => {
     try {
-      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
@@ -159,7 +159,7 @@ export function registerRoutes(app: Express): Server {
 
   app.get('/api/friend-requests', isAuthenticated, async (req: any, res) => {
     try {
-      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
@@ -174,7 +174,7 @@ export function registerRoutes(app: Express): Server {
 
   app.post('/api/friend-requests', isAuthenticated, async (req: any, res) => {
     try {
-      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
@@ -220,7 +220,7 @@ export function registerRoutes(app: Express): Server {
   // Post routes
   app.get('/api/posts', isAuthenticated, async (req: any, res) => {
     try {
-      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
@@ -240,7 +240,7 @@ export function registerRoutes(app: Express): Server {
 
       // Get viewer's active profile if authenticated
       if (req.user) {
-        const viewerProfile = await storage.getActiveProfile(req.user.claims.sub);
+        const viewerProfile = await storage.getActiveProfile(req.user.id);
         viewerProfileId = viewerProfile?.id;
       }
 
@@ -254,7 +254,7 @@ export function registerRoutes(app: Express): Server {
 
   app.post('/api/posts', isAuthenticated, async (req: any, res) => {
     try {
-      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
@@ -279,7 +279,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/posts/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const postId = parseInt(req.params.id);
-      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
@@ -313,7 +313,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/posts/:id/comments', isAuthenticated, async (req: any, res) => {
     try {
       const postId = parseInt(req.params.id);
-      const activeProfile = await storage.getActiveProfile(req.user.claims.sub);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }

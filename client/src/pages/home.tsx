@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import Sidebar from "@/components/sidebar";
 import ProfileHeader from "@/components/profile-header";
 import PostFeed from "@/components/post-feed";
@@ -10,12 +12,34 @@ import { Button } from "@/components/ui/button";
 import { Plus, Music, Building, Users } from "lucide-react";
 
 export default function Home() {
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const { data: user } = useQuery({ queryKey: ["/api/user"] });
   const { data: activeProfile, isLoading: profileLoading } = useQuery({
     queryKey: ["/api/profiles/active"],
   });
 
-  if (profileLoading) {
+  // Auto-create audience profile if user doesn't have one
+  const createDefaultProfile = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/profiles", {
+        type: "audience", 
+        name: (user as any)?.username || "My Profile",
+        bio: "",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+    },
+  });
+
+  // Automatically create profile if user doesn't have one
+  useEffect(() => {
+    if (!profileLoading && !activeProfile && user && !createDefaultProfile.isPending) {
+      createDefaultProfile.mutate();
+    }
+  }, [activeProfile, profileLoading, user, createDefaultProfile]);
+
+  if (profileLoading || createDefaultProfile.isPending) {
     return (
       <div className="min-h-screen flex">
         <div className="w-80 bg-white shadow-lg border-r border-neutral-200 hidden lg:block">
@@ -30,57 +54,10 @@ export default function Home() {
 
   if (!activeProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Welcome to SocialConnect!</h2>
-            <p className="text-gray-600 mb-6">Create your first profile to start connecting with your community.</p>
-          </div>
-
-          <div className="space-y-4 mb-8">
-            <div className="flex items-center space-x-4 p-4 bg-white rounded-lg shadow-sm">
-              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-semibold text-gray-900">Audience Member</h3>
-                <p className="text-gray-600 text-sm">Discover music and connect with friends</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4 p-4 bg-white rounded-lg shadow-sm">
-              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                <Music className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-semibold text-gray-900">Artist Profile</h3>
-                <p className="text-gray-600 text-sm">Showcase your music and connect with fans</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4 p-4 bg-white rounded-lg shadow-sm">
-              <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
-                <Building className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-semibold text-gray-900">Venue Profile</h3>
-                <p className="text-gray-600 text-sm">Promote events and connect with artists</p>
-              </div>
-            </div>
-          </div>
-
-          <Button 
-            onClick={() => setShowCreateModal(true)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 text-lg"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Create Your First Profile
-          </Button>
-
-          <CreateProfileModal 
-            open={showCreateModal} 
-            onOpenChange={setShowCreateModal} 
-          />
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Setting up your profile...</h2>
+          <Skeleton className="w-48 h-4 mx-auto" />
         </div>
       </div>
     );

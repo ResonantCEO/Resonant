@@ -33,7 +33,7 @@ export interface IStorage {
   getActiveProfile(userId: number): Promise<Profile | undefined>;
   createProfile(profile: InsertProfile): Promise<Profile>;
   updateProfile(id: number, updates: Partial<InsertProfile>): Promise<Profile>;
-  setActiveProfile(userId: string, profileId: number): Promise<void>;
+  setActiveProfile(userId: number, profileId: number): Promise<void>;
   searchProfiles(query: string, limit?: number): Promise<Profile[]>;
   
   // Friendship operations
@@ -93,11 +93,11 @@ export class DatabaseStorage implements IStorage {
     return profile;
   }
 
-  async getProfilesByUserId(userId: string): Promise<Profile[]> {
+  async getProfilesByUserId(userId: number): Promise<Profile[]> {
     return db.select().from(profiles).where(eq(profiles.userId, userId)).orderBy(desc(profiles.createdAt));
   }
 
-  async getActiveProfile(userId: string): Promise<Profile | undefined> {
+  async getActiveProfile(userId: number): Promise<Profile | undefined> {
     const [profile] = await db
       .select()
       .from(profiles)
@@ -130,7 +130,7 @@ export class DatabaseStorage implements IStorage {
     return profile;
   }
 
-  async setActiveProfile(userId: string, profileId: number): Promise<void> {
+  async setActiveProfile(userId: number, profileId: number): Promise<void> {
     // Deactivate all profiles for the user
     await db
       .update(profiles)

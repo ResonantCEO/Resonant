@@ -131,7 +131,13 @@ export function setupAuth(app: Express) {
           console.error("Session error:", err);
           return res.status(500).json({ message: "Session creation failed" });
         }
-        res.status(200).json({ id: user.id, email: user.email });
+        res.status(200).json({ 
+          id: user.id, 
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profileImageUrl: user.profileImageUrl
+        });
       });
     })(req, res, next);
   });
@@ -149,6 +155,11 @@ export function setupAuth(app: Express) {
     // Fetch fresh user data from database to ensure we have all fields
     const user = await storage.getUser(req.user!.id);
     if (!user) return res.sendStatus(401);
+    
+    // Disable caching to ensure fresh data is always returned
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
     
     res.json({ 
       id: user.id, 

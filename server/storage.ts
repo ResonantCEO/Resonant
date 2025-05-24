@@ -18,7 +18,7 @@ import {
   type PostLike,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, or, desc, count, sql } from "drizzle-orm";
+import { eq, and, or, desc, count, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -272,7 +272,7 @@ export class DatabaseStorage implements IStorage {
       .from(posts)
       .where(
         and(
-          sql`${posts.profileId} = ANY(${friendIds})`,
+          sql`${posts.profileId} = ANY(${JSON.stringify(friendIds)})`,
           or(
             eq(posts.visibility, "public"),
             eq(posts.visibility, "friends")

@@ -232,9 +232,6 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
 
               {/* Profile Type & Visibility */}
               <div className="flex items-center space-x-4">
-                <Badge className={`${getProfileTypeColor(profile.type)} text-white`}>
-                  {getProfileTypeName(profile.type)}
-                </Badge>
                 <div className="flex items-center space-x-2 text-sm text-neutral-600">
                   {getVisibilityIcon(profile.visibility)}
                   <span className="capitalize">{profile.visibility} Profile</span>
@@ -244,6 +241,9 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
                     </Button>
                   )}
                 </div>
+                <Badge className={`${getProfileTypeColor(profile.type)} text-white`}>
+                  {getProfileTypeName(profile.type)}
+                </Badge>
               </div>
             </div>
           </div>

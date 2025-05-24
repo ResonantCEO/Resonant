@@ -16,13 +16,12 @@ export default function AuthPage() {
   
   // Login form state
   const [loginForm, setLoginForm] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
   // Register form state
   const [registerForm, setRegisterForm] = useState({
-    username: "",
     email: "",
     password: "",
     firstName: "",

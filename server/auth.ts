@@ -5,11 +5,20 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import type { User } from "@shared/schema";
+import type { User as SelectUser } from "@shared/schema";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User {
+      id: number;
+      email: string;
+      password: string;
+      firstName: string | null;
+      lastName: string | null;
+      profileImageUrl: string | null;
+      createdAt: Date | null;
+      updatedAt: Date | null;
+    }
   }
 }
 const scryptAsync = promisify(scrypt);

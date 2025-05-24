@@ -56,24 +56,20 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
       try {
-        console.log("Attempting login for email:", email);
-        const user = await storage.getUserByEmail(email);
-        console.log("User found:", user ? "Yes" : "No");
+        // Normalize email to lowercase for case-insensitive lookup
+        const normalizedEmail = email.toLowerCase();
+        const user = await storage.getUserByEmail(normalizedEmail);
         
         if (!user) {
-          console.log("No user found with email:", email);
           return done(null, false);
         }
         
         const passwordValid = await comparePasswords(password, user.password);
-        console.log("Password valid:", passwordValid);
         
         if (!passwordValid) {
-          console.log("Invalid password for user:", email);
           return done(null, false);
         }
         
-        console.log("Login successful for:", email);
         return done(null, user);
       } catch (error) {
         console.error("Login error:", error);
@@ -95,14 +91,17 @@ export function setupAuth(app: Express) {
   app.post("/api/register", async (req, res, next) => {
     try {
       const { email, password, firstName, lastName } = req.body;
+      
+      // Normalize email to lowercase for consistency
+      const normalizedEmail = email.toLowerCase();
 
-      const existingEmail = await storage.getUserByEmail(email);
+      const existingEmail = await storage.getUserByEmail(normalizedEmail);
       if (existingEmail) {
         return res.status(400).json({ message: "Email already exists" });
       }
 
       const user = await storage.createUser({
-        email,
+        email: normalizedEmail,
         password: await hashPassword(password),
         firstName,
         lastName,

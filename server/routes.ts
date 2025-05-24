@@ -70,6 +70,11 @@ export function registerRoutes(app: Express): Server {
   // Profile picture upload endpoint
   app.post('/api/user/profile-image', isAuthenticated, upload.single('profileImage'), async (req: any, res) => {
     try {
+      console.log("Upload request received:", {
+        file: req.file ? { filename: req.file.filename, size: req.file.size, mimetype: req.file.mimetype } : null,
+        userId: req.user?.id
+      });
+
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
@@ -77,8 +82,12 @@ export function registerRoutes(app: Express): Server {
       const userId = req.user.id;
       const profileImageUrl = `/uploads/${req.file.filename}`;
 
+      console.log("Updating user profile image:", { userId, profileImageUrl });
+
       // Update user's profile image URL in database
       await storage.updateUser(userId, { profileImageUrl });
+
+      console.log("Profile image updated successfully");
 
       res.json({ 
         message: "Profile picture updated successfully",

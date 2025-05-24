@@ -318,6 +318,15 @@ export default function Sidebar() {
         open={showCreateModal} 
         onOpenChange={setShowCreateModal} 
       />
+      
+      {/* Hidden file input for profile picture upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/*"
+        className="hidden"
+      />
     </div>
   );
 }

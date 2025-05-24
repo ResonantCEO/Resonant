@@ -4,6 +4,9 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertProfileSchema, insertPostSchema, insertCommentSchema } from "@shared/schema";
 import { z } from "zod";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 // Auth middleware function
 export function isAuthenticated(req: any, res: any, next: any) {
@@ -13,9 +16,44 @@ export function isAuthenticated(req: any, res: any, next: any) {
   next();
 }
 
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Configure multer for file uploads
+const storage_multer = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage_multer,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Check if file is an image
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'));
+    }
+  }
+});
+
 export function registerRoutes(app: Express): Server {
   // Auth middleware
   setupAuth(app);
+
+  // Serve uploaded files statically
+  app.use('/uploads', express.static(uploadsDir));
 
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
@@ -25,6 +63,29 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Profile picture upload endpoint
+  app.post('/api/user/profile-image', isAuthenticated, upload.single('profileImage'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const userId = req.user.id;
+      const profileImageUrl = `/uploads/${req.file.filename}`;
+
+      // Update user's profile image URL in database
+      await storage.updateUser(userId, { profileImageUrl });
+
+      res.json({ 
+        message: "Profile picture updated successfully",
+        profileImageUrl 
+      });
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      res.status(500).json({ message: "Failed to upload profile picture" });
     }
   });
 

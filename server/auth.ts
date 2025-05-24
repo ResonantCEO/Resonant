@@ -126,17 +126,24 @@ export function setupAuth(app: Express) {
       if (!user) {
         return res.status(400).json({ message: "Invalid email or password" });
       }
-      req.login(user, (err) => {
+      req.login(user, async (err) => {
         if (err) {
           console.error("Session error:", err);
           return res.status(500).json({ message: "Session creation failed" });
         }
+        
+        // Fetch complete user data including first and last names
+        const completeUser = await storage.getUser(user.id);
+        if (!completeUser) {
+          return res.status(500).json({ message: "Failed to fetch user data" });
+        }
+        
         res.status(200).json({ 
-          id: user.id, 
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl: user.profileImageUrl
+          id: completeUser.id, 
+          email: completeUser.email,
+          firstName: completeUser.firstName,
+          lastName: completeUser.lastName,
+          profileImageUrl: completeUser.profileImageUrl
         });
       });
     })(req, res, next);

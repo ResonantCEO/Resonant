@@ -20,7 +20,6 @@ export default function Sidebar() {
     if (!user) return "";
     const firstName = user.firstName || "";
     const lastName = user.lastName || "";
-    console.log("User data:", { firstName, lastName, fullUser: user });
     return `${firstName} ${lastName}`.trim() || user.email;
   };
 

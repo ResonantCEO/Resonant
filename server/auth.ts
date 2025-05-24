@@ -56,13 +56,27 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
       try {
+        console.log("Attempting login for email:", email);
         const user = await storage.getUserByEmail(email);
-        if (!user || !(await comparePasswords(password, user.password))) {
+        console.log("User found:", user ? "Yes" : "No");
+        
+        if (!user) {
+          console.log("No user found with email:", email);
           return done(null, false);
-        } else {
-          return done(null, user);
         }
+        
+        const passwordValid = await comparePasswords(password, user.password);
+        console.log("Password valid:", passwordValid);
+        
+        if (!passwordValid) {
+          console.log("Invalid password for user:", email);
+          return done(null, false);
+        }
+        
+        console.log("Login successful for:", email);
+        return done(null, user);
       } catch (error) {
+        console.error("Login error:", error);
         return done(error);
       }
     }),
@@ -104,8 +118,23 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    res.status(200).json({ id: req.user!.id, email: req.user!.email });
+  app.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) {
+        console.error("Login error:", err);
+        return res.status(500).json({ message: "Login failed" });
+      }
+      if (!user) {
+        return res.status(400).json({ message: "Invalid email or password" });
+      }
+      req.login(user, (err) => {
+        if (err) {
+          console.error("Session error:", err);
+          return res.status(500).json({ message: "Session creation failed" });
+        }
+        res.status(200).json({ id: user.id, email: user.email });
+      });
+    })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {

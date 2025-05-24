@@ -5,15 +5,13 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User } from "@shared/schema";
-import connectPg from "connect-pg-simple";
+import type { User } from "@shared/schema";
 
 declare global {
   namespace Express {
     interface User extends User {}
   }
 }
-
 const scryptAsync = promisify(scrypt);
 
 async function hashPassword(password: string) {
@@ -30,16 +28,10 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const PostgresSessionStore = connectPg(session);
-  
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-secret-key-change-this",
     resave: false,
     saveUninitialized: false,
-    store: new PostgresSessionStore({
-      conString: process.env.DATABASE_URL,
-      createTableIfMissing: true,
-    }),
     cookie: {
       httpOnly: true,
       secure: false, // Set to true in production with HTTPS

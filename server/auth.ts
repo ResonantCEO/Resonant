@@ -143,14 +143,19 @@ export function setupAuth(app: Express) {
     });
   });
 
-  app.get("/api/user", (req, res) => {
+  app.get("/api/user", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    // Fetch fresh user data from database to ensure we have all fields
+    const user = await storage.getUser(req.user!.id);
+    if (!user) return res.sendStatus(401);
+    
     res.json({ 
-      id: req.user!.id, 
-      email: req.user!.email,
-      firstName: req.user!.firstName,
-      lastName: req.user!.lastName,
-      profileImageUrl: req.user!.profileImageUrl
+      id: user.id, 
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      profileImageUrl: user.profileImageUrl
     });
   });
 }

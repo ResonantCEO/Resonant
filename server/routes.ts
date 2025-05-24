@@ -26,11 +26,14 @@ if (!fs.existsSync(uploadsDir)) {
 // Configure multer for file uploads
 const storage_multer = multer.diskStorage({
   destination: (req, file, cb) => {
+    console.log('Setting destination to:', uploadsDir);
     cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
+    const filename = 'profile-' + uniqueSuffix + path.extname(file.originalname);
+    console.log('Generated filename:', filename);
+    cb(null, filename);
   }
 });
 
@@ -40,11 +43,12 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024 // 5MB limit
   },
   fileFilter: (req, file, cb) => {
+    console.log('File filter - mimetype:', file.mimetype);
     // Check if file is an image
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed!'));
+      cb(new Error('Only image files are allowed!'), false);
     }
   }
 });

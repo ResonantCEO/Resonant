@@ -72,7 +72,7 @@ export default function AuthPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginForm.username.trim() || !loginForm.password.trim()) {
+    if (!loginForm.email.trim() || !loginForm.password.trim()) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -85,7 +85,7 @@ export default function AuthPage() {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!registerForm.username.trim() || !registerForm.email.trim() || !registerForm.password.trim()) {
+    if (!registerForm.email.trim() || !registerForm.password.trim()) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -117,13 +117,13 @@ export default function AuthPage() {
                 <TabsContent value="login">
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div>
-                      <Label htmlFor="login-username">Username</Label>
+                      <Label htmlFor="login-email">Email</Label>
                       <Input
-                        id="login-username"
-                        type="text"
-                        value={loginForm.username}
-                        onChange={(e) => setLoginForm(prev => ({ ...prev, username: e.target.value }))}
-                        placeholder="Enter your username"
+                        id="login-email"
+                        type="email"
+                        value={loginForm.email}
+                        onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="Enter your email"
                         required
                       />
                     </div>
@@ -183,17 +183,7 @@ export default function AuthPage() {
                         />
                       </div>
                     </div>
-                    <div>
-                      <Label htmlFor="register-username">Username *</Label>
-                      <Input
-                        id="register-username"
-                        type="text"
-                        value={registerForm.username}
-                        onChange={(e) => setRegisterForm(prev => ({ ...prev, username: e.target.value }))}
-                        placeholder="Choose a username"
-                        required
-                      />
-                    </div>
+
                     <div>
                       <Label htmlFor="register-email">Email *</Label>
                       <Input

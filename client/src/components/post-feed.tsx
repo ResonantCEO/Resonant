@@ -136,10 +136,6 @@ export default function PostFeed({ profileId }: PostFeedProps) {
                         Photo
                       </Button>
                       <Button type="button" variant="ghost" size="sm">
-                        <Smile className="w-4 h-4 mr-2" />
-                        Feeling
-                      </Button>
-                      <Button type="button" variant="ghost" size="sm">
                         <MapPin className="w-4 h-4 mr-2" />
                         Location
                       </Button>

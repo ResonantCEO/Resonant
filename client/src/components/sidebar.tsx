@@ -209,7 +209,11 @@ export default function Sidebar() {
           <Button
             variant="outline"
             className="w-full"
-            onClick={() => window.location.href = '/api/logout'}
+            onClick={async () => {
+              await apiRequest("POST", "/api/logout");
+              queryClient.clear();
+              window.location.reload();
+            }}
           >
             Logout
           </Button>

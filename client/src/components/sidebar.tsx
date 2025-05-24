@@ -149,7 +149,7 @@ export default function Sidebar() {
               <div className="flex items-center space-x-3">
                 <Avatar className="w-10 h-10">
                   <AvatarImage src={profile.profileImageUrl || ""} />
-                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                  <AvatarFallback>{profile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">

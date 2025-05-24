@@ -72,35 +72,51 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Profile picture upload endpoint
-  app.post('/api/user/profile-image', isAuthenticated, upload.single('profileImage'), async (req: any, res) => {
-    try {
-      console.log("Upload request received:", {
-        file: req.file ? { filename: req.file.filename, size: req.file.size, mimetype: req.file.mimetype } : null,
-        userId: req.user?.id
-      });
+  app.post('/api/user/profile-image', isAuthenticated, (req: any, res, next) => {
+    console.log("POST /api/user/profile-image - Raw request received");
+    console.log("Content-Type:", req.headers['content-type']);
+    console.log("Body keys:", Object.keys(req.body || {}));
+    
+    upload.single('profileImage')(req, res, async (err) => {
+      try {
+        console.log("Multer callback executed");
+        console.log("Error:", err);
+        console.log("File:", req.file ? { 
+          filename: req.file.filename, 
+          size: req.file.size, 
+          mimetype: req.file.mimetype,
+          path: req.file.path 
+        } : null);
 
-      if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
+        if (err) {
+          console.error("Multer error:", err);
+          return res.status(400).json({ message: err.message });
+        }
+
+        if (!req.file) {
+          console.log("No file received by multer");
+          return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const userId = req.user.id;
+        const profileImageUrl = `/uploads/${req.file.filename}`;
+
+        console.log("Updating user profile image:", { userId, profileImageUrl });
+
+        // Update user's profile image URL in database
+        await storage.updateUser(userId, { profileImageUrl });
+
+        console.log("Profile image updated successfully");
+
+        res.json({ 
+          message: "Profile picture updated successfully",
+          profileImageUrl 
+        });
+      } catch (error) {
+        console.error("Error uploading profile picture:", error);
+        res.status(500).json({ message: "Failed to upload profile picture" });
       }
-
-      const userId = req.user.id;
-      const profileImageUrl = `/uploads/${req.file.filename}`;
-
-      console.log("Updating user profile image:", { userId, profileImageUrl });
-
-      // Update user's profile image URL in database
-      await storage.updateUser(userId, { profileImageUrl });
-
-      console.log("Profile image updated successfully");
-
-      res.json({ 
-        message: "Profile picture updated successfully",
-        profileImageUrl 
-      });
-    } catch (error) {
-      console.error("Error uploading profile picture:", error);
-      res.status(500).json({ message: "Failed to upload profile picture" });
-    }
+    });
   });
 
   // Profile routes

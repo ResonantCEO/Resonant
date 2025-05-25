@@ -192,7 +192,7 @@ export default function Sidebar() {
               variant="ghost"
               className={`w-full justify-start ${
                 isActivePath("/profile") 
-                  ? "bg-blue-500 text-white hover:bg-blue-600" 
+                  ? "bg-blue-500 text-white hover:bg-blue-600 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
               onClick={() => setLocation("/profile")}
@@ -206,7 +206,7 @@ export default function Sidebar() {
               variant="ghost"
               className={`w-full justify-start ${
                 isActivePath("/friends") 
-                  ? "bg-blue-500 text-white hover:bg-blue-600" 
+                  ? "bg-blue-500 text-white hover:bg-blue-600 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
             >
@@ -224,7 +224,7 @@ export default function Sidebar() {
               variant="ghost"
               className={`w-full justify-start ${
                 isActivePath("/discover") 
-                  ? "bg-blue-500 text-white hover:bg-blue-600" 
+                  ? "bg-blue-500 text-white hover:bg-blue-600 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
             >
@@ -237,7 +237,7 @@ export default function Sidebar() {
               variant="ghost"
               className={`w-full justify-start ${
                 isActivePath("/settings") 
-                  ? "bg-blue-500 text-white hover:bg-blue-600" 
+                  ? "bg-blue-500 text-white hover:bg-blue-600 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
               onClick={() => setLocation("/settings")}

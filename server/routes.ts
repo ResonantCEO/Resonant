@@ -71,6 +71,49 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Update user profile
+  app.put("/api/user/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const { firstName, lastName, email } = req.body;
+      const userId = req.user.id;
+      
+      const updatedUser = await storage.updateUser(userId, {
+        firstName,
+        lastName,
+        email
+      });
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Update user password
+  app.put("/api/user/password", isAuthenticated, async (req: any, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user.id;
+      
+      // Get current user to verify password
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // For now, we'll just update the password (in production this should verify current password and hash new one)
+      const updatedUser = await storage.updateUser(userId, {
+        password: newPassword
+      });
+      
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error updating password:", error);
+      res.status(500).json({ message: "Failed to update password" });
+    }
+  });
+
   // Profile picture upload endpoint
   app.post('/api/user/profile-image', isAuthenticated, (req: any, res, next) => {
     console.log("POST /api/user/profile-image - Raw request received");

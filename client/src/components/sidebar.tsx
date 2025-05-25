@@ -10,7 +10,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Sidebar() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { user } = useAuth();
 
@@ -31,6 +31,12 @@ export default function Sidebar() {
       return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
     }
     return user.email ? user.email.charAt(0).toUpperCase() : "";
+  };
+
+  // Helper function to check if a path is active
+  const isActivePath = (path: string) => {
+    if (path === "/" && (location === "/" || location === "/profile")) return true;
+    return location === path;
   };
 
   const { data: profiles = [] } = useQuery({
@@ -184,7 +190,11 @@ export default function Sidebar() {
           <li>
             <Button
               variant="ghost"
-              className="w-full justify-start bg-blue-500 text-white hover:bg-blue-600"
+              className={`w-full justify-start ${
+                isActivePath("/profile") 
+                  ? "bg-blue-500 text-white hover:bg-blue-600" 
+                  : "text-neutral-600 hover:bg-neutral-100"
+              }`}
               onClick={() => setLocation("/profile")}
             >
               <Home className="w-5 h-5 mr-3" />
@@ -194,7 +204,11 @@ export default function Sidebar() {
           <li>
             <Button
               variant="ghost"
-              className="w-full justify-start text-neutral-600 hover:bg-neutral-100"
+              className={`w-full justify-start ${
+                isActivePath("/friends") 
+                  ? "bg-blue-500 text-white hover:bg-blue-600" 
+                  : "text-neutral-600 hover:bg-neutral-100"
+              }`}
             >
               <Users className="w-5 h-5 mr-3" />
               Friends
@@ -208,7 +222,11 @@ export default function Sidebar() {
           <li>
             <Button
               variant="ghost"
-              className="w-full justify-start text-neutral-600 hover:bg-neutral-100"
+              className={`w-full justify-start ${
+                isActivePath("/discover") 
+                  ? "bg-blue-500 text-white hover:bg-blue-600" 
+                  : "text-neutral-600 hover:bg-neutral-100"
+              }`}
             >
               <Search className="w-5 h-5 mr-3" />
               Discover
@@ -217,7 +235,11 @@ export default function Sidebar() {
           <li>
             <Button
               variant="ghost"
-              className="w-full justify-start text-neutral-600 hover:bg-neutral-100"
+              className={`w-full justify-start ${
+                isActivePath("/settings") 
+                  ? "bg-blue-500 text-white hover:bg-blue-600" 
+                  : "text-neutral-600 hover:bg-neutral-100"
+              }`}
               onClick={() => setLocation("/settings")}
             >
               <Settings className="w-5 h-5 mr-3" />

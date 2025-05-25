@@ -224,6 +224,7 @@ export default function PostFeed({ profileId }: PostFeedProps) {
       ) : (
         posts.map((post: any) => {
           console.log("Post data:", post); // Debug log
+          console.log("Profile image URL:", post.profile?.profileImageUrl || post.profileImageUrl);
           return (
             <Card key={post.id}>
             <CardContent className="p-6">

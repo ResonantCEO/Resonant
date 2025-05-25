@@ -32,6 +32,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  coverImageUrl: varchar("cover_image_url"),
   // Settings and preferences
   showOnlineStatus: boolean("show_online_status").default(true),
   allowFriendRequests: boolean("allow_friend_requests").default(true),

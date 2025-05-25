@@ -157,15 +157,26 @@ export function registerRoutes(app: Express): Server {
   // Cover photo upload endpoint
   app.post('/api/user/cover-image', isAuthenticated, (req: any, res, next) => {
     console.log("POST /api/user/cover-image - Raw request received");
+    console.log("Content-Type:", req.headers['content-type']);
     
     upload.single('coverImage')(req, res, async (err) => {
       try {
+        console.log("Cover image multer callback executed");
+        console.log("Error:", err);
+        console.log("File:", req.file ? { 
+          filename: req.file.filename, 
+          size: req.file.size, 
+          mimetype: req.file.mimetype,
+          path: req.file.path 
+        } : null);
+
         if (err) {
           console.error("Multer error:", err);
           return res.status(400).json({ message: err.message });
         }
 
         if (!req.file) {
+          console.log("No cover image file received by multer");
           return res.status(400).json({ message: "No file uploaded" });
         }
 

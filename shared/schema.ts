@@ -32,6 +32,19 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  // Settings and preferences
+  showOnlineStatus: boolean("show_online_status").default(true),
+  allowFriendRequests: boolean("allow_friend_requests").default(true),
+  showActivityStatus: boolean("show_activity_status").default(true),
+  emailNotifications: boolean("email_notifications").default(false),
+  notifyFriendRequests: boolean("notify_friend_requests").default(true),
+  notifyMessages: boolean("notify_messages").default(true),
+  notifyPostLikes: boolean("notify_post_likes").default(true),
+  notifyComments: boolean("notify_comments").default(true),
+  theme: varchar("theme").default("light"), // 'light', 'dark', 'system'
+  language: varchar("language").default("en"),
+  compactMode: boolean("compact_mode").default(false),
+  autoplayVideos: boolean("autoplay_videos").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

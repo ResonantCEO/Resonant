@@ -180,10 +180,6 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     if (isOwn) {
       return (
         <div className="flex space-x-3">
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-            <Edit className="w-4 h-4 mr-2" />
-            Edit Profile
-          </Button>
           <Button variant="outline">
             <Share className="w-4 h-4 mr-2" />
             Share

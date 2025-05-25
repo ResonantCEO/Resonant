@@ -31,6 +31,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverPhotoInputRef = useRef<HTMLInputElement>(null);
 
   // Helper function to format user's display name
   const getUserDisplayName = () => {
@@ -143,6 +144,30 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     },
   });
 
+  // Handle cover photo upload
+  const uploadCoverPhotoMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('coverImage', file);
+      return await apiRequest("POST", "/api/user/cover-image", formData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      toast({
+        title: "Cover Photo Updated",
+        description: "Your cover photo has been successfully updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload cover photo",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleProfilePictureClick = () => {
     if (isOwn) {
       fileInputRef.current?.click();
@@ -173,6 +198,39 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       }
 
       uploadProfilePictureMutation.mutate(file);
+    }
+  };
+
+  const handleCoverPhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      uploadCoverPhotoMutation.mutate(file);
+    }
+  };
+
+  const handleCoverPhotoClick = () => {
+    if (isOwn) {
+      coverPhotoInputRef.current?.click();
     }
   };
 
@@ -225,9 +283,11 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
               variant="secondary"
               size="sm"
               className="absolute bottom-4 right-4 bg-white/90 hover:bg-white"
+              onClick={handleCoverPhotoClick}
+              disabled={uploadCoverPhotoMutation.isPending}
             >
               <Camera className="w-4 h-4 mr-2" />
-              Edit Cover
+              {uploadCoverPhotoMutation.isPending ? "Uploading..." : "Edit Cover"}
             </Button>
           )}
         </div>
@@ -337,15 +397,24 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
         </Tabs>
       </div>
       
-      {/* Hidden file input for profile picture upload */}
+      {/* Hidden file inputs for uploads */}
       {isOwn && (
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept="image/*"
-          className="hidden"
-        />
+        <>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+          <input
+            type="file"
+            ref={coverPhotoInputRef}
+            onChange={handleCoverPhotoChange}
+            accept="image/*"
+            className="hidden"
+          />
+        </>
       )}
     </>
   );

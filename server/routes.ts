@@ -154,6 +154,42 @@ export function registerRoutes(app: Express): Server {
     });
   });
 
+  // Cover photo upload endpoint
+  app.post('/api/user/cover-image', isAuthenticated, (req: any, res, next) => {
+    console.log("POST /api/user/cover-image - Raw request received");
+    
+    upload.single('coverImage')(req, res, async (err) => {
+      try {
+        if (err) {
+          console.error("Multer error:", err);
+          return res.status(400).json({ message: err.message });
+        }
+
+        if (!req.file) {
+          return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const userId = req.user.id;
+        const coverImageUrl = `/uploads/${req.file.filename}`;
+
+        console.log("Updating user cover image:", { userId, coverImageUrl });
+
+        // Update user's cover image URL in database
+        await storage.updateUser(userId, { coverImageUrl });
+
+        console.log("Cover image updated successfully");
+
+        res.json({ 
+          message: "Cover photo updated successfully",
+          coverImageUrl 
+        });
+      } catch (error) {
+        console.error("Error uploading cover photo:", error);
+        res.status(500).json({ message: "Failed to upload cover photo" });
+      }
+    });
+  });
+
   // Profile routes
   app.get('/api/profiles', isAuthenticated, async (req: any, res) => {
     try {

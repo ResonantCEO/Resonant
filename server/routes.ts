@@ -71,6 +71,18 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Update current user
+  app.put("/api/user", isAuthenticated, async (req: any, res) => {
+    try {
+      const updateData = req.body;
+      const updatedUser = await storage.updateUser(req.user.id, updateData);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
   // Profile picture upload endpoint
   app.post('/api/user/profile-image', isAuthenticated, (req: any, res, next) => {
     console.log("POST /api/user/profile-image - Raw request received");

@@ -247,7 +247,7 @@ export class DatabaseStorage implements IStorage {
 
   // Post operations
   async getPosts(profileId: number, viewerProfileId?: number): Promise<Post[]> {
-    // Get posts with profile information joined
+    // Get posts with profile information joined, including user profile image
     const query = db
       .select({
         id: posts.id,
@@ -262,12 +262,13 @@ export class DatabaseStorage implements IStorage {
         profile: {
           id: profiles.id,
           name: profiles.name,
-          profileImageUrl: profiles.profileImageUrl,
+          profileImageUrl: users.profileImageUrl, // Get from users table
           type: profiles.type,
         }
       })
       .from(posts)
       .innerJoin(profiles, eq(posts.profileId, profiles.id))
+      .innerJoin(users, eq(profiles.userId, users.id))
       .where(eq(posts.profileId, profileId))
       .orderBy(desc(posts.createdAt));
 
@@ -307,18 +308,19 @@ export class DatabaseStorage implements IStorage {
         updatedAt: posts.updatedAt,
         // Flattened profile data for better compatibility
         profileName: profiles.name,
-        profileImageUrl: profiles.profileImageUrl,
+        profileImageUrl: users.profileImageUrl, // Get from users table
         profileType: profiles.type,
         // Also include nested profile object
         profile: {
           id: profiles.id,
           name: profiles.name,
-          profileImageUrl: profiles.profileImageUrl,
+          profileImageUrl: users.profileImageUrl, // Get from users table
           type: profiles.type,
         }
       })
       .from(posts)
       .innerJoin(profiles, eq(posts.profileId, profiles.id))
+      .innerJoin(users, eq(profiles.userId, users.id))
       .where(
         and(
           inArray(posts.profileId, friendIds),

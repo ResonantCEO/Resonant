@@ -74,7 +74,8 @@ export function registerRoutes(app: Express): Server {
         email: user.email, 
         firstName: user.firstName, 
         lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl
+        profileImageUrl: user.profileImageUrl,
+        coverImageUrl: user.coverImageUrl
       });
     } catch (error) {
       console.error("Error fetching user:", error);

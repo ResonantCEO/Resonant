@@ -209,15 +209,30 @@ export default function Settings() {
                       <Button
                         size="sm"
                         className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
+                        onClick={() => document.getElementById('profile-image-input')?.click()}
+                        disabled={profileImageMutation.isPending}
                       >
                         <Camera className="w-4 h-4" />
                       </Button>
+                      <input
+                        id="profile-image-input"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfileImageUpload}
+                        className="hidden"
+                      />
                     </div>
                     <div>
                       <h3 className="font-semibold">{user?.firstName} {user?.lastName}</h3>
                       <p className="text-sm text-neutral-600">{user?.email}</p>
-                      <Button variant="outline" size="sm" className="mt-2">
-                        Change Profile Picture
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-2"
+                        onClick={() => document.getElementById('profile-image-input')?.click()}
+                        disabled={profileImageMutation.isPending}
+                      >
+                        {profileImageMutation.isPending ? "Uploading..." : "Change Profile Picture"}
                       </Button>
                     </div>
                   </div>

@@ -261,7 +261,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: posts.updatedAt,
         profile: {
           id: profiles.id,
-          name: profiles.name,
+          name: sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`, // Use first and last name
           profileImageUrl: users.profileImageUrl, // Get from users table
           type: profiles.type,
         }
@@ -307,13 +307,13 @@ export class DatabaseStorage implements IStorage {
         createdAt: posts.createdAt,
         updatedAt: posts.updatedAt,
         // Flattened profile data for better compatibility
-        profileName: profiles.name,
+        profileName: sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`, // Use first and last name
         profileImageUrl: users.profileImageUrl, // Get from users table
         profileType: profiles.type,
         // Also include nested profile object
         profile: {
           id: profiles.id,
-          name: profiles.name,
+          name: sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`, // Use first and last name
           profileImageUrl: users.profileImageUrl, // Get from users table
           type: profiles.type,
         }

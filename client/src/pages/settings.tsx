@@ -28,10 +28,12 @@ import {
   X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({
     firstName: user?.firstName || "",
@@ -115,6 +117,11 @@ export default function Settings() {
   const handlePreferenceChange = (key: keyof typeof preferences, value: any) => {
     setPreferences(prev => ({ ...prev, [key]: value }));
     updatePreferencesMutation.mutate({ [key]: value });
+  };
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme as "light" | "dark" | "system");
+    handlePreferenceChange('theme', newTheme);
   };
 
   const profileImageMutation = useMutation({

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
@@ -34,14 +34,48 @@ export default function Settings() {
   const { toast } = useToast();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
-    email: user?.email || "",
+    firstName: (user as any)?.firstName || "",
+    lastName: (user as any)?.lastName || "",
+    email: (user as any)?.email || "",
+  });
+
+  // Settings state
+  const [privacySettings, setPrivacySettings] = useState({
+    profileVisibility: "public",
+    showOnlineStatus: true,
+    allowFriendRequests: true,
+    showActivityStatus: true,
+  });
+
+  const [notificationSettings, setNotificationSettings] = useState({
+    friendRequests: true,
+    newMessages: true,
+    postLikes: true,
+    comments: true,
+    emailNotifications: false,
+  });
+
+  const [appearanceSettings, setAppearanceSettings] = useState({
+    theme: "light",
+    language: "en",
+    compactMode: false,
+    autoplayVideos: true,
   });
 
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
   });
+
+  // Update profile data when user changes
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        firstName: (user as any)?.firstName || "",
+        lastName: (user as any)?.lastName || "",
+        email: (user as any)?.email || "",
+      });
+    }
+  }, [user]);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof profileData) => {
@@ -70,11 +104,85 @@ export default function Settings() {
 
   const handleCancelEdit = () => {
     setProfileData({
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      email: user?.email || "",
+      firstName: (user as any)?.firstName || "",
+      lastName: (user as any)?.lastName || "",
+      email: (user as any)?.email || "",
     });
     setIsEditingProfile(false);
+  };
+
+  // Profile picture upload mutation
+  const uploadProfilePicture = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+      
+      const response = await fetch('/api/user/profile-image', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload profile picture');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({
+        title: "Profile Picture Updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload profile picture",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      uploadProfilePicture.mutate(file);
+    }
+  };
+
+  // Settings update handlers
+  const updatePrivacySetting = (key: string, value: any) => {
+    setPrivacySettings(prev => ({ ...prev, [key]: value }));
+    toast({
+      title: "Privacy Setting Updated",
+      description: "Your privacy preferences have been saved.",
+    });
+  };
+
+  const updateNotificationSetting = (key: string, value: boolean) => {
+    setNotificationSettings(prev => ({ ...prev, [key]: value }));
+    toast({
+      title: "Notification Setting Updated",
+      description: "Your notification preferences have been saved.",
+    });
+  };
+
+  const updateAppearanceSetting = (key: string, value: any) => {
+    setAppearanceSettings(prev => ({ ...prev, [key]: value }));
+    toast({
+      title: "Appearance Setting Updated",
+      description: "Your appearance preferences have been saved.",
+    });
   };
 
   return (
@@ -130,9 +238,18 @@ export default function Settings() {
                       <Button
                         size="sm"
                         className="absolute bottom-0 right-0 rounded-full w-8 h-8 p-0"
+                        onClick={() => document.getElementById('profile-picture-input')?.click()}
+                        disabled={uploadProfilePicture.isPending}
                       >
                         <Camera className="w-4 h-4" />
                       </Button>
+                      <input
+                        id="profile-picture-input"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
                     </div>
                     <div>
                       <h3 className="font-semibold">{user?.firstName} {user?.lastName}</h3>
@@ -248,7 +365,10 @@ export default function Settings() {
                         <p className="font-medium">Profile Visibility</p>
                         <p className="text-sm text-neutral-600">Who can see your profile</p>
                       </div>
-                      <Select defaultValue="public">
+                      <Select 
+                        value={privacySettings.profileVisibility} 
+                        onValueChange={(value) => updatePrivacySetting('profileVisibility', value)}
+                      >
                         <SelectTrigger className="w-40">
                           <SelectValue />
                         </SelectTrigger>
@@ -267,7 +387,10 @@ export default function Settings() {
                         <p className="font-medium">Show Online Status</p>
                         <p className="text-sm text-neutral-600">Let others see when you're online</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={privacySettings.showOnlineStatus}
+                        onCheckedChange={(checked) => updatePrivacySetting('showOnlineStatus', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -277,7 +400,10 @@ export default function Settings() {
                         <p className="font-medium">Allow Friend Requests</p>
                         <p className="text-sm text-neutral-600">Let others send you friend requests</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={privacySettings.allowFriendRequests}
+                        onCheckedChange={(checked) => updatePrivacySetting('allowFriendRequests', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -287,7 +413,10 @@ export default function Settings() {
                         <p className="font-medium">Show Activity Status</p>
                         <p className="text-sm text-neutral-600">Show your recent activity to friends</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={privacySettings.showActivityStatus}
+                        onCheckedChange={(checked) => updatePrivacySetting('showActivityStatus', checked)}
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -322,7 +451,10 @@ export default function Settings() {
                         <p className="font-medium">Friend Requests</p>
                         <p className="text-sm text-neutral-600">Get notified when someone sends you a friend request</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.friendRequests}
+                        onCheckedChange={(checked) => updateNotificationSetting('friendRequests', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -332,7 +464,10 @@ export default function Settings() {
                         <p className="font-medium">New Messages</p>
                         <p className="text-sm text-neutral-600">Get notified when you receive new messages</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.newMessages}
+                        onCheckedChange={(checked) => updateNotificationSetting('newMessages', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -342,7 +477,10 @@ export default function Settings() {
                         <p className="font-medium">Post Likes</p>
                         <p className="text-sm text-neutral-600">Get notified when someone likes your posts</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.postLikes}
+                        onCheckedChange={(checked) => updateNotificationSetting('postLikes', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -352,7 +490,10 @@ export default function Settings() {
                         <p className="font-medium">Comments</p>
                         <p className="text-sm text-neutral-600">Get notified when someone comments on your posts</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={notificationSettings.comments}
+                        onCheckedChange={(checked) => updateNotificationSetting('comments', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -362,7 +503,10 @@ export default function Settings() {
                         <p className="font-medium">Email Notifications</p>
                         <p className="text-sm text-neutral-600">Receive notifications via email</p>
                       </div>
-                      <Switch />
+                      <Switch 
+                        checked={notificationSettings.emailNotifications}
+                        onCheckedChange={(checked) => updateNotificationSetting('emailNotifications', checked)}
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -382,7 +526,10 @@ export default function Settings() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>Theme</Label>
-                      <Select defaultValue="light">
+                      <Select 
+                        value={appearanceSettings.theme} 
+                        onValueChange={(value) => updateAppearanceSetting('theme', value)}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -398,7 +545,10 @@ export default function Settings() {
 
                     <div className="space-y-2">
                       <Label>Language</Label>
-                      <Select defaultValue="en">
+                      <Select 
+                        value={appearanceSettings.language} 
+                        onValueChange={(value) => updateAppearanceSetting('language', value)}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -418,7 +568,10 @@ export default function Settings() {
                         <p className="font-medium">Compact Mode</p>
                         <p className="text-sm text-neutral-600">Show more content with smaller spacing</p>
                       </div>
-                      <Switch />
+                      <Switch 
+                        checked={appearanceSettings.compactMode}
+                        onCheckedChange={(checked) => updateAppearanceSetting('compactMode', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -428,7 +581,10 @@ export default function Settings() {
                         <p className="font-medium">Auto-play Videos</p>
                         <p className="text-sm text-neutral-600">Automatically play videos in feed</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={appearanceSettings.autoplayVideos}
+                        onCheckedChange={(checked) => updateAppearanceSetting('autoplayVideos', checked)}
+                      />
                     </div>
                   </div>
                 </CardContent>

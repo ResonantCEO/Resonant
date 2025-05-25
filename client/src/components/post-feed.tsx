@@ -232,7 +232,13 @@ export default function PostFeed({ profileId }: PostFeedProps) {
                 <div className="flex items-center space-x-3">
                   <Avatar>
                     <AvatarImage src={post.profile?.profileImageUrl || post.profileImageUrl || ""} />
-                    <AvatarFallback className="bg-blue-500 text-white font-semibold">
+                    <AvatarFallback className={`text-white font-semibold ${
+                      (post.profile?.type || post.profileType) === 'artist' 
+                        ? 'bg-green-500' 
+                        : (post.profile?.type || post.profileType) === 'venue' 
+                        ? 'bg-red-500' 
+                        : 'bg-blue-500'
+                    }`}>
                       {(post.profile?.name || post.profileName)?.slice(0, 2).toUpperCase() || "??"}
                     </AvatarFallback>
                   </Avatar>

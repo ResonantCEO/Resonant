@@ -39,6 +39,21 @@ export default function Settings() {
     email: user?.email || "",
   });
 
+  const [preferences, setPreferences] = useState({
+    showOnlineStatus: user?.showOnlineStatus ?? true,
+    allowFriendRequests: user?.allowFriendRequests ?? true,
+    showActivityStatus: user?.showActivityStatus ?? true,
+    emailNotifications: user?.emailNotifications ?? false,
+    notifyFriendRequests: user?.notifyFriendRequests ?? true,
+    notifyMessages: user?.notifyMessages ?? true,
+    notifyPostLikes: user?.notifyPostLikes ?? true,
+    notifyComments: user?.notifyComments ?? true,
+    theme: user?.theme || "light",
+    language: user?.language || "en",
+    compactMode: user?.compactMode ?? false,
+    autoplayVideos: user?.autoplayVideos ?? true,
+  });
+
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
   });
@@ -64,6 +79,26 @@ export default function Settings() {
     },
   });
 
+  const updatePreferencesMutation = useMutation({
+    mutationFn: async (data: Partial<typeof preferences>) => {
+      return await apiRequest("PUT", "/api/user/preferences", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({
+        title: "Settings Updated",
+        description: "Your preferences have been saved successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update preferences",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSaveProfile = () => {
     updateProfileMutation.mutate(profileData);
   };
@@ -75,6 +110,50 @@ export default function Settings() {
       email: user?.email || "",
     });
     setIsEditingProfile(false);
+  };
+
+  const handlePreferenceChange = (key: keyof typeof preferences, value: any) => {
+    setPreferences(prev => ({ ...prev, [key]: value }));
+    updatePreferencesMutation.mutate({ [key]: value });
+  };
+
+  const profileImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+      
+      const response = await fetch('/api/user/profile-image', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({
+        title: "Profile Picture Updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload profile picture",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleProfileImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      profileImageMutation.mutate(file);
+    }
   };
 
   return (
@@ -245,29 +324,13 @@ export default function Settings() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="font-medium">Profile Visibility</p>
-                        <p className="text-sm text-neutral-600">Who can see your profile</p>
-                      </div>
-                      <Select defaultValue="public">
-                        <SelectTrigger className="w-40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="public">Everyone</SelectItem>
-                          <SelectItem value="friends">Friends Only</SelectItem>
-                          <SelectItem value="private">Private</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <Separator />
-
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
                         <p className="font-medium">Show Online Status</p>
                         <p className="text-sm text-neutral-600">Let others see when you're online</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={preferences.showOnlineStatus}
+                        onCheckedChange={(checked) => handlePreferenceChange('showOnlineStatus', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -277,7 +340,10 @@ export default function Settings() {
                         <p className="font-medium">Allow Friend Requests</p>
                         <p className="text-sm text-neutral-600">Let others send you friend requests</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={preferences.allowFriendRequests}
+                        onCheckedChange={(checked) => handlePreferenceChange('allowFriendRequests', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -287,7 +353,10 @@ export default function Settings() {
                         <p className="font-medium">Show Activity Status</p>
                         <p className="text-sm text-neutral-600">Show your recent activity to friends</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={preferences.showActivityStatus}
+                        onCheckedChange={(checked) => handlePreferenceChange('showActivityStatus', checked)}
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -322,7 +391,10 @@ export default function Settings() {
                         <p className="font-medium">Friend Requests</p>
                         <p className="text-sm text-neutral-600">Get notified when someone sends you a friend request</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={preferences.notifyFriendRequests}
+                        onCheckedChange={(checked) => handlePreferenceChange('notifyFriendRequests', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -332,7 +404,10 @@ export default function Settings() {
                         <p className="font-medium">New Messages</p>
                         <p className="text-sm text-neutral-600">Get notified when you receive new messages</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={preferences.notifyMessages}
+                        onCheckedChange={(checked) => handlePreferenceChange('notifyMessages', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -342,7 +417,10 @@ export default function Settings() {
                         <p className="font-medium">Post Likes</p>
                         <p className="text-sm text-neutral-600">Get notified when someone likes your posts</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={preferences.notifyPostLikes}
+                        onCheckedChange={(checked) => handlePreferenceChange('notifyPostLikes', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -352,7 +430,10 @@ export default function Settings() {
                         <p className="font-medium">Comments</p>
                         <p className="text-sm text-neutral-600">Get notified when someone comments on your posts</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={preferences.notifyComments}
+                        onCheckedChange={(checked) => handlePreferenceChange('notifyComments', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -362,7 +443,10 @@ export default function Settings() {
                         <p className="font-medium">Email Notifications</p>
                         <p className="text-sm text-neutral-600">Receive notifications via email</p>
                       </div>
-                      <Switch />
+                      <Switch 
+                        checked={preferences.emailNotifications}
+                        onCheckedChange={(checked) => handlePreferenceChange('emailNotifications', checked)}
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -382,7 +466,10 @@ export default function Settings() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>Theme</Label>
-                      <Select defaultValue="light">
+                      <Select 
+                        value={preferences.theme}
+                        onValueChange={(value) => handlePreferenceChange('theme', value)}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -398,7 +485,10 @@ export default function Settings() {
 
                     <div className="space-y-2">
                       <Label>Language</Label>
-                      <Select defaultValue="en">
+                      <Select 
+                        value={preferences.language}
+                        onValueChange={(value) => handlePreferenceChange('language', value)}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -418,7 +508,10 @@ export default function Settings() {
                         <p className="font-medium">Compact Mode</p>
                         <p className="text-sm text-neutral-600">Show more content with smaller spacing</p>
                       </div>
-                      <Switch />
+                      <Switch 
+                        checked={preferences.compactMode}
+                        onCheckedChange={(checked) => handlePreferenceChange('compactMode', checked)}
+                      />
                     </div>
 
                     <Separator />
@@ -428,7 +521,10 @@ export default function Settings() {
                         <p className="font-medium">Auto-play Videos</p>
                         <p className="text-sm text-neutral-600">Automatically play videos in feed</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch 
+                        checked={preferences.autoplayVideos}
+                        onCheckedChange={(checked) => handlePreferenceChange('autoplayVideos', checked)}
+                      />
                     </div>
                   </div>
                 </CardContent>

@@ -247,10 +247,27 @@ export class DatabaseStorage implements IStorage {
 
   // Post operations
   async getPosts(profileId: number, viewerProfileId?: number): Promise<Post[]> {
-    // Get posts with proper visibility filtering
-    let query = db
-      .select()
+    // Get posts with profile information joined
+    const query = db
+      .select({
+        id: posts.id,
+        profileId: posts.profileId,
+        content: posts.content,
+        imageUrl: posts.imageUrl,
+        visibility: posts.visibility,
+        likesCount: posts.likesCount,
+        commentsCount: posts.commentsCount,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+        profile: {
+          id: profiles.id,
+          name: profiles.name,
+          profileImageUrl: profiles.profileImageUrl,
+          type: profiles.type,
+        }
+      })
       .from(posts)
+      .innerJoin(profiles, eq(posts.profileId, profiles.id))
       .where(eq(posts.profileId, profileId))
       .orderBy(desc(posts.createdAt));
 
@@ -278,8 +295,25 @@ export class DatabaseStorage implements IStorage {
     friendIds.push(profileId); // Include own posts
 
     const feedPosts = await db
-      .select()
+      .select({
+        id: posts.id,
+        profileId: posts.profileId,
+        content: posts.content,
+        imageUrl: posts.imageUrl,
+        visibility: posts.visibility,
+        likesCount: posts.likesCount,
+        commentsCount: posts.commentsCount,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+        profile: {
+          id: profiles.id,
+          name: profiles.name,
+          profileImageUrl: profiles.profileImageUrl,
+          type: profiles.type,
+        }
+      })
       .from(posts)
+      .innerJoin(profiles, eq(posts.profileId, profiles.id))
       .where(
         and(
           inArray(posts.profileId, friendIds),

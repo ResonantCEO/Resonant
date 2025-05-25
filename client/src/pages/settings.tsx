@@ -489,8 +489,8 @@ export default function Settings() {
                     <div className="space-y-2">
                       <Label>Theme</Label>
                       <Select 
-                        value={preferences.theme}
-                        onValueChange={(value) => handlePreferenceChange('theme', value)}
+                        value={theme}
+                        onValueChange={handleThemeChange}
                       >
                         <SelectTrigger>
                           <SelectValue />

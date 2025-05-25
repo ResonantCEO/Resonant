@@ -222,16 +222,18 @@ export default function PostFeed({ profileId }: PostFeedProps) {
           </CardContent>
         </Card>
       ) : (
-        posts.map((post: any) => (
-          <Card key={post.id}>
+        posts.map((post: any) => {
+          console.log("Post data:", post); // Debug log
+          return (
+            <Card key={post.id}>
             <CardContent className="p-6">
               {/* Post Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <Avatar>
-                    <AvatarImage src={post.profile?.profileImageUrl || ""} />
+                    <AvatarImage src={post.profile?.profileImageUrl || post.profileImageUrl || ""} />
                     <AvatarFallback>
-                      {post.profile?.name?.slice(0, 2).toUpperCase() || "??"}
+                      {(post.profile?.name || post.profileName)?.slice(0, 2).toUpperCase() || "??"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
@@ -344,7 +346,8 @@ export default function PostFeed({ profileId }: PostFeedProps) {
               </div>
             </CardContent>
           </Card>
-        ))
+          );
+        })
       )}
     </div>
   );

@@ -217,7 +217,15 @@ export default function Sidebar() {
               Discover
             </Button>
           </li>
-
+          <li>
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-neutral-600 hover:bg-neutral-100"
+            >
+              <Settings className="w-5 h-5 mr-3" />
+              Settings
+            </Button>
+          </li>
         </ul>
 
         {/* Logout Button */}

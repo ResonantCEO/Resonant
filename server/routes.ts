@@ -444,7 +444,9 @@ export function registerRoutes(app: Express): Server {
         return res.status(403).json({ message: "Unauthorized to delete this post" });
       }
 
+      console.log(`About to call storage.deletePost(${postId})`);
       await storage.deletePost(postId);
+      console.log(`Storage.deletePost completed for postId: ${postId}`);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting post:", error);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
@@ -55,6 +55,32 @@ export default function Settings() {
     compactMode: user?.compactMode ?? false,
     autoplayVideos: user?.autoplayVideos ?? true,
   });
+
+  // Update state when user data changes
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+      });
+      
+      setPreferences({
+        showOnlineStatus: user.showOnlineStatus ?? true,
+        allowFriendRequests: user.allowFriendRequests ?? true,
+        showActivityStatus: user.showActivityStatus ?? true,
+        emailNotifications: user.emailNotifications ?? false,
+        notifyFriendRequests: user.notifyFriendRequests ?? true,
+        notifyMessages: user.notifyMessages ?? true,
+        notifyPostLikes: user.notifyPostLikes ?? true,
+        notifyComments: user.notifyComments ?? true,
+        theme: user.theme || "light",
+        language: user.language || "en",
+        compactMode: user.compactMode ?? false,
+        autoplayVideos: user.autoplayVideos ?? true,
+      });
+    }
+  }, [user]);
 
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],

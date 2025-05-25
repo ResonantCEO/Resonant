@@ -282,7 +282,7 @@ export class DatabaseStorage implements IStorage {
       .from(posts)
       .where(
         and(
-          sql`${posts.profileId} = ANY(${JSON.stringify(friendIds)})`,
+          inArray(posts.profileId, friendIds),
           or(
             eq(posts.visibility, "public"),
             eq(posts.visibility, "friends")

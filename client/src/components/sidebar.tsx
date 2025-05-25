@@ -256,7 +256,7 @@ export default function Sidebar() {
             onClick={async () => {
               await apiRequest("POST", "/api/logout");
               queryClient.clear();
-              setLocation("/");
+              window.location.href = "/";
             }}
           >
             Logout

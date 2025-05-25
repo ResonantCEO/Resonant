@@ -430,12 +430,16 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      // Get all posts for this profile to verify ownership
-      const posts = await storage.getPosts(activeProfile.id, activeProfile.id);
-      const targetPost = posts.find(p => p.id === postId);
+      // Direct database check for post ownership
+      const result = await db.select().from(posts).where(eq(posts.id, postId));
+      const post = result[0];
       
-      if (!targetPost) {
-        return res.status(403).json({ message: "Post not found or unauthorized to delete" });
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+      
+      if (post.profileId !== activeProfile.id) {
+        return res.status(403).json({ message: "Unauthorized to delete this post" });
       }
 
       await storage.deletePost(postId);

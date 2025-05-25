@@ -103,11 +103,13 @@ export default function PostFeed({ profileId }: PostFeedProps) {
       return await apiRequest("DELETE", `/api/posts/${postId}`);
     },
     onSuccess: () => {
-      // Clear all post caches
-      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}/posts`] });
+      // Force complete cache clear and refetch
       queryClient.removeQueries({ queryKey: ["/api/posts"] });
       queryClient.removeQueries({ queryKey: [`/api/profiles/${profileId}/posts`] });
+      queryClient.refetchQueries({ queryKey: ["/api/posts"] });
+      if (profileId) {
+        queryClient.refetchQueries({ queryKey: [`/api/profiles/${profileId}/posts`] });
+      }
       toast({
         title: "Post Deleted",
         description: "Your post has been deleted successfully.",

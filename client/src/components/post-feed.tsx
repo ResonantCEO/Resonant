@@ -17,8 +17,15 @@ import {
   MapPin,
   MoreHorizontal,
   Globe,
-  Users as FriendsIcon
+  Users as FriendsIcon,
+  Trash2
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
@@ -78,6 +85,27 @@ export default function PostFeed({ profileId }: PostFeedProps) {
     },
   });
 
+  const deletePostMutation = useMutation({
+    mutationFn: async (postId: number) => {
+      return await apiRequest("DELETE", `/api/posts/${postId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}/posts`] });
+      toast({
+        title: "Post Deleted",
+        description: "Your post has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete post",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreatePost = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPost.trim()) return;
@@ -86,6 +114,12 @@ export default function PostFeed({ profileId }: PostFeedProps) {
 
   const handleLikePost = (postId: number) => {
     likePostMutation.mutate(postId);
+  };
+
+  const handleDeletePost = (postId: number) => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      deletePostMutation.mutate(postId);
+    }
   };
 
   const getVisibilityIcon = (visibility: string) => {
@@ -188,9 +222,25 @@ export default function PostFeed({ profileId }: PostFeedProps) {
                     </div>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm">
-                  <MoreHorizontal className="w-4 h-4" />
-                </Button>
+                {/* Show menu only for posts owned by current user */}
+                {post.profileId === activeProfile?.id && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        onClick={() => handleDeletePost(post.id)}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Post
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
 
               {/* Post Content */}

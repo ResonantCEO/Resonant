@@ -422,6 +422,30 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.delete('/api/posts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Get the post to verify ownership
+      const post = await storage.getPosts(activeProfile.id);
+      const targetPost = post.find(p => p.id === postId && p.profileId === activeProfile.id);
+      
+      if (!targetPost) {
+        return res.status(403).json({ message: "Post not found or unauthorized to delete" });
+      }
+
+      await storage.deletePost(postId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      res.status(500).json({ message: "Failed to delete post" });
+    }
+  });
+
   // Comment routes
   app.get('/api/posts/:id/comments', async (req, res) => {
     try {

@@ -104,9 +104,6 @@ export default function Sidebar() {
       <div className="p-6 border-b border-neutral-200">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-neutral-900">SocialConnect</h1>
-          <Button variant="ghost" size="sm">
-            <Settings className="w-4 h-4 text-neutral-600" />
-          </Button>
         </div>
 
         {/* Active Profile Display */}

@@ -103,13 +103,22 @@ export default function PostFeed({ profileId }: PostFeedProps) {
       return await apiRequest("DELETE", `/api/posts/${postId}`);
     },
     onSuccess: () => {
-      // Force complete cache clear and refetch
-      queryClient.removeQueries({ queryKey: ["/api/posts"] });
-      queryClient.removeQueries({ queryKey: [`/api/profiles/${profileId}/posts`] });
-      queryClient.refetchQueries({ queryKey: ["/api/posts"] });
+      // Immediately update local state by removing the post from cache
+      queryClient.setQueryData(["/api/posts"], (oldData: any) => {
+        if (!oldData) return [];
+        return oldData.filter((post: any) => post.id !== deletePostMutation.variables);
+      });
+      
       if (profileId) {
-        queryClient.refetchQueries({ queryKey: [`/api/profiles/${profileId}/posts`] });
+        queryClient.setQueryData([`/api/profiles/${profileId}/posts`], (oldData: any) => {
+          if (!oldData) return [];
+          return oldData.filter((post: any) => post.id !== deletePostMutation.variables);
+        });
       }
+      
+      // Also force a refresh to ensure consistency
+      queryClient.refetchQueries({ queryKey: ["/api/posts"] });
+      
       toast({
         title: "Post Deleted",
         description: "Your post has been deleted successfully.",
@@ -227,7 +236,7 @@ export default function PostFeed({ profileId }: PostFeedProps) {
                   </Avatar>
                   <div>
                     <h4 className="font-semibold text-neutral-900">
-                      {post.profile?.name || "Unknown User"}
+                      {post.profile?.name || post.profileName || "Unknown User"}
                     </h4>
                     <div className="flex items-center space-x-2 text-sm text-neutral-600">
                       <span>

@@ -305,6 +305,11 @@ export class DatabaseStorage implements IStorage {
         commentsCount: posts.commentsCount,
         createdAt: posts.createdAt,
         updatedAt: posts.updatedAt,
+        // Flattened profile data for better compatibility
+        profileName: profiles.name,
+        profileImageUrl: profiles.profileImageUrl,
+        profileType: profiles.type,
+        // Also include nested profile object
         profile: {
           id: profiles.id,
           name: profiles.name,

@@ -346,15 +346,28 @@ export class DatabaseStorage implements IStorage {
   async deletePost(id: number): Promise<void> {
     console.log(`Attempting to delete post with id: ${id}`);
     
-    // First delete any related post likes
-    await db.delete(postLikes).where(eq(postLikes.postId, id));
-    
-    // Then delete any comments
-    await db.delete(comments).where(eq(comments.postId, id));
-    
-    // Finally delete the post
-    const result = await db.delete(posts).where(eq(posts.id, id));
-    console.log(`Delete result:`, result);
+    try {
+      // First delete any related post likes
+      const likesResult = await db.delete(postLikes).where(eq(postLikes.postId, id));
+      console.log(`Deleted ${likesResult.rowCount || 0} likes`);
+      
+      // Then delete any comments
+      const commentsResult = await db.delete(comments).where(eq(comments.postId, id));
+      console.log(`Deleted ${commentsResult.rowCount || 0} comments`);
+      
+      // Finally delete the post
+      const postResult = await db.delete(posts).where(eq(posts.id, id));
+      console.log(`Deleted ${postResult.rowCount || 0} posts`);
+      
+      if (postResult.rowCount === 0) {
+        throw new Error(`Post with id ${id} not found or already deleted`);
+      }
+      
+      console.log(`Successfully deleted post ${id}`);
+    } catch (error) {
+      console.error(`Error deleting post ${id}:`, error);
+      throw error;
+    }
   }
 
   async likePost(postId: number, profileId: number): Promise<PostLike> {

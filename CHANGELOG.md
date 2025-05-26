@@ -1,6 +1,57 @@
 # SocialConnect Changelog
 
-## Version 2.0 - Enhanced Dark Mode & Settings System (Latest)
+## Version 2.1 - Cover Photo System & Profile Enhancements (Latest)
+
+### Major Features Added
+
+#### 📸 Cover Photo System
+- **Cover Photo Upload**: Full implementation of cover photo upload functionality
+- **Database Integration**: Added `cover_image_url` field to user schema with proper mapping
+- **File Upload Processing**: Secure file handling with size validation and type checking
+- **Dynamic Display**: Cover photos replace gradient backgrounds when uploaded
+- **Upload Progress**: Real-time feedback during cover photo uploads
+- **Error Handling**: Comprehensive validation for file types and sizes (5MB limit)
+
+#### 🖼️ Enhanced Profile Display
+- **Profile Pictures in Posts**: Posts now display user profile pictures instead of initials
+- **Full Name Display**: Posts show complete names (first + last name) for better identification  
+- **Improved Avatar System**: Proper fallback handling for missing profile images
+- **Visual Consistency**: Unified profile image display across all components
+
+#### 🔧 Backend Improvements
+- **Cover Photo API**: New `/api/user/cover-image` endpoint with multer file processing
+- **Database Field Mapping**: Fixed Drizzle ORM field mapping for cover images
+- **Direct Query Optimization**: Implemented targeted database queries for reliable data retrieval
+- **File Storage**: Organized upload directory structure for profile and cover images
+
+#### 🎨 UI/UX Enhancements
+- **Cover Photo Interface**: "Edit Cover" button with camera icon for intuitive uploading
+- **Loading States**: Upload progress indicators and disabled states during processing
+- **Image Optimization**: Proper aspect ratio handling and responsive cover photo display
+- **Visual Feedback**: Toast notifications for successful uploads and error states
+
+### Technical Fixes
+
+#### Database Schema Updates:
+- Enhanced user table with proper cover image field mapping
+- Improved field naming consistency between database and application layer
+- Reliable data persistence for uploaded cover images
+
+#### File Upload System:
+- Multer configuration for secure file processing
+- Automatic filename generation with timestamps for uniqueness
+- Proper file validation and error handling
+- Static file serving for uploaded images
+
+#### Frontend Integration:
+- React Query cache invalidation after image uploads
+- Proper state management for uploaded images
+- Dynamic UI updates without page refresh
+- Comprehensive error handling with user feedback
+
+---
+
+## Version 2.0 - Enhanced Dark Mode & Settings System
 
 ### Major Features Added
 

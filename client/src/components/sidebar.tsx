@@ -122,7 +122,7 @@ export default function Sidebar() {
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-neutral-900">{getUserDisplayName()}</span>
+                  <span className="font-semibold text-neutral-900">{activeProfile.name}</span>
                   <Badge className={`${getProfileTypeColor(activeProfile.type)} text-white text-xs`}>
                     {getProfileTypeName(activeProfile.type)}
                   </Badge>
@@ -156,7 +156,7 @@ export default function Sidebar() {
                 </Avatar>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-neutral-900">{getUserDisplayName()}</span>
+                    <span className="font-medium text-neutral-900">{profile.name}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">

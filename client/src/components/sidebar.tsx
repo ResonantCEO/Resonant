@@ -138,13 +138,15 @@ export default function Sidebar() {
                     <AvatarFallback>{getDisplayName(activeProfile).slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 mb-1">
                       <span className="font-semibold text-neutral-900">{getDisplayName(activeProfile)}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-sm text-neutral-600">Active Profile</p>
                       <Badge className={`${getProfileTypeColor(activeProfile.type)} text-white text-xs`}>
                         {getProfileTypeName(activeProfile.type)}
                       </Badge>
                     </div>
-                    <p className="text-sm text-neutral-600">Active Profile</p>
                   </div>
                   <ChevronDown className="w-4 h-4 text-neutral-500" />
                 </div>

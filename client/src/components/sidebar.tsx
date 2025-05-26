@@ -156,7 +156,14 @@ export default function Sidebar() {
               <DropdownMenuLabel>Switch Profile</DropdownMenuLabel>
               <DropdownMenuSeparator />
               
-              {Array.isArray(profiles) && profiles.map((profile: any) => (
+              {Array.isArray(profiles) && profiles
+                .sort((a: any, b: any) => {
+                  // Put active profile first
+                  if (a.id === activeProfile?.id) return -1;
+                  if (b.id === activeProfile?.id) return 1;
+                  return 0;
+                })
+                .map((profile: any) => (
                 <DropdownMenuItem
                   key={profile.id}
                   className={`p-3 ${profile.id === activeProfile?.id ? "bg-blue-50" : ""}`}

@@ -304,10 +304,15 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
               src={user.coverImageUrl} 
               alt="Cover photo" 
               className="w-full h-full object-cover"
+              onLoad={() => console.log("Cover image loaded:", user.coverImageUrl)}
+              onError={() => console.log("Cover image failed to load:", user.coverImageUrl)}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-r from-blue-500 to-blue-600" />
           )}
+          {/* Debug info */}
+          {console.log("User data:", user)}
+          {console.log("Cover image URL:", user?.coverImageUrl)}
           {isOwn && (
             <>
               <Button

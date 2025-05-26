@@ -147,13 +147,7 @@ export default function Sidebar() {
               <DropdownMenuLabel>Switch Profile</DropdownMenuLabel>
               <DropdownMenuSeparator />
               
-              {Array.isArray(profiles) && 
-                // Sort profiles to show active profile first
-                [...profiles].sort((a, b) => {
-                  if (a.id === activeProfile?.id) return -1;
-                  if (b.id === activeProfile?.id) return 1;
-                  return 0;
-                }).map((profile: any) => (
+              {Array.isArray(profiles) && profiles.map((profile: any) => (
                 <DropdownMenuItem
                   key={profile.id}
                   className={`p-3 ${profile.id === activeProfile?.id ? "bg-blue-50" : ""}`}
@@ -174,9 +168,6 @@ export default function Sidebar() {
                       <div className="flex items-center space-x-2">
                         {getVisibilityIcon(profile.visibility)}
                         <span className="text-xs text-neutral-600 capitalize">{profile.visibility}</span>
-                        {profile.id === activeProfile?.id && (
-                          <span className="text-xs text-blue-600 font-medium">Active</span>
-                        )}
                       </div>
                     </div>
                   </div>

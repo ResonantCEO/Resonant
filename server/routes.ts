@@ -70,7 +70,12 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "User not found" });
       }
       
-      console.log("Raw user data from DB:", user);
+      // Force debug output
+      console.log("===== DEBUG USER DATA =====");
+      console.log("Raw user data from DB:", JSON.stringify(user, null, 2));
+      console.log("Cover image specifically:", user.coverImageUrl);
+      console.log("Profile image specifically:", user.profileImageUrl);
+      
       const response = {
         id: user.id,
         email: user.email,
@@ -79,7 +84,8 @@ export function registerRoutes(app: Express): Server {
         profileImageUrl: user.profileImageUrl,
         coverImageUrl: user.coverImageUrl
       };
-      console.log("API response:", response);
+      console.log("Final API response:", JSON.stringify(response, null, 2));
+      console.log("===== END DEBUG =====");
       res.json(response);
     } catch (error) {
       console.error("Error fetching user:", error);

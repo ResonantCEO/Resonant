@@ -98,8 +98,24 @@ export async function setupAuth(app: Express) {
     passport.use(strategy);
   }
 
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+  passport.serializeUser((user: any, cb) => {
+    console.log("Serializing user:", user);
+    // Store only the user ID or claims sub for session
+    cb(null, user.claims?.sub || user.id);
+  });
+  
+  passport.deserializeUser(async (id: string | number, cb) => {
+    try {
+      console.log("Deserializing user ID:", id);
+      // Always fetch the complete user data from database
+      const user = await storage.getUser(Number(id));
+      console.log("Deserialized full user:", user);
+      cb(null, user);
+    } catch (error) {
+      console.error("Deserialization error:", error);
+      cb(error);
+    }
+  });
 
   app.get("/api/login", (req, res, next) => {
     passport.authenticate(`replitauth:${req.hostname}`, {

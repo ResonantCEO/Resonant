@@ -51,6 +51,14 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     }
     return user.email ? user.email.charAt(0).toUpperCase() : profile.name?.slice(0, 2).toUpperCase() || "";
   };
+
+  // Helper function to get display name for profile
+  const getDisplayName = () => {
+    if (profile.type === 'audience' && user) {
+      return `${user.firstName || ''} ${user.lastName || ''}`.trim() || profile.name;
+    }
+    return profile.name;
+  };
   const [activeTab, setActiveTab] = useState("posts");
 
   const { data: friendshipStatus } = useQuery({
@@ -352,7 +360,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
                 >
                   <AvatarImage src={profile.profileImageUrl || ""} />
                   <AvatarFallback className="text-2xl">
-                    {profile.name.slice(0, 2).toUpperCase()}
+                    {getDisplayName().slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 {isOwn && (
@@ -377,7 +385,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
             <div className="flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">{profile.name}</h1>
+                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">{getDisplayName()}</h1>
                   <div className="flex items-center space-x-4 text-neutral-600 mb-4">
                     <span className="flex items-center">
                       <Users className="w-4 h-4 mr-2" />

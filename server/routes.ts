@@ -75,7 +75,7 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "User not found" });
       }
       
-      console.log("User data returned from /api/user:", user); // Debug log
+      console.log("User data returned from /api/user:", JSON.stringify(user, null, 2));
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);

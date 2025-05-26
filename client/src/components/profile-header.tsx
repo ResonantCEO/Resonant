@@ -271,9 +271,9 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
         <div className="h-48 bg-gradient-to-r from-blue-500 to-blue-600 relative">
-          {(isOwn && user?.coverImageUrl) || profile.coverImageUrl ? (
+          {user?.coverImageUrl ? (
             <img 
-              src={isOwn && user?.coverImageUrl ? user.coverImageUrl : profile.coverImageUrl} 
+              src={user.coverImageUrl} 
               alt="Cover photo" 
               className="w-full h-full object-cover"
             />

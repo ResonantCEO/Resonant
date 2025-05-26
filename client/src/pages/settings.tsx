@@ -30,6 +30,149 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
 
+// Profile Names Section Component
+function ProfileNamesSection() {
+  const { toast } = useToast();
+  const [editingProfileId, setEditingProfileId] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState("");
+
+  // Fetch all profiles
+  const { data: profiles = [] } = useQuery({
+    queryKey: ["/api/profiles"],
+  });
+
+  // Update profile mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async ({ profileId, name }: { profileId: number; name: string }) => {
+      return await apiRequest("PUT", `/api/profiles/${profileId}`, { name });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+      toast({
+        title: "Profile Updated",
+        description: "Profile name has been updated successfully.",
+      });
+      setEditingProfileId(null);
+      setEditingName("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile name",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEdit = (profile: any) => {
+    setEditingProfileId(profile.id);
+    setEditingName(profile.name);
+  };
+
+  const handleSave = () => {
+    if (editingProfileId && editingName.trim()) {
+      updateProfileMutation.mutate({
+        profileId: editingProfileId,
+        name: editingName.trim()
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingProfileId(null);
+    setEditingName("");
+  };
+
+  const getProfileTypeColor = (type: string) => {
+    switch (type) {
+      case "artist":
+        return "bg-green-500";
+      case "venue":
+        return "bg-red-500";
+      default:
+        return "bg-blue-500";
+    }
+  };
+
+  const getProfileTypeName = (type: string) => {
+    switch (type) {
+      case "artist":
+        return "Artist";
+      case "venue":
+        return "Venue";
+      default:
+        return "Audience";
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {profiles.map((profile: any) => (
+        <div key={profile.id} className="flex items-center justify-between p-4 border rounded-lg">
+          <div className="flex items-center space-x-3">
+            <Avatar className="w-12 h-12">
+              <AvatarImage src={profile.profileImageUrl || ""} />
+              <AvatarFallback>
+                {profile.name?.charAt(0)?.toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              {editingProfileId === profile.id ? (
+                <div className="flex items-center space-x-2">
+                  <Input
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    className="flex-1"
+                    placeholder="Enter profile name"
+                  />
+                  <Button 
+                    size="sm" 
+                    onClick={handleSave}
+                    disabled={updateProfileMutation.isPending}
+                  >
+                    <Save className="w-4 h-4 mr-1" />
+                    Save
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={handleCancel}
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <p className="font-medium">{profile.name}</p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
+                      {getProfileTypeName(profile.type)}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {profile.visibility || 'public'}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          {editingProfileId !== profile.id && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleEdit(profile)}
+            >
+              Edit Name
+            </Button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Settings() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -329,32 +472,8 @@ export default function Settings() {
 
                   <Separator />
 
-                  {/* Active Profile */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Active Profile</h3>
-                    {activeProfile && (
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="w-12 h-12">
-                            <AvatarImage src={user?.profileImageUrl || ""} />
-                            <AvatarFallback>
-                              {activeProfile.name?.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{activeProfile.name}</p>
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="secondary">{activeProfile.type}</Badge>
-                              <Badge variant="outline">{activeProfile.visibility}</Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          Switch Profile
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                  {/* Profile Names Management */}
+                  <ProfileNamesSection />
                 </CardContent>
               </Card>
             </TabsContent>

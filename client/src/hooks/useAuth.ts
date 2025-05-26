@@ -7,6 +7,20 @@ interface User {
   lastName: string | null;
   profileImageUrl: string | null;
   coverImageUrl: string | null;
+  showOnlineStatus?: boolean;
+  allowFriendRequests?: boolean;
+  showActivityStatus?: boolean;
+  emailNotifications?: boolean;
+  notifyFriendRequests?: boolean;
+  notifyMessages?: boolean;
+  notifyPostLikes?: boolean;
+  notifyComments?: boolean;
+  theme?: string;
+  language?: string;
+  compactMode?: boolean;
+  autoplayVideos?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export function useAuth() {

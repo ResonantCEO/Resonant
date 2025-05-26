@@ -65,17 +65,14 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      // Direct database query to ensure we get all fields including cover image
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, req.user.id));
+      // Use storage method to get user data with all fields
+      const user = await storage.getUser(req.user.id);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      console.log("User data returned from /api/user:", JSON.stringify(user, null, 2));
+      console.log("User data from storage getUser:", JSON.stringify(user, null, 2));
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);

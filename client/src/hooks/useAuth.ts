@@ -30,7 +30,14 @@ export function useAuth() {
     staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    onSuccess: (data) => {
+      console.log("useAuth - Received user data:", data);
+      console.log("useAuth - Theme field:", data?.theme);
+    },
   });
+
+  console.log("useAuth - Current user state:", user);
+  console.log("useAuth - Current user theme:", user?.theme);
 
   return {
     user,

@@ -98,13 +98,15 @@ export function registerRoutes(app: Express): Server {
       
       console.log("FIXED API - User result:", JSON.stringify(user, null, 2));
       
-      // Manually ensure coverImageUrl is included
+      // Manually ensure coverImageUrl is included and theme is explicitly set
       const response = {
         ...user,
-        coverImageUrl: user.coverImageUrl || null
+        coverImageUrl: user.coverImageUrl || null,
+        theme: user.theme || 'light' // Explicitly ensure theme is included
       };
       
-      console.log("FIXED API - Final response:", JSON.stringify(response, null, 2));
+      console.log("FIXED API - Final response being sent:", JSON.stringify(response, null, 2));
+      console.log("FIXED API - Response theme field:", response.theme);
       res.json(response);
     } catch (error) {
       console.error("Error fetching user:", error);

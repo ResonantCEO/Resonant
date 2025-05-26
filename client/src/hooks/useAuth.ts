@@ -6,6 +6,7 @@ interface User {
   firstName: string | null;
   lastName: string | null;
   profileImageUrl: string | null;
+  coverImageUrl: string | null;
 }
 
 export function useAuth() {

@@ -23,7 +23,7 @@ interface CreateProfileModalProps {
 
 export default function CreateProfileModal({ open, onOpenChange }: CreateProfileModalProps) {
   const { toast } = useToast();
-  const [profileType, setProfileType] = useState<string>("audience");
+  const [profileType, setProfileType] = useState<string>("artist");
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
 
@@ -50,7 +50,7 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
   });
 
   const handleClose = () => {
-    setProfileType("audience");
+    setProfileType("artist");
     setName("");
     setBio("");
     onOpenChange(false);
@@ -88,21 +88,48 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <Label className="text-sm font-medium text-neutral-700 mb-2 block">
-              Profile Type
+            <Label className="text-sm font-medium text-neutral-700 mb-3 block">
+              Profile Type *
             </Label>
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <Music className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <p className="font-medium text-neutral-900">Audience Member</p>
-                  <p className="text-sm text-neutral-600">Your primary profile for discovering music and connecting with friends</p>
+            <RadioGroup value={profileType} onValueChange={setProfileType} className="space-y-3">
+              <div className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                profileType === "artist" 
+                  ? "bg-green-50 border-green-500" 
+                  : "bg-white border-neutral-200 hover:border-green-300"
+              }`}>
+                <RadioGroupItem value="artist" id="artist" />
+                <div className="flex items-center space-x-3 flex-1">
+                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                    <Music className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <Label htmlFor="artist" className="font-medium text-neutral-900 cursor-pointer">
+                      Artist Profile
+                    </Label>
+                    <p className="text-sm text-neutral-600">Showcase your music, connect with fans, and promote your performances</p>
+                  </div>
                 </div>
               </div>
-              <p className="text-xs text-blue-600 mt-2">Start with your audience profile. You can create artist and venue profiles later!</p>
-            </div>
+              
+              <div className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                profileType === "venue" 
+                  ? "bg-red-50 border-red-500" 
+                  : "bg-white border-neutral-200 hover:border-red-300"
+              }`}>
+                <RadioGroupItem value="venue" id="venue" />
+                <div className="flex items-center space-x-3 flex-1">
+                  <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                    <Building className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <Label htmlFor="venue" className="font-medium text-neutral-900 cursor-pointer">
+                      Venue Profile
+                    </Label>
+                    <p className="text-sm text-neutral-600">Promote your venue, list upcoming events, and connect with artists</p>
+                  </div>
+                </div>
+              </div>
+            </RadioGroup>
           </div>
 
           <div>
@@ -113,7 +140,7 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter profile name"
+              placeholder={profileType === "artist" ? "Enter artist name or band name" : "Enter venue name"}
               className="w-full"
               required
             />
@@ -127,7 +154,10 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
               id="bio"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell us about this profile..."
+              placeholder={profileType === "artist" 
+                ? "Tell us about your music, style, and what makes you unique..." 
+                : "Describe your venue, capacity, location, and what events you host..."
+              }
               rows={3}
               className="w-full resize-none"
             />
@@ -144,10 +174,17 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
+              className={`flex-1 text-white ${
+                profileType === "artist" 
+                  ? "bg-green-500 hover:bg-green-600" 
+                  : "bg-red-500 hover:bg-red-600"
+              }`}
               disabled={createProfileMutation.isPending}
             >
-              {createProfileMutation.isPending ? "Creating..." : "Create Profile"}
+              {createProfileMutation.isPending 
+                ? "Creating..." 
+                : `Create ${profileType === "artist" ? "Artist" : "Venue"} Profile`
+              }
             </Button>
           </div>
         </form>

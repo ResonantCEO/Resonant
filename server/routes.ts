@@ -107,7 +107,10 @@ export function registerRoutes(app: Express): Server {
       
       console.log("FIXED API - Final response being sent:", JSON.stringify(response, null, 2));
       console.log("FIXED API - Response theme field:", response.theme);
-      res.json(response);
+      
+      // Explicitly set content-type and send response
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200).send(JSON.stringify(response));
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

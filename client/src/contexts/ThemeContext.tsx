@@ -13,23 +13,24 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Initialize from localStorage first
+    const saved = localStorage.getItem('app-theme');
+    return saved as Theme || "light";
+  });
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    // Initialize theme from user data when user loads
-    console.log("ThemeContext - User data:", user);
-    console.log("ThemeContext - User theme:", user?.theme);
-    
+    // Initialize theme from user data or localStorage when user loads
     if (user?.theme) {
-      console.log("ThemeContext - Setting theme to:", user.theme);
       setTheme(user.theme as Theme);
+      localStorage.setItem('app-theme', user.theme);
     } else if (!user) {
-      // Reset to light theme when logged out
-      console.log("ThemeContext - No user, setting light theme");
-      setTheme("light");
-    } else {
-      console.log("ThemeContext - User exists but no theme field, keeping current theme");
+      // Keep current theme when logged out (don't reset)
+      const saved = localStorage.getItem('app-theme');
+      if (saved) {
+        setTheme(saved as Theme);
+      }
     }
   }, [user, user?.theme]);
 
@@ -58,9 +59,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [theme]);
 
+  const handleSetTheme = (newTheme: Theme) => {
+    setTheme(newTheme);
+    // Always save to localStorage for persistence
+    localStorage.setItem('app-theme', newTheme);
+  };
+
   const value = {
     theme,
-    setTheme,
+    setTheme: handleSetTheme,
     resolvedTheme,
   };
 

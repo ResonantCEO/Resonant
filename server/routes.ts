@@ -65,18 +65,7 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      // Direct query to ensure cover image is included
-      const [user] = await db
-        .select({
-          id: users.id,
-          email: users.email,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          profileImageUrl: users.profileImageUrl,
-          coverImageUrl: users.coverImageUrl
-        })
-        .from(users)
-        .where(eq(users.id, req.user.id));
+      const user = await storage.getUser(req.user.id);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });

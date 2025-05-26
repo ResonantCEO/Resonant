@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
@@ -65,14 +65,38 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      // Use storage method to get user data with all fields
-      const user = await storage.getUser(req.user.id);
+      // Direct query with explicit field selection
+      const [user] = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          coverImageUrl: users.coverImageUrl,
+          showOnlineStatus: users.showOnlineStatus,
+          allowFriendRequests: users.allowFriendRequests,
+          showActivityStatus: users.showActivityStatus,
+          emailNotifications: users.emailNotifications,
+          notifyFriendRequests: users.notifyFriendRequests,
+          notifyMessages: users.notifyMessages,
+          notifyPostLikes: users.notifyPostLikes,
+          notifyComments: users.notifyComments,
+          theme: users.theme,
+          language: users.language,
+          compactMode: users.compactMode,
+          autoplayVideos: users.autoplayVideos,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt
+        })
+        .from(users)
+        .where(eq(users.id, req.user.id));
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      console.log("User data from storage getUser:", JSON.stringify(user, null, 2));
+      console.log("Direct SQL user result:", JSON.stringify(user, null, 2));
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);

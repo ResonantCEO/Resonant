@@ -276,7 +276,8 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
         <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600">
-          {user?.coverImageUrl && (
+          {console.log("User data for cover photo:", user)}
+          {user?.coverImageUrl ? (
             <img 
               src={user.coverImageUrl} 
               alt="Cover photo" 
@@ -288,6 +289,8 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
                 e.currentTarget.style.display = 'none';
               }}
             />
+          ) : (
+            console.log("No cover image URL found in user data")
           )}
 
           {isOwn && (

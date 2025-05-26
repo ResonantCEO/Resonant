@@ -184,6 +184,54 @@ export function registerRoutes(app: Express): Server {
     });
   });
 
+  // Profile picture upload endpoint for specific profiles
+  app.post('/api/profiles/:profileId/profile-image', isAuthenticated, (req: any, res, next) => {
+    console.log("POST /api/profiles/:profileId/profile-image - Raw request received");
+    console.log("Content-Type:", req.headers['content-type']);
+    console.log("Profile ID:", req.params.profileId);
+    
+    upload.single('profileImage')(req, res, async (err) => {
+      try {
+        console.log("Multer callback executed");
+        console.log("Error:", err);
+        console.log("File:", req.file ? { 
+          filename: req.file.filename, 
+          size: req.file.size, 
+          mimetype: req.file.mimetype,
+          path: req.file.path 
+        } : null);
+
+        if (err) {
+          console.error("Multer error:", err);
+          return res.status(400).json({ message: err.message });
+        }
+
+        if (!req.file) {
+          console.log("No file received by multer");
+          return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const profileId = parseInt(req.params.profileId);
+        const profileImageUrl = `/uploads/${req.file.filename}`;
+
+        console.log("Updating profile image:", { profileId, profileImageUrl });
+
+        // Update profile's image URL in database
+        await storage.updateProfile(profileId, { profileImageUrl });
+
+        console.log("Profile image updated successfully");
+
+        res.json({ 
+          message: "Profile picture updated successfully",
+          profileImageUrl 
+        });
+      } catch (error) {
+        console.error("Error uploading profile picture:", error);
+        res.status(500).json({ message: "Failed to upload profile picture" });
+      }
+    });
+  });
+
   // Cover photo upload endpoint
   app.post('/api/user/cover-image', isAuthenticated, (req: any, res, next) => {
     console.log("POST /api/user/cover-image - Raw request received");

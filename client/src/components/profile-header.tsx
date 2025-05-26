@@ -126,10 +126,12 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('profileImage', file);
-      return await apiRequest("POST", "/api/user/profile-image", formData);
+      return await apiRequest("POST", `/api/profiles/${profile.id}/profile-image`, formData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
       toast({
         title: "Profile Picture Updated",
         description: "Your profile picture has been successfully updated.",
@@ -348,9 +350,9 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
                   className={`w-32 h-32 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
                   onClick={handleProfilePictureClick}
                 >
-                  <AvatarImage src={isOwn && user?.profileImageUrl ? user.profileImageUrl : profile.profileImageUrl || ""} />
+                  <AvatarImage src={profile.profileImageUrl || ""} />
                   <AvatarFallback className="text-2xl">
-                    {isOwn ? getUserInitials() : profile.name.slice(0, 2).toUpperCase()}
+                    {profile.name.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 {isOwn && (

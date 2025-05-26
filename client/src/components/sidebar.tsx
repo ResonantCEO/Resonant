@@ -117,8 +117,8 @@ export default function Sidebar() {
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-center space-x-3">
               <Avatar className="w-12 h-12 border-2 border-blue-500">
-                <AvatarImage src={user.profileImageUrl || ""} />
-                <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                <AvatarImage src={activeProfile.profileImageUrl || ""} />
+                <AvatarFallback>{activeProfile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
@@ -151,7 +151,7 @@ export default function Sidebar() {
             >
               <div className="flex items-center space-x-3">
                 <Avatar className="w-10 h-10">
-                  <AvatarImage src={user?.profileImageUrl || ""} />
+                  <AvatarImage src={profile.profileImageUrl || ""} />
                   <AvatarFallback>{profile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">

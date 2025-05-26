@@ -106,6 +106,15 @@ function ProfileNamesSection() {
     }
   };
 
+  const { user } = useAuth();
+
+  const getDisplayName = (profile: any) => {
+    if (profile.type === 'audience') {
+      return `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+    }
+    return profile.name;
+  };
+
   return (
     <div className="space-y-4">
       {profiles.map((profile: any) => (
@@ -114,7 +123,7 @@ function ProfileNamesSection() {
             <Avatar className="w-12 h-12">
               <AvatarImage src={profile.profileImageUrl || ""} />
               <AvatarFallback>
-                {profile.name?.charAt(0)?.toUpperCase()}
+                {getDisplayName(profile)?.charAt(0)?.toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
@@ -145,7 +154,7 @@ function ProfileNamesSection() {
                 </div>
               ) : (
                 <div>
-                  <p className="font-medium">{profile.name}</p>
+                  <p className="font-medium">{getDisplayName(profile)}</p>
                   <div className="flex items-center space-x-2 mt-1">
                     <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
                       {getProfileTypeName(profile.type)}
@@ -158,7 +167,7 @@ function ProfileNamesSection() {
               )}
             </div>
           </div>
-          {editingProfileId !== profile.id && (
+          {editingProfileId !== profile.id && profile.type !== 'audience' && (
             <Button 
               variant="outline" 
               size="sm"

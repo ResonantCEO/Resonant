@@ -63,25 +63,18 @@ export function registerRoutes(app: Express): Server {
   app.use('/uploads', express.static(uploadsDir));
 
   // Auth routes
+  // Get current user
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      // Direct database query to ensure we get all fields including cover image
-      const [user] = await db
-        .select({
-          id: users.id,
-          email: users.email,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          profileImageUrl: users.profileImageUrl,
-          coverImageUrl: users.coverImageUrl
-        })
-        .from(users)
-        .where(eq(users.id, req.user.id));
-      
+      const userId = req.user.id;
+      const user = await storage.getUserById(userId);
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
+      // Ensure coverImageUrl is included in the response
+      console.log("User data being returned:", user);
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -118,7 +111,7 @@ export function registerRoutes(app: Express): Server {
     console.log("POST /api/user/profile-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
     console.log("Body keys:", Object.keys(req.body || {}));
-    
+
     upload.single('profileImage')(req, res, async (err) => {
       try {
         console.log("Multer callback executed");
@@ -165,9 +158,9 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/user/cover-image', isAuthenticated, (req: any, res, next) => {
     console.log("POST /api/user/cover-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
-    
+
     const uploadSingle = upload.single('coverImage');
-    
+
     uploadSingle(req, res, async (err: any) => {
       try {
         console.log("Multer processed:", {
@@ -241,7 +234,7 @@ export function registerRoutes(app: Express): Server {
         ...req.body,
         userId,
       });
-      
+
       const profile = await storage.createProfile(profileData);
       res.json(profile);
     } catch (error) {
@@ -258,7 +251,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Verify ownership
       const existingProfile = await storage.getProfile(profileId);
       if (!existingProfile || existingProfile.userId !== userId) {
@@ -278,7 +271,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Verify ownership
       const profile = await storage.getProfile(profileId);
       if (!profile || profile.userId !== userId) {
@@ -299,7 +292,7 @@ export function registerRoutes(app: Express): Server {
       if (!query) {
         return res.json([]);
       }
-      
+
       const profiles = await storage.searchProfiles(query);
       res.json(profiles);
     } catch (error) {
@@ -312,7 +305,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const profile = await storage.getProfile(profileId);
-      
+
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -363,7 +356,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       const { addresseeId } = req.body;
-      
+
       // Check if friendship already exists
       const existingFriendship = await storage.getFriendshipStatus(activeProfile.id, addresseeId);
       if (existingFriendship) {
@@ -492,11 +485,11 @@ export function registerRoutes(app: Express): Server {
       // Direct database check for post ownership
       const result = await db.select().from(posts).where(eq(posts.id, postId));
       const post = result[0];
-      
+
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       if (post.profileId !== activeProfile.id) {
         return res.status(403).json({ message: "Unauthorized to delete this post" });
       }

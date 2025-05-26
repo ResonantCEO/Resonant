@@ -26,7 +26,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<InsertUser>): Promise<User>;
-  
+
   // Profile operations
   getProfile(id: number): Promise<Profile | undefined>;
   getProfilesByUserId(userId: number): Promise<Profile[]>;
@@ -35,7 +35,7 @@ export interface IStorage {
   updateProfile(id: number, updates: Partial<InsertProfile>): Promise<Profile>;
   setActiveProfile(userId: number, profileId: number): Promise<void>;
   searchProfiles(query: string, limit?: number): Promise<Profile[]>;
-  
+
   // Friendship operations
   getFriends(profileId: number): Promise<Profile[]>;
   getFriendRequests(profileId: number): Promise<{ profile: Profile; friendship: Friendship }[]>;
@@ -45,7 +45,7 @@ export interface IStorage {
   rejectFriendRequest(friendshipId: number): Promise<Friendship>;
   getFriendshipStatus(profileId1: number, profileId2: number): Promise<Friendship | undefined>;
   areFriends(profileId1: number, profileId2: number): Promise<boolean>;
-  
+
   // Post operations
   getPosts(profileId: number, viewerProfileId?: number): Promise<Post[]>;
   getFeedPosts(profileId: number, limit?: number): Promise<Post[]>;
@@ -55,7 +55,7 @@ export interface IStorage {
   likePost(postId: number, profileId: number): Promise<PostLike>;
   unlikePost(postId: number, profileId: number): Promise<void>;
   isPostLikedByProfile(postId: number, profileId: number): Promise<boolean>;
-  
+
   // Comment operations
   getComments(postId: number): Promise<{ comment: Comment; profile: Profile }[]>;
   createComment(comment: InsertComment): Promise<Comment>;
@@ -82,13 +82,35 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUser(id: number, updates: Partial<InsertUser>): Promise<User> {
-    const [user] = await db
+  async updateUser(id: number, data: Partial<typeof users.$inferInsert>) {
+    console.log("Updating user with data:", data);
+    const [updatedUser] = await db
       .update(users)
-      .set(updates)
+      .set(data)
       .where(eq(users.id, id))
-      .returning();
-    return user;
+      .returning({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        coverImageUrl: users.coverImageUrl,
+        showOnlineStatus: users.showOnlineStatus,
+        allowFriendRequests: users.allowFriendRequests,
+        showActivityStatus: users.showActivityStatus,
+        emailNotifications: users.emailNotifications,
+        notifyFriendRequests: users.notifyFriendRequests,
+        notifyMessages: users.notifyMessages,
+        notifyPostLikes: users.notifyPostLikes,
+        notifyComments: users.notifyComments,
+        theme: users.theme,
+        language: users.language,
+        compactMode: users.compactMode,
+        autoplayVideos: users.autoplayVideos,
+      });
+
+    console.log("Updated user result:", updatedUser);
+    return updatedUser;
   }
 
   // Profile operations
@@ -281,7 +303,7 @@ export class DatabaseStorage implements IStorage {
 
     // Filter based on visibility and friendship status
     const areFriends = await this.areFriends(profileId, viewerProfileId);
-    
+
     return allPosts.filter(post => {
       if (post.visibility === "public") return true;
       if (post.visibility === "friends" && areFriends) return true;
@@ -352,24 +374,24 @@ export class DatabaseStorage implements IStorage {
 
   async deletePost(id: number): Promise<void> {
     console.log(`Attempting to delete post with id: ${id}`);
-    
+
     try {
       // First delete any related post likes
       const likesResult = await db.delete(postLikes).where(eq(postLikes.postId, id));
       console.log(`Deleted ${likesResult.rowCount || 0} likes`);
-      
+
       // Then delete any comments
       const commentsResult = await db.delete(comments).where(eq(comments.postId, id));
       console.log(`Deleted ${commentsResult.rowCount || 0} comments`);
-      
+
       // Finally delete the post
       const postResult = await db.delete(posts).where(eq(posts.id, id));
       console.log(`Deleted ${postResult.rowCount || 0} posts`);
-      
+
       if (postResult.rowCount === 0) {
         throw new Error(`Post with id ${id} not found or already deleted`);
       }
-      
+
       console.log(`Successfully deleted post ${id}`);
     } catch (error) {
       console.error(`Error deleting post ${id}:`, error);

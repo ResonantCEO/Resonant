@@ -190,19 +190,15 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     },
     onSuccess: async (data) => {
       console.log("Cover photo upload response:", data);
-      // Invalidate and remove all user-related queries
-      queryClient.removeQueries({ queryKey: ["/api/user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      
-      // Force a complete refetch with a small delay to ensure backend consistency
-      setTimeout(async () => {
-        await queryClient.refetchQueries({ queryKey: ["/api/user"] });
-      }, 100);
-      
       toast({
         title: "Cover Photo Updated",
         description: "Your cover photo has been successfully updated.",
       });
+      
+      // Force a complete page reload to ensure the cover photo displays
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     },
     onError: (error: any) => {
       console.error("Cover photo upload error:", error);

@@ -525,6 +525,24 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Friendship status endpoint
+  app.get('/api/friendship-status/:profileId', isAuthenticated, async (req: any, res) => {
+    try {
+      const targetProfileId = parseInt(req.params.profileId);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const friendship = await storage.getFriendshipStatus(activeProfile.id, targetProfileId);
+      res.json(friendship || null);
+    } catch (error) {
+      console.error("Error fetching friendship status:", error);
+      res.status(500).json({ message: "Failed to fetch friendship status" });
+    }
+  });
+
   // Comment routes
   app.get('/api/posts/:id/comments', async (req, res) => {
     try {

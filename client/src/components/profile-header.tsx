@@ -188,15 +188,12 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       formData.append('coverImage', file);
       return await apiRequest("POST", "/api/user/cover-image", formData);
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log("Cover photo upload response:", data);
-      // Force refresh the user data to get updated cover photo
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      queryClient.refetchQueries({ queryKey: ["/api/user"] });
-      // Small delay to ensure backend has processed the update
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ["/api/user"] });
-      }, 500);
+      // Remove cached data immediately
+      queryClient.removeQueries({ queryKey: ["/api/user"] });
+      // Force fresh fetch of user data
+      await queryClient.refetchQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Cover Photo Updated",
         description: "Your cover photo has been successfully updated.",

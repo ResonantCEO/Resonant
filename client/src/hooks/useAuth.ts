@@ -13,11 +13,9 @@ export function useAuth() {
   const { data: user, isLoading } = useQuery<User>({
     queryKey: ["/api/user"],
     retry: false,
-    staleTime: 0, // Always fetch fresh data
-    gcTime: 0, // Don't cache the response
+    staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-
   });
 
   return {

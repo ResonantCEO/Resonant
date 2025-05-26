@@ -65,28 +65,31 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      // Use direct Drizzle query to ensure we get all fields
-      const [user] = await db.select().from(users).where(eq(users.id, req.user.id));
-      if (!user) {
+      // Get latest cover photo from database
+      const result = await db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        coverImageUrl: users.coverImageUrl
+      }).from(users).where(eq(users.id, req.user.id));
+      
+      if (!result[0]) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      console.log("===== DEBUG USER DATA =====");
-      console.log("Raw user data from DB:", JSON.stringify(user, null, 2));
-      console.log("Cover image specifically:", user.coverImageUrl);
-      console.log("Profile image specifically:", user.profileImageUrl);
+      const user = result[0];
+      console.log("FOUND USER WITH COVER:", user.coverImageUrl);
       
-      const response = {
+      res.json({
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
         coverImageUrl: user.coverImageUrl
-      };
-      console.log("Final API response:", JSON.stringify(response, null, 2));
-      console.log("===== END DEBUG =====");
-      res.json(response);
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

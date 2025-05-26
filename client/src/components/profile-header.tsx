@@ -287,17 +287,32 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
             }
             return null;
           })()}
+          
+          {/* Cover photo image - only show if coverImageUrl exists */}
           {user?.coverImageUrl && (
             <img 
               src={user.coverImageUrl} 
               alt="Cover photo" 
-              className="w-full h-full object-cover"
+              className="w-full h-48 object-cover absolute inset-0"
               onError={(e) => {
                 console.log("Cover image failed to load:", user.coverImageUrl);
                 // Hide the broken image and show gradient background
                 e.currentTarget.style.display = 'none';
               }}
+              onLoad={() => {
+                console.log("Cover image loaded successfully:", user.coverImageUrl);
+              }}
             />
+          )}
+          
+          {/* Cover photo placeholder text when no image is set */}
+          {!user?.coverImageUrl && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-white/70 text-center">
+                <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm font-medium">Add a cover photo</p>
+              </div>
+            </div>
           )}
 
           {isOwn && (

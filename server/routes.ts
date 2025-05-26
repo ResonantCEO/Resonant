@@ -76,14 +76,17 @@ export function registerRoutes(app: Express): Server {
       }
       
       const user = result.rows[0];
-      res.json({
+      console.log("Raw user data from DB:", user);
+      const response = {
         id: user.id,
         email: user.email,
         firstName: user.first_name,
         lastName: user.last_name,
         profileImageUrl: user.profile_image_url,
         coverImageUrl: user.cover_image_url
-      });
+      };
+      console.log("API response:", response);
+      res.json(response);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

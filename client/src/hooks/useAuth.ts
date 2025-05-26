@@ -17,6 +17,7 @@ export function useAuth() {
     gcTime: 0, // Don't cache the response
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    refetchInterval: 1000, // Force refresh every second for debugging
   });
 
   return {

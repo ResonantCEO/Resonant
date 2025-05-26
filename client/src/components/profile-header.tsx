@@ -58,7 +58,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     enabled: !isOwn,
   });
 
-  const { data: friends = [] } = useQuery({
+  const { data: friends = [] } = useQuery<any[]>({
     queryKey: [`/api/profiles/${profile.id}/friends`],
   });
 
@@ -179,32 +179,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     }
   };
 
-  const handleCoverPhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid File Type",
-          description: "Please select an image file.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File Too Large",
-          description: "Please select an image smaller than 5MB.",
-          variant: "destructive",
-        });
-        return;
-      }
 
-      // Cover photo functionality removed
-    }
-  };
 
   // Handle cover photo upload
   const uploadCoverPhotoMutation = useMutation({
@@ -214,7 +189,9 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       return await apiRequest("POST", "/api/user/cover-image", formData);
     },
     onSuccess: () => {
+      // Force refresh the user data to get updated cover photo
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.refetchQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Cover Photo Updated",
         description: "Your cover photo has been successfully updated.",
@@ -298,17 +275,19 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       {/* Profile Header */}
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
-        <div className="h-48 relative overflow-hidden">
-          {user?.coverImageUrl ? (
+        <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600">
+          {user?.coverImageUrl && (
             <img 
               src={user.coverImageUrl} 
               alt="Cover photo" 
               className="w-full h-full object-cover"
               onLoad={() => console.log("Cover image loaded:", user.coverImageUrl)}
-              onError={() => console.log("Cover image failed to load:", user.coverImageUrl)}
+              onError={(e) => {
+                console.log("Cover image failed to load:", user.coverImageUrl);
+                // Hide the broken image and show gradient background
+                e.currentTarget.style.display = 'none';
+              }}
             />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-r from-blue-500 to-blue-600" />
           )}
 
           {isOwn && (

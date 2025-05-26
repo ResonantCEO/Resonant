@@ -49,6 +49,14 @@ export default function PostFeed({ profileId }: PostFeedProps) {
   const { user } = useAuth();
   const [newPost, setNewPost] = useState("");
 
+  // Helper function to get display name for profile
+  const getDisplayName = (profile: any) => {
+    if (profile?.type === 'audience' && user) {
+      return `${user.firstName || ''} ${user.lastName || ''}`.trim() || profile.name;
+    }
+    return profile?.name || 'Unknown User';
+  };
+
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
   });
@@ -178,13 +186,13 @@ export default function PostFeed({ profileId }: PostFeedProps) {
               <div className="flex items-start space-x-4">
                 <Avatar>
                   <AvatarImage src={user?.profileImageUrl || ""} />
-                  <AvatarFallback>{activeProfile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>{getDisplayName(activeProfile).slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <Textarea
                     value={newPost}
                     onChange={(e) => setNewPost(e.target.value)}
-                    placeholder={`What's on your mind, ${activeProfile.name}?`}
+                    placeholder={`What's on your mind, ${getDisplayName(activeProfile)}?`}
                     className="w-full border border-neutral-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     rows={3}
                   />
@@ -245,7 +253,7 @@ export default function PostFeed({ profileId }: PostFeedProps) {
                   </Avatar>
                   <div>
                     <h4 className="font-semibold text-neutral-900">
-                      {post.profile?.name || post.profileName || "Unknown User"}
+                      {getDisplayName(post.profile) || post.profileName || "Unknown User"}
                     </h4>
                     <div className="flex items-center space-x-2 text-sm text-neutral-600">
                       <span>

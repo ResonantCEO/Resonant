@@ -13,15 +13,18 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [theme, setTheme] = useState<Theme>(user?.theme || "light");
+  const [theme, setTheme] = useState<Theme>("light");
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    // Update theme when user data changes
+    // Initialize theme from user data when user loads
     if (user?.theme) {
       setTheme(user.theme as Theme);
+    } else if (!user) {
+      // Reset to light theme when logged out
+      setTheme("light");
     }
-  }, [user?.theme]);
+  }, [user, user?.theme]);
 
   useEffect(() => {
     const root = window.document.documentElement;

@@ -13,9 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Music, Building, Users, MapPin, Eye, EyeOff, Globe, X, CheckCircle } from "lucide-react";
+import { Music, Building, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface CreateProfileModalProps {
@@ -28,68 +26,24 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
   const [profileType, setProfileType] = useState<string>("audience");
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
-  const [location, setLocation] = useState("");
-  const [visibility, setVisibility] = useState<string>("public");
-
-  const profileTypes = [
-    {
-      value: "audience",
-      label: "Audience Member",
-      icon: Users,
-      description: "Discover music, connect with friends, and engage with the community",
-      color: "bg-blue-500",
-      borderColor: "border-blue-200",
-      bgColor: "bg-blue-50"
-    },
-    {
-      value: "artist",
-      label: "Artist",
-      icon: Music,
-      description: "Share your music, build your fanbase, and connect with other artists",
-      color: "bg-purple-500",
-      borderColor: "border-purple-200",
-      bgColor: "bg-purple-50"
-    },
-    {
-      value: "venue",
-      label: "Venue",
-      icon: Building,
-      description: "Promote events, connect with artists, and build your venue community",
-      color: "bg-green-500",
-      borderColor: "border-green-200",
-      bgColor: "bg-green-50"
-    }
-  ];
-
-  const visibilityOptions = [
-    { value: "public", label: "Public", icon: Globe, description: "Anyone can see this profile" },
-    { value: "friends", label: "Friends Only", icon: Users, description: "Only friends can see this profile" },
-    { value: "private", label: "Private", icon: EyeOff, description: "Only you can see this profile" }
-  ];
 
   const createProfileMutation = useMutation({
-    mutationFn: async (data: { 
-      type: string; 
-      name: string; 
-      bio: string; 
-      location: string; 
-      visibility: string; 
-    }) => {
+    mutationFn: async (data: { type: string; name: string; bio: string }) => {
       return await apiRequest("POST", "/api/profiles", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
       toast({
-        title: "Profile Created Successfully!",
-        description: `Your ${profileTypes.find(t => t.value === profileType)?.label} profile has been created.`,
+        title: "Profile Created",
+        description: "Your new profile has been created successfully.",
       });
       handleClose();
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to Create Profile",
-        description: error.message || "Please try again or contact support if the issue persists.",
+        title: "Error",
+        description: error.message || "Failed to create profile",
         variant: "destructive",
       });
     },
@@ -99,27 +53,15 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
     setProfileType("audience");
     setName("");
     setBio("");
-    setLocation("");
-    setVisibility("public");
     onOpenChange(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!profileType || !name.trim()) {
       toast({
-        title: "Missing Required Information",
-        description: "Please enter a profile name and select a profile type.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (name.trim().length < 2) {
-      toast({
-        title: "Name Too Short",
-        description: "Profile name must be at least 2 characters long.",
+        title: "Error",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
@@ -129,8 +71,6 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
       type: profileType,
       name: name.trim(),
       bio: bio.trim(),
-      location: location.trim(),
-      visibility: visibility,
     });
   };
 

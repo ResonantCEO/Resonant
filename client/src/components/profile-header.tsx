@@ -218,7 +218,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
 
   const handleCoverPhotoClick = () => {
     if (isOwn) {
-      coverPhotoInputRef.current?.click();
+      coverFileInputRef.current?.click();
     }
   };
 
@@ -398,8 +398,8 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
           />
           <input
             type="file"
-            ref={coverPhotoInputRef}
-            onChange={handleCoverPhotoChange}
+            ref={coverFileInputRef}
+            onChange={handleCoverUpload}
             accept="image/*"
             className="hidden"
           />

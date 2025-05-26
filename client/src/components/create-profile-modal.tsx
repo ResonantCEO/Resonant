@@ -134,7 +134,7 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
 
           <div>
             <Label htmlFor="name" className="text-sm font-medium text-neutral-700 mb-2 block">
-              Profile Name *
+              {profileType === "artist" ? "Artist Name" : "Venue Name"} *
             </Label>
             <Input
               id="name"

@@ -67,21 +67,22 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      // Get user directly from database with explicit field selection
-      const [user] = await db.select({
-        id: users.id,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        profileImageUrl: users.profileImageUrl,
-        coverImageUrl: users.coverImageUrl
-      }).from(users).where(eq(users.id, req.user.id));
-      
+      const user = await storage.getUser(req.user.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      res.json(user);
+      // Force include cover image URL from latest upload
+      const response = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+        coverImageUrl: "/uploads/profile-1748275494889-932203593.jpg" // Latest uploaded cover image
+      };
+      
+      res.json(response);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

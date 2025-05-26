@@ -141,9 +141,9 @@ export default function Sidebar() {
                     <div className="flex items-center space-x-2 mb-1">
                       <span className="font-semibold text-neutral-900">{getDisplayName(activeProfile)}</span>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 whitespace-nowrap">
                       <p className="text-sm text-neutral-600">Active Profile</p>
-                      <Badge className={`${getProfileTypeColor(activeProfile.type)} text-white text-xs`}>
+                      <Badge className={`${getProfileTypeColor(activeProfile.type)} text-white text-xs flex-shrink-0`}>
                         {getProfileTypeName(activeProfile.type)}
                       </Badge>
                     </div>

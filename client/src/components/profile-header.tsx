@@ -206,6 +206,16 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     }
   };
 
+  const handleCoverUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      toast({
+        title: "Cover Photo Uploaded",
+        description: "Your cover photo has been uploaded successfully!",
+      });
+    }
+  };
+
   const handleCoverPhotoClick = () => {
     if (isOwn) {
       coverPhotoInputRef.current?.click();

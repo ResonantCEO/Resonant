@@ -69,6 +69,7 @@ export function registerRoutes(app: Express): Server {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
+      console.log("User from DB:", user);
       res.json({ 
         id: user.id, 
         email: user.email, 

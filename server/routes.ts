@@ -67,26 +67,7 @@ export function registerRoutes(app: Express): Server {
     try {
       // Direct database query to ensure we get all fields including cover image
       const [user] = await db
-        .select({
-          id: users.id,
-          email: users.email,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          profileImageUrl: users.profileImageUrl,
-          coverImageUrl: users.coverImageUrl,
-          showOnlineStatus: users.showOnlineStatus,
-          allowFriendRequests: users.allowFriendRequests,
-          showActivityStatus: users.showActivityStatus,
-          emailNotifications: users.emailNotifications,
-          notifyFriendRequests: users.notifyFriendRequests,
-          notifyMessages: users.notifyMessages,
-          notifyPostLikes: users.notifyPostLikes,
-          notifyComments: users.notifyComments,
-          theme: users.theme,
-          language: users.language,
-          compactMode: users.compactMode,
-          autoplayVideos: users.autoplayVideos
-        })
+        .select()
         .from(users)
         .where(eq(users.id, req.user.id));
       

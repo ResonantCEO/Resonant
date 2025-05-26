@@ -65,12 +65,12 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      // Use direct Drizzle query to ensure we get all fields
+      const [user] = await db.select().from(users).where(eq(users.id, req.user.id));
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Force debug output
       console.log("===== DEBUG USER DATA =====");
       console.log("Raw user data from DB:", JSON.stringify(user, null, 2));
       console.log("Cover image specifically:", user.coverImageUrl);

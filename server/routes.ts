@@ -82,14 +82,18 @@ export function registerRoutes(app: Express): Server {
       const user = result[0];
       console.log("FOUND USER WITH COVER:", user.coverImageUrl);
       
-      res.json({
+      // Force the cover image URL to be included
+      const response = {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
-        coverImageUrl: user.coverImageUrl
-      });
+        coverImageUrl: user.coverImageUrl || null
+      };
+      
+      console.log("SENDING RESPONSE:", JSON.stringify(response));
+      res.json(response);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

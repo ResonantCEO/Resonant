@@ -65,35 +65,31 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      // Get latest cover photo from database
-      const result = await db.select({
-        id: users.id,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        profileImageUrl: users.profileImageUrl,
-        coverImageUrl: users.coverImageUrl
-      }).from(users).where(eq(users.id, req.user.id));
+      // Direct query to ensure cover image is included
+      const [user] = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          coverImageUrl: users.coverImageUrl
+        })
+        .from(users)
+        .where(eq(users.id, req.user.id));
       
-      if (!result[0]) {
+      if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      const user = result[0];
-      console.log("FOUND USER WITH COVER:", user.coverImageUrl);
-      
-      // Force the cover image URL to be included
-      const response = {
+      res.json({
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
-        coverImageUrl: user.coverImageUrl || null
-      };
-      
-      console.log("SENDING RESPONSE:", JSON.stringify(response));
-      res.json(response);
+        coverImageUrl: user.coverImageUrl
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

@@ -310,9 +310,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
           ) : (
             <div className="w-full h-full bg-gradient-to-r from-blue-500 to-blue-600" />
           )}
-          {/* Debug info */}
-          {console.log("User data:", user)}
-          {console.log("Cover image URL:", user?.coverImageUrl)}
+
           {isOwn && (
             <>
               <Button

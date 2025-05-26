@@ -206,13 +206,53 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     }
   };
 
+  // Handle cover photo upload
+  const uploadCoverPhotoMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('coverImage', file);
+      return await apiRequest("POST", "/api/user/cover-image", formData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({
+        title: "Cover Photo Updated",
+        description: "Your cover photo has been successfully updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload cover photo",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCoverUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      toast({
-        title: "Cover Photo Uploaded",
-        description: "Your cover photo has been uploaded successfully!",
-      });
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      uploadCoverPhotoMutation.mutate(file);
     }
   };
 
@@ -258,7 +298,16 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       {/* Profile Header */}
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
-        <div className="h-48 bg-gradient-to-r from-blue-500 to-blue-600 relative">
+        <div className="h-48 relative overflow-hidden">
+          {user?.coverImageUrl ? (
+            <img 
+              src={user.coverImageUrl} 
+              alt="Cover photo" 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-r from-blue-500 to-blue-600" />
+          )}
           {isOwn && (
             <>
               <Button
@@ -266,9 +315,10 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
                 size="sm"
                 className="absolute bottom-4 right-4 bg-white/90 hover:bg-white"
                 onClick={() => coverFileInputRef.current?.click()}
+                disabled={uploadCoverPhotoMutation.isPending}
               >
                 <Camera className="w-4 h-4 mr-2" />
-                Edit Cover
+                {uploadCoverPhotoMutation.isPending ? "Uploading..." : "Edit Cover"}
               </Button>
               <input
                 type="file"

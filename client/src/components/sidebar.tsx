@@ -3,9 +3,17 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import CreateProfileModal from "./create-profile-modal";
 import { useState } from "react";
-import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock } from "lucide-react";
+import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -112,77 +120,78 @@ export default function Sidebar() {
           <h1 className="text-xl font-bold text-neutral-900">SocialConnect</h1>
         </div>
 
-        {/* Active Profile Display */}
+        {/* Active Profile Display with Dropdown */}
         {activeProfile && user && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <div className="flex items-center space-x-3">
-              <Avatar className="w-12 h-12 border-2 border-blue-500">
-                <AvatarImage src={activeProfile.profileImageUrl || ""} />
-                <AvatarFallback>{activeProfile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-neutral-900">{activeProfile.name}</span>
-                  <Badge className={`${getProfileTypeColor(activeProfile.type)} text-white text-xs`}>
-                    {getProfileTypeName(activeProfile.type)}
-                  </Badge>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 cursor-pointer hover:bg-blue-100 transition-colors">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="w-12 h-12 border-2 border-blue-500">
+                    <AvatarImage src={activeProfile.profileImageUrl || ""} />
+                    <AvatarFallback>{activeProfile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-semibold text-neutral-900">{activeProfile.name}</span>
+                      <Badge className={`${getProfileTypeColor(activeProfile.type)} text-white text-xs`}>
+                        {getProfileTypeName(activeProfile.type)}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-neutral-600">Active Profile</p>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-neutral-500" />
                 </div>
-                <p className="text-sm text-neutral-600">Active Profile</p>
               </div>
-            </div>
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-80">
+              <DropdownMenuLabel>Switch Profile</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              
+              {Array.isArray(profiles) && profiles.map((profile: any) => (
+                <DropdownMenuItem
+                  key={profile.id}
+                  className={`p-3 ${profile.id === activeProfile?.id ? "bg-blue-50" : ""}`}
+                  onClick={() => handleProfileSwitch(profile.id)}
+                >
+                  <div className="flex items-center space-x-3 w-full">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={profile.profileImageUrl || ""} />
+                      <AvatarFallback>{profile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-neutral-900">{profile.name}</span>
+                        <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
+                          {getProfileTypeName(profile.type)}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {getVisibilityIcon(profile.visibility)}
+                        <span className="text-xs text-neutral-600 capitalize">{profile.visibility}</span>
+                      </div>
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="p-3"
+                onClick={() => setShowCreateModal(true)}
+              >
+                <div className="flex items-center space-x-3 w-full">
+                  <div className="w-8 h-8 border-2 border-dashed border-neutral-300 rounded-full flex items-center justify-center">
+                    <UserPlus className="w-4 h-4 text-neutral-500" />
+                  </div>
+                  <span className="text-neutral-600">Create New Profile</span>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 
-      {/* Profile Switcher */}
-      <div className="p-6 border-b border-neutral-200">
-        <h3 className="font-semibold text-neutral-900 mb-3">Your Profiles</h3>
 
-        <div className="space-y-3">
-          {profiles.map((profile: any) => (
-            <div
-              key={profile.id}
-              className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                profile.id === activeProfile?.id
-                  ? "bg-blue-50 border border-blue-200"
-                  : "border border-neutral-200 hover:bg-neutral-50"
-              }`}
-              onClick={() => handleProfileSwitch(profile.id)}
-            >
-              <div className="flex items-center space-x-3">
-                <Avatar className="w-10 h-10">
-                  <AvatarImage src={profile.profileImageUrl || ""} />
-                  <AvatarFallback>{profile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-neutral-900">{profile.name}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      {getVisibilityIcon(profile.visibility)}
-                      <span className="text-xs text-neutral-600 capitalize">{profile.visibility}</span>
-                    </div>
-                    <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
-                      {getProfileTypeName(profile.type)}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {/* Create New Profile Button */}
-          <Button
-            variant="outline"
-            className="w-full py-3 border-2 border-dashed border-neutral-300 text-neutral-600 hover:border-blue-500 hover:text-blue-500 transition-colors"
-            onClick={() => setShowCreateModal(true)}
-          >
-            <UserPlus className="w-4 h-4 mr-2" />
-            Create New Profile
-          </Button>
-        </div>
-      </div>
 
       {/* Navigation Menu */}
       <nav className="p-6">

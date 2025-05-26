@@ -18,11 +18,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Initialize theme from user data when user loads
+    console.log("ThemeContext - User data:", user);
+    console.log("ThemeContext - User theme:", user?.theme);
+    
     if (user?.theme) {
+      console.log("ThemeContext - Setting theme to:", user.theme);
       setTheme(user.theme as Theme);
     } else if (!user) {
       // Reset to light theme when logged out
+      console.log("ThemeContext - No user, setting light theme");
       setTheme("light");
+    } else {
+      console.log("ThemeContext - User exists but no theme field, keeping current theme");
     }
   }, [user, user?.theme]);
 

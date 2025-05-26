@@ -73,7 +73,19 @@ export function registerRoutes(app: Express): Server {
           firstName: users.firstName,
           lastName: users.lastName,
           profileImageUrl: users.profileImageUrl,
-          coverImageUrl: users.coverImageUrl
+          coverImageUrl: users.coverImageUrl,
+          showOnlineStatus: users.showOnlineStatus,
+          allowFriendRequests: users.allowFriendRequests,
+          showActivityStatus: users.showActivityStatus,
+          emailNotifications: users.emailNotifications,
+          notifyFriendRequests: users.notifyFriendRequests,
+          notifyMessages: users.notifyMessages,
+          notifyPostLikes: users.notifyPostLikes,
+          notifyComments: users.notifyComments,
+          theme: users.theme,
+          language: users.language,
+          compactMode: users.compactMode,
+          autoplayVideos: users.autoplayVideos
         })
         .from(users)
         .where(eq(users.id, req.user.id));
@@ -82,7 +94,7 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "User not found" });
       }
       
-      console.log("User data returned:", user); // Debug log
+      console.log("User data returned from /api/user:", user); // Debug log
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -197,13 +209,14 @@ export function registerRoutes(app: Express): Server {
         console.log("Updating user cover image:", { userId, coverImageUrl });
 
         // Update user's cover image URL in database
-        await storage.updateUser(userId, { coverImageUrl });
+        const updatedUser = await storage.updateUser(userId, { coverImageUrl });
 
         console.log("Cover image updated successfully");
 
         res.json({ 
           message: "Cover photo updated successfully",
-          coverImageUrl 
+          coverImageUrl,
+          user: updatedUser
         });
       } catch (error) {
         console.error("Error uploading cover photo:", error);

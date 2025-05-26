@@ -271,11 +271,13 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
         <div className="h-48 bg-gradient-to-r from-blue-500 to-blue-600 relative">
-          <img 
-            src="/uploads/profile-1748275494889-932203593.jpg" 
-            alt="Cover photo" 
-            className="w-full h-full object-cover"
-          />
+          {user?.coverImageUrl ? (
+            <img 
+              src={user.coverImageUrl} 
+              alt="Cover photo" 
+              className="w-full h-full object-cover"
+            />
+          ) : null}
           {isOwn && (
             <Button
               variant="secondary"

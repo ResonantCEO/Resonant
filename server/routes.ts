@@ -72,14 +72,13 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Force include cover image URL from latest upload
       const response = {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
-        coverImageUrl: "/uploads/profile-1748275494889-932203593.jpg" // Latest uploaded cover image
+        coverImageUrl: user.coverImageUrl
       };
       
       res.json(response);

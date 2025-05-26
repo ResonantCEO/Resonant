@@ -1,6 +1,24 @@
 # SocialConnect Changelog
 
-## Version 2.1 - Cover Photo System & Profile Enhancements (Latest)
+## Version 2.2 - Cover Photo Display Fix (Latest)
+
+### Critical Fixes
+
+#### 🔧 Cover Photo Display Resolution
+- **API Response Fix**: Resolved cover photo URL not being returned in user data
+- **Database Query Fix**: Implemented direct database query to ensure cover image field inclusion
+- **Cache Invalidation**: Enhanced cache refresh mechanism for immediate cover photo updates
+- **Field Mapping**: Fixed database field mapping inconsistencies between schema and API
+- **Display Logic**: Improved cover photo display with proper fallback to gradient background
+
+#### 🚀 Performance Improvements
+- **Direct Queries**: Optimized database queries for faster cover photo retrieval
+- **Reduced API Calls**: Streamlined cover photo upload and display process
+- **Error Handling**: Enhanced error handling for missing or corrupted cover images
+
+---
+
+## Version 2.1 - Cover Photo System & Profile Enhancements
 
 ### Major Features Added
 

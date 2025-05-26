@@ -188,16 +188,22 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       formData.append('coverImage', file);
       return await apiRequest("POST", "/api/user/cover-image", formData);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Cover photo upload response:", data);
       // Force refresh the user data to get updated cover photo
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       queryClient.refetchQueries({ queryKey: ["/api/user"] });
+      // Small delay to ensure backend has processed the update
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/user"] });
+      }, 500);
       toast({
         title: "Cover Photo Updated",
         description: "Your cover photo has been successfully updated.",
       });
     },
     onError: (error: any) => {
+      console.error("Cover photo upload error:", error);
       toast({
         title: "Upload Failed",
         description: error.message || "Failed to upload cover photo",
@@ -276,12 +282,21 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
         <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600">
+          {(() => {
+            console.log("User data for cover photo:", user);
+            console.log("Cover image URL:", user?.coverImageUrl);
+            if (!user?.coverImageUrl) {
+              console.log("No cover image URL found in user data");
+            }
+            return null;
+          })()}
           {user?.coverImageUrl && (
             <img 
               src={user.coverImageUrl} 
               alt="Cover photo" 
               className="w-full h-full object-cover"
               onError={(e) => {
+                console.log("Cover image failed to load:", user.coverImageUrl);
                 // Hide the broken image and show gradient background
                 e.currentTarget.style.display = 'none';
               }}

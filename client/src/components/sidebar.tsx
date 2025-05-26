@@ -104,6 +104,13 @@ export default function Sidebar() {
     }
   };
 
+  const getDisplayName = (profile: any) => {
+    if (profile.type === 'audience' && user) {
+      return `${user.firstName || ''} ${user.lastName || ''}`.trim() || profile.name;
+    }
+    return profile.name;
+  };
+
   const handleProfileSwitch = (profileId: number) => {
     if (profileId !== activeProfile?.id) {
       activateProfileMutation.mutate(profileId);
@@ -128,11 +135,11 @@ export default function Sidebar() {
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-12 h-12 border-2 border-blue-500">
                     <AvatarImage src={activeProfile.profileImageUrl || ""} />
-                    <AvatarFallback>{activeProfile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{getDisplayName(activeProfile).slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-semibold text-neutral-900">{activeProfile.name}</span>
+                      <span className="font-semibold text-neutral-900">{getDisplayName(activeProfile)}</span>
                       <Badge className={`${getProfileTypeColor(activeProfile.type)} text-white text-xs`}>
                         {getProfileTypeName(activeProfile.type)}
                       </Badge>
@@ -156,11 +163,11 @@ export default function Sidebar() {
                   <div className="flex items-center space-x-3 w-full">
                     <Avatar className="w-8 h-8">
                       <AvatarImage src={profile.profileImageUrl || ""} />
-                      <AvatarFallback>{profile.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>{getDisplayName(profile).slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-neutral-900">{profile.name}</span>
+                        <span className="font-medium text-neutral-900">{getDisplayName(profile)}</span>
                         <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
                           {getProfileTypeName(profile.type)}
                         </Badge>

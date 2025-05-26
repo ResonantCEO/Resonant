@@ -71,14 +71,20 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "User not found" });
       }
       
-      res.json({
+      console.log("User data from storage:", JSON.stringify(user, null, 2));
+      
+      const response = {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
         coverImageUrl: user.coverImageUrl
-      });
+      };
+      
+      console.log("API response:", JSON.stringify(response, null, 2));
+      
+      res.json(response);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

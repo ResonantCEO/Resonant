@@ -31,7 +31,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const coverPhotoInputRef = useRef<HTMLInputElement>(null);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
 
   // Helper function to format user's display name
   const getUserDisplayName = () => {
@@ -144,29 +144,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
     },
   });
 
-  // Handle cover photo upload
-  const uploadCoverPhotoMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('coverImage', file);
-      return await apiRequest("POST", "/api/user/cover-image", formData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
-      toast({
-        title: "Cover Photo Updated",
-        description: "Your cover photo has been successfully updated.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload cover photo",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   const handleProfilePictureClick = () => {
     if (isOwn) {
@@ -224,7 +202,7 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
         return;
       }
 
-      uploadCoverPhotoMutation.mutate(file);
+      // Cover photo functionality removed
     }
   };
 
@@ -271,24 +249,25 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
         <div className="h-48 bg-gradient-to-r from-blue-500 to-blue-600 relative">
-          {user?.coverImageUrl ? (
-            <img 
-              src={user.coverImageUrl} 
-              alt="Cover photo" 
-              className="w-full h-full object-cover"
-            />
-          ) : null}
           {isOwn && (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="absolute bottom-4 right-4 bg-white/90 hover:bg-white"
-              onClick={handleCoverPhotoClick}
-              disabled={uploadCoverPhotoMutation.isPending}
-            >
-              <Camera className="w-4 h-4 mr-2" />
-              {uploadCoverPhotoMutation.isPending ? "Uploading..." : "Edit Cover"}
-            </Button>
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="absolute bottom-4 right-4 bg-white/90 hover:bg-white"
+                onClick={() => coverFileInputRef.current?.click()}
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                Edit Cover
+              </Button>
+              <input
+                type="file"
+                ref={coverFileInputRef}
+                onChange={handleCoverUpload}
+                accept="image/*"
+                className="hidden"
+              />
+            </>
           )}
         </div>
 

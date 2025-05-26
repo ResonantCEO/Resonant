@@ -96,8 +96,16 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "User not found" });
       }
       
-      console.log("Direct SQL user result:", JSON.stringify(user, null, 2));
-      res.json(user);
+      console.log("FIXED API - User result:", JSON.stringify(user, null, 2));
+      
+      // Manually ensure coverImageUrl is included
+      const response = {
+        ...user,
+        coverImageUrl: user.coverImageUrl || null
+      };
+      
+      console.log("FIXED API - Final response:", JSON.stringify(response, null, 2));
+      res.json(response);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

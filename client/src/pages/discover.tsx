@@ -300,8 +300,8 @@ export default function Discover() {
                       </div>
 
                       {/* Action Button */}
-                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-medium shadow-lg">
-                        View Profile
+                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold shadow-lg border-0">
+                        <span className="drop-shadow-sm">View Profile</span>
                       </Button>
                     </div>
                   </CardContent>
@@ -439,12 +439,12 @@ export default function Discover() {
 
                       {/* Action Buttons */}
                       <div className="flex gap-3">
-                        <Button variant="outline" size="sm" className="flex-1 font-medium">
+                        <Button variant="outline" size="sm" className="flex-1 font-bold text-neutral-800 border-2 border-neutral-300 hover:bg-neutral-100">
                           View Profile
                         </Button>
-                        <Button size="sm" className="flex-1 font-medium">
+                        <Button size="sm" className="flex-1 font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
                           <Plus className="h-4 w-4 mr-2" />
-                          Add to Event
+                          <span className="drop-shadow-sm">Add to Event</span>
                         </Button>
                       </div>
                     </div>

@@ -1,6 +1,33 @@
 # Resonant Changelog
 
-## Version 2.5 - Platform Stability & User Experience Enhancement (Latest)
+## Version 2.6 - Automatic Audience Profile Management (Latest)
+
+### User Experience Enhancement
+
+#### 🎯 Smart Profile Management
+- **Default Audience Profile**: Automatically sets audience member profile as default on login and app access
+- **Seamless Profile Switching**: Users always return to audience profile when accessing the application
+- **Enhanced User Flow**: Eliminates manual profile switching for primary use case
+- **Intelligent Profile Detection**: System automatically identifies and activates audience profiles
+- **Improved User Experience**: Streamlined workflow for audience members accessing the platform
+
+#### 🔧 Backend Profile System
+- **Auto-Activation Endpoint**: New API endpoint for automatic audience profile activation
+- **Profile Type Detection**: Smart detection of audience profiles in user's profile collection
+- **Database Profile Management**: Efficient profile switching with proper state management
+- **Session Integration**: Profile activation integrated with user authentication flow
+- **Error Handling**: Robust fallback handling for edge cases in profile switching
+
+#### 🎨 Frontend Integration
+- **Automatic Profile Loading**: Client-side logic ensures audience profile is always active
+- **Real-time Profile Switching**: Instant profile activation without page refresh
+- **User Name Integration**: Improved profile naming using actual user first and last names
+- **Cache Management**: Proper query invalidation for immediate UI updates
+- **Loading State Management**: Smooth transitions during profile activation
+
+---
+
+## Version 2.5 - Platform Stability & User Experience Enhancement
 
 ### Production Readiness Verification
 

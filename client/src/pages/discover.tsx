@@ -187,15 +187,49 @@ export default function Discover() {
             <h2 className="text-xl font-semibold text-neutral-900 mb-4">Featured This Week</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {filteredData.slice(0, 3).map((item) => (
-                <Card key={item.id} className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <span className="text-2xl">{getTypeIcon(item.type)}</span>
-                      <Badge variant="secondary" className="text-xs">Featured</Badge>
+                <Card key={item.id} className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-white/80 flex items-center justify-center text-2xl shadow-sm">
+                          {getTypeIcon(item.type)}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-neutral-900 text-lg">{item.name}</h3>
+                          <p className="text-sm text-neutral-600">{item.location}</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="text-xs font-medium">Featured</Badge>
                     </div>
-                    <h3 className="font-semibold text-neutral-900 mb-1">{item.name}</h3>
-                    <p className="text-sm text-neutral-600 mb-2">{item.location}</p>
-                    <div className="flex gap-2 mb-3">
+                    
+                    {/* Additional Info */}
+                    <div className="mb-4 space-y-2">
+                      {item.rating && (
+                        <div className="flex items-center gap-2">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm font-medium">{item.rating}</span>
+                          <span className="text-xs text-neutral-500">rating</span>
+                        </div>
+                      )}
+                      {item.capacity && (
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-neutral-400" />
+                          <span className="text-sm font-medium">{item.capacity}</span>
+                          <span className="text-xs text-neutral-500">capacity</span>
+                        </div>
+                      )}
+                      {item.availability && (
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${
+                            item.availability === 'available' ? 'bg-green-500' : 
+                            item.availability === 'limited' ? 'bg-yellow-500' : 'bg-red-500'
+                          }`} />
+                          <span className="text-sm font-medium capitalize">{item.availability}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-1 mb-4">
                       {item.tags?.slice(0, 2).map((tag, index) => (
                         <Badge key={index} variant="outline" className="text-xs">{tag}</Badge>
                       ))}
@@ -236,100 +270,111 @@ export default function Discover() {
                   onMouseLeave={() => setHoveredItem(null)}
                 >
                   <CardContent className="p-0">
-                    {/* Image/Header */}
-                    <div className="h-48 bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-t-lg relative overflow-hidden">
+                    {/* Enhanced Header */}
+                    <div className="h-56 bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-4xl opacity-60">{getTypeIcon(item.type)}</span>
+                        <div className="w-20 h-20 rounded-2xl bg-white shadow-lg flex items-center justify-center text-4xl">
+                          {getTypeIcon(item.type)}
+                        </div>
                       </div>
                       
                       {/* Quick Actions - appear on hover */}
                       {hoveredItem === item.id && (
-                        <div className="absolute top-3 right-3 flex gap-2">
-                          <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+                        <div className="absolute top-4 right-4 flex gap-2">
+                          <Button size="sm" variant="secondary" className="h-9 w-9 p-0 shadow-lg">
                             <Bookmark className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+                          <Button size="sm" variant="secondary" className="h-9 w-9 p-0 shadow-lg">
                             <MessageSquare className="h-4 w-4" />
                           </Button>
                         </div>
                       )}
 
                       {/* Type Badge */}
-                      <div className="absolute top-3 left-3">
-                        <Badge variant="secondary" className="capitalize">
+                      <div className="absolute top-4 left-4">
+                        <Badge variant="secondary" className="capitalize font-medium px-3 py-1">
                           {item.type}
                         </Badge>
                       </div>
 
                       {/* Availability Badge */}
                       {item.availability && (
-                        <div className="absolute bottom-3 left-3">
-                          <Badge className={getAvailabilityColor(item.availability)}>
+                        <div className="absolute bottom-4 left-4">
+                          <Badge className={`${getAvailabilityColor(item.availability)} font-medium px-3 py-1`}>
                             {item.availability}
                           </Badge>
                         </div>
                       )}
+
+                      {/* Rating Badge */}
+                      {item.rating && (
+                        <div className="absolute bottom-4 right-4">
+                          <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1 shadow-lg">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="text-sm font-semibold text-neutral-700">{item.rating}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Content */}
-                    <div className="p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors">
+                    {/* Enhanced Content */}
+                    <div className="p-6">
+                      <div className="mb-4">
+                        <h3 className="font-bold text-xl text-neutral-900 group-hover:text-blue-600 transition-colors mb-2">
                           {item.name}
                         </h3>
-                        {item.rating && (
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            <span className="text-xs text-neutral-600">{item.rating}</span>
-                          </div>
-                        )}
-                      </div>
 
-                      {/* Location/Date */}
-                      <div className="flex items-center gap-1 mb-2">
-                        {item.type === "event" && item.eventDate ? (
-                          <>
-                            <Calendar className="h-3 w-3 text-neutral-400" />
-                            <span className="text-xs text-neutral-600">
-                              {new Date(item.eventDate).toLocaleDateString()}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <MapPin className="h-3 w-3 text-neutral-400" />
-                            <span className="text-xs text-neutral-600">{item.location}</span>
-                          </>
-                        )}
-                        {item.capacity && (
-                          <>
-                            <span className="text-neutral-300 mx-1">•</span>
-                            <Users className="h-3 w-3 text-neutral-400" />
-                            <span className="text-xs text-neutral-600">{item.capacity}</span>
-                          </>
-                        )}
+                        {/* Location/Date and Capacity */}
+                        <div className="space-y-2">
+                          {item.type === "event" && item.eventDate ? (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-blue-500" />
+                              <span className="text-sm font-medium text-neutral-700">
+                                {new Date(item.eventDate).toLocaleDateString('en-US', { 
+                                  weekday: 'short', 
+                                  year: 'numeric', 
+                                  month: 'short', 
+                                  day: 'numeric' 
+                                })}
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-blue-500" />
+                              <span className="text-sm font-medium text-neutral-700">{item.location}</span>
+                            </div>
+                          )}
+                          
+                          {item.capacity && (
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-green-500" />
+                              <span className="text-sm font-medium text-neutral-700">{item.capacity.toLocaleString()} capacity</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Description */}
-                      <p className="text-sm text-neutral-600 mb-3 line-clamp-2">
+                      <p className="text-sm text-neutral-600 mb-4 leading-relaxed">
                         {item.description}
                       </p>
 
                       {/* Tags */}
-                      <div className="flex flex-wrap gap-1 mb-4">
+                      <div className="flex flex-wrap gap-2 mb-6">
                         {item.tags?.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge key={index} variant="outline" className="text-xs font-medium px-3 py-1">
                             {tag}
                           </Badge>
                         ))}
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
+                      <div className="flex gap-3">
+                        <Button variant="outline" size="sm" className="flex-1 font-medium">
                           View Profile
                         </Button>
-                        <Button size="sm" className="flex-1">
-                          <Plus className="h-3 w-3 mr-1" />
+                        <Button size="sm" className="flex-1 font-medium">
+                          <Plus className="h-4 w-4 mr-2" />
                           Add to Event
                         </Button>
                       </div>

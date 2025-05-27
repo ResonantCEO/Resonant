@@ -292,6 +292,10 @@ export function registerRoutes(app: Express): Server {
   app.get('/api/profiles', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      
+      // Always ensure audience profile is active when fetching profiles
+      await storage.ensureAudienceProfileActive(userId);
+      
       const profiles = await storage.getProfilesByUserId(userId);
       res.json(profiles);
     } catch (error) {

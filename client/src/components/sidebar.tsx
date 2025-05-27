@@ -258,19 +258,7 @@ export default function Sidebar() {
               )}
             </Button>
           </li>
-          <li>
-            <Button
-              variant="ghost"
-              className={`w-full justify-start ${
-                isActivePath("/discover") 
-                  ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
-                  : "text-neutral-600 hover:bg-neutral-100"
-              }`}
-            >
-              <Search className="w-5 h-5 mr-3" />
-              Discover
-            </Button>
-          </li>
+
           <li>
             <Button
               variant="ghost"

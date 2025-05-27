@@ -1,4 +1,4 @@
-# SocialConnect Changelog
+# Resonant Changelog
 
 ## Version 2.5 - Platform Stability & User Experience Enhancement (Latest)
 
@@ -442,7 +442,7 @@
 
 ## Summary
 
-SocialConnect has evolved from a basic social platform to a sophisticated, customizable networking application:
+Resonant has evolved from a basic social platform to a sophisticated, customizable networking application:
 
 ### Version 1.0 Achievements:
 - ✅ Complete multi-profile social networking platform

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import CreateProfileModal from "./create-profile-modal";
 import { useState } from "react";
-import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown } from "lucide-react";
+import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 

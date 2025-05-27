@@ -1,6 +1,6 @@
 # Resonant Changelog
 
-## Version 2.6 - Automatic Audience Profile Management (Latest)
+## Version 2.6 - Automatic Audience Profile Management & Discovery Platform (Latest)
 
 ### User Experience Enhancement
 
@@ -10,6 +10,14 @@
 - **Enhanced User Flow**: Eliminates manual profile switching for primary use case
 - **Intelligent Profile Detection**: System automatically identifies and activates audience profiles
 - **Improved User Experience**: Streamlined workflow for audience members accessing the platform
+
+#### 🔍 Comprehensive Discovery Platform
+- **Advanced Discovery Page**: Full-featured discovery interface for artists, venues, and events
+- **Multi-Category Filtering**: Filter by artist, venue, or event type with real-time updates
+- **Advanced Search System**: Location, genre, and availability-based search functionality
+- **Interactive Filter Panel**: Comprehensive filtering options with intuitive user interface
+- **Professional Listings**: Detailed profiles with ratings, capacity, genres, and availability status
+- **Visual Discovery Experience**: Card-based layout with hover effects and professional styling
 
 #### 🔧 Backend Profile System
 - **Auto-Activation Endpoint**: New API endpoint for automatic audience profile activation
@@ -24,6 +32,7 @@
 - **User Name Integration**: Improved profile naming using actual user first and last names
 - **Cache Management**: Proper query invalidation for immediate UI updates
 - **Loading State Management**: Smooth transitions during profile activation
+- **Responsive Discovery Interface**: Mobile-optimized discovery experience with adaptive layouts
 
 ---
 

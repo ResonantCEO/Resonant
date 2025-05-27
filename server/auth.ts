@@ -138,6 +138,19 @@ export function setupAuth(app: Express) {
           return res.status(500).json({ message: "Failed to fetch user data" });
         }
         
+        // Always set audience profile as active on login
+        try {
+          const userProfiles = await storage.getProfilesByUserId(user.id);
+          const audienceProfile = userProfiles.find(profile => profile.type === 'audience');
+          
+          if (audienceProfile) {
+            await storage.setActiveProfile(user.id, audienceProfile.id);
+          }
+        } catch (error) {
+          console.error("Error setting audience profile as active:", error);
+          // Don't fail login if profile activation fails
+        }
+        
         res.status(200).json({ 
           id: completeUser.id, 
           email: completeUser.email,

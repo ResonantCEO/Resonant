@@ -370,6 +370,25 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Auto-activate audience profile
+  app.post('/api/activate-audience-profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const userProfiles = await storage.getProfilesByUserId(userId);
+      const audienceProfile = userProfiles.find(p => p.type === 'audience');
+      
+      if (audienceProfile) {
+        await storage.setActiveProfile(userId, audienceProfile.id);
+        res.json({ success: true, profileId: audienceProfile.id });
+      } else {
+        res.status(404).json({ message: "No audience profile found" });
+      }
+    } catch (error) {
+      console.error("Error activating audience profile:", error);
+      res.status(500).json({ message: "Failed to activate audience profile" });
+    }
+  });
+
   app.get('/api/profiles/search', isAuthenticated, async (req, res) => {
     try {
       const query = req.query.q as string;

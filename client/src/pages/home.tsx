@@ -36,12 +36,33 @@ export default function Home() {
     },
   });
 
+  // Auto-activate audience profile mutation
+  const activateAudienceProfile = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/activate-audience-profile", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+    },
+  });
+
   // Automatically create profile if user doesn't have one
   useEffect(() => {
     if (!profileLoading && !activeProfile && user && !createDefaultProfile.isPending) {
       createDefaultProfile.mutate();
     }
   }, [activeProfile, profileLoading, user, createDefaultProfile]);
+
+  // Auto-activate audience profile when app loads
+  useEffect(() => {
+    if (user && activeProfile && !activateAudienceProfile.isPending) {
+      // Only activate if not already on audience profile
+      if (activeProfile.type !== 'audience') {
+        activateAudienceProfile.mutate();
+      }
+    }
+  }, [user, activeProfile, activateAudienceProfile]);
 
   if (profileLoading || createDefaultProfile.isPending) {
     return (

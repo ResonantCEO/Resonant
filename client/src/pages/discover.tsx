@@ -27,8 +27,8 @@ interface DiscoverItem {
 export default function Discover() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<"all" | "artist" | "venue" | "event">("all");
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedGenre, setSelectedGenre] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("all-locations");
+  const [selectedGenre, setSelectedGenre] = useState("all-genres");
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
 
   // Mock data - replace with actual API call
@@ -73,8 +73,8 @@ export default function Discover() {
   const filteredData = mockData.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = selectedType === "all" || item.type === selectedType;
-    const matchesLocation = !selectedLocation || item.location?.includes(selectedLocation);
-    const matchesGenre = !selectedGenre || item.genre?.includes(selectedGenre);
+    const matchesLocation = selectedLocation === "all-locations" || !selectedLocation || item.location?.includes(selectedLocation);
+    const matchesGenre = selectedGenre === "all-genres" || !selectedGenre || item.genre?.includes(selectedGenre);
     
     return matchesSearch && matchesType && matchesLocation && matchesGenre;
   });
@@ -152,7 +152,7 @@ export default function Discover() {
                   <SelectValue placeholder="Location" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Locations</SelectItem>
+                  <SelectItem value="all-locations">All Locations</SelectItem>
                   <SelectItem value="Los Angeles">Los Angeles, CA</SelectItem>
                   <SelectItem value="Nashville">Nashville, TN</SelectItem>
                   <SelectItem value="Austin">Austin, TX</SelectItem>
@@ -166,7 +166,7 @@ export default function Discover() {
                   <SelectValue placeholder="Genre" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Genres</SelectItem>
+                  <SelectItem value="all-genres">All Genres</SelectItem>
                   <SelectItem value="Electronic">Electronic</SelectItem>
                   <SelectItem value="Rock">Rock</SelectItem>
                   <SelectItem value="Jazz">Jazz</SelectItem>

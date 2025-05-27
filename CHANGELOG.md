@@ -34,6 +34,17 @@
 - **Loading State Management**: Smooth transitions during profile activation
 - **Responsive Discovery Interface**: Mobile-optimized discovery experience with adaptive layouts
 
+#### 📊 Database Architecture
+- **Comprehensive Entity Relationship Diagram**: Visual representation of complete database structure
+- **Multi-Profile System**: Users can maintain multiple profile types (audience, artist, venue)
+- **Friendship Management**: Profile-based friend requests and connections system
+- **Content Management**: Posts, likes, and comments linked to specific profiles
+- **Session Management**: Secure user authentication and session storage
+
+![Database Entity Relationship Diagram](database-erd.svg)
+
+The database architecture supports a flexible multi-profile system where users can create and manage different profile types while maintaining a single account. The friendship system operates at the profile level, allowing users to connect through their different personas.
+
 ---
 
 ## Version 2.5 - Platform Stability & User Experience Enhancement

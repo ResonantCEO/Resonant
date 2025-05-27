@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .table { fill: #ffffff; stroke: #2563eb; stroke-width: 2; rx: 8; }
+      .table-header { fill: #2563eb; }
+      .table-name { fill: #ffffff; font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; text-anchor: middle; dominant-baseline: middle; }
+      .field { font-family: Arial, sans-serif; font-size: 11px; fill: #1f2937; }
+      .pk { font-weight: bold; fill: #dc2626; }
+      .fk { fill: #059669; }
+      .connection { stroke: #6b7280; stroke-width: 2; fill: none; }
+      .connection-label { font-family: Arial, sans-serif; font-size: 10px; fill: #6b7280; text-anchor: middle; }
+    </style>
+  </defs>
+  
+  <!-- Sessions Table -->
+  <rect class="table" x="50" y="50" width="180" height="120"/>
+  <rect class="table-header" x="50" y="50" width="180" height="30"/>
+  <text class="table-name" x="140" y="65">sessions</text>
+  <text class="field pk" x="60" y="90">sid (PK)</text>
+  <text class="field" x="60" y="110">sess</text>
+  <text class="field" x="60" y="130">expire</text>
+  
+  <!-- Users Table -->
+  <rect class="table" x="300" y="50" width="200" height="300"/>
+  <rect class="table-header" x="300" y="50" width="200" height="30"/>
+  <text class="table-name" x="400" y="65">users</text>
+  <text class="field pk" x="310" y="90">id (PK)</text>
+  <text class="field" x="310" y="110">email</text>
+  <text class="field" x="310" y="130">password</text>
+  <text class="field" x="310" y="150">firstName</text>
+  <text class="field" x="310" y="170">lastName</text>
+  <text class="field" x="310" y="190">profileImageUrl</text>
+  <text class="field" x="310" y="210">coverImageUrl</text>
+  <text class="field" x="310" y="230">showOnlineStatus</text>
+  <text class="field" x="310" y="250">allowFriendRequests</text>
+  <text class="field" x="310" y="270">theme</text>
+  <text class="field" x="310" y="290">language</text>
+  <text class="field" x="310" y="310">createdAt</text>
+  <text class="field" x="310" y="330">updatedAt</text>
+  
+  <!-- Profiles Table -->
+  <rect class="table" x="600" y="50" width="180" height="240"/>
+  <rect class="table-header" x="600" y="50" width="180" height="30"/>
+  <text class="table-name" x="690" y="65">profiles</text>
+  <text class="field pk" x="610" y="90">id (PK)</text>
+  <text class="field fk" x="610" y="110">userId (FK)</text>
+  <text class="field" x="610" y="130">type</text>
+  <text class="field" x="610" y="150">name</text>
+  <text class="field" x="610" y="170">bio</text>
+  <text class="field" x="610" y="190">profileImageUrl</text>
+  <text class="field" x="610" y="210">visibility</text>
+  <text class="field" x="610" y="230">location</text>
+  <text class="field" x="610" y="250">isActive</text>
+  <text class="field" x="610" y="270">createdAt</text>
+  
+  <!-- Friendships Table -->
+  <rect class="table" x="850" y="50" width="180" height="140"/>
+  <rect class="table-header" x="850" y="50" width="180" height="30"/>
+  <text class="table-name" x="940" y="65">friendships</text>
+  <text class="field pk" x="860" y="90">id (PK)</text>
+  <text class="field fk" x="860" y="110">requesterId (FK)</text>
+  <text class="field fk" x="860" y="130">addresseeId (FK)</text>
+  <text class="field" x="860" y="150">status</text>
+  <text class="field" x="860" y="170">createdAt</text>
+  
+  <!-- Posts Table -->
+  <rect class="table" x="300" y="400" width="180" height="200"/>
+  <rect class="table-header" x="300" y="400" width="180" height="30"/>
+  <text class="table-name" x="390" y="415">posts</text>
+  <text class="field pk" x="310" y="440">id (PK)</text>
+  <text class="field fk" x="310" y="460">profileId (FK)</text>
+  <text class="field" x="310" y="480">content</text>
+  <text class="field" x="310" y="500">imageUrl</text>
+  <text class="field" x="310" y="520">visibility</text>
+  <text class="field" x="310" y="540">likesCount</text>
+  <text class="field" x="310" y="560">commentsCount</text>
+  <text class="field" x="310" y="580">createdAt</text>
+  
+  <!-- Post Likes Table -->
+  <rect class="table" x="550" y="400" width="180" height="120"/>
+  <rect class="table-header" x="550" y="400" width="180" height="30"/>
+  <text class="table-name" x="640" y="415">post_likes</text>
+  <text class="field pk" x="560" y="440">id (PK)</text>
+  <text class="field fk" x="560" y="460">postId (FK)</text>
+  <text class="field fk" x="560" y="480">profileId (FK)</text>
+  <text class="field" x="560" y="500">createdAt</text>
+  
+  <!-- Comments Table -->
+  <rect class="table" x="800" y="400" width="180" height="140"/>
+  <rect class="table-header" x="800" y="400" width="180" height="30"/>
+  <text class="table-name" x="890" y="415">comments</text>
+  <text class="field pk" x="810" y="440">id (PK)</text>
+  <text class="field fk" x="810" y="460">postId (FK)</text>
+  <text class="field fk" x="810" y="480">profileId (FK)</text>
+  <text class="field" x="810" y="500">content</text>
+  <text class="field" x="810" y="520">createdAt</text>
+  
+  <!-- Relationships -->
+  <!-- Users to Profiles (1:Many) -->
+  <path class="connection" d="M 500 200 L 600 170"/>
+  <text class="connection-label" x="550" y="180">1:M</text>
+  
+  <!-- Profiles to Friendships (1:Many - Requester) -->
+  <path class="connection" d="M 780 120 L 850 120"/>
+  <text class="connection-label" x="815" y="115">1:M</text>
+  
+  <!-- Profiles to Friendships (1:Many - Addressee) -->
+  <path class="connection" d="M 780 140 L 850 140"/>
+  
+  <!-- Profiles to Posts (1:Many) -->
+  <path class="connection" d="M 690 290 L 390 400"/>
+  <text class="connection-label" x="540" y="340">1:M</text>
+  
+  <!-- Posts to Post Likes (1:Many) -->
+  <path class="connection" d="M 480 460 L 550 460"/>
+  <text class="connection-label" x="515" y="455">1:M</text>
+  
+  <!-- Profiles to Post Likes (1:Many) -->
+  <path class="connection" d="M 690 290 L 640 400"/>
+  <text class="connection-label" x="665" y="340">1:M</text>
+  
+  <!-- Posts to Comments (1:Many) -->
+  <path class="connection" d="M 480 480 L 800 480"/>
+  <text class="connection-label" x="640" y="475">1:M</text>
+  
+  <!-- Profiles to Comments (1:Many) -->
+  <path class="connection" d="M 780 200 L 890 400"/>
+  <text class="connection-label" x="835" y="300">1:M</text>
+  
+  <!-- Legend -->
+  <rect fill="#f9fafb" stroke="#d1d5db" x="50" y="650" width="300" height="120"/>
+  <text class="table-name" x="200" y="670" fill="#1f2937">Entity Relationship Diagram</text>
+  <text class="field pk" x="60" y="695">Primary Key (PK)</text>
+  <text class="field fk" x="60" y="715">Foreign Key (FK)</text>
+  <text class="field" x="60" y="735">Regular Field</text>
+  <text class="connection-label" x="60" y="755">1:M = One-to-Many Relationship</text>
+</svg>

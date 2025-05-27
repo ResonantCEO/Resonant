@@ -196,7 +196,7 @@ export default function Discover() {
                         </div>
                         <div>
                           <h3 className="font-semibold text-neutral-900 text-lg">{item.name}</h3>
-                          <p className="text-sm text-neutral-600">{item.location}</p>
+                          <p className="text-sm text-neutral-700 font-medium">{item.location}</p>
                         </div>
                       </div>
                       <Badge variant="secondary" className="text-xs font-medium">Featured</Badge>
@@ -207,15 +207,15 @@ export default function Discover() {
                       {item.rating && (
                         <div className="flex items-center gap-2">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-medium">{item.rating}</span>
-                          <span className="text-xs text-neutral-500">rating</span>
+                          <span className="text-sm font-semibold text-neutral-900">{item.rating}</span>
+                          <span className="text-xs text-neutral-600 font-medium">rating</span>
                         </div>
                       )}
                       {item.capacity && (
                         <div className="flex items-center gap-2">
                           <Users className="h-4 w-4 text-neutral-400" />
-                          <span className="text-sm font-medium">{item.capacity}</span>
-                          <span className="text-xs text-neutral-500">capacity</span>
+                          <span className="text-sm font-semibold text-neutral-900">{item.capacity}</span>
+                          <span className="text-xs text-neutral-600 font-medium">capacity</span>
                         </div>
                       )}
                       {item.availability && (
@@ -224,7 +224,7 @@ export default function Discover() {
                             item.availability === 'available' ? 'bg-green-500' : 
                             item.availability === 'limited' ? 'bg-yellow-500' : 'bg-red-500'
                           }`} />
-                          <span className="text-sm font-medium capitalize">{item.availability}</span>
+                          <span className="text-sm font-semibold text-neutral-900 capitalize">{item.availability}</span>
                         </div>
                       )}
                     </div>
@@ -355,7 +355,7 @@ export default function Discover() {
                       </div>
 
                       {/* Description */}
-                      <p className="text-sm text-neutral-600 mb-4 leading-relaxed">
+                      <p className="text-sm text-neutral-700 font-medium mb-4 leading-relaxed">
                         {item.description}
                       </p>
 

@@ -20,9 +20,13 @@ export default function Home() {
   // Auto-create audience profile if user doesn't have one
   const createDefaultProfile = useMutation({
     mutationFn: async () => {
+      const userName = user?.firstName && user?.lastName 
+        ? `${user.firstName} ${user.lastName}`
+        : user?.firstName || user?.lastName || "My Profile";
+      
       return await apiRequest("POST", "/api/profiles", {
         type: "audience", 
-        name: (user as any)?.username || "My Profile",
+        name: userName,
         bio: "",
       });
     },

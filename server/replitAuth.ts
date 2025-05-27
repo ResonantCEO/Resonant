@@ -57,13 +57,24 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
-  });
+  const userId = parseInt(claims["sub"]);
+  const existingUser = await storage.getUser(userId);
+  
+  if (existingUser) {
+    await storage.updateUser(userId, {
+      email: claims["email"],
+      firstName: claims["first_name"],
+      lastName: claims["last_name"],
+      profileImageUrl: claims["profile_image_url"],
+    });
+  } else {
+    await storage.createUser({
+      email: claims["email"],
+      firstName: claims["first_name"],
+      lastName: claims["last_name"],
+      profileImageUrl: claims["profile_image_url"],
+    });
+  }
 }
 
 export async function setupAuth(app: Express) {
@@ -80,7 +91,33 @@ export async function setupAuth(app: Express) {
   ) => {
     const user = {};
     updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
+    const claims = tokens.claims();
+    await upsertUser(claims);
+    
+    // Automatically set audience profile as active on login
+    try {
+      if (claims && claims.sub) {
+        console.log("REPLIT LOGIN: Setting audience profile as active for user", claims.sub);
+        const userId = parseInt(claims.sub);
+        const userProfiles = await storage.getProfilesByUserId(userId);
+        console.log("REPLIT LOGIN: User profiles found:", userProfiles.map(p => ({ id: p.id, type: p.type, name: p.name })));
+        
+        const audienceProfile = userProfiles.find(p => p.type === 'audience');
+        console.log("REPLIT LOGIN: Audience profile found:", audienceProfile ? { id: audienceProfile.id, name: audienceProfile.name } : "None");
+        
+        if (audienceProfile) {
+          console.log("REPLIT LOGIN: Setting audience profile as active:", audienceProfile.id);
+          await storage.setActiveProfile(userId, audienceProfile.id);
+          console.log("REPLIT LOGIN: Successfully set audience profile as active");
+        } else {
+          console.log("REPLIT LOGIN: No audience profile found for user");
+        }
+      }
+    } catch (error) {
+      console.error("Error setting audience profile as active:", error);
+      // Don't fail login if profile activation fails
+    }
+    
     verified(null, user);
   };
 

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Filter, MapPin, Calendar, Users, Star, Bookmark, MessageSquare, Plus } from "lucide-react";
+import { Search, Filter, MapPin, Calendar, Users, Star, Bookmark, MessageSquare, Plus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Sidebar from "@/components/sidebar";
 
@@ -30,6 +31,7 @@ export default function Discover() {
   const [selectedLocation, setSelectedLocation] = useState("all-locations");
   const [selectedGenre, setSelectedGenre] = useState("all-genres");
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Mock data - replace with actual API call
   const mockData: DiscoverItem[] = [
@@ -118,68 +120,165 @@ export default function Discover() {
             <p className="text-neutral-600">Find artists, venues, and events for your next collaboration</p>
           </div>
 
-          {/* Search and Filters */}
-          <div className="bg-white rounded-lg border border-neutral-200 p-6 mb-8">
-            <div className="flex flex-col lg:flex-row gap-4">
+          {/* Compact Search and Filters */}
+          <div className="bg-white rounded-lg border border-neutral-200 p-4 mb-8">
+            <div className="flex gap-3 items-center">
               
-              {/* Search Bar */}
+              {/* Main Search Bar */}
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
                 <Input
                   placeholder="Search artists, venues, or events..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-11"
                 />
               </div>
 
-              {/* Type Filter */}
-              <Select value={selectedType} onValueChange={(value: any) => setSelectedType(value)}>
-                <SelectTrigger className="w-full lg:w-48">
-                  <SelectValue placeholder="All Types" />
+              {/* Filters Dropdown */}
+              <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="h-11 px-4 flex items-center gap-2 min-w-[120px] relative"
+                  >
+                    <Filter className="h-4 w-4" />
+                    <span>Filters</span>
+                    <ChevronDown className="h-4 w-4" />
+                    {/* Active filter indicator */}
+                    {(selectedType !== "all" || selectedLocation !== "all-locations" || selectedGenre !== "all-genres") && (
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4" align="end">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-neutral-700 mb-2 block">Type</label>
+                      <Select value={selectedType} onValueChange={(value: any) => setSelectedType(value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Types" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Types</SelectItem>
+                          <SelectItem value="artist">Artists</SelectItem>
+                          <SelectItem value="venue">Venues</SelectItem>
+                          <SelectItem value="event">Events</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-neutral-700 mb-2 block">Location</label>
+                      <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Locations" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all-locations">All Locations</SelectItem>
+                          <SelectItem value="Los Angeles">Los Angeles, CA</SelectItem>
+                          <SelectItem value="Nashville">Nashville, TN</SelectItem>
+                          <SelectItem value="Austin">Austin, TX</SelectItem>
+                          <SelectItem value="New York">New York, NY</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-neutral-700 mb-2 block">Genre</label>
+                      <Select value={selectedGenre} onValueChange={setSelectedGenre}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Genres" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all-genres">All Genres</SelectItem>
+                          <SelectItem value="Electronic">Electronic</SelectItem>
+                          <SelectItem value="Rock">Rock</SelectItem>
+                          <SelectItem value="Jazz">Jazz</SelectItem>
+                          <SelectItem value="Folk">Folk</SelectItem>
+                          <SelectItem value="Hip Hop">Hip Hop</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => {
+                          setSelectedType("all");
+                          setSelectedLocation("all-locations");
+                          setSelectedGenre("all-genres");
+                        }}
+                      >
+                        Clear All
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        onClick={() => setFiltersOpen(false)}
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              {/* Quick Sort */}
+              <Select defaultValue="relevance">
+                <SelectTrigger className="h-11 w-[140px]">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="artist">Artists</SelectItem>
-                  <SelectItem value="venue">Venues</SelectItem>
-                  <SelectItem value="event">Events</SelectItem>
+                  <SelectItem value="relevance">Relevance</SelectItem>
+                  <SelectItem value="rating">Top Rated</SelectItem>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="availability">Available</SelectItem>
                 </SelectContent>
               </Select>
-
-              {/* Location Filter */}
-              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                <SelectTrigger className="w-full lg:w-48">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all-locations">All Locations</SelectItem>
-                  <SelectItem value="Los Angeles">Los Angeles, CA</SelectItem>
-                  <SelectItem value="Nashville">Nashville, TN</SelectItem>
-                  <SelectItem value="Austin">Austin, TX</SelectItem>
-                  <SelectItem value="New York">New York, NY</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Genre Filter */}
-              <Select value={selectedGenre} onValueChange={setSelectedGenre}>
-                <SelectTrigger className="w-full lg:w-48">
-                  <SelectValue placeholder="Genre" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all-genres">All Genres</SelectItem>
-                  <SelectItem value="Electronic">Electronic</SelectItem>
-                  <SelectItem value="Rock">Rock</SelectItem>
-                  <SelectItem value="Jazz">Jazz</SelectItem>
-                  <SelectItem value="Folk">Folk</SelectItem>
-                  <SelectItem value="Hip Hop">Hip Hop</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                More Filters
-              </Button>
             </div>
+
+            {/* Active Filters Display */}
+            {(selectedType !== "all" || selectedLocation !== "all-locations" || selectedGenre !== "all-genres") && (
+              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-neutral-200">
+                <span className="text-sm text-neutral-500 font-medium">Active filters:</span>
+                {selectedType !== "all" && (
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+                    Type: {selectedType}
+                    <button 
+                      className="ml-2 hover:text-red-600 font-bold"
+                      onClick={() => setSelectedType("all")}
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {selectedLocation !== "all-locations" && (
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200">
+                    Location: {selectedLocation}
+                    <button 
+                      className="ml-2 hover:text-red-600 font-bold"
+                      onClick={() => setSelectedLocation("all-locations")}
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {selectedGenre !== "all-genres" && (
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200">
+                    Genre: {selectedGenre}
+                    <button 
+                      className="ml-2 hover:text-red-600 font-bold"
+                      onClick={() => setSelectedGenre("all-genres")}
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Featured Section */}

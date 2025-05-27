@@ -174,6 +174,13 @@ export function setupAuth(app: Express) {
   app.get("/api/user", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
+    // Ensure audience profile is active every time user data is requested
+    try {
+      await storage.ensureAudienceProfileActive(req.user!.id);
+    } catch (error) {
+      console.error("Failed to ensure audience profile active:", error);
+    }
+    
     // Fetch fresh user data from database to ensure we have all fields
     const user = await storage.getUser(req.user!.id);
     if (!user) return res.sendStatus(401);

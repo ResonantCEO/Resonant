@@ -107,8 +107,16 @@ export function setupAuth(app: Express) {
         lastName,
       });
 
-      req.login(user, (err) => {
+      req.login(user, async (err) => {
         if (err) return next(err);
+        
+        // Ensure audience profile is active for new user
+        try {
+          await storage.ensureAudienceProfileActive(user.id);
+        } catch (error) {
+          console.error("Failed to create/activate audience profile:", error);
+        }
+        
         res.status(201).json({ id: user.id, email: user.email });
       });
     } catch (error) {
@@ -130,6 +138,13 @@ export function setupAuth(app: Express) {
         if (err) {
           console.error("Session error:", err);
           return res.status(500).json({ message: "Session creation failed" });
+        }
+        
+        // Ensure audience profile is active for returning user
+        try {
+          await storage.ensureAudienceProfileActive(user.id);
+        } catch (error) {
+          console.error("Failed to activate audience profile:", error);
         }
         
         // Fetch complete user data including first and last names

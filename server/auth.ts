@@ -107,16 +107,8 @@ export function setupAuth(app: Express) {
         lastName,
       });
 
-      req.login(user, async (err) => {
+      req.login(user, (err) => {
         if (err) return next(err);
-        
-        // Ensure audience profile is active for new user
-        try {
-          await storage.ensureAudienceProfileActive(user.id);
-        } catch (error) {
-          console.error("Failed to create/activate audience profile:", error);
-        }
-        
         res.status(201).json({ id: user.id, email: user.email });
       });
     } catch (error) {
@@ -138,13 +130,6 @@ export function setupAuth(app: Express) {
         if (err) {
           console.error("Session error:", err);
           return res.status(500).json({ message: "Session creation failed" });
-        }
-        
-        // Ensure audience profile is active for returning user
-        try {
-          await storage.ensureAudienceProfileActive(user.id);
-        } catch (error) {
-          console.error("Failed to activate audience profile:", error);
         }
         
         // Fetch complete user data including first and last names
@@ -173,13 +158,6 @@ export function setupAuth(app: Express) {
 
   app.get("/api/user", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
-    // Ensure audience profile is active every time user data is requested
-    try {
-      await storage.ensureAudienceProfileActive(req.user!.id);
-    } catch (error) {
-      console.error("Failed to ensure audience profile active:", error);
-    }
     
     // Fetch fresh user data from database to ensure we have all fields
     const user = await storage.getUser(req.user!.id);

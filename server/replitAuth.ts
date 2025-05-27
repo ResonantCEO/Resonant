@@ -80,15 +80,7 @@ export async function setupAuth(app: Express) {
   ) => {
     const user = {};
     updateUserSession(user, tokens);
-    const dbUser = await upsertUser(tokens.claims());
-    
-    // Ensure audience profile is active for Replit auth users
-    try {
-      await storage.ensureAudienceProfileActive(dbUser.id);
-    } catch (error) {
-      console.error("Failed to activate audience profile for Replit user:", error);
-    }
-    
+    await upsertUser(tokens.claims());
     verified(null, user);
   };
 

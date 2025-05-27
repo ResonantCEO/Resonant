@@ -34,7 +34,6 @@ export interface IStorage {
   createProfile(profile: InsertProfile): Promise<Profile>;
   updateProfile(id: number, updates: Partial<InsertProfile>): Promise<Profile>;
   setActiveProfile(userId: number, profileId: number): Promise<void>;
-  ensureAudienceProfileActive(userId: number): Promise<Profile>;
   searchProfiles(query: string, limit?: number): Promise<Profile[]>;
 
   // Friendship operations
@@ -170,39 +169,6 @@ export class DatabaseStorage implements IStorage {
       .update(profiles)
       .set({ isActive: true })
       .where(eq(profiles.id, profileId));
-  }
-
-  async ensureAudienceProfileActive(userId: number): Promise<Profile> {
-    // First, check if user has an audience profile
-    const audienceProfiles = await db
-      .select()
-      .from(profiles)
-      .where(and(eq(profiles.userId, userId), eq(profiles.type, "audience")));
-
-    let audienceProfile: Profile;
-
-    if (audienceProfiles.length === 0) {
-      // Create audience profile if it doesn't exist
-      const user = await this.getUser(userId);
-      const profileName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'My Profile' : 'My Profile';
-      
-      audienceProfile = await this.createProfile({
-        userId,
-        type: "audience",
-        name: profileName,
-        bio: "",
-        isActive: false // Will be set to true below
-      });
-    } else {
-      audienceProfile = audienceProfiles[0];
-    }
-
-    // Set audience profile as active
-    await this.setActiveProfile(userId, audienceProfile.id);
-    
-    // Return the updated profile with isActive: true
-    const updatedProfile = await this.getProfile(audienceProfile.id);
-    return updatedProfile!;
   }
 
   async searchProfiles(query: string, limit = 20): Promise<Profile[]> {

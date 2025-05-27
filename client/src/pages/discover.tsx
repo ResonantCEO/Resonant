@@ -293,7 +293,7 @@ export default function Discover() {
                       {/* Tags */}
                       <div className="flex flex-wrap gap-2 mb-5">
                         {item.tags?.slice(0, 2).map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs font-medium px-2 py-1 border-indigo-200 text-indigo-700">
+                          <Badge key={index} variant="outline" className="text-xs font-medium px-2 py-1 border-indigo-300 bg-indigo-500 text-white">
                             {tag}
                           </Badge>
                         ))}
@@ -431,7 +431,7 @@ export default function Discover() {
                       {/* Tags */}
                       <div className="flex flex-wrap gap-2 mb-6">
                         {item.tags?.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs font-medium px-3 py-1">
+                          <Badge key={index} variant="outline" className="text-xs font-medium px-3 py-1 border-blue-300 bg-blue-500 text-white">
                             {tag}
                           </Badge>
                         ))}

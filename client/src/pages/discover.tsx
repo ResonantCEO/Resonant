@@ -283,9 +283,17 @@ export default function Discover() {
 
           {/* Featured Section */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold text-neutral-900 mb-4">Featured This Week</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {filteredData.slice(0, 3).map((item) => (
+            <h2 className="text-2xl font-bold text-neutral-900 mb-6">Featured This Week</h2>
+            
+            {/* Featured Artists */}
+            {filteredData.filter(item => item.type === "artist").length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-neutral-800 mb-4 flex items-center">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 mr-3"></span>
+                  Featured Artists
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {filteredData.filter(item => item.type === "artist").slice(0, 3).map((item) => (
                 <Card 
                   key={item.id} 
                   className="group hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden"
@@ -405,8 +413,276 @@ export default function Discover() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                ))}
+              </div>
             </div>
+          )}
+
+            {/* Featured Venues */}
+            {filteredData.filter(item => item.type === "venue").length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-neutral-800 mb-4 flex items-center">
+                  <span className="w-2 h-2 rounded-full bg-green-500 mr-3"></span>
+                  Featured Venues
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {filteredData.filter(item => item.type === "venue").slice(0, 3).map((item) => (
+                    <Card 
+                      key={item.id} 
+                      className="group hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden"
+                      onMouseEnter={() => setHoveredItem(item.id)}
+                      onMouseLeave={() => setHoveredItem(null)}
+                    >
+                      <CardContent className="p-0">
+                        {/* Enhanced Header with Featured styling */}
+                        <div className="h-48 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-16 h-16 rounded-xl bg-white shadow-xl flex items-center justify-center text-3xl">
+                              {getTypeIcon(item.type)}
+                            </div>
+                          </div>
+                          
+                          {/* Quick Actions - appear on hover */}
+                          {hoveredItem === item.id && (
+                            <div className="absolute top-4 right-4 flex gap-2">
+                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0 shadow-lg">
+                                <Bookmark className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0 shadow-lg">
+                                <MessageSquare className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Featured Badge - more prominent */}
+                          <div className="absolute top-4 left-4">
+                            <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold px-3 py-1 shadow-lg">
+                              ⭐ Featured
+                            </Badge>
+                          </div>
+
+                          {/* Type Badge */}
+                          <div className="absolute top-4 right-1/2 transform translate-x-1/2">
+                            <Badge variant="secondary" className="capitalize font-medium px-3 py-1 bg-white/90 backdrop-blur-sm">
+                              {item.type}
+                            </Badge>
+                          </div>
+
+                          {/* Availability Badge */}
+                          {item.availability && (
+                            <div className="absolute bottom-4 left-4">
+                              <Badge className={`${getAvailabilityColor(item.availability)} font-medium px-3 py-1 shadow-lg`}>
+                                {item.availability}
+                              </Badge>
+                            </div>
+                          )}
+
+                          {/* Rating Badge */}
+                          {item.rating && (
+                            <div className="absolute bottom-4 right-4">
+                              <div className="flex items-center gap-1 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1 shadow-lg">
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                <span className="text-sm font-bold text-neutral-800">{item.rating}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Enhanced Content */}
+                        <div className="p-5">
+                          <div className="mb-4">
+                            <h3 className="font-bold text-lg text-neutral-900 group-hover:text-green-600 transition-colors mb-2">
+                              {item.name}
+                            </h3>
+
+                            {/* Location/Date and Capacity */}
+                            <div className="space-y-2">
+                              {item.type === "event" && item.eventDate ? (
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-green-500" />
+                                  <span className="text-sm font-medium text-neutral-700">
+                                    {new Date(item.eventDate).toLocaleDateString('en-US', { 
+                                      weekday: 'short', 
+                                      year: 'numeric', 
+                                      month: 'short', 
+                                      day: 'numeric' 
+                                    })}
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-green-500" />
+                                  <span className="text-sm font-medium text-neutral-700">{item.location}</span>
+                                </div>
+                              )}
+                              
+                              {item.capacity && (
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-4 w-4 text-emerald-500" />
+                                  <span className="text-sm font-medium text-neutral-700">{item.capacity.toLocaleString()} capacity</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          <p className="text-sm text-neutral-600 mb-4 leading-relaxed line-clamp-2">
+                            {item.description}
+                          </p>
+
+                          {/* Tags */}
+                          <div className="flex flex-wrap gap-2 mb-5">
+                            {item.tags?.slice(0, 2).map((tag, index) => (
+                              <Badge key={index} variant="outline" className="text-xs font-medium px-2 py-1 border-green-300 bg-green-500 text-white">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+
+                          {/* Action Button */}
+                          <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold shadow-lg border-0">
+                            <span className="drop-shadow-sm">View Profile</span>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Featured Events */}
+            {filteredData.filter(item => item.type === "event").length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-neutral-800 mb-4 flex items-center">
+                  <span className="w-2 h-2 rounded-full bg-purple-500 mr-3"></span>
+                  Featured Events
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {filteredData.filter(item => item.type === "event").slice(0, 3).map((item) => (
+                    <Card 
+                      key={item.id} 
+                      className="group hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden"
+                      onMouseEnter={() => setHoveredItem(item.id)}
+                      onMouseLeave={() => setHoveredItem(null)}
+                    >
+                      <CardContent className="p-0">
+                        {/* Enhanced Header with Featured styling */}
+                        <div className="h-48 bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-16 h-16 rounded-xl bg-white shadow-xl flex items-center justify-center text-3xl">
+                              {getTypeIcon(item.type)}
+                            </div>
+                          </div>
+                          
+                          {/* Quick Actions - appear on hover */}
+                          {hoveredItem === item.id && (
+                            <div className="absolute top-4 right-4 flex gap-2">
+                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0 shadow-lg">
+                                <Bookmark className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0 shadow-lg">
+                                <MessageSquare className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Featured Badge - more prominent */}
+                          <div className="absolute top-4 left-4">
+                            <Badge className="bg-gradient-to-r from-purple-500 to-violet-500 text-white font-semibold px-3 py-1 shadow-lg">
+                              ⭐ Featured
+                            </Badge>
+                          </div>
+
+                          {/* Type Badge */}
+                          <div className="absolute top-4 right-1/2 transform translate-x-1/2">
+                            <Badge variant="secondary" className="capitalize font-medium px-3 py-1 bg-white/90 backdrop-blur-sm">
+                              {item.type}
+                            </Badge>
+                          </div>
+
+                          {/* Availability Badge */}
+                          {item.availability && (
+                            <div className="absolute bottom-4 left-4">
+                              <Badge className={`${getAvailabilityColor(item.availability)} font-medium px-3 py-1 shadow-lg`}>
+                                {item.availability}
+                              </Badge>
+                            </div>
+                          )}
+
+                          {/* Rating Badge */}
+                          {item.rating && (
+                            <div className="absolute bottom-4 right-4">
+                              <div className="flex items-center gap-1 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1 shadow-lg">
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                <span className="text-sm font-bold text-neutral-800">{item.rating}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Enhanced Content */}
+                        <div className="p-5">
+                          <div className="mb-4">
+                            <h3 className="font-bold text-lg text-neutral-900 group-hover:text-purple-600 transition-colors mb-2">
+                              {item.name}
+                            </h3>
+
+                            {/* Location/Date and Capacity */}
+                            <div className="space-y-2">
+                              {item.type === "event" && item.eventDate ? (
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-purple-500" />
+                                  <span className="text-sm font-medium text-neutral-700">
+                                    {new Date(item.eventDate).toLocaleDateString('en-US', { 
+                                      weekday: 'short', 
+                                      year: 'numeric', 
+                                      month: 'short', 
+                                      day: 'numeric' 
+                                    })}
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-purple-500" />
+                                  <span className="text-sm font-medium text-neutral-700">{item.location}</span>
+                                </div>
+                              )}
+                              
+                              {item.capacity && (
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-4 w-4 text-violet-500" />
+                                  <span className="text-sm font-medium text-neutral-700">{item.capacity.toLocaleString()} capacity</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          <p className="text-sm text-neutral-600 mb-4 leading-relaxed line-clamp-2">
+                            {item.description}
+                          </p>
+
+                          {/* Tags */}
+                          <div className="flex flex-wrap gap-2 mb-5">
+                            {item.tags?.slice(0, 2).map((tag, index) => (
+                              <Badge key={index} variant="outline" className="text-xs font-medium px-2 py-1 border-purple-300 bg-purple-500 text-white">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+
+                          {/* Action Button */}
+                          <Button className="w-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-bold shadow-lg border-0">
+                            <span className="drop-shadow-sm">View Profile</span>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Results Section */}

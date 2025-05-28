@@ -304,8 +304,8 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
                           </div>
                         )}
                         <div>
-                          <p className="font-medium">{member?.user?.firstName || ''} {member?.user?.lastName || ''}</p>
-                          <p className="text-sm text-gray-600">{member?.user?.email || ''}</p>
+                          <p className="font-semibold text-white">{member?.user?.firstName || ''} {member?.user?.lastName || ''}</p>
+                          <p className="text-sm text-gray-300">{member?.user?.email || ''}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

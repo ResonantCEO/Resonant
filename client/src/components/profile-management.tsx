@@ -92,10 +92,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
   // Invite user mutation
   const inviteUserMutation = useMutation({
     mutationFn: async (data: { invitedEmail: string; role: string; permissions: string[] }) => {
-      return apiRequest(`/api/profiles/${profileId}/invite`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return apiRequest(`/api/profiles/${profileId}/invite`, "POST", data);
     },
     onSuccess: () => {
       toast({
@@ -120,10 +117,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
   // Update member role mutation
   const updateMemberMutation = useMutation({
     mutationFn: async ({ memberId, role, permissions }: { memberId: number; role: string; permissions: string[] }) => {
-      return apiRequest(`/api/profiles/${profileId}/members/${memberId}`, {
-        method: "PATCH",
-        body: JSON.stringify({ role, permissions }),
-      });
+      return apiRequest(`/api/profile-memberships/${memberId}`, "PATCH", { role, permissions });
     },
     onSuccess: () => {
       toast({
@@ -144,9 +138,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
   // Remove member mutation
   const removeMemberMutation = useMutation({
     mutationFn: async (memberId: number) => {
-      return apiRequest(`/api/profiles/${profileId}/members/${memberId}`, {
-        method: "DELETE",
-      });
+      return apiRequest(`/api/profile-memberships/${memberId}`, "DELETE");
     },
     onSuccess: () => {
       toast({

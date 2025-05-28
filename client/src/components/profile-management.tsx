@@ -290,7 +290,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
                   const role = member?.membership?.role || member?.role || "member";
                   const RoleIcon = ROLE_ICONS[role as keyof typeof ROLE_ICONS] || User;
                   return (
-                    <div key={member?.membership?.id || member?.id || Math.random()} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={member?.membership?.id || member?.id || Math.random()} className="flex items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-lg">
                       <div className="flex items-center gap-3">
                         {member?.user?.profileImageUrl ? (
                           <img

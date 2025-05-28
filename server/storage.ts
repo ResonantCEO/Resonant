@@ -1,6 +1,8 @@
 import {
   users,
   profiles,
+  profileMemberships,
+  profileInvitations,
   friendships,
   posts,
   postLikes,
@@ -9,6 +11,10 @@ import {
   type InsertUser,
   type Profile,
   type InsertProfile,
+  type ProfileMembership,
+  type InsertProfileMembership,
+  type ProfileInvitation,
+  type InsertProfileInvitation,
   type Post,
   type InsertPost,
   type Friendship,
@@ -35,6 +41,22 @@ export interface IStorage {
   updateProfile(id: number, updates: Partial<InsertProfile>): Promise<Profile>;
   setActiveProfile(userId: number, profileId: number): Promise<void>;
   searchProfiles(query: string, limit?: number): Promise<Profile[]>;
+
+  // Shared profile operations
+  getProfileMemberships(profileId: number): Promise<{ membership: ProfileMembership; user: User }[]>;
+  getUserMemberships(userId: number): Promise<{ membership: ProfileMembership; profile: Profile }[]>;
+  getUserProfileRole(userId: number, profileId: number): Promise<ProfileMembership | undefined>;
+  createProfileMembership(membership: InsertProfileMembership): Promise<ProfileMembership>;
+  updateProfileMembership(id: number, updates: Partial<InsertProfileMembership>): Promise<ProfileMembership>;
+  removeProfileMembership(id: number): Promise<void>;
+  checkProfilePermission(userId: number, profileId: number, permission: string): Promise<boolean>;
+  
+  // Profile invitation operations
+  createProfileInvitation(invitation: InsertProfileInvitation): Promise<ProfileInvitation>;
+  getProfileInvitations(profileId: number): Promise<ProfileInvitation[]>;
+  getInvitationByToken(token: string): Promise<ProfileInvitation | undefined>;
+  acceptProfileInvitation(token: string, userId: number): Promise<ProfileMembership>;
+  declineProfileInvitation(token: string): Promise<void>;
 
   // Friendship operations
   getFriends(profileId: number): Promise<Profile[]>;

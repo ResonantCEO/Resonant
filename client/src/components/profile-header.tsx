@@ -351,7 +351,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
         </div>
 
         {/* Profile Info */}
-        <div className="p-6">
+        <div className="p-6 pt-12">
           <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Profile Picture */}
             <div className="relative -mt-20">

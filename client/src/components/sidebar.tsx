@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import CreateProfileModal from "./create-profile-modal";
+import SharedProfilesWidget from "./shared-profiles-widget";
 import { useState } from "react";
 import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -293,6 +294,11 @@ export default function Sidebar() {
             </Button>
           </li>
         </ul>
+
+        {/* Shared Profiles Widget */}
+        <div className="mt-6 pt-6 border-t border-neutral-200">
+          <SharedProfilesWidget />
+        </div>
 
         {/* Logout Button */}
         <div className="mt-6 pt-6 border-t border-neutral-200">

@@ -453,7 +453,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
               {/* Management tab - only for shared profiles (artist/venue) */}
               {(profile.type === "artist" || profile.type === "venue") && canManageMembers && (
                 <TabsTrigger value="management" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
-                  Management
+                  {profile.type === "artist" ? "Members" : "Staff"}
                 </TabsTrigger>
               )}
             </TabsList>

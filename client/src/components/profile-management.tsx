@@ -294,15 +294,16 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
               <div>Loading members...</div>
             ) : (
               <div className="space-y-3">
-                {members.map((member: ProfileMember) => {
-                  const RoleIcon = ROLE_ICONS[member.membership.role as keyof typeof ROLE_ICONS] || User;
+                {members.map((member: any) => {
+                  const role = member?.membership?.role || member?.role || "member";
+                  const RoleIcon = ROLE_ICONS[role as keyof typeof ROLE_ICONS] || User;
                   return (
-                    <div key={member.membership.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={member?.membership?.id || member?.id || Math.random()} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        {member.user.profileImageUrl ? (
+                        {member?.user?.profileImageUrl ? (
                           <img
-                            src={member.user.profileImageUrl}
-                            alt={`${member.user.firstName} ${member.user.lastName}`}
+                            src={member?.user?.profileImageUrl}
+                            alt={`${member?.user?.firstName || ''} ${member?.user?.lastName || ''}`}
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         ) : (
@@ -311,20 +312,20 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
                           </div>
                         )}
                         <div>
-                          <p className="font-medium">{member.user.firstName} {member.user.lastName}</p>
-                          <p className="text-sm text-gray-600">{member.user.email}</p>
+                          <p className="font-medium">{member?.user?.firstName || ''} {member?.user?.lastName || ''}</p>
+                          <p className="text-sm text-gray-600">{member?.user?.email || ''}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge className={`flex items-center gap-1 ${ROLE_COLORS[member.membership.role as keyof typeof ROLE_COLORS]}`}>
+                        <Badge className={`flex items-center gap-1 ${ROLE_COLORS[role as keyof typeof ROLE_COLORS] || ROLE_COLORS.member}`}>
                           <RoleIcon className="h-3 w-3" />
-                          {member.membership.role}
+                          {role}
                         </Badge>
-                        {member.membership.role !== "owner" && isOwner && (
+                        {role !== "owner" && isOwner && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeMemberMutation.mutate(member.membership.id)}
+                            onClick={() => removeMemberMutation.mutate(member?.membership?.id || member?.id)}
                             disabled={removeMemberMutation.isPending}
                           >
                             <Trash2 className="h-4 w-4 text-red-500" />

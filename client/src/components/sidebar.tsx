@@ -295,10 +295,7 @@ export default function Sidebar() {
           </li>
         </ul>
 
-        {/* Shared Profiles Widget */}
-        <div className="mt-6 pt-6 border-t border-neutral-200">
-          <SharedProfilesWidget />
-        </div>
+
 
         {/* Logout Button */}
         <div className="mt-6 pt-6 border-t border-neutral-200">

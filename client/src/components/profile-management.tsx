@@ -309,7 +309,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge className={`flex items-center gap-1 ${ROLE_COLORS[role as keyof typeof ROLE_COLORS] || ROLE_COLORS.member}`}>
+                        <Badge className={`flex items-center gap-1 ${ROLE_COLORS[role as keyof typeof ROLE_COLORS] || ROLE_COLORS.member} ${role === 'member' ? '!text-black' : ''}`}>
                           <RoleIcon className="h-3 w-3" />
                           {role}
                         </Badge>

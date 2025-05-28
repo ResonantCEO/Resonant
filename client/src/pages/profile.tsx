@@ -71,8 +71,17 @@ export default function Profile() {
           
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Friends Widget */}
-            <div className="lg:col-span-1">
+            {/* Left Column - Bio and Friends Widget */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Bio Section */}
+              {profile.bio && (
+                <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+                  <h3 className="text-lg font-semibold text-neutral-900 mb-3">About</h3>
+                  <p className="text-neutral-700 leading-relaxed">{profile.bio}</p>
+                </div>
+              )}
+              
+              {/* Friends Widget */}
               <FriendsWidget profileId={profileId} />
             </div>
 

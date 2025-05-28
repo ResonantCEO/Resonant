@@ -406,12 +406,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
                 {renderActionButtons()}
               </div>
 
-              {/* Bio */}
-              {profile.bio && (
-                <div className="bg-neutral-50 rounded-lg p-4 mb-4">
-                  <p className="text-neutral-700 leading-relaxed">{profile.bio}</p>
-                </div>
-              )}
+
 
               {/* Profile Type & Visibility */}
               <div className="flex items-center space-x-4">

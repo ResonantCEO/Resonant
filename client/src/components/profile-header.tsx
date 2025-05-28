@@ -21,13 +21,15 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import ProfileManagement from "./profile-management";
 
 interface ProfileHeaderProps {
   profile: any;
   isOwn: boolean;
+  canManageMembers?: boolean;
 }
 
-export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
+export default function ProfileHeader({ profile, isOwn, canManageMembers }: ProfileHeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -448,8 +450,49 @@ export default function ProfileHeader({ profile, isOwn }: ProfileHeaderProps) {
               <TabsTrigger value="photos" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                 Photos
               </TabsTrigger>
+              {/* Management tab - only for shared profiles (artist/venue) */}
+              {(profile.type === "artist" || profile.type === "venue") && canManageMembers && (
+                <TabsTrigger value="management" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Management
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
+          
+          {/* Tab Content */}
+          <TabsContent value="posts" className="p-0">
+            {/* Posts content will be handled by the parent component */}
+          </TabsContent>
+          
+          <TabsContent value="about" className="p-6">
+            <div className="text-center text-gray-500">
+              About content coming soon...
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="friends" className="p-6">
+            <div className="text-center text-gray-500">
+              Friends content coming soon...
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="photos" className="p-6">
+            <div className="text-center text-gray-500">
+              Photos content coming soon...
+            </div>
+          </TabsContent>
+          
+          {/* Management tab content - only for shared profiles */}
+          {(profile.type === "artist" || profile.type === "venue") && canManageMembers && (
+            <TabsContent value="management" className="p-6">
+              <ProfileManagement 
+                profileId={profile.id}
+                profileType={profile.type}
+                isOwner={isOwn}
+                canManageMembers={canManageMembers || false}
+              />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
       

@@ -67,19 +67,7 @@ export default function Profile() {
       {/* Main Content */}
       <div className="flex-1 lg:ml-0 pt-16 lg:pt-0">
         <div className="max-w-4xl mx-auto p-6">
-          <ProfileHeader profile={profile} isOwn={isOwn} />
-          
-          {/* Profile Management for shared profiles */}
-          {isSharedProfile && (isOwn || canManageMembers) && (
-            <div className="mb-6">
-              <ProfileManagement 
-                profileId={profileId}
-                profileType={profile.type}
-                isOwner={isOwn}
-                canManageMembers={canManageMembers}
-              />
-            </div>
-          )}
+          <ProfileHeader profile={profile} isOwn={isOwn} canManageMembers={canManageMembers} />
           
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

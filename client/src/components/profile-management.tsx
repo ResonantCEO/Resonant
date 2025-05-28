@@ -217,7 +217,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
               <h3 className="text-lg font-semibold text-white">Current Members</h3>
               <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
                 <DialogTrigger asChild>
-                  <Button className="flex items-center gap-2">
+                  <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
                     <UserPlus className="h-4 w-4" />
                     Invite Member
                   </Button>

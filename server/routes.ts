@@ -663,6 +663,155 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Shared Profile Management Routes
+  
+  // Get profile memberships
+  app.get('/api/profiles/:id/members', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      
+      // Check if user has permission to view members
+      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "view_analytics");
+      if (!hasPermission) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const memberships = await storage.getProfileMemberships(profileId);
+      res.json(memberships);
+    } catch (error) {
+      console.error("Error fetching profile members:", error);
+      res.status(500).json({ message: "Failed to fetch profile members" });
+    }
+  });
+
+  // Get user's profile memberships
+  app.get('/api/user/memberships', isAuthenticated, async (req: any, res) => {
+    try {
+      const memberships = await storage.getUserMemberships(req.user.id);
+      res.json(memberships);
+    } catch (error) {
+      console.error("Error fetching user memberships:", error);
+      res.status(500).json({ message: "Failed to fetch user memberships" });
+    }
+  });
+
+  // Invite user to profile
+  app.post('/api/profiles/:id/invite', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const { invitedEmail, role = "member", permissions = [] } = req.body;
+
+      // Check if user has permission to manage members
+      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_members");
+      if (!hasPermission) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const invitation = await storage.createProfileInvitation({
+        profileId,
+        invitedEmail,
+        invitedBy: req.user.id,
+        role,
+        permissions,
+      });
+
+      res.json(invitation);
+    } catch (error) {
+      console.error("Error creating profile invitation:", error);
+      res.status(500).json({ message: "Failed to create invitation" });
+    }
+  });
+
+  // Accept profile invitation
+  app.post('/api/invitations/:token/accept', isAuthenticated, async (req: any, res) => {
+    try {
+      const { token } = req.params;
+      
+      const membership = await storage.acceptProfileInvitation(token, req.user.id);
+      res.json(membership);
+    } catch (error) {
+      console.error("Error accepting invitation:", error);
+      res.status(400).json({ message: error.message || "Failed to accept invitation" });
+    }
+  });
+
+  // Decline profile invitation
+  app.post('/api/invitations/:token/decline', async (req, res) => {
+    try {
+      const { token } = req.params;
+      
+      await storage.declineProfileInvitation(token);
+      res.json({ message: "Invitation declined" });
+    } catch (error) {
+      console.error("Error declining invitation:", error);
+      res.status(500).json({ message: "Failed to decline invitation" });
+    }
+  });
+
+  // Update member role/permissions
+  app.patch('/api/profiles/:profileId/members/:memberId', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.profileId);
+      const memberId = parseInt(req.params.memberId);
+      const { role, permissions } = req.body;
+
+      // Check if user has permission to manage members
+      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_members");
+      if (!hasPermission) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const membership = await storage.updateProfileMembership(memberId, {
+        role,
+        permissions,
+      });
+
+      res.json(membership);
+    } catch (error) {
+      console.error("Error updating member:", error);
+      res.status(500).json({ message: "Failed to update member" });
+    }
+  });
+
+  // Remove member from profile
+  app.delete('/api/profiles/:profileId/members/:memberId', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.profileId);
+      const memberId = parseInt(req.params.memberId);
+
+      // Check if user has permission to manage members
+      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_members");
+      if (!hasPermission) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      await storage.removeProfileMembership(memberId);
+      res.json({ message: "Member removed successfully" });
+    } catch (error) {
+      console.error("Error removing member:", error);
+      res.status(500).json({ message: "Failed to remove member" });
+    }
+  });
+
+  // Get profile invitations
+  app.get('/api/profiles/:id/invitations', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+
+      // Check if user has permission to manage members
+      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_members");
+      if (!hasPermission) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const invitations = await storage.getProfileInvitations(profileId);
+      res.json(invitations);
+    } catch (error) {
+      console.error("Error fetching invitations:", error);
+      res.status(500).json({ message: "Failed to fetch invitations" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

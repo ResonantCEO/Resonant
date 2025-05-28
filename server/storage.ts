@@ -508,6 +508,161 @@ export class DatabaseStorage implements IStorage {
         .where(eq(posts.id, comment.postId));
     }
   }
+
+  // Shared profile operations
+  async getProfileMemberships(profileId: number): Promise<{ membership: ProfileMembership; user: User }[]> {
+    const memberships = await db
+      .select({
+        membership: profileMemberships,
+        user: users,
+      })
+      .from(profileMemberships)
+      .innerJoin(users, eq(profileMemberships.userId, users.id))
+      .where(eq(profileMemberships.profileId, profileId))
+      .orderBy(profileMemberships.joinedAt);
+
+    return memberships;
+  }
+
+  async getUserMemberships(userId: number): Promise<{ membership: ProfileMembership; profile: Profile }[]> {
+    const memberships = await db
+      .select({
+        membership: profileMemberships,
+        profile: profiles,
+      })
+      .from(profileMemberships)
+      .innerJoin(profiles, eq(profileMemberships.profileId, profiles.id))
+      .where(eq(profileMemberships.userId, userId))
+      .orderBy(profileMemberships.joinedAt);
+
+    return memberships;
+  }
+
+  async getUserProfileRole(userId: number, profileId: number): Promise<ProfileMembership | undefined> {
+    const [membership] = await db
+      .select()
+      .from(profileMemberships)
+      .where(
+        and(
+          eq(profileMemberships.userId, userId),
+          eq(profileMemberships.profileId, profileId),
+          eq(profileMemberships.status, "active")
+        )
+      );
+
+    return membership;
+  }
+
+  async createProfileMembership(membership: InsertProfileMembership): Promise<ProfileMembership> {
+    const [newMembership] = await db
+      .insert(profileMemberships)
+      .values(membership)
+      .returning();
+
+    return newMembership;
+  }
+
+  async updateProfileMembership(id: number, updates: Partial<InsertProfileMembership>): Promise<ProfileMembership> {
+    const [membership] = await db
+      .update(profileMemberships)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(profileMemberships.id, id))
+      .returning();
+
+    return membership;
+  }
+
+  async removeProfileMembership(id: number): Promise<void> {
+    await db.delete(profileMemberships).where(eq(profileMemberships.id, id));
+  }
+
+  async checkProfilePermission(userId: number, profileId: number, permission: string): Promise<boolean> {
+    const membership = await this.getUserProfileRole(userId, profileId);
+    if (!membership) return false;
+
+    // Check if user has the specific permission
+    if (membership.permissions?.includes(permission)) return true;
+
+    // Owner and admin roles have all permissions
+    if (membership.role === "owner" || membership.role === "admin") return true;
+
+    // Manager role has most permissions except member management
+    if (membership.role === "manager" && permission !== "manage_members") return true;
+
+    return false;
+  }
+
+  // Profile invitation operations
+  async createProfileInvitation(invitation: InsertProfileInvitation): Promise<ProfileInvitation> {
+    // Generate unique token
+    const token = require('crypto').randomBytes(32).toString('hex');
+    
+    const [newInvitation] = await db
+      .insert(profileInvitations)
+      .values({
+        ...invitation,
+        token,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      })
+      .returning();
+
+    return newInvitation;
+  }
+
+  async getProfileInvitations(profileId: number): Promise<ProfileInvitation[]> {
+    const invitations = await db
+      .select()
+      .from(profileInvitations)
+      .where(
+        and(
+          eq(profileInvitations.profileId, profileId),
+          eq(profileInvitations.status, "pending")
+        )
+      )
+      .orderBy(profileInvitations.createdAt);
+
+    return invitations;
+  }
+
+  async getInvitationByToken(token: string): Promise<ProfileInvitation | undefined> {
+    const [invitation] = await db
+      .select()
+      .from(profileInvitations)
+      .where(eq(profileInvitations.token, token));
+
+    return invitation;
+  }
+
+  async acceptProfileInvitation(token: string, userId: number): Promise<ProfileMembership> {
+    const invitation = await this.getInvitationByToken(token);
+    if (!invitation || invitation.status !== "pending" || invitation.expiresAt < new Date()) {
+      throw new Error("Invalid or expired invitation");
+    }
+
+    // Create membership
+    const membership = await this.createProfileMembership({
+      profileId: invitation.profileId,
+      userId,
+      role: invitation.role,
+      permissions: invitation.permissions || [],
+      invitedBy: invitation.invitedBy,
+    });
+
+    // Update invitation status
+    await db
+      .update(profileInvitations)
+      .set({ status: "accepted", updatedAt: new Date() })
+      .where(eq(profileInvitations.id, invitation.id));
+
+    return membership;
+  }
+
+  async declineProfileInvitation(token: string): Promise<void> {
+    await db
+      .update(profileInvitations)
+      .set({ status: "declined", updatedAt: new Date() })
+      .where(eq(profileInvitations.token, token));
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -122,11 +122,12 @@ export default function Sidebar() {
 
 
   return (
-    <div className="w-80 bg-white dark:bg-neutral-900 shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block">
+    <div className="w-80 bg-white dark:bg-[#3c3c3c] shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block">
       {/* Header */}
       <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
         <div className="flex justify-center mb-6">
-          <img src="/resonant-logo.png" alt="Resonant" className="h-12 dark:invert" />
+          <img src="/resonant-logo.png" alt="Resonant" className="h-12 block dark:hidden" />
+          <img src="/resonant-logo-dark.png" alt="Resonant" className="h-12 hidden dark:block" />
         </div>
 
         {/* Active Profile Display with Dropdown */}

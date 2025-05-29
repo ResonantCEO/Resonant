@@ -60,7 +60,11 @@ export default function Profile() {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-neutral-200 z-40">
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-lg font-bold text-neutral-900">Resonant</h1>
+          <img 
+            src="/attached_assets/image_1748494763790.png" 
+            alt="Resonant" 
+            className="h-6 w-auto"
+          />
         </div>
       </div>
 

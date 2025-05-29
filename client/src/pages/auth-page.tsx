@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Music, Building, Users, Eye, EyeOff } from "lucide-react";
+import resonantLogo from "@assets/image_1748495188704.png";
 
 export default function AuthPage() {
   const { toast } = useToast();

@@ -7,7 +7,13 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-12">
-          <h1 className="text-6xl font-bold text-gray-900 mb-4">Resonant</h1>
+          <div className="mb-4 flex justify-center">
+            <img 
+              src="/attached_assets/image_1748494763790.png" 
+              alt="Resonant" 
+              className="h-20 w-auto"
+            />
+          </div>
           <p className="text-xl text-gray-600 mb-8">
             Connect as an audience member, artist, or venue. Build your layered social presence.
           </p>

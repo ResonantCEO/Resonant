@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import resonantLogo from "@assets/image_1748495188704.png";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -126,7 +126,7 @@ export default function Sidebar() {
       {/* Header */}
       <div className="p-6 border-b border-neutral-200">
         <div className="flex items-center justify-between mb-4">
-          <img src={resonantLogo} alt="Resonant" className="h-8" />
+          <img src="/resonant-logo.png" alt="Resonant" className="h-8" />
         </div>
 
         {/* Active Profile Display with Dropdown */}

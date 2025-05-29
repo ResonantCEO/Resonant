@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Music, Building, Users, Eye, EyeOff } from "lucide-react";
-import resonantLogo from "@assets/image_1748495188704.png";
+
 
 export default function AuthPage() {
   const { toast } = useToast();
@@ -103,7 +103,7 @@ export default function AuthPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <img src="/src/assets/image_1748495188704.png" alt="Resonant" className="h-12 mx-auto mb-2" />
+            <img src="/resonant-logo.png" alt="Resonant" className="h-12 mx-auto mb-2" />
             <p className="text-gray-600">Connect with your community</p>
           </div>
 

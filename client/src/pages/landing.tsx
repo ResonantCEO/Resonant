@@ -1,14 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Music, Building, Users } from "lucide-react";
-import resonantLogo from "@assets/image_1748495188704.png";
+
 
 export default function Landing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-12">
-          <img src={resonantLogo} alt="Resonant" className="h-24 mx-auto mb-4" />
+          <img src="/resonant-logo.png" alt="Resonant" className="h-24 mx-auto mb-4" />
           <p className="text-xl text-gray-600 mb-8">
             Connect as an audience member, artist, or venue. Build your layered social presence.
           </p>

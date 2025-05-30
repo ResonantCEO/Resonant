@@ -283,34 +283,20 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
         <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600">
-          {(() => {
-            console.log("User data for cover photo:", user);
-            console.log("Cover image URL:", user?.coverImageUrl);
-            if (!user?.coverImageUrl) {
-              console.log("No cover image URL found in user data");
-            }
-            return null;
-          })()}
-
           {/* Cover photo image - only show if coverImageUrl exists */}
-          {user?.coverImageUrl && (
+          {profile.coverImageUrl && (
             <img 
-              src={user.coverImageUrl} 
+              src={profile.coverImageUrl} 
               alt="Cover photo" 
               className="w-full h-48 object-cover absolute inset-0"
               onError={(e) => {
-                console.log("Cover image failed to load:", user.coverImageUrl);
-                // Hide the broken image and show gradient background
                 e.currentTarget.style.display = 'none';
-              }}
-              onLoad={() => {
-                console.log("Cover image loaded successfully:", user.coverImageUrl);
               }}
             />
           )}
 
           {/* Cover photo placeholder text when no image is set */}
-          {!user?.coverImageUrl && (
+          {!profile.coverImageUrl && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-white/70 text-center">
                 <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
@@ -320,25 +306,16 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
           )}
 
           {isOwn && (
-            <>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="absolute bottom-4 right-4 bg-white/90 hover:bg-white"
-                onClick={() => coverFileInputRef.current?.click()}
-                disabled={uploadCoverPhotoMutation.isPending}
-              >
-                <Camera className="w-4 h-4 mr-2" />
-                {uploadCoverPhotoMutation.isPending ? "Uploading..." : "Edit Cover"}
-              </Button>
-              <input
-                type="file"
-                ref={coverFileInputRef}
-                onChange={handleCoverUpload}
-                accept="image/*"
-                className="hidden"
-              />
-            </>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="absolute bottom-4 right-4 bg-white/90 hover:bg-white"
+              onClick={handleCoverPhotoClick}
+              disabled={uploadCoverPhotoMutation.isPending}
+            >
+              <Camera className="w-4 h-4 mr-2" />
+              {uploadCoverPhotoMutation.isPending ? "Uploading..." : "Edit Cover"}
+            </Button>
           )}
         </div>
 

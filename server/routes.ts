@@ -101,7 +101,7 @@ export function registerRoutes(app: Express): Server {
       // Manually ensure coverImageUrl is included and theme is explicitly set
       const response = {
         ...user,
-        coverImageUrl: user.coverImageUrl || null,
+        coverImageUrl: user.coverImageUrl, // Don't override with null
         theme: user.theme || 'light' // Explicitly ensure theme is included
       };
       

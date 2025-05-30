@@ -94,7 +94,7 @@ export default function Profile() {
 
               {/* Right Column - Posts Feed */}
               <div className="lg:col-span-2">
-                <PostFeed profileId={profileId} showCreatePost={true} />
+                <PostFeed profileId={profileId} showCreatePost={isOwn} />
               </div>
             </div>
           )}

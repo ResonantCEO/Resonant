@@ -120,7 +120,7 @@ export default function Home() {
 
             {/* Right Column - Posts Feed */}
             <div className="lg:col-span-2">
-              <PostFeed showCreatePost={true} />
+              <PostFeed showCreatePost={false} />
             </div>
           </div>
         </div>

@@ -214,7 +214,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
 
           <TabsContent value="members" className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-white">Current Members</h3>
+              <h3 className="text-lg font-semibold">Current Members</h3>
               <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
                 <DialogTrigger asChild>
                   <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">

@@ -224,6 +224,26 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     },
   });
 
+  const removeCoverPhotoMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("DELETE", "/api/user/cover-image");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      toast({
+        title: "Cover Photo Removed",
+        description: "Your cover photo has been removed.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove cover photo",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCoverUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -249,6 +269,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
       uploadCoverPhotoMutation.mutate(file);
     }
+  };
+
+  const handleRemoveCoverPhoto = () => {
+    removeCoverPhotoMutation.mutate();
   };
 
   const handleCoverPhotoClick = () => {
@@ -293,32 +317,22 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       {/* Profile Header */}
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
-        <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600">
-          {(() => {
-            console.log("User data for cover photo:", user);
-            console.log("Cover image URL:", user?.coverImageUrl);
-            if (!user?.coverImageUrl) {
-              console.log("No cover image URL found in user data");
-            }
-            return null;
-          })()}
-          
+        <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
           {/* Cover photo image - only show if coverImageUrl exists */}
           {user?.coverImageUrl && (
             <img 
               src={user.coverImageUrl} 
               alt="Cover photo" 
-              className="w-full h-48 object-cover absolute inset-0"
+              className="w-full h-48 object-cover absolute inset-0 transition-opacity duration-300"
               onError={(e) => {
-                console.log("Cover image failed to load:", user.coverImageUrl);
                 // Hide the broken image and show gradient background
                 e.currentTarget.style.display = 'none';
               }}
-              onLoad={() => {
-                console.log("Cover image loaded successfully:", user.coverImageUrl);
-              }}
             />
           )}
+          
+          {/* Overlay gradient for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
           
           {/* Cover photo placeholder text when no image is set */}
           {!user?.coverImageUrl && (
@@ -331,16 +345,27 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
 
           {isOwn && (
-            <>
+            <div className="absolute bottom-4 right-4 flex space-x-2">
+              {user?.coverImageUrl && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="bg-red-500/90 hover:bg-red-600/90 text-white"
+                  onClick={handleRemoveCoverPhoto}
+                  disabled={removeCoverPhotoMutation.isPending}
+                >
+                  {removeCoverPhotoMutation.isPending ? "Removing..." : "Remove"}
+                </Button>
+              )}
               <Button
                 variant="secondary"
                 size="sm"
-                className="absolute bottom-4 right-4 bg-white/90 hover:bg-white"
+                className="bg-white/90 hover:bg-white"
                 onClick={() => coverFileInputRef.current?.click()}
                 disabled={uploadCoverPhotoMutation.isPending}
               >
                 <Camera className="w-4 h-4 mr-2" />
-                {uploadCoverPhotoMutation.isPending ? "Uploading..." : "Edit Cover"}
+                {uploadCoverPhotoMutation.isPending ? "Uploading..." : user?.coverImageUrl ? "Change Cover" : "Add Cover"}
               </Button>
               <input
                 type="file"
@@ -349,7 +374,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 accept="image/*"
                 className="hidden"
               />
-            </>
+            </div>
           )}
         </div>
 

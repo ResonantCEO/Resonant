@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "@wouter";
+import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/sidebar";
 import ProfileHeader from "@/components/profile-header";

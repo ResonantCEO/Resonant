@@ -159,12 +159,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('coverImage', file);
-      return await apiRequest("POST", `/api/profiles/${profile.id}/cover-image`, formData);
+      return await apiRequest("POST", `/api/user/cover-image`, formData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
       toast({
         title: "Cover Photo Updated",
         description: "Your cover photo has been successfully updated.",

@@ -65,26 +65,24 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      // Use storage method which handles the field mapping correctly
-      const user = await storage.getUser(req.user.id);
+      // Direct database query to ensure we get the coverImageUrl field
+      const [user] = await db.select().from(users).where(eq(users.id, req.user.id));
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      console.log("API - User result:", JSON.stringify(user, null, 2));
-      console.log("API - Cover image URL:", user.coverImageUrl);
+      console.log("API - Direct DB query result:", JSON.stringify(user, null, 2));
+      console.log("API - Cover image URL from DB:", user.coverImageUrl);
       
-      console.log("API - Cover image URL from storage:", user.coverImageUrl);
-      
-      // Construct response with explicit field mapping to ensure coverImageUrl is included
+      // Return user data directly from database with only safe fields
       const safeUser = {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
-        coverImageUrl: user.coverImageUrl || null, // Explicitly ensure this field exists
+        coverImageUrl: user.coverImageUrl,
         showOnlineStatus: user.showOnlineStatus,
         allowFriendRequests: user.allowFriendRequests,
         showActivityStatus: user.showActivityStatus,

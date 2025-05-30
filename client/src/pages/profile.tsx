@@ -120,7 +120,10 @@ export default function Profile() {
           {/* Friends Tab */}
           {activeTab === "friends" && (
             <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <FriendsWidget profileId={profileId} />
+              <div className="text-center text-gray-500">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Friends</h3>
+                <p>Friends functionality coming soon...</p>
+              </div>
             </div>
           )}
 

@@ -814,7 +814,13 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log(`Getting memberships for profile ${profileId}`);
 
-      // First get actual memberships
+      // First get the profile to identify the owner
+      const profile = await this.getProfile(profileId);
+      if (!profile) {
+        return [];
+      }
+
+      // Get actual memberships
       const memberships = await db
         .select({
           membership: {
@@ -840,32 +846,34 @@ export class DatabaseStorage implements IStorage {
 
       console.log("Actual memberships found:", JSON.stringify(memberships, null, 2));
 
-      // If no memberships found, check if this is the profile owner
-      if (memberships.length === 0) {
-        const profile = await this.getProfile(profileId);
-        if (profile) {
-          const owner = await this.getUser(profile.userId);
-          if (owner) {
-            console.log("Adding profile owner as member");
-            return [{
-              membership: {
-                id: 0, // Fake ID for owner
-                profileId: profileId,
-                userId: profile.userId,
-                role: "owner",
-                permissions: [],
-                status: "active",
-                joinedAt: profile.createdAt,
-              },
-              user: {
-                id: owner.id,
-                firstName: owner.firstName,
-                lastName: owner.lastName,
-                email: owner.email,
-                profileImageUrl: owner.profileImageUrl,
-              },
-            }];
-          }
+      // Always add the profile creator as owner if not already in memberships
+      const ownerMembership = memberships.find(m => m.membership.userId === profile.userId && m.membership.role === "owner");
+      
+      if (!ownerMembership) {
+        const owner = await this.getUser(profile.userId);
+        if (owner) {
+          console.log("Adding profile creator as owner");
+          const ownerEntry = {
+            membership: {
+              id: -1, // Special ID for profile owner
+              profileId: profileId,
+              userId: profile.userId,
+              role: "owner" as const,
+              permissions: [] as string[],
+              status: "active" as const,
+              joinedAt: profile.createdAt,
+            },
+            user: {
+              id: owner.id,
+              firstName: owner.firstName,
+              lastName: owner.lastName,
+              email: owner.email,
+              profileImageUrl: owner.profileImageUrl,
+            },
+          };
+          
+          // Add owner at the beginning of the list
+          return [ownerEntry, ...memberships];
         }
       }
 

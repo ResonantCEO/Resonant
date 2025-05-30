@@ -313,45 +313,35 @@ export class DatabaseStorage implements IStorage {
     deletedByName: string,
     deletedAt: Date
   ): Promise<void> {
-    const { emailService } = await import('./email');
+    const { notificationService } = await import('./notifications');
     
     // Calculate restoration deadline (30 days from deletion)
     const restorationDeadline = new Date(deletedAt);
     restorationDeadline.setDate(restorationDeadline.getDate() + 30);
 
-    // Send email to each member
+    // Collect all user IDs to notify
+    const userIdsToNotify: number[] = [];
+
+    // Add all members
     for (const member of members) {
-      try {
-        await emailService.sendProfileDeletionNotification(
-          member.user.email,
-          `${member.user.firstName} ${member.user.lastName}`,
-          profile.name,
-          profile.type,
-          deletedByName,
-          restorationDeadline
-        );
-      } catch (error) {
-        console.error(`Failed to send deletion notification to ${member.user.email}:`, error);
-      }
+      userIdsToNotify.push(member.user.id);
     }
 
-    // Also send to profile owner if it's an individual profile
-    if (profile.userId) {
-      try {
-        const owner = await this.getUser(profile.userId);
-        if (owner && !members.some(m => m.user.id === owner.id)) {
-          await emailService.sendProfileDeletionNotification(
-            owner.email,
-            `${owner.firstName} ${owner.lastName}`,
-            profile.name,
-            profile.type,
-            deletedByName,
-            restorationDeadline
-          );
-        }
-      } catch (error) {
-        console.error(`Failed to send deletion notification to profile owner:`, error);
-      }
+    // Also notify profile owner if it's an individual profile and not already in members
+    if (profile.userId && !userIdsToNotify.includes(profile.userId)) {
+      userIdsToNotify.push(profile.userId);
+    }
+
+    // Send notifications to all users
+    try {
+      await notificationService.notifyProfileDeleted(
+        userIdsToNotify,
+        profile.name,
+        deletedByName
+      );
+      console.log(`Profile deletion notifications sent to ${userIdsToNotify.length} users`);
+    } catch (error) {
+      console.error(`Failed to send profile deletion notifications:`, error);
     }
   }
 

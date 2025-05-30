@@ -286,13 +286,22 @@ export class NotificationService {
   }
 
   async notifyProfileDeleted(recipientIds: number[], profileName: string, deletedBy: string): Promise<void> {
+    // Calculate restoration deadline (30 days from now)
+    const restorationDeadline = new Date();
+    restorationDeadline.setDate(restorationDeadline.getDate() + 30);
+
     for (const recipientId of recipientIds) {
       await this.createNotification({
         recipientId,
         type: "profile_deleted",
         title: "Profile Deleted",
-        message: `The profile "${profileName}" has been deleted by ${deletedBy}`,
-        data: { profileName, deletedBy },
+        message: `The profile "${profileName}" has been deleted by ${deletedBy}. It can be restored until ${restorationDeadline.toLocaleDateString()}.`,
+        data: { 
+          profileName, 
+          deletedBy, 
+          restorationDeadline: restorationDeadline.toISOString(),
+          canRestore: true 
+        },
       });
     }
   }

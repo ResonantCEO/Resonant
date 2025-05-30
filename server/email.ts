@@ -1,4 +1,3 @@
-
 import nodemailer from 'nodemailer';
 
 interface EmailConfig {
@@ -38,15 +37,15 @@ class EmailService {
     restorationDeadline: Date
   ) {
     const subject = `Profile "${profileName}" has been deleted`;
-    
+
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #dc2626;">Profile Deletion Notice</h2>
-        
+
         <p>Dear ${recipientName},</p>
-        
+
         <p>We're writing to inform you that the ${profileType} profile "<strong>${profileName}</strong>" has been deleted by ${deletedBy}.</p>
-        
+
         <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin: 20px 0;">
           <h3 style="color: #dc2626; margin-top: 0;">Important Information:</h3>
           <ul style="margin: 0;">
@@ -55,12 +54,24 @@ class EmailService {
             <li>You can request restoration within the next 30 days</li>
           </ul>
         </div>
-        
+
         <p>If you believe this deletion was made in error or if you would like to restore the profile, please contact our support team immediately.</p>
-        
+
         <p>Best regards,<br>The Resonant Team</p>
-        
+
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+        <p style="font-size: 12px; color: #6b7280;">This is an automated message. Please do not reply to this email.</p>
+      </div>
+    `;
+
+    try {
+      await this.sendEmail(recipientEmail, subject, html);
+      console.log(`Profile deletion notification sent to ${recipientEmail}`);
+    } catch (error) {
+      console.error(`Failed to send profile deletion notification to ${recipientEmail}:`, error);
+      throw error;
+    }
+  }
 
   async sendNotificationEmail(
     recipientEmail: string,
@@ -71,7 +82,7 @@ class EmailService {
     data?: any
   ) {
     const subject = title;
-    
+
     let actionButton = '';
     if (type === 'friend_request') {
       actionButton = `
@@ -101,21 +112,21 @@ class EmailService {
         </div>
       `;
     }
-    
+
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #1f2937;">${title}</h2>
-        
+
         <p>Dear ${recipientName},</p>
-        
+
         <p>${message}</p>
-        
+
         ${actionButton}
-        
+
         <p>You can manage your notification preferences in your account settings.</p>
-        
+
         <p>Best regards,<br>The Resonant Team</p>
-        
+
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
         <p style="font-size: 12px; color: #6b7280;">
           This is an automated message. Please do not reply to this email.
@@ -166,6 +177,23 @@ The Resonant Team
     } catch (error) {
       console.error('Email service connection failed:', error);
       return false;
+    }
+  }
+
+  async sendEmail(recipientEmail: string, subject: string, html: string) {
+    try {
+      const info = await this.transporter.sendMail({
+        from: process.env.EMAIL_FROM || 'noreply@resonant.com',
+        to: recipientEmail,
+        subject,
+        html,
+      });
+
+      console.log('Email sent successfully:', info.messageId);
+      return { success: true, messageId: info.messageId };
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      return { success: false, error: error.message };
     }
   }
 }

@@ -79,7 +79,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
 
   // Fetch profile members (enable for owners and those who can manage members)
   const { data: members = [], isLoading: membersLoading } = useQuery({
-    queryKey: ['/api/profiles', profileId, 'members'],
+    queryKey: [`/api/profiles/${profileId}/members`],
     enabled: isOwner || canManageMembers,
   });
 
@@ -145,7 +145,9 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
         title: "Member removed",
         description: "Member has been removed from the profile.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/profiles', profileId, 'members'] });
+      // Invalidate both members and the general profiles cache
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}/members`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles'] });
     },
     onError: (error: any) => {
       toast({

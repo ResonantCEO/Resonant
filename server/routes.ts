@@ -96,21 +96,11 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "User not found" });
       }
       
-      console.log("FIXED API - User result:", JSON.stringify(user, null, 2));
+      console.log("API - User query result:", JSON.stringify(user, null, 2));
+      console.log("API - Cover image URL from DB:", user.coverImageUrl);
       
-      // Manually ensure coverImageUrl is included and theme is explicitly set
-      const response = {
-        ...user,
-        coverImageUrl: user.coverImageUrl || null,
-        theme: user.theme || 'light' // Explicitly ensure theme is included
-      };
-      
-      console.log("FIXED API - Final response being sent:", JSON.stringify(response, null, 2));
-      console.log("FIXED API - Response theme field:", response.theme);
-      
-      // Explicitly set content-type and send response
-      res.setHeader('Content-Type', 'application/json');
-      res.status(200).send(JSON.stringify(response));
+      // Return the user data directly using res.json()
+      res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

@@ -1,0 +1,582 @@
+
+import React, { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Separator } from '../components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Switch } from '../components/ui/switch';
+import { Label } from '../components/ui/label';
+import { Input } from '../components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { useToast } from '../hooks/use-toast';
+import { Trash2, User, Palette, Bell, Shield, Globe } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../components/ui/alert-dialog';
+
+export default function Settings() {
+  const { user, updateUser } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+
+  // Fetch user profiles
+  const { data: profiles = [] } = useQuery({
+    queryKey: ['/api/profiles'],
+    queryFn: async () => {
+      const response = await fetch('/api/profiles', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch profiles');
+      return response.json();
+    }
+  });
+
+  // Delete profile mutation
+  const deleteProfileMutation = useMutation({
+    mutationFn: async (profileId: number) => {
+      const response = await fetch(`/api/profiles/${profileId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to delete profile');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile deleted",
+        description: "Profile has been successfully deleted.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete profile",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update user mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async (updates: any) => {
+      const response = await fetch('/api/user', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(updates)
+      });
+      if (!response.ok) throw new Error('Failed to update user');
+      return response.json();
+    },
+    onSuccess: (updatedUser) => {
+      updateUser(updatedUser);
+      toast({
+        title: "Settings updated",
+        description: "Your settings have been saved.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update settings",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Profile image upload mutation
+  const uploadProfileImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+      
+      const response = await fetch('/api/user/profile-image', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+      if (!response.ok) throw new Error('Failed to upload profile image');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile picture updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      setProfileImageFile(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload profile picture",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Cover image upload mutation
+  const uploadCoverImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('coverImage', file);
+      
+      const response = await fetch('/api/user/cover-image', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+      if (!response.ok) throw new Error('Failed to upload cover image');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Cover photo updated",
+        description: "Your cover photo has been updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      setCoverImageFile(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload cover photo",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleUpdateSetting = (key: string, value: any) => {
+    updateUserMutation.mutate({ [key]: value });
+  };
+
+  const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfileImageFile(file);
+      uploadProfileImageMutation.mutate(file);
+    }
+  };
+
+  const handleCoverImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverImageFile(file);
+      uploadCoverImageMutation.mutate(file);
+    }
+  };
+
+  const artistProfiles = profiles.filter((p: any) => p.type === 'artist');
+  const venueProfiles = profiles.filter((p: any) => p.type === 'venue');
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <h1 className="text-3xl font-bold mb-8">Settings</h1>
+      
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="profile" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Profile
+          </TabsTrigger>
+          <TabsTrigger value="appearance" className="flex items-center gap-2">
+            <Palette className="h-4 w-4" />
+            Appearance
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            Notifications
+          </TabsTrigger>
+          <TabsTrigger value="privacy" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Privacy
+          </TabsTrigger>
+          <TabsTrigger value="accounts" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Accounts
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+              <CardDescription>Update your personal information</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    value={user.firstName || ''}
+                    onChange={(e) => handleUpdateSetting('firstName', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    value={user.lastName || ''}
+                    onChange={(e) => handleUpdateSetting('lastName', e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={user.email || ''}
+                  onChange={(e) => handleUpdateSetting('email', e.target.value)}
+                />
+              </div>
+
+              <Separator />
+
+              <div>
+                <Label htmlFor="profileImage">Profile Picture</Label>
+                <Input
+                  id="profileImage"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfileImageUpload}
+                  disabled={uploadProfileImageMutation.isPending}
+                />
+                {user.profileImageUrl && (
+                  <img
+                    src={user.profileImageUrl}
+                    alt="Profile"
+                    className="mt-2 w-20 h-20 rounded-full object-cover"
+                  />
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="coverImage">Cover Photo</Label>
+                <Input
+                  id="coverImage"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCoverImageUpload}
+                  disabled={uploadCoverImageMutation.isPending}
+                />
+                {user.coverImageUrl && (
+                  <img
+                    src={user.coverImageUrl}
+                    alt="Cover"
+                    className="mt-2 w-full h-32 rounded-lg object-cover"
+                  />
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="appearance" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Appearance Settings</CardTitle>
+              <CardDescription>Customize how the app looks and feels</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="theme">Theme</Label>
+                  <p className="text-sm text-muted-foreground">Choose your preferred theme</p>
+                </div>
+                <Select
+                  value={user.theme || 'system'}
+                  onValueChange={(value) => handleUpdateSetting('theme', value)}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="compactMode">Compact Mode</Label>
+                  <p className="text-sm text-muted-foreground">Use a more compact layout</p>
+                </div>
+                <Switch
+                  id="compactMode"
+                  checked={user.compactMode || false}
+                  onCheckedChange={(checked) => handleUpdateSetting('compactMode', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="autoplayVideos">Autoplay Videos</Label>
+                  <p className="text-sm text-muted-foreground">Automatically play videos in feed</p>
+                </div>
+                <Switch
+                  id="autoplayVideos"
+                  checked={user.autoplayVideos || false}
+                  onCheckedChange={(checked) => handleUpdateSetting('autoplayVideos', checked)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notifications" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notification Preferences</CardTitle>
+              <CardDescription>Control what notifications you receive</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="emailNotifications">Email Notifications</Label>
+                  <p className="text-sm text-muted-foreground">Receive notifications via email</p>
+                </div>
+                <Switch
+                  id="emailNotifications"
+                  checked={user.emailNotifications || false}
+                  onCheckedChange={(checked) => handleUpdateSetting('emailNotifications', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="notifyFriendRequests">Friend Requests</Label>
+                  <p className="text-sm text-muted-foreground">Get notified of new friend requests</p>
+                </div>
+                <Switch
+                  id="notifyFriendRequests"
+                  checked={user.notifyFriendRequests || false}
+                  onCheckedChange={(checked) => handleUpdateSetting('notifyFriendRequests', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="notifyMessages">Messages</Label>
+                  <p className="text-sm text-muted-foreground">Get notified of new messages</p>
+                </div>
+                <Switch
+                  id="notifyMessages"
+                  checked={user.notifyMessages || false}
+                  onCheckedChange={(checked) => handleUpdateSetting('notifyMessages', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="notifyPostLikes">Post Likes</Label>
+                  <p className="text-sm text-muted-foreground">Get notified when someone likes your posts</p>
+                </div>
+                <Switch
+                  id="notifyPostLikes"
+                  checked={user.notifyPostLikes || false}
+                  onCheckedChange={(checked) => handleUpdateSetting('notifyPostLikes', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="notifyComments">Comments</Label>
+                  <p className="text-sm text-muted-foreground">Get notified of new comments on your posts</p>
+                </div>
+                <Switch
+                  id="notifyComments"
+                  checked={user.notifyComments || false}
+                  onCheckedChange={(checked) => handleUpdateSetting('notifyComments', checked)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="privacy" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Privacy Settings</CardTitle>
+              <CardDescription>Control your privacy and visibility</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="showOnlineStatus">Show Online Status</Label>
+                  <p className="text-sm text-muted-foreground">Let others see when you're online</p>
+                </div>
+                <Switch
+                  id="showOnlineStatus"
+                  checked={user.showOnlineStatus || false}
+                  onCheckedChange={(checked) => handleUpdateSetting('showOnlineStatus', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="allowFriendRequests">Allow Friend Requests</Label>
+                  <p className="text-sm text-muted-foreground">Allow others to send you friend requests</p>
+                </div>
+                <Switch
+                  id="allowFriendRequests"
+                  checked={user.allowFriendRequests || false}
+                  onCheckedChange={(checked) => handleUpdateSetting('allowFriendRequests', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="showActivityStatus">Show Activity Status</Label>
+                  <p className="text-sm text-muted-foreground">Show your recent activity to friends</p>
+                </div>
+                <Switch
+                  id="showActivityStatus"
+                  checked={user.showActivityStatus || false}
+                  onCheckedChange={(checked) => handleUpdateSetting('showActivityStatus', checked)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="accounts" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Artist Profiles</CardTitle>
+              <CardDescription>Manage your artist profile accounts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {artistProfiles.length > 0 ? (
+                <div className="space-y-4">
+                  {artistProfiles.map((profile: any) => (
+                    <div key={profile.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        {profile.profileImageUrl && (
+                          <img
+                            src={profile.profileImageUrl}
+                            alt={profile.name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        )}
+                        <div>
+                          <h3 className="font-medium">{profile.name}</h3>
+                          <p className="text-sm text-muted-foreground">Artist Profile</p>
+                        </div>
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Artist Profile</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete the artist profile "{profile.name}"? This action cannot be undone and will remove all associated posts and data.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => deleteProfileMutation.mutate(profile.id)}
+                            >
+                              Delete Profile
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No artist profiles found.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Venue Profiles</CardTitle>
+              <CardDescription>Manage your venue profile accounts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {venueProfiles.length > 0 ? (
+                <div className="space-y-4">
+                  {venueProfiles.map((profile: any) => (
+                    <div key={profile.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        {profile.profileImageUrl && (
+                          <img
+                            src={profile.profileImageUrl}
+                            alt={profile.name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        )}
+                        <div>
+                          <h3 className="font-medium">{profile.name}</h3>
+                          <p className="text-sm text-muted-foreground">Venue Profile</p>
+                        </div>
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Venue Profile</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete the venue profile "{profile.name}"? This action cannot be undone and will remove all associated posts and data.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => deleteProfileMutation.mutate(profile.id)}
+                            >
+                              Delete Profile
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No venue profiles found.</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

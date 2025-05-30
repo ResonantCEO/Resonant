@@ -67,14 +67,14 @@ export function registerRoutes(app: Express): Server {
     try {
       // Use storage.getUser to ensure all fields are included
       const user = await storage.getUser(req.user.id);
-      
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       console.log("API - User query result:", JSON.stringify(user, null, 2));
       console.log("API - Cover image URL from DB:", user.coverImageUrl);
-      
+
       // Explicitly construct response to ensure all fields are included
       const userResponse = {
         id: user.id,
@@ -98,7 +98,7 @@ export function registerRoutes(app: Express): Server {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
-      
+
       console.log("API - Final response:", JSON.stringify(userResponse, null, 2));
       res.json(userResponse);
     } catch (error) {
@@ -136,7 +136,7 @@ export function registerRoutes(app: Express): Server {
     console.log("POST /api/user/profile-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
     console.log("Body keys:", Object.keys(req.body || {}));
-    
+
     upload.single('profileImage')(req, res, async (err) => {
       try {
         console.log("Multer callback executed");
@@ -184,7 +184,7 @@ export function registerRoutes(app: Express): Server {
     console.log("POST /api/profiles/:profileId/profile-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
     console.log("Profile ID:", req.params.profileId);
-    
+
     upload.single('profileImage')(req, res, async (err) => {
       try {
         console.log("Multer callback executed");
@@ -214,7 +214,7 @@ export function registerRoutes(app: Express): Server {
 
         // Update profile's image URL in database
         await storage.updateProfile(profileId, { profileImageUrl });
-        
+
         // Also update the user's profile image URL so posts show the current image
         await storage.updateUser(userId, { profileImageUrl });
 
@@ -235,9 +235,9 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/user/cover-image', isAuthenticated, (req: any, res, next) => {
     console.log("POST /api/user/cover-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
-    
+
     const uploadSingle = upload.single('coverImage');
-    
+
     uploadSingle(req, res, async (err: any) => {
       try {
         console.log("Multer processed:", {
@@ -312,7 +312,7 @@ export function registerRoutes(app: Express): Server {
         ...req.body,
         userId,
       });
-      
+
       const profile = await storage.createProfile(profileData);
       res.json(profile);
     } catch (error) {
@@ -329,7 +329,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Verify ownership
       const existingProfile = await storage.getProfile(profileId);
       if (!existingProfile || existingProfile.userId !== userId) {
@@ -349,7 +349,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Verify ownership
       const profile = await storage.getProfile(profileId);
       if (!profile || profile.userId !== userId) {
@@ -369,7 +369,7 @@ export function registerRoutes(app: Express): Server {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
       const { reason } = req.body;
-      
+
       // Verify ownership
       const profile = await storage.getProfile(profileId);
       if (!profile || profile.userId !== userId) {
@@ -408,7 +408,7 @@ export function registerRoutes(app: Express): Server {
       const userId = req.user.id;
       const userProfiles = await storage.getProfilesByUserId(userId);
       const audienceProfile = userProfiles.find(p => p.type === 'audience' && !p.deletedAt);
-      
+
       if (audienceProfile) {
         await storage.setActiveProfile(userId, audienceProfile.id);
         res.json({ success: true, profileId: audienceProfile.id });
@@ -438,7 +438,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Verify ownership
       const profile = await storage.getProfile(profileId);
       if (!profile || profile.userId !== userId) {
@@ -479,7 +479,7 @@ export function registerRoutes(app: Express): Server {
       if (!query) {
         return res.json([]);
       }
-      
+
       const profiles = await storage.searchProfiles(query);
       res.json(profiles);
     } catch (error) {
@@ -492,7 +492,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const profile = await storage.getProfile(profileId);
-      
+
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -543,7 +543,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       const { addresseeId } = req.body;
-      
+
       // Check if friendship already exists
       const existingFriendship = await storage.getFriendshipStatus(activeProfile.id, addresseeId);
       if (existingFriendship) {
@@ -551,7 +551,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       const friendship = await storage.sendFriendRequest(activeProfile.id, addresseeId);
-      
+
       // Send notification
       const { notificationService } = await import('./notifications');
       const targetProfile = await storage.getProfile(addresseeId);
@@ -560,7 +560,7 @@ export function registerRoutes(app: Express): Server {
         const senderName = `${senderUser?.firstName} ${senderUser?.lastName}`;
         await notificationService.notifyFriendRequest(targetProfile.userId, req.user.id, senderName);
       }
-      
+
       res.json(friendship);
     } catch (error) {
       console.error("Error sending friend request:", error);
@@ -572,7 +572,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const friendshipId = parseInt(req.params.id);
       const friendship = await storage.acceptFriendRequest(friendshipId);
-      
+
       // Send notification to the requester
       const { notificationService } = await import('./notifications');
       const requesterProfile = await storage.getProfile(friendship.requesterId);
@@ -581,7 +581,7 @@ export function registerRoutes(app: Express): Server {
         const accepterName = `${accepterUser?.firstName} ${accepterUser?.lastName}`;
         await notificationService.notifyFriendAccepted(requesterProfile.userId, req.user.id, accepterName);
       }
-      
+
       res.json(friendship);
     } catch (error) {
       console.error("Error accepting friend request:", error);
@@ -673,7 +673,7 @@ export function registerRoutes(app: Express): Server {
         res.json({ liked: false });
       } else {
         await storage.likePost(postId, activeProfile.id);
-        
+
         // Send notification for new like
         const { notificationService } = await import('./notifications');
         const post = await db.select().from(posts).where(eq(posts.id, postId));
@@ -685,7 +685,7 @@ export function registerRoutes(app: Express): Server {
             await notificationService.notifyPostLike(postOwnerProfile.userId, req.user.id, likerName, postId);
           }
         }
-        
+
         res.json({ liked: true });
       }
     } catch (error) {
@@ -705,11 +705,11 @@ export function registerRoutes(app: Express): Server {
       // Direct database check for post ownership
       const result = await db.select().from(posts).where(eq(posts.id, postId));
       const post = result[0];
-      
+
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       if (post.profileId !== activeProfile.id) {
         return res.status(403).json({ message: "Unauthorized to delete this post" });
       }
@@ -729,7 +729,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const targetProfileId = parseInt(req.params.profileId);
       const activeProfile = await storage.getActiveProfile(req.user.id);
-      
+
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
@@ -769,7 +769,7 @@ export function registerRoutes(app: Express): Server {
       });
 
       const comment = await storage.createComment(commentData);
-      
+
       // Send notification for new comment
       const { notificationService } = await import('./notifications');
       const post = await db.select().from(posts).where(eq(posts.id, postId));
@@ -781,7 +781,7 @@ export function registerRoutes(app: Express): Server {
           await notificationService.notifyPostComment(postOwnerProfile.userId, req.user.id, commenterName, postId);
         }
       }
-      
+
       res.json(comment);
     } catch (error) {
       console.error("Error creating comment:", error);
@@ -794,12 +794,12 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Shared Profile Management Routes
-  
+
   // Get profile memberships
   app.get('/api/profiles/:id/members', isAuthenticated, async (req: any, res) => {
     try {
       const profileId = parseInt(req.params.id);
-      
+
       // Check if user has permission to view members
       const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "view_analytics");
       if (!hasPermission) {
@@ -824,6 +824,15 @@ export function registerRoutes(app: Express): Server {
       res.status(500).json({ message: "Failed to fetch user memberships" });
     }
   });
+
+  app.use(express.json());
+  // Authentication middleware
+  const requireAuth = (req: any, res: any, next: any) => {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.status(401).json({ message: "Unauthorized" });
+  };
 
   // Invite user to profile
   app.post('/api/profiles/:id/invite', isAuthenticated, async (req: any, res) => {
@@ -850,7 +859,7 @@ export function registerRoutes(app: Express): Server {
       const inviterUser = await storage.getUser(req.user.id);
       const profile = await storage.getProfile(profileId);
       const inviterName = `${inviterUser?.firstName} ${inviterUser?.lastName}`;
-      
+
       if (profile) {
         await notificationService.notifyProfileInvite(
           invitedEmail, 
@@ -871,7 +880,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/invitations/:token/accept', isAuthenticated, async (req: any, res) => {
     try {
       const { token } = req.params;
-      
+
       const membership = await storage.acceptProfileInvitation(token, req.user.id);
       res.json(membership);
     } catch (error) {
@@ -884,7 +893,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/invitations/:token/decline', async (req, res) => {
     try {
       const { token } = req.params;
-      
+
       await storage.declineProfileInvitation(token);
       res.json({ message: "Invitation declined" });
     } catch (error) {
@@ -962,13 +971,13 @@ export function registerRoutes(app: Express): Server {
     try {
       const { limit = 20, offset = 0 } = req.query;
       const { notificationService } = await import('./notifications');
-      
+
       const notifications = await notificationService.getUserNotifications(
         req.user.id,
         parseInt(limit),
         parseInt(offset)
       );
-      
+
       res.json(notifications);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -991,7 +1000,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const notificationId = parseInt(req.params.id);
       const { notificationService } = await import('./notifications');
-      
+
       await notificationService.markAsRead(notificationId, req.user.id);
       res.json({ success: true });
     } catch (error) {
@@ -1015,7 +1024,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const notificationId = parseInt(req.params.id);
       const { notificationService } = await import('./notifications');
-      
+
       await notificationService.deleteNotification(notificationId, req.user.id);
       res.json({ success: true });
     } catch (error) {
@@ -1040,7 +1049,7 @@ export function registerRoutes(app: Express): Server {
       const { type } = req.params;
       const settings = req.body;
       const { notificationService } = await import('./notifications');
-      
+
       await notificationService.updateNotificationSettings(req.user.id, type, settings);
       res.json({ success: true });
     } catch (error) {

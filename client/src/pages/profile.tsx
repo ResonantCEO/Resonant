@@ -1,10 +1,13 @@
-import { useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import Sidebar from "@/components/sidebar";
+import { useState } from "react";
+import { useParams, useNavigate } from "@wouter";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import ProfileHeader from "@/components/profile-header";
 import PostFeed from "@/components/post-feed";
 import FriendsWidget from "@/components/friends-widget";
-import ProfileManagement from "@/components/profile-management";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
@@ -52,6 +55,7 @@ export default function Profile() {
   // For shared profiles, always show management if user owns the profile
   // We'll simplify this to avoid the hooks order issue
   const canManageMembers = isOwn && isSharedProfile;
+    const [activeTab, setActiveTab] = useState("posts");
 
   return (
     <div className="min-h-screen flex bg-neutral-50">
@@ -67,32 +71,42 @@ export default function Profile() {
       {/* Main Content */}
       <div className="flex-1 lg:ml-0 pt-16 lg:pt-0">
         <div className="max-w-4xl mx-auto p-6">
-          <ProfileHeader profile={profile} isOwn={isOwn} canManageMembers={canManageMembers} />
+          <ProfileHeader 
+            profile={profile} 
+            isOwn={isOwn}
+            canManageMembers={canManageMembers}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
 
           {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Bio and Friends Widget */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Bio Section */}
-              {profile.bio && (
-                <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-                  <h3 className="text-lg font-semibold text-neutral-900 mb-3">About</h3>
-                  <p className="text-neutral-700 leading-relaxed">{profile.bio}</p>
-                </div>
-              )}
+          {activeTab === "posts" && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Bio and Friends Widget */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Bio Section */}
+                {profile.bio && (
+                  <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+                    <h3 className="text-lg font-semibold text-neutral-900 mb-3">About</h3>
+                    <p className="text-neutral-700 leading-relaxed">{profile.bio}</p>
+                  </div>
+                )}
 
-              {/* Friends Widget */}
-              <FriendsWidget profileId={profileId} />
-            </div>
+                {/* Friends Widget - Removed from Members tab */}
+                {/* <FriendsWidget profileId={profileId} /> */}
+              </div>
 
-            {/* Right Column - Posts Feed */}
-            <div className="lg:col-span-2">
-              <PostFeed profileId={profileId} />
+              {/* Right Column - Posts Feed */}
+              <div className="lg:col-span-2">
+                {/* Post Feed - Removed from Members tab */}
+                {/* <PostFeed profileId={profileId} /> */}
+                <PostFeed profileId={profileId} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
-      
+
     </div>
   );
 }

@@ -27,9 +27,11 @@ interface ProfileHeaderProps {
   profile: any;
   isOwn: boolean;
   canManageMembers?: boolean;
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
 }
 
-export default function ProfileHeader({ profile, isOwn, canManageMembers }: ProfileHeaderProps) {
+export default function ProfileHeader({ profile, isOwn, canManageMembers, activeTab = "posts", setActiveTab }: ProfileHeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +63,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
     }
     return profile.name;
   };
-  const [activeTab, setActiveTab] = useState("posts");
 
   const { data: friendshipStatus } = useQuery({
     queryKey: [`/api/friendship-status/${profile.id}`],

@@ -36,6 +36,14 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
   const coverFileInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState("posts");
 
+  // Helper function to get display name for profile
+  const getDisplayName = () => {
+    if (profile.type === 'audience' && user) {
+      return `${user.firstName || ''} ${user.lastName || ''}`.trim() || profile.name;
+    }
+    return profile.name;
+  };
+
   const { data: friendshipStatus } = useQuery({
     queryKey: [`/api/friendship-status/${profile.id}`],
     enabled: !isOwn,

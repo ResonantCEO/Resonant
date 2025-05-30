@@ -811,17 +811,69 @@ export class DatabaseStorage implements IStorage {
 
   // Shared profile operations
   async getProfileMemberships(profileId: number): Promise<{ membership: ProfileMembership; user: User }[]> {
-    const memberships = await db
-      .select({
-        membership: profileMemberships,
-        user: users,
-      })
-      .from(profileMemberships)
-      .innerJoin(users, eq(profileMemberships.userId, users.id))
-      .where(eq(profileMemberships.profileId, profileId))
-      .orderBy(profileMemberships.joinedAt);
+    try {
+      console.log(`Getting memberships for profile ${profileId}`);
 
-    return memberships;
+      // First get actual memberships
+      const memberships = await db
+        .select({
+          membership: {
+            id: profileMemberships.id,
+            profileId: profileMemberships.profileId,
+            userId: profileMemberships.userId,
+            role: profileMemberships.role,
+            permissions: profileMemberships.permissions,
+            status: profileMemberships.status,
+            joinedAt: profileMemberships.joinedAt,
+          },
+          user: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            profileImageUrl: users.profileImageUrl,
+          },
+        })
+        .from(profileMemberships)
+        .innerJoin(users, eq(profileMemberships.userId, users.id))
+        .where(eq(profileMemberships.profileId, profileId));
+
+      console.log("Actual memberships found:", JSON.stringify(memberships, null, 2));
+
+      // If no memberships found, check if this is the profile owner
+      if (memberships.length === 0) {
+        const profile = await this.getProfile(profileId);
+        if (profile) {
+          const owner = await this.getUser(profile.userId);
+          if (owner) {
+            console.log("Adding profile owner as member");
+            return [{
+              membership: {
+                id: 0, // Fake ID for owner
+                profileId: profileId,
+                userId: profile.userId,
+                role: "owner",
+                permissions: [],
+                status: "active",
+                joinedAt: profile.createdAt,
+              },
+              user: {
+                id: owner.id,
+                firstName: owner.firstName,
+                lastName: owner.lastName,
+                email: owner.email,
+                profileImageUrl: owner.profileImageUrl,
+              },
+            }];
+          }
+        }
+      }
+
+      return memberships;
+    } catch (error) {
+      console.error("Error in getProfileMemberships:", error);
+      throw error;
+    }
   }
 
   async getUserMemberships(userId: number): Promise<{ membership: ProfileMembership; profile: Profile }[]> {

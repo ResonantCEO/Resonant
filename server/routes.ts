@@ -805,11 +805,12 @@ export function registerRoutes(app: Express): Server {
       const profile = await storage.getProfile(profileId);
       console.log("Profile:", profile);
       
-      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "view_analytics");
+      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_members");
       const isOwner = profile?.userId === req.user.id;
       
       console.log("Permission check:", { hasPermission, isOwner, profileUserId: profile?.userId, requestUserId: req.user.id });
       
+      // Allow access if user is the profile owner or has explicit permission
       if (!hasPermission && !isOwner) {
         return res.status(403).json({ message: "Permission denied" });
       }

@@ -457,39 +457,16 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </TabsList>
           </div>
           
-          {/* Tab Content */}
-          <TabsContent value="posts" className="p-0">
-            {/* Posts content will be handled by the parent component */}
-          </TabsContent>
-          
-          <TabsContent value="about" className="p-6">
-            <div className="text-center text-gray-500">
-              About content coming soon...
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="friends" className="p-6">
-            <div className="text-center text-gray-500">
-              Friends content coming soon...
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="photos" className="p-6">
-            <div className="text-center text-gray-500">
-              Photos content coming soon...
-            </div>
-          </TabsContent>
-          
-          {/* Management tab content - visible for all users on artist/venue profiles */}
-          {(profile.type === "artist" || profile.type === "venue") && (
-            <TabsContent value="management" className="p-6">
+          {/* Management tab content - only show when on management tab */}
+          {activeTab === "management" && (profile.type === "artist" || profile.type === "venue") && (
+            <div className="p-6">
               <ProfileManagement 
                 profileId={profile.id}
                 profileType={profile.type}
                 isOwner={isOwn}
                 canManageMembers={canManageMembers || false}
               />
-            </TabsContent>
+            </div>
           )}
         </Tabs>
       </div>

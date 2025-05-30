@@ -99,10 +99,45 @@ export default function Profile() {
             </div>
           )}
 
-          {/* Members Tab - Clean layout without Friends Widget and Post Feed */}
-          {activeTab === "members" && canManageMembers && (
-            <div className="max-w-4xl mx-auto">
-              {/* Members management content will be handled by ProfileHeader */}
+          {/* About Tab */}
+          {activeTab === "about" && (
+            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+              <h3 className="text-lg font-semibold text-neutral-900 mb-4">About {profile.name}</h3>
+              {profile.bio ? (
+                <p className="text-neutral-700 leading-relaxed">{profile.bio}</p>
+              ) : (
+                <p className="text-neutral-500 italic">No bio available.</p>
+              )}
+              {profile.location && (
+                <div className="mt-4">
+                  <h4 className="font-medium text-neutral-900 mb-2">Location</h4>
+                  <p className="text-neutral-700">{profile.location}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Friends Tab */}
+          {activeTab === "friends" && (
+            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+              <FriendsWidget profileId={profileId} />
+            </div>
+          )}
+
+          {/* Photos Tab */}
+          {activeTab === "photos" && (
+            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+              <div className="text-center text-gray-500">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Photos</h3>
+                <p>Photo gallery coming soon...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Management Tab */}
+          {activeTab === "management" && isSharedProfile && (
+            <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
+              {/* Management content will be handled by ProfileHeader */}
             </div>
           )}
         </div>

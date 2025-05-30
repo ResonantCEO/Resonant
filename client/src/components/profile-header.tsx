@@ -207,8 +207,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       console.log("Cover photo upload response:", data);
       
       // Invalidate and refetch profile data to get updated cover photo
-      await queryClient.invalidateQueries({ queryKey: ["/api/profiles", profile.id] });
-      await queryClient.refetchQueries({ queryKey: ["/api/profiles", profile.id] });
+      await queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      await queryClient.refetchQueries({ queryKey: [`/api/profiles/${profile.id}`] });
       
       toast({
         title: "Cover Photo Updated",
@@ -230,7 +230,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       return await apiRequest("DELETE", `/api/profiles/${profile.id}/cover-image`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles", profile.id] });
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
       toast({
         title: "Cover Photo Removed",
         description: "Your cover photo has been removed.",

@@ -75,33 +75,14 @@ export function registerRoutes(app: Express): Server {
       console.log("API - User query result:", JSON.stringify(user, null, 2));
       console.log("API - Cover image URL from DB:", user.coverImageUrl);
 
-      // Explicitly construct response to ensure all fields are included
-      const userResponse = {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl,
-        coverImageUrl: user.coverImageUrl,
-        showOnlineStatus: user.showOnlineStatus,
-        allowFriendRequests: user.allowFriendRequests,
-        showActivityStatus: user.showActivityStatus,
-        emailNotifications: user.emailNotifications,
-        notifyFriendRequests: user.notifyFriendRequests,
-        notifyMessages: user.notifyMessages,
-        notifyPostLikes: user.notifyPostLikes,
-        notifyComments: user.notifyComments,
-        theme: user.theme,
-        language: user.language,
-        compactMode: user.compactMode,
-        autoplayVideos: user.autoplayVideos,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
-      };
+      // Send the complete user object (excluding password)
+      const { password, ...userResponse } = user;
 
       console.log("API - Final response:", JSON.stringify(userResponse, null, 2));
       console.log("API - Sending coverImageUrl:", userResponse.coverImageUrl);
-      res.json(userResponse);
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200).json(userResponse);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

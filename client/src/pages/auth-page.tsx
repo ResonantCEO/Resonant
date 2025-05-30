@@ -9,10 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Music, Building, Users, Eye, EyeOff } from "lucide-react";
+import { useLocation } from "wouter";
 
 
 export default function AuthPage() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   
   // Login form state
@@ -40,6 +42,8 @@ export default function AuthPage() {
         title: "Welcome back!",
         description: "You've successfully logged in.",
       });
+      // Redirect to home page after successful login
+      setLocation("/");
     },
     onError: (error: any) => {
       toast({
@@ -58,9 +62,11 @@ export default function AuthPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
-        title: "Welcome to SocialConnect!",
+        title: "Welcome to Resonant!",
         description: "Your account has been created successfully.",
       });
+      // Redirect to home page after successful registration
+      setLocation("/");
     },
     onError: (error: any) => {
       toast({

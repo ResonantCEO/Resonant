@@ -368,6 +368,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
+      const { reason } = req.body;
       
       // Verify ownership
       const profile = await storage.getProfile(profileId);
@@ -384,14 +385,17 @@ export function registerRoutes(app: Express): Server {
       const activeProfile = await storage.getActiveProfile(userId);
       if (activeProfile?.id === profileId) {
         const userProfiles = await storage.getProfilesByUserId(userId);
-        const audienceProfile = userProfiles.find(p => p.type === 'audience');
+        const audienceProfile = userProfiles.find(p => p.type === 'audience' && !p.deletedAt);
         if (audienceProfile) {
           await storage.setActiveProfile(userId, audienceProfile.id);
         }
       }
 
-      await storage.deleteProfile(profileId);
-      res.json({ success: true });
+      await storage.deleteProfile(profileId, userId, reason);
+      res.json({ 
+        success: true, 
+        message: "Profile deleted successfully. It will be permanently removed in 30 days unless restored." 
+      });
     } catch (error) {
       console.error("Error deleting profile:", error);
       res.status(500).json({ message: "Failed to delete profile" });
@@ -403,7 +407,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const userId = req.user.id;
       const userProfiles = await storage.getProfilesByUserId(userId);
-      const audienceProfile = userProfiles.find(p => p.type === 'audience');
+      const audienceProfile = userProfiles.find(p => p.type === 'audience' && !p.deletedAt);
       
       if (audienceProfile) {
         await storage.setActiveProfile(userId, audienceProfile.id);
@@ -414,6 +418,58 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error activating audience profile:", error);
       res.status(500).json({ message: "Failed to activate audience profile" });
+    }
+  });
+
+  // Get deleted profiles
+  app.get('/api/profiles/deleted', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const deletedProfiles = await storage.getDeletedProfiles(userId);
+      res.json(deletedProfiles);
+    } catch (error) {
+      console.error("Error fetching deleted profiles:", error);
+      res.status(500).json({ message: "Failed to fetch deleted profiles" });
+    }
+  });
+
+  // Restore profile
+  app.post('/api/profiles/:id/restore', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      // Verify ownership
+      const profile = await storage.getProfile(profileId);
+      if (!profile || profile.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const restoredProfile = await storage.restoreProfile(profileId, userId);
+      res.json({ 
+        success: true, 
+        profile: restoredProfile,
+        message: "Profile restored successfully" 
+      });
+    } catch (error) {
+      console.error("Error restoring profile:", error);
+      res.status(500).json({ message: error.message || "Failed to restore profile" });
+    }
+  });
+
+  // Admin route for cleanup (you may want to add admin authentication)
+  app.post('/api/admin/cleanup-expired-profiles', isAuthenticated, async (req: any, res) => {
+    try {
+      // Add admin check here if needed
+      const deletedCount = await storage.cleanupExpiredProfiles();
+      res.json({ 
+        success: true, 
+        deletedCount,
+        message: `${deletedCount} expired profiles permanently deleted` 
+      });
+    } catch (error) {
+      console.error("Error during profile cleanup:", error);
+      res.status(500).json({ message: "Failed to cleanup expired profiles" });
     }
   });
 

@@ -62,6 +62,10 @@ export const profiles = pgTable("profiles", {
   location: varchar("location"),
   isActive: boolean("is_active").default(false), // which profile is currently active
   isShared: boolean("is_shared").default(false), // true for artist/venue profiles that can have multiple members
+  deletedAt: timestamp("deleted_at"), // soft delete timestamp
+  deletedBy: integer("deleted_by").references(() => users.id), // who deleted the profile
+  deletionReason: text("deletion_reason"), // reason for deletion
+  backupData: jsonb("backup_data"), // backup of related data
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

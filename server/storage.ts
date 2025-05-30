@@ -24,7 +24,7 @@ import {
   type PostLike,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc, and, or, sql, inArray } from "drizzle-orm";
+import { eq, desc, asc, and, or, sql, inArray, isNotNull, isNull, lt } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -39,7 +39,11 @@ export interface IStorage {
   getActiveProfile(userId: number): Promise<Profile | undefined>;
   createProfile(profile: InsertProfile): Promise<Profile>;
   updateProfile(id: number, updates: Partial<InsertProfile>): Promise<Profile>;
-  deleteProfile(id: number): Promise<void>;
+  deleteProfile(id: number, deletedBy?: number, reason?: string): Promise<void>;
+  restoreProfile(id: number, restoredBy: number): Promise<Profile>;
+  permanentlyDeleteProfile(id: number): Promise<void>;
+  getDeletedProfiles(userId?: number): Promise<Profile[]>;
+  cleanupExpiredProfiles(): Promise<number>;
   setActiveProfile(userId: number, profileId: number): Promise<void>;
   searchProfiles(query: string, limit?: number): Promise<Profile[]>;
 
@@ -144,14 +148,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProfilesByUserId(userId: number): Promise<Profile[]> {
-    return db.select().from(profiles).where(eq(profiles.userId, userId)).orderBy(desc(profiles.createdAt));
+    return db.select().from(profiles).where(
+      and(
+        eq(profiles.userId, userId),
+        isNull(profiles.deletedAt)
+      )
+    ).orderBy(desc(profiles.createdAt));
   }
 
   async getActiveProfile(userId: number): Promise<Profile | undefined> {
     const [profile] = await db
       .select()
       .from(profiles)
-      .where(and(eq(profiles.userId, userId), eq(profiles.isActive, true)));
+      .where(and(
+        eq(profiles.userId, userId), 
+        eq(profiles.isActive, true),
+        isNull(profiles.deletedAt)
+      ));
     return profile;
   }
 
@@ -194,10 +207,210 @@ export class DatabaseStorage implements IStorage {
       .where(eq(profiles.id, profileId));
   }
 
-  async deleteProfile(id: number): Promise<void> {
-    console.log(`Attempting to delete profile with id: ${id}`);
+  async deleteProfile(id: number, deletedBy?: number, reason?: string): Promise<void> {
+    console.log(`Attempting to soft delete profile with id: ${id}`);
 
     try {
+      // Get the profile to delete
+      const profile = await this.getProfile(id);
+      if (!profile) {
+        throw new Error(`Profile with id ${id} not found`);
+      }
+
+      // Check if already soft deleted
+      if (profile.deletedAt) {
+        throw new Error(`Profile with id ${id} is already deleted`);
+      }
+
+      // Create backup data
+      const backupData = await this.createProfileBackup(id);
+
+      // Get all members for email notifications
+      const members = await this.getProfileMemberships(id);
+      
+      // Get the user who deleted the profile for notification
+      const deletedByUser = deletedBy ? await this.getUser(deletedBy) : null;
+      const deletedByName = deletedByUser ? `${deletedByUser.firstName} ${deletedByUser.lastName}` : 'System';
+
+      // Soft delete the profile
+      const deletedAt = new Date();
+      const [updatedProfile] = await db
+        .update(profiles)
+        .set({
+          deletedAt,
+          deletedBy,
+          deletionReason: reason,
+          backupData,
+          isActive: false, // Deactivate the profile
+          updatedAt: deletedAt
+        })
+        .where(eq(profiles.id, id))
+        .returning();
+
+      if (!updatedProfile) {
+        throw new Error(`Failed to soft delete profile with id ${id}`);
+      }
+
+      console.log(`Successfully soft deleted profile ${id}`);
+
+      // Send email notifications to all members (async, don't wait)
+      this.sendDeletionNotifications(profile, members, deletedByName, deletedAt)
+        .catch(error => console.error('Failed to send deletion notifications:', error));
+
+    } catch (error) {
+      console.error(`Error soft deleting profile ${id}:`, error);
+      throw error;
+    }
+  }
+
+  private async createProfileBackup(profileId: number): Promise<any> {
+    try {
+      // Get all related data
+      const profile = await this.getProfile(profileId);
+      const profilePosts = await db.select().from(posts).where(eq(posts.profileId, profileId));
+      const memberships = await this.getProfileMemberships(profileId);
+      const invitations = await this.getProfileInvitations(profileId);
+      
+      // Get friendships
+      const friendships = await db.select().from(friendships).where(
+        or(
+          eq(friendships.requesterId, profileId),
+          eq(friendships.addresseeId, profileId)
+        )
+      );
+
+      // Get comments for all posts
+      const postIds = profilePosts.map(p => p.id);
+      const comments = postIds.length > 0 
+        ? await db.select().from(comments).where(inArray(comments.postId, postIds))
+        : [];
+
+      // Get likes for all posts
+      const likes = postIds.length > 0
+        ? await db.select().from(postLikes).where(inArray(postLikes.postId, postIds))
+        : [];
+
+      return {
+        profile,
+        posts: profilePosts,
+        memberships: memberships.map(m => m.membership),
+        invitations,
+        friendships,
+        comments,
+        likes,
+        backedUpAt: new Date(),
+        version: '1.0'
+      };
+    } catch (error) {
+      console.error(`Error creating backup for profile ${profileId}:`, error);
+      throw error;
+    }
+  }
+
+  private async sendDeletionNotifications(
+    profile: Profile, 
+    members: { membership: ProfileMembership; user: User }[],
+    deletedByName: string,
+    deletedAt: Date
+  ): Promise<void> {
+    const { emailService } = await import('./email');
+    
+    // Calculate restoration deadline (30 days from deletion)
+    const restorationDeadline = new Date(deletedAt);
+    restorationDeadline.setDate(restorationDeadline.getDate() + 30);
+
+    // Send email to each member
+    for (const member of members) {
+      try {
+        await emailService.sendProfileDeletionNotification(
+          member.user.email,
+          `${member.user.firstName} ${member.user.lastName}`,
+          profile.name,
+          profile.type,
+          deletedByName,
+          restorationDeadline
+        );
+      } catch (error) {
+        console.error(`Failed to send deletion notification to ${member.user.email}:`, error);
+      }
+    }
+
+    // Also send to profile owner if it's an individual profile
+    if (profile.userId) {
+      try {
+        const owner = await this.getUser(profile.userId);
+        if (owner && !members.some(m => m.user.id === owner.id)) {
+          await emailService.sendProfileDeletionNotification(
+            owner.email,
+            `${owner.firstName} ${owner.lastName}`,
+            profile.name,
+            profile.type,
+            deletedByName,
+            restorationDeadline
+          );
+        }
+      } catch (error) {
+        console.error(`Failed to send deletion notification to profile owner:`, error);
+      }
+    }
+  }
+
+  async restoreProfile(id: number, restoredBy: number): Promise<Profile> {
+    console.log(`Attempting to restore profile with id: ${id}`);
+
+    try {
+      const profile = await this.getProfile(id);
+      if (!profile) {
+        throw new Error(`Profile with id ${id} not found`);
+      }
+
+      if (!profile.deletedAt) {
+        throw new Error(`Profile with id ${id} is not deleted`);
+      }
+
+      // Check if within restoration period (30 days)
+      const deletionDate = new Date(profile.deletedAt);
+      const restorationDeadline = new Date(deletionDate);
+      restorationDeadline.setDate(restorationDeadline.getDate() + 30);
+
+      if (new Date() > restorationDeadline) {
+        throw new Error('Restoration period has expired (30 days)');
+      }
+
+      // Restore the profile
+      const [restoredProfile] = await db
+        .update(profiles)
+        .set({
+          deletedAt: null,
+          deletedBy: null,
+          deletionReason: null,
+          updatedAt: new Date()
+          // Keep backupData for audit purposes
+        })
+        .where(eq(profiles.id, id))
+        .returning();
+
+      console.log(`Successfully restored profile ${id}`);
+      return restoredProfile;
+    } catch (error) {
+      console.error(`Error restoring profile ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async permanentlyDeleteProfile(id: number): Promise<void> {
+    console.log(`Attempting to permanently delete profile with id: ${id}`);
+
+    try {
+      const profile = await this.getProfile(id);
+      if (!profile) {
+        throw new Error(`Profile with id ${id} not found`);
+      }
+
+      if (!profile.deletedAt) {
+        throw new Error(`Profile with id ${id} is not soft deleted`);
+      }
+
       // First delete any related posts (which will cascade to comments and likes)
       const profilePosts = await db.select().from(posts).where(eq(posts.profileId, id));
       for (const post of profilePosts) {
@@ -225,9 +438,58 @@ export class DatabaseStorage implements IStorage {
         throw new Error(`Profile with id ${id} not found or already deleted`);
       }
 
-      console.log(`Successfully deleted profile ${id}`);
+      console.log(`Successfully permanently deleted profile ${id}`);
     } catch (error) {
-      console.error(`Error deleting profile ${id}:`, error);
+      console.error(`Error permanently deleting profile ${id}:`, error);
+      throw error;
+    }
+  }
+
+  async getDeletedProfiles(userId?: number): Promise<Profile[]> {
+    const query = db
+      .select()
+      .from(profiles)
+      .where(isNotNull(profiles.deletedAt));
+
+    if (userId) {
+      query.where(eq(profiles.userId, userId));
+    }
+
+    return query.orderBy(desc(profiles.deletedAt));
+  }
+
+  async cleanupExpiredProfiles(): Promise<number> {
+    console.log('Starting cleanup of expired soft-deleted profiles');
+    
+    try {
+      // Find profiles deleted more than 30 days ago
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const expiredProfiles = await db
+        .select()
+        .from(profiles)
+        .where(
+          and(
+            isNotNull(profiles.deletedAt),
+            lt(profiles.deletedAt, thirtyDaysAgo)
+          )
+        );
+
+      let deletedCount = 0;
+      for (const profile of expiredProfiles) {
+        try {
+          await this.permanentlyDeleteProfile(profile.id);
+          deletedCount++;
+        } catch (error) {
+          console.error(`Failed to permanently delete expired profile ${profile.id}:`, error);
+        }
+      }
+
+      console.log(`Cleanup completed: ${deletedCount} expired profiles permanently deleted`);
+      return deletedCount;
+    } catch (error) {
+      console.error('Error during profile cleanup:', error);
       throw error;
     }
   }

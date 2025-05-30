@@ -92,12 +92,7 @@ export default function Profile() {
           </div>
         </div>
       </div>
-      <ProfileManagement 
-                profileId={profile.id}
-                profileType={profile.type}
-                isOwner={isOwn}
-                canManageMembers={canManageMembers || isOwn}
-              />
+      
     </div>
   );
 }

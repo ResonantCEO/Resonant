@@ -17,6 +17,12 @@ export default function Home() {
     queryKey: ["/api/profiles/active"],
   });
 
+  // Get all user profiles to check for existing audience profile
+  const { data: userProfiles } = useQuery({
+    queryKey: ["/api/profiles"],
+    enabled: !!user,
+  });
+
   // Auto-create audience profile if user doesn't have one
   const createDefaultProfile = useMutation({
     mutationFn: async () => {
@@ -49,10 +55,19 @@ export default function Home() {
 
   // Automatically create profile if user doesn't have one
   useEffect(() => {
-    if (!profileLoading && !activeProfile && user && !createDefaultProfile.isPending) {
-      createDefaultProfile.mutate();
+    if (!profileLoading && !activeProfile && user && userProfiles && !createDefaultProfile.isPending) {
+      // Check if user already has an audience profile
+      const existingAudienceProfile = userProfiles.find((p: any) => p.type === 'audience' && !p.deletedAt);
+      
+      if (existingAudienceProfile) {
+        // Activate existing audience profile instead of creating new one
+        activateAudienceProfile.mutate();
+      } else {
+        // Only create new profile if no audience profile exists
+        createDefaultProfile.mutate();
+      }
     }
-  }, [activeProfile, profileLoading, user, createDefaultProfile]);
+  }, [activeProfile, profileLoading, user, userProfiles, createDefaultProfile, activateAudienceProfile]);
 
   // Auto-activate audience profile when app loads
   useEffect(() => {

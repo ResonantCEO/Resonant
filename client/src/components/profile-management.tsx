@@ -117,7 +117,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
   // Update member role mutation
   const updateMemberMutation = useMutation({
     mutationFn: async ({ memberId, role, permissions }: { memberId: number; role: string; permissions: string[] }) => {
-      return apiRequest(`/api/profile-memberships/${memberId}`, "PATCH", { role, permissions });
+      return apiRequest(`/api/profiles/${profileId}/members`, "PATCH", { role, permissions });
     },
     onSuccess: () => {
       toast({
@@ -294,7 +294,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
                   const lastName = member?.user?.lastName || '';
                   const email = member?.user?.email || '';
                   const profileImageUrl = member?.user?.profileImageUrl;
-                  
+
                   return (
                     <div key={member?.membership?.id || member?.id || Math.random()} className="flex items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-lg">
                       <div className="flex items-center gap-3">

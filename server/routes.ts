@@ -75,14 +75,16 @@ export function registerRoutes(app: Express): Server {
       console.log("API - User result:", JSON.stringify(user, null, 2));
       console.log("API - Cover image URL:", user.coverImageUrl);
       
-      // Return only the fields the frontend needs, excluding sensitive data like password
+      console.log("API - Cover image URL from storage:", user.coverImageUrl);
+      
+      // Construct response with explicit field mapping to ensure coverImageUrl is included
       const safeUser = {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
-        coverImageUrl: user.coverImageUrl,
+        coverImageUrl: user.coverImageUrl || null, // Explicitly ensure this field exists
         showOnlineStatus: user.showOnlineStatus,
         allowFriendRequests: user.allowFriendRequests,
         showActivityStatus: user.showActivityStatus,
@@ -99,6 +101,7 @@ export function registerRoutes(app: Express): Server {
         updatedAt: user.updatedAt
       };
       
+      console.log("API - Final response coverImageUrl:", safeUser.coverImageUrl);
       res.json(safeUser);
     } catch (error) {
       console.error("Error fetching user:", error);

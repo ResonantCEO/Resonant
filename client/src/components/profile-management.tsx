@@ -92,7 +92,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
   // Invite user mutation
   const inviteUserMutation = useMutation({
     mutationFn: async (data: { invitedEmail: string; role: string; permissions: string[] }) => {
-      return apiRequest(`/api/profiles/${profileId}/invite`, "POST", data);
+      return apiRequest("POST", `/api/profiles/${profileId}/invite`, data);
     },
     onSuccess: () => {
       toast({
@@ -138,7 +138,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
   // Remove member mutation
   const removeMemberMutation = useMutation({
     mutationFn: async (memberId: number) => {
-      return apiRequest(`/api/profile-memberships/${memberId}`, "DELETE");
+      return apiRequest("DELETE", `/api/profile-memberships/${memberId}`);
     },
     onSuccess: () => {
       toast({

@@ -35,25 +35,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Helper function to format user's display name
-  const getUserDisplayName = () => {
-    if (!user) return profile.name || "";
-    const firstName = user.firstName || "";
-    const lastName = user.lastName || "";
-    return `${firstName} ${lastName}`.trim() || user.email || profile.name;
-  };
-
-  // Helper function to get user initials
-  const getUserInitials = () => {
-    if (!user) return profile.name?.slice(0, 2).toUpperCase() || "";
-    const firstName = user.firstName || "";
-    const lastName = user.lastName || "";
-    if (firstName && lastName) {
-      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-    }
-    return user.email ? user.email.charAt(0).toUpperCase() : profile.name?.slice(0, 2).toUpperCase() || "";
-  };
-
   // Helper function to get display name for profile
   const getDisplayName = () => {
     if (profile.type === 'audience' && user) {

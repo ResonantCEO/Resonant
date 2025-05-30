@@ -233,6 +233,13 @@ export default function PostFeed({ profileId }: PostFeedProps) {
         posts.map((post: any) => {
           console.log("Post data:", post); // Debug log
           console.log("Profile image URL:", post.profile?.profileImageUrl || post.profileImageUrl);
+          
+          // For posts by the current user, use their current profile image, not the saved one
+          const isOwnPost = post.profileId === activeProfile?.id;
+          const profileImageUrl = isOwnPost && user?.profileImageUrl 
+            ? user.profileImageUrl 
+            : (post.profile?.profileImageUrl || post.profileImageUrl || "");
+          
           return (
             <Card key={post.id}>
             <CardContent className="p-6">
@@ -240,7 +247,7 @@ export default function PostFeed({ profileId }: PostFeedProps) {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <Avatar>
-                    <AvatarImage src={post.profile?.profileImageUrl || post.profileImageUrl || ""} />
+                    <AvatarImage src={profileImageUrl} />
                     <AvatarFallback className={`text-white font-semibold ${
                       (post.profile?.type || post.profileType) === 'artist' 
                         ? 'bg-green-500' 

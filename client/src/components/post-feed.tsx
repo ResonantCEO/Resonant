@@ -179,8 +179,8 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
 
   return (
     <div className="space-y-6">
-      {/* Create Post (only show on own profile or feed) */}
-      {(!profileId || profileId === activeProfile?.id) && activeProfile && (
+      {/* Create Post (only show when showCreatePost is true and on own profile or feed) */}
+      {showCreatePost && (!profileId || profileId === activeProfile?.id) && activeProfile && (
         <Card>
           <CardContent className="p-6">
             <form onSubmit={handleCreatePost}>

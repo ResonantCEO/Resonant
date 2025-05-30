@@ -447,8 +447,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
               <TabsTrigger value="photos" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                 Photos
               </TabsTrigger>
-              {/* Management tab - only for shared profiles (artist/venue) */}
-              {(profile.type === "artist" || profile.type === "venue") && canManageMembers && (
+              {/* Management tab - visible for all users on artist/venue profiles */}
+              {(profile.type === "artist" || profile.type === "venue") && (
                 <TabsTrigger value="management" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                   {profile.type === "artist" ? "Members" : "Staff"}
                 </TabsTrigger>
@@ -479,8 +479,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
             </div>
           </TabsContent>
           
-          {/* Management tab content - only for shared profiles */}
-          {(profile.type === "artist" || profile.type === "venue") && canManageMembers && (
+          {/* Management tab content - visible for all users on artist/venue profiles */}
+          {(profile.type === "artist" || profile.type === "venue") && (
             <TabsContent value="management" className="p-6">
               <ProfileManagement 
                 profileId={profile.id}

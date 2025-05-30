@@ -34,14 +34,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
-
-  // Helper function to get display name for profile
-  const getDisplayName = () => {
-    if (profile.type === 'audience' && user) {
-      return `${user.firstName || ''} ${user.lastName || ''}`.trim() || profile.name;
-    }
-    return profile.name;
-  };
   const [activeTab, setActiveTab] = useState("posts");
 
   const { data: friendshipStatus } = useQuery({

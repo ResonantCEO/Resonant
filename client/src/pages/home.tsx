@@ -69,15 +69,7 @@ export default function Home() {
     }
   }, [activeProfile, profileLoading, user, userProfiles, createDefaultProfile, activateAudienceProfile]);
 
-  // Auto-activate audience profile when app loads
-  useEffect(() => {
-    if (user && activeProfile && !activateAudienceProfile.isPending) {
-      // Only activate if not already on audience profile
-      if (activeProfile.type !== 'audience') {
-        activateAudienceProfile.mutate();
-      }
-    }
-  }, [user, activeProfile, activateAudienceProfile]);
+  
 
   if (profileLoading || createDefaultProfile.isPending) {
     return (

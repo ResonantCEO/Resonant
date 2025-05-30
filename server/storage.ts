@@ -918,7 +918,6 @@ export class DatabaseStorage implements IStorage {
           eq(profileInvitations.profileId, profileId),
           eq(profileInvitations.status, "pending")
         )
-```text
       )
       .orderBy(profileInvitations.createdAt);
 

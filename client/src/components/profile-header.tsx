@@ -322,11 +322,18 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           {(() => {
             console.log("ProfileHeader - User data:", user);
             console.log("ProfileHeader - Cover image URL:", user?.coverImageUrl);
-            // Force a fresh API call to debug the issue
+            
+            // Force direct API call to bypass cache
             if (user && !user.coverImageUrl) {
-              console.log("Missing coverImageUrl, forcing cache refresh...");
-              queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+              fetch('/api/user', { credentials: 'include' })
+                .then(res => res.json())
+                .then(data => {
+                  console.log("Direct API call response:", data);
+                  console.log("Direct API coverImageUrl:", data?.coverImageUrl);
+                })
+                .catch(err => console.error("Direct API error:", err));
             }
+            
             return null;
           })()}
           

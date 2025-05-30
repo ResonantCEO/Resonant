@@ -25,13 +25,12 @@ interface User {
 
 export function useAuth() {
   const { data: user, isLoading } = useQuery<User>({
-    queryKey: ["/api/user"],
+    queryKey: ["/api/user", Date.now()], // Force fresh request
     retry: false,
     staleTime: 0,
-    cacheTime: 0,
+    gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
-    refetchInterval: false,
   });
 
   return {

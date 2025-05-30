@@ -40,7 +40,15 @@ export const getQueryFn: <T>(options: {
     }
 
     await throwIfResNotOk(res);
-    return await res.json();
+    const data = await res.json();
+    
+    // Debug logging for /api/user endpoint specifically
+    if (queryKey[0] === '/api/user') {
+      console.log("QueryClient - Raw API response for /api/user:", data);
+      console.log("QueryClient - coverImageUrl in response:", data?.coverImageUrl);
+    }
+    
+    return data;
   };
 
 export const queryClient = new QueryClient({

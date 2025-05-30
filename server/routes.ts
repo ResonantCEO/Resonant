@@ -67,14 +67,14 @@ export function registerRoutes(app: Express): Server {
     try {
       // Direct database query to ensure we get the coverImageUrl field
       const [user] = await db.select().from(users).where(eq(users.id, req.user.id));
-      
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       console.log("API - Direct DB query result:", JSON.stringify(user, null, 2));
       console.log("API - Cover image URL from DB:", user.coverImageUrl);
-      
+
       // Return user data directly from database with only safe fields
       const safeUser = {
         id: user.id,
@@ -82,7 +82,7 @@ export function registerRoutes(app: Express): Server {
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
-        coverImageUrl: user.coverImageUrl, // Ensure this field is explicitly included
+        coverImageUrl: user.coverImageUrl,
         showOnlineStatus: user.showOnlineStatus,
         allowFriendRequests: user.allowFriendRequests,
         showActivityStatus: user.showActivityStatus,
@@ -98,12 +98,10 @@ export function registerRoutes(app: Express): Server {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
-      
-      // Debug logging to verify the field is included
-      console.log("Final safeUser object:", JSON.stringify(safeUser, null, 2));
-      console.log("Cover image in final response:", safeUser.coverImageUrl);
-      
-      console.log("API - Final response coverImageUrl:", safeUser.coverImageUrl);
+
+      console.log("Final response being sent:", JSON.stringify(safeUser, null, 2));
+      console.log("Cover image URL in response:", safeUser.coverImageUrl);
+
       res.json(safeUser);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -140,7 +138,7 @@ export function registerRoutes(app: Express): Server {
     console.log("POST /api/user/profile-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
     console.log("Body keys:", Object.keys(req.body || {}));
-    
+
     upload.single('profileImage')(req, res, async (err) => {
       try {
         console.log("Multer callback executed");
@@ -188,7 +186,7 @@ export function registerRoutes(app: Express): Server {
     console.log("POST /api/profiles/:profileId/profile-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
     console.log("Profile ID:", req.params.profileId);
-    
+
     upload.single('profileImage')(req, res, async (err) => {
       try {
         console.log("Multer callback executed");
@@ -235,9 +233,9 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/user/cover-image', isAuthenticated, (req: any, res, next) => {
     console.log("POST /api/user/cover-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
-    
+
     const uploadSingle = upload.single('coverImage');
-    
+
     uploadSingle(req, res, async (err: any) => {
       try {
         console.log("Multer processed:", {
@@ -313,7 +311,7 @@ export function registerRoutes(app: Express): Server {
         ...req.body,
         userId,
       });
-      
+
       const profile = await storage.createProfile(profileData);
       res.json(profile);
     } catch (error) {
@@ -330,7 +328,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Verify ownership
       const existingProfile = await storage.getProfile(profileId);
       if (!existingProfile || existingProfile.userId !== userId) {
@@ -350,7 +348,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Verify ownership
       const profile = await storage.getProfile(profileId);
       if (!profile || profile.userId !== userId) {
@@ -371,7 +369,7 @@ export function registerRoutes(app: Express): Server {
       const userId = req.user.id;
       const userProfiles = await storage.getProfilesByUserId(userId);
       const audienceProfile = userProfiles.find(p => p.type === 'audience');
-      
+
       if (audienceProfile) {
         await storage.setActiveProfile(userId, audienceProfile.id);
         res.json({ success: true, profileId: audienceProfile.id });
@@ -390,7 +388,7 @@ export function registerRoutes(app: Express): Server {
       if (!query) {
         return res.json([]);
       }
-      
+
       const profiles = await storage.searchProfiles(query);
       res.json(profiles);
     } catch (error) {
@@ -403,7 +401,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const profile = await storage.getProfile(profileId);
-      
+
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -454,7 +452,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       const { addresseeId } = req.body;
-      
+
       // Check if friendship already exists
       const existingFriendship = await storage.getFriendshipStatus(activeProfile.id, addresseeId);
       if (existingFriendship) {
@@ -583,11 +581,11 @@ export function registerRoutes(app: Express): Server {
       // Direct database check for post ownership
       const result = await db.select().from(posts).where(eq(posts.id, postId));
       const post = result[0];
-      
+
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-      
+
       if (post.profileId !== activeProfile.id) {
         return res.status(403).json({ message: "Unauthorized to delete this post" });
       }
@@ -607,7 +605,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const targetProfileId = parseInt(req.params.profileId);
       const activeProfile = await storage.getActiveProfile(req.user.id);
-      
+
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
@@ -659,12 +657,12 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Shared Profile Management Routes
-  
+
   // Get profile memberships
   app.get('/api/profiles/:id/members', isAuthenticated, async (req: any, res) => {
     try {
       const profileId = parseInt(req.params.id);
-      
+
       // Check if user has permission to view members
       const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "view_analytics");
       if (!hasPermission) {
@@ -721,7 +719,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/invitations/:token/accept', isAuthenticated, async (req: any, res) => {
     try {
       const { token } = req.params;
-      
+
       const membership = await storage.acceptProfileInvitation(token, req.user.id);
       res.json(membership);
     } catch (error) {
@@ -734,7 +732,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/invitations/:token/decline', async (req, res) => {
     try {
       const { token } = req.params;
-      
+
       await storage.declineProfileInvitation(token);
       res.json({ message: "Invitation declined" });
     } catch (error) {

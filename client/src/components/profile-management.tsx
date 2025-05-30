@@ -286,9 +286,13 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
               <div>Loading members...</div>
             ) : (
               <div className="space-y-3">
-                {members.map((member: any) => {
+                {members.filter((member: any) => {
+                  // Filter out any items that are not actual member objects
+                  // Only show items that have membership data or are the profile owner
+                  return member?.membership || member?.role === "owner";
+                }).map((member: any) => {
                   console.log("Member data:", member);
-                  const role = member?.membership?.role || member?.role || "member";
+                  const role = member?.membership?.role || member?.role || "owner";
                   const RoleIcon = ROLE_ICONS[role as keyof typeof ROLE_ICONS] || User;
                   const firstName = member?.user?.firstName || '';
                   const lastName = member?.user?.lastName || '';

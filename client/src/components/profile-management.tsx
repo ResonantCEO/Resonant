@@ -287,15 +287,21 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
             ) : (
               <div className="space-y-3">
                 {members.map((member: any) => {
+                  console.log("Member data:", member);
                   const role = member?.membership?.role || member?.role || "member";
                   const RoleIcon = ROLE_ICONS[role as keyof typeof ROLE_ICONS] || User;
+                  const firstName = member?.user?.firstName || '';
+                  const lastName = member?.user?.lastName || '';
+                  const email = member?.user?.email || '';
+                  const profileImageUrl = member?.user?.profileImageUrl;
+                  
                   return (
                     <div key={member?.membership?.id || member?.id || Math.random()} className="flex items-center justify-between p-4 bg-gray-800 border border-gray-700 rounded-lg">
                       <div className="flex items-center gap-3">
-                        {member?.user?.profileImageUrl ? (
+                        {profileImageUrl ? (
                           <img
-                            src={member?.user?.profileImageUrl}
-                            alt={`${member?.user?.firstName || ''} ${member?.user?.lastName || ''}`}
+                            src={profileImageUrl}
+                            alt={`${firstName} ${lastName}`}
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         ) : (
@@ -304,8 +310,10 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
                           </div>
                         )}
                         <div>
-                          <p className="font-semibold text-white">{member?.user?.firstName || ''} {member?.user?.lastName || ''}</p>
-                          <p className="text-sm text-gray-300">{member?.user?.email || ''}</p>
+                          <p className="font-semibold text-white">
+                            {firstName && lastName ? `${firstName} ${lastName}` : email || 'Unknown User'}
+                          </p>
+                          <p className="text-sm text-gray-300">{email}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

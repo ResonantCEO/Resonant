@@ -799,17 +799,23 @@ export function registerRoutes(app: Express): Server {
   app.get('/api/profiles/:id/members', isAuthenticated, async (req: any, res) => {
     try {
       const profileId = parseInt(req.params.id);
+      console.log(`Fetching members for profile ${profileId} by user ${req.user.id}`);
 
       // Check if user has permission to view members OR is the profile owner
       const profile = await storage.getProfile(profileId);
+      console.log("Profile:", profile);
+      
       const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "view_analytics");
       const isOwner = profile?.userId === req.user.id;
+      
+      console.log("Permission check:", { hasPermission, isOwner, profileUserId: profile?.userId, requestUserId: req.user.id });
       
       if (!hasPermission && !isOwner) {
         return res.status(403).json({ message: "Permission denied" });
       }
 
       const memberships = await storage.getProfileMemberships(profileId);
+      console.log("Memberships found:", JSON.stringify(memberships, null, 2));
       res.json(memberships);
     } catch (error) {
       console.error("Error fetching profile members:", error);
@@ -906,24 +912,29 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Update member role/permissions
-  app.patch('/api/profiles/:profileId/members/:memberId', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/profile-memberships/:memberId', isAuthenticated, async (req: any, res) => {
     try {
-      const profileId = parseInt(req.params.profileId);
       const memberId = parseInt(req.params.memberId);
       const { role, permissions } = req.body;
 
+      // Get the membership to check profile access
+      const membership = await storage.getUserProfileRole(req.user.id, memberId);
+      if (!membership) {
+        return res.status(404).json({ message: "Membership not found" });
+      }
+
       // Check if user has permission to manage members
-      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_members");
+      const hasPermission = await storage.checkProfilePermission(req.user.id, membership.profileId, "manage_members");
       if (!hasPermission) {
         return res.status(403).json({ message: "Permission denied" });
       }
 
-      const membership = await storage.updateProfileMembership(memberId, {
+      const updatedMembership = await storage.updateProfileMembership(memberId, {
         role,
         permissions,
       });
 
-      res.json(membership);
+      res.json(updatedMembership);
     } catch (error) {
       console.error("Error updating member:", error);
       res.status(500).json({ message: "Failed to update member" });
@@ -931,13 +942,20 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Remove member from profile
-  app.delete('/api/profiles/:profileId/members/:memberId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/profile-memberships/:memberId', isAuthenticated, async (req: any, res) => {
     try {
-      const profileId = parseInt(req.params.profileId);
       const memberId = parseInt(req.params.memberId);
 
+      // Get the membership to check profile access
+      const memberships = await storage.getProfileMemberships(memberId);
+      if (memberships.length === 0) {
+        return res.status(404).json({ message: "Membership not found" });
+      }
+
+      const membership = memberships[0].membership;
+
       // Check if user has permission to manage members
-      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_members");
+      const hasPermission = await storage.checkProfilePermission(req.user.id, membership.profileId, "manage_members");
       if (!hasPermission) {
         return res.status(403).json({ message: "Permission denied" });
       }

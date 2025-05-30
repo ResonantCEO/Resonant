@@ -217,12 +217,16 @@ export function registerRoutes(app: Express): Server {
         }
 
         const profileId = parseInt(req.params.profileId);
+        const userId = req.user.id;
         const profileImageUrl = `/uploads/${req.file.filename}`;
 
         console.log("Updating profile image:", { profileId, profileImageUrl });
 
         // Update profile's image URL in database
         await storage.updateProfile(profileId, { profileImageUrl });
+        
+        // Also update the user's profile image URL so posts show the current image
+        await storage.updateUser(userId, { profileImageUrl });
 
         console.log("Profile image updated successfully");
 

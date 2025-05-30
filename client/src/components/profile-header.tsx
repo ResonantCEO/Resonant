@@ -433,7 +433,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
       {/* Content Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
           <div className="border-b border-neutral-200">
             <TabsList className="w-full justify-start rounded-none border-0 bg-transparent px-6">
               <TabsTrigger value="posts" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
@@ -456,23 +456,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               )}
             </TabsList>
           </div>
-          
-          {/* Tab Content using Radix UI TabsContent components */}
-          <TabsContent value="posts" className="p-0">
-            {/* This content is handled by setActiveTab callback */}
-          </TabsContent>
-          
-          <TabsContent value="about" className="p-0">
-            {/* This content is handled by setActiveTab callback */}
-          </TabsContent>
-          
-          <TabsContent value="friends" className="p-0">
-            {/* This content is handled by setActiveTab callback */}
-          </TabsContent>
-          
-          <TabsContent value="photos" className="p-0">
-            {/* This content is handled by setActiveTab callback */}
-          </TabsContent>
           
           {/* Management tab content - only show when on management tab */}
           {(profile.type === "artist" || profile.type === "venue") && (

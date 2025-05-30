@@ -65,32 +65,8 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      // Direct query with explicit field selection
-      const [user] = await db
-        .select({
-          id: users.id,
-          email: users.email,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          profileImageUrl: users.profileImageUrl,
-          coverImageUrl: users.coverImageUrl,
-          showOnlineStatus: users.showOnlineStatus,
-          allowFriendRequests: users.allowFriendRequests,
-          showActivityStatus: users.showActivityStatus,
-          emailNotifications: users.emailNotifications,
-          notifyFriendRequests: users.notifyFriendRequests,
-          notifyMessages: users.notifyMessages,
-          notifyPostLikes: users.notifyPostLikes,
-          notifyComments: users.notifyComments,
-          theme: users.theme,
-          language: users.language,
-          compactMode: users.compactMode,
-          autoplayVideos: users.autoplayVideos,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt
-        })
-        .from(users)
-        .where(eq(users.id, req.user.id));
+      // Use storage.getUser to ensure all fields are included
+      const user = await storage.getUser(req.user.id);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -99,8 +75,32 @@ export function registerRoutes(app: Express): Server {
       console.log("API - User query result:", JSON.stringify(user, null, 2));
       console.log("API - Cover image URL from DB:", user.coverImageUrl);
       
-      // Return the user data directly using res.json()
-      res.json(user);
+      // Explicitly construct response to ensure all fields are included
+      const userResponse = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+        coverImageUrl: user.coverImageUrl,
+        showOnlineStatus: user.showOnlineStatus,
+        allowFriendRequests: user.allowFriendRequests,
+        showActivityStatus: user.showActivityStatus,
+        emailNotifications: user.emailNotifications,
+        notifyFriendRequests: user.notifyFriendRequests,
+        notifyMessages: user.notifyMessages,
+        notifyPostLikes: user.notifyPostLikes,
+        notifyComments: user.notifyComments,
+        theme: user.theme,
+        language: user.language,
+        compactMode: user.compactMode,
+        autoplayVideos: user.autoplayVideos,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      };
+      
+      console.log("API - Final response:", JSON.stringify(userResponse, null, 2));
+      res.json(userResponse);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

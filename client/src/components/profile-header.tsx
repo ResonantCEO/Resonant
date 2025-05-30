@@ -34,7 +34,25 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
-  const [activeTab, setActiveTab] = useState("posts");
+
+  // Helper function to format user's display name
+  const getUserDisplayName = () => {
+    if (!user) return profile.name || "";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    return `${firstName} ${lastName}`.trim() || user.email || profile.name;
+  };
+
+  // Helper function to get user initials
+  const getUserInitials = () => {
+    if (!user) return profile.name?.slice(0, 2).toUpperCase() || "";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    }
+    return user.email ? user.email.charAt(0).toUpperCase() : profile.name?.slice(0, 2).toUpperCase() || "";
+  };
 
   // Helper function to get display name for profile
   const getDisplayName = () => {
@@ -43,6 +61,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
     }
     return profile.name;
   };
+  const [activeTab, setActiveTab] = useState("posts");
 
   const { data: friendshipStatus } = useQuery({
     queryKey: [`/api/friendship-status/${profile.id}`],
@@ -112,6 +131,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
     sendFriendRequestMutation.mutate(profile.id);
   };
 
+  // Handle profile picture upload
   const uploadProfilePictureMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
@@ -136,27 +156,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
     },
   });
 
-  const uploadCoverPhotoMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('coverImage', file);
-      return await apiRequest("POST", `/api/user/cover-image`, formData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      toast({
-        title: "Cover Photo Updated",
-        description: "Your cover photo has been successfully updated.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload cover photo",
-        variant: "destructive",
-      });
-    },
-  });
 
 
   const handleProfilePictureClick = () => {
@@ -177,7 +176,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
         });
         return;
       }
-
+      
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast({
@@ -192,11 +191,35 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
     }
   };
 
-  const handleCoverPhotoClick = () => {
-    if (isOwn) {
-      coverFileInputRef.current?.click();
-    }
-  };
+
+
+  // Handle cover photo upload
+  const uploadCoverPhotoMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('coverImage', file);
+      return await apiRequest("POST", "/api/user/cover-image", formData);
+    },
+    onSuccess: async (data) => {
+      console.log("Cover photo upload response:", data);
+      
+      // Invalidate and refetch user data to get updated cover photo
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
+      toast({
+        title: "Cover Photo Updated",
+        description: "Your cover photo has been successfully updated.",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Cover photo upload error:", error);
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload cover photo",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleCoverUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -222,6 +245,12 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
       }
 
       uploadCoverPhotoMutation.mutate(file);
+    }
+  };
+
+  const handleCoverPhotoClick = () => {
+    if (isOwn) {
+      coverFileInputRef.current?.click();
     }
   };
 
@@ -262,6 +291,15 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
         <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600">
+          {(() => {
+            console.log("User data for cover photo:", user);
+            console.log("Cover image URL:", user?.coverImageUrl);
+            if (!user?.coverImageUrl) {
+              console.log("No cover image URL found in user data");
+            }
+            return null;
+          })()}
+          
           {/* Cover photo image - only show if coverImageUrl exists */}
           {user?.coverImageUrl && (
             <img 
@@ -269,11 +307,16 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
               alt="Cover photo" 
               className="w-full h-48 object-cover absolute inset-0"
               onError={(e) => {
+                console.log("Cover image failed to load:", user.coverImageUrl);
+                // Hide the broken image and show gradient background
                 e.currentTarget.style.display = 'none';
+              }}
+              onLoad={() => {
+                console.log("Cover image loaded successfully:", user.coverImageUrl);
               }}
             />
           )}
-
+          
           {/* Cover photo placeholder text when no image is set */}
           {!user?.coverImageUrl && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -285,16 +328,25 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
           )}
 
           {isOwn && (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="absolute bottom-4 right-4 bg-white/90 hover:bg-white"
-              onClick={handleCoverPhotoClick}
-              disabled={uploadCoverPhotoMutation.isPending}
-            >
-              <Camera className="w-4 h-4 mr-2" />
-              {uploadCoverPhotoMutation.isPending ? "Uploading..." : "Edit Cover"}
-            </Button>
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="absolute bottom-4 right-4 bg-white/90 hover:bg-white"
+                onClick={() => coverFileInputRef.current?.click()}
+                disabled={uploadCoverPhotoMutation.isPending}
+              >
+                <Camera className="w-4 h-4 mr-2" />
+                {uploadCoverPhotoMutation.isPending ? "Uploading..." : "Edit Cover"}
+              </Button>
+              <input
+                type="file"
+                ref={coverFileInputRef}
+                onChange={handleCoverUpload}
+                accept="image/*"
+                className="hidden"
+              />
+            </>
           )}
         </div>
 
@@ -349,7 +401,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
                     )}
                   </div>
                 </div>
-
+                
                 {/* Action Buttons */}
                 {renderActionButtons()}
               </div>
@@ -401,30 +453,30 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
               )}
             </TabsList>
           </div>
-
+          
           {/* Tab Content */}
           <TabsContent value="posts" className="p-0">
             {/* Posts content will be handled by the parent component */}
           </TabsContent>
-
+          
           <TabsContent value="about" className="p-6">
             <div className="text-center text-gray-500">
               About content coming soon...
             </div>
           </TabsContent>
-
+          
           <TabsContent value="friends" className="p-6">
             <div className="text-center text-gray-500">
               Friends content coming soon...
             </div>
           </TabsContent>
-
+          
           <TabsContent value="photos" className="p-6">
             <div className="text-center text-gray-500">
               Photos content coming soon...
             </div>
           </TabsContent>
-
+          
           {/* Management tab content - only for shared profiles */}
           {(profile.type === "artist" || profile.type === "venue") && canManageMembers && (
             <TabsContent value="management" className="p-6">
@@ -438,7 +490,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
           )}
         </Tabs>
       </div>
-
+      
       {/* Hidden file inputs for uploads */}
       {isOwn && (
         <>

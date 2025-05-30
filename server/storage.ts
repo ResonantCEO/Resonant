@@ -87,29 +87,7 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select({
-      id: users.id,
-      email: users.email,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      profileImageUrl: users.profileImageUrl,
-      coverImageUrl: users.coverImageUrl,
-      showOnlineStatus: users.showOnlineStatus,
-      allowFriendRequests: users.allowFriendRequests,
-      showActivityStatus: users.showActivityStatus,
-      emailNotifications: users.emailNotifications,
-      notifyFriendRequests: users.notifyFriendRequests,
-      notifyMessages: users.notifyMessages,
-      notifyPostLikes: users.notifyPostLikes,
-      notifyComments: users.notifyComments,
-      theme: users.theme,
-      language: users.language,
-      compactMode: users.compactMode,
-      autoplayVideos: users.autoplayVideos,
-      createdAt: users.createdAt,
-      updatedAt: users.updatedAt
-    }).from(users).where(eq(users.id, id));
-    
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     console.log("Storage getUser result:", JSON.stringify(user, null, 2));
     return user;
   }
@@ -152,8 +130,6 @@ export class DatabaseStorage implements IStorage {
         language: users.language,
         compactMode: users.compactMode,
         autoplayVideos: users.autoplayVideos,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt
       });
 
     console.log("Updated user result:", updatedUser);

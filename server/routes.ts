@@ -65,15 +65,52 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.id);
+      // Direct query with explicit field selection
+      const [user] = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          coverImageUrl: users.coverImageUrl,
+          showOnlineStatus: users.showOnlineStatus,
+          allowFriendRequests: users.allowFriendRequests,
+          showActivityStatus: users.showActivityStatus,
+          emailNotifications: users.emailNotifications,
+          notifyFriendRequests: users.notifyFriendRequests,
+          notifyMessages: users.notifyMessages,
+          notifyPostLikes: users.notifyPostLikes,
+          notifyComments: users.notifyComments,
+          theme: users.theme,
+          language: users.language,
+          compactMode: users.compactMode,
+          autoplayVideos: users.autoplayVideos,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt
+        })
+        .from(users)
+        .where(eq(users.id, req.user.id));
+      
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-
-      console.log("API - User from storage:", JSON.stringify(user, null, 2));
-      console.log("API - Cover image URL:", user.coverImageUrl);
-
-      res.json(user);
+      
+      console.log("FIXED API - User result:", JSON.stringify(user, null, 2));
+      
+      // Manually ensure coverImageUrl is included and theme is explicitly set
+      const response = {
+        ...user,
+        coverImageUrl: user.coverImageUrl || null,
+        theme: user.theme || 'light' // Explicitly ensure theme is included
+      };
+      
+      console.log("FIXED API - Final response being sent:", JSON.stringify(response, null, 2));
+      console.log("FIXED API - Response theme field:", response.theme);
+      
+      // Explicitly set content-type and send response
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200).send(JSON.stringify(response));
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -109,7 +146,7 @@ export function registerRoutes(app: Express): Server {
     console.log("POST /api/user/profile-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
     console.log("Body keys:", Object.keys(req.body || {}));
-
+    
     upload.single('profileImage')(req, res, async (err) => {
       try {
         console.log("Multer callback executed");
@@ -157,7 +194,7 @@ export function registerRoutes(app: Express): Server {
     console.log("POST /api/profiles/:profileId/profile-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
     console.log("Profile ID:", req.params.profileId);
-
+    
     upload.single('profileImage')(req, res, async (err) => {
       try {
         console.log("Multer callback executed");
@@ -204,9 +241,9 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/user/cover-image', isAuthenticated, (req: any, res, next) => {
     console.log("POST /api/user/cover-image - Raw request received");
     console.log("Content-Type:", req.headers['content-type']);
-
+    
     const uploadSingle = upload.single('coverImage');
-
+    
     uploadSingle(req, res, async (err: any) => {
       try {
         console.log("Multer processed:", {
@@ -238,7 +275,6 @@ export function registerRoutes(app: Express): Server {
         const updatedUser = await storage.updateUser(userId, { coverImageUrl });
 
         console.log("Cover image updated successfully");
-        console.log("Updated user with cover image:", JSON.stringify(updatedUser, null, 2));
 
         res.json({ 
           message: "Cover photo updated successfully",
@@ -282,7 +318,7 @@ export function registerRoutes(app: Express): Server {
         ...req.body,
         userId,
       });
-
+      
       const profile = await storage.createProfile(profileData);
       res.json(profile);
     } catch (error) {
@@ -299,7 +335,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
-
+      
       // Verify ownership
       const existingProfile = await storage.getProfile(profileId);
       if (!existingProfile || existingProfile.userId !== userId) {
@@ -319,7 +355,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const userId = req.user.id;
-
+      
       // Verify ownership
       const profile = await storage.getProfile(profileId);
       if (!profile || profile.userId !== userId) {
@@ -340,7 +376,7 @@ export function registerRoutes(app: Express): Server {
       const userId = req.user.id;
       const userProfiles = await storage.getProfilesByUserId(userId);
       const audienceProfile = userProfiles.find(p => p.type === 'audience');
-
+      
       if (audienceProfile) {
         await storage.setActiveProfile(userId, audienceProfile.id);
         res.json({ success: true, profileId: audienceProfile.id });
@@ -359,7 +395,7 @@ export function registerRoutes(app: Express): Server {
       if (!query) {
         return res.json([]);
       }
-
+      
       const profiles = await storage.searchProfiles(query);
       res.json(profiles);
     } catch (error) {
@@ -372,7 +408,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
       const profile = await storage.getProfile(profileId);
-
+      
       if (!profile) {
         return res.status(404).json({ message: "Profile not found" });
       }
@@ -423,7 +459,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       const { addresseeId } = req.body;
-
+      
       // Check if friendship already exists
       const existingFriendship = await storage.getFriendshipStatus(activeProfile.id, addresseeId);
       if (existingFriendship) {
@@ -552,11 +588,11 @@ export function registerRoutes(app: Express): Server {
       // Direct database check for post ownership
       const result = await db.select().from(posts).where(eq(posts.id, postId));
       const post = result[0];
-
+      
       if (!post) {
         return res.status(404).json({ message: "Post not found" });
       }
-
+      
       if (post.profileId !== activeProfile.id) {
         return res.status(403).json({ message: "Unauthorized to delete this post" });
       }
@@ -576,7 +612,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const targetProfileId = parseInt(req.params.profileId);
       const activeProfile = await storage.getActiveProfile(req.user.id);
-
+      
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
@@ -628,12 +664,12 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Shared Profile Management Routes
-
+  
   // Get profile memberships
   app.get('/api/profiles/:id/members', isAuthenticated, async (req: any, res) => {
     try {
       const profileId = parseInt(req.params.id);
-
+      
       // Check if user has permission to view members
       const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "view_analytics");
       if (!hasPermission) {
@@ -690,7 +726,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/invitations/:token/accept', isAuthenticated, async (req: any, res) => {
     try {
       const { token } = req.params;
-
+      
       const membership = await storage.acceptProfileInvitation(token, req.user.id);
       res.json(membership);
     } catch (error) {
@@ -703,7 +739,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/invitations/:token/decline', async (req, res) => {
     try {
       const { token } = req.params;
-
+      
       await storage.declineProfileInvitation(token);
       res.json({ message: "Invitation declined" });
     } catch (error) {

@@ -23,8 +23,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../components/ui/alert-dialog';
+import Sidebar from '../components/sidebar';
 
-export default function Settings() {
+function SettingsContent() {
   const { user, updateUser } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -577,6 +578,17 @@ export default function Settings() {
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+export default function Settings() {
+  return (
+    <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950">
+      <Sidebar />
+      <div className="flex-1 overflow-auto">
+        <SettingsContent />
+      </div>
     </div>
   );
 }

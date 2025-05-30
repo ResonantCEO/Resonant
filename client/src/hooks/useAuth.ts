@@ -28,8 +28,10 @@ export function useAuth() {
     queryKey: ["/api/user"],
     retry: false,
     staleTime: 0,
+    cacheTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    refetchInterval: false,
   });
 
   return {

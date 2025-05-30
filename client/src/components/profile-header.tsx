@@ -207,7 +207,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       console.log("Cover photo upload response:", data);
       
       // Invalidate and refetch user data to get updated cover photo
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      await queryClient.refetchQueries({ queryKey: ["/api/user"] });
       
       toast({
         title: "Cover Photo Updated",
@@ -318,6 +319,12 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
         <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
+          {(() => {
+            console.log("ProfileHeader - User data:", user);
+            console.log("ProfileHeader - Cover image URL:", user?.coverImageUrl);
+            return null;
+          })()}
+          
           {/* Cover photo image - only show if coverImageUrl exists */}
           {user?.coverImageUrl && (
             <img 
@@ -325,8 +332,12 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               alt="Cover photo" 
               className="w-full h-48 object-cover absolute inset-0 transition-opacity duration-300"
               onError={(e) => {
+                console.log("Cover image failed to load:", user.coverImageUrl);
                 // Hide the broken image and show gradient background
                 e.currentTarget.style.display = 'none';
+              }}
+              onLoad={() => {
+                console.log("Cover image loaded successfully:", user.coverImageUrl);
               }}
             />
           )}

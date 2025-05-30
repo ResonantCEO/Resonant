@@ -126,7 +126,8 @@ export default function Sidebar() {
       {/* Header */}
       <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
         <div className="flex justify-center mb-6">
-          <img src="/resonant-logo.png" alt="Resonant" className="h-12 dark:invert" />
+          <img src="/resonant-logo.png" alt="Resonant" className="h-12 block dark:hidden" />
+          <img src="/resonant-logo-white.png" alt="Resonant" className="h-12 hidden dark:block" />
         </div>
 
         {/* Active Profile Display with Dropdown */}

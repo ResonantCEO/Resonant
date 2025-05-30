@@ -8,7 +8,8 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-12">
-          <img src="/resonant-logo.png" alt="Resonant" className="h-32 mx-auto mb-4 mix-blend-multiply" />
+          <img src="/resonant-logo.png" alt="Resonant" className="h-32 mx-auto mb-4 block dark:hidden" />
+          <img src="/resonant-logo-white.png" alt="Resonant" className="h-32 mx-auto mb-4 hidden dark:block" />
           <p className="text-xl text-gray-600 mb-8">
             Connect as an audience member, artist, or venue. Build your layered social presence.
           </p>

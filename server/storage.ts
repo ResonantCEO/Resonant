@@ -130,6 +130,8 @@ export class DatabaseStorage implements IStorage {
         language: users.language,
         compactMode: users.compactMode,
         autoplayVideos: users.autoplayVideos,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt
       });
 
     console.log("Updated user result:", updatedUser);

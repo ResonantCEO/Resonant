@@ -300,6 +300,64 @@ export const profilePermissionSchema = z.enum([
   "moderate_content", // Moderate comments, reports
 ]);
 
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  recipientId: integer("recipient_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  senderId: integer("sender_id").references(() => users.id, { onDelete: "set null" }),
+  type: varchar("type").notNull(), // 'friend_request', 'post_like', 'comment', 'message', 'profile_invite', etc.
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  data: jsonb("data"), // Additional data like profileId, postId, etc.
+  read: boolean("read").default(false),
+  emailSent: boolean("email_sent").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User notification settings table (extends the user preferences)
+export const userNotificationSettings = pgTable("user_notification_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: varchar("type").notNull(), // notification type
+  inApp: boolean("in_app").default(true),
+  email: boolean("email").default(true),
+  push: boolean("push").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations for notifications
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  recipient: one(users, {
+    fields: [notifications.recipientId],
+    references: [users.id],
+    relationName: "recipient",
+  }),
+  sender: one(users, {
+    fields: [notifications.senderId],
+    references: [users.id],
+    relationName: "sender",
+  }),
+}));
+
+export const userNotificationSettingsRelations = relations(userNotificationSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [userNotificationSettings.userId],
+    references: [users.id],
+  }),
+}));
+
+// Update users relations to include notifications
+export const usersRelations = relations(users, ({ many }) => ({
+  profiles: many(profiles),
+  profileMemberships: many(profileMemberships),
+  sentInvitations: many(profileInvitations, { relationName: "inviter" }),
+  receivedNotifications: many(notifications, { relationName: "recipient" }),
+  sentNotifications: many(notifications, { relationName: "sender" }),
+  notificationSettings: many(userNotificationSettings),
+}));
+
 // Type exports
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type LoginUser = z.infer<typeof loginUserSchema>;
@@ -319,3 +377,38 @@ export type InsertProfileInvitation = z.infer<typeof insertProfileInvitationSche
 export type ProfileInvitation = typeof profileInvitations.$inferSelect;
 export type ProfileRole = z.infer<typeof profileRoleSchema>;
 export type ProfilePermission = z.infer<typeof profilePermissionSchema>;
+
+// Notification types
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
+export type UserNotificationSettings = typeof userNotificationSettings.$inferSelect;
+export type InsertUserNotificationSettings = typeof userNotificationSettings.$inferInsert;
+
+// Notification schemas
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  read: true,
+  emailSent: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserNotificationSettingsSchema = createInsertSchema(userNotificationSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const notificationTypeSchema = z.enum([
+  "friend_request",
+  "friend_accepted",
+  "post_like",
+  "comment",
+  "post_comment",
+  "message",
+  "profile_invite",
+  "profile_deleted",
+  "profile_restored",
+  "membership_updated",
+  "system_announcement"
+]);

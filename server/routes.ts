@@ -551,6 +551,16 @@ export function registerRoutes(app: Express): Server {
       }
 
       const friendship = await storage.sendFriendRequest(activeProfile.id, addresseeId);
+      
+      // Send notification
+      const { notificationService } = await import('./notifications');
+      const targetProfile = await storage.getProfile(addresseeId);
+      if (targetProfile?.userId) {
+        const senderUser = await storage.getUser(req.user.id);
+        const senderName = `${senderUser?.firstName} ${senderUser?.lastName}`;
+        await notificationService.notifyFriendRequest(targetProfile.userId, req.user.id, senderName);
+      }
+      
       res.json(friendship);
     } catch (error) {
       console.error("Error sending friend request:", error);
@@ -562,6 +572,16 @@ export function registerRoutes(app: Express): Server {
     try {
       const friendshipId = parseInt(req.params.id);
       const friendship = await storage.acceptFriendRequest(friendshipId);
+      
+      // Send notification to the requester
+      const { notificationService } = await import('./notifications');
+      const requesterProfile = await storage.getProfile(friendship.requesterId);
+      if (requesterProfile?.userId) {
+        const accepterUser = await storage.getUser(req.user.id);
+        const accepterName = `${accepterUser?.firstName} ${accepterUser?.lastName}`;
+        await notificationService.notifyFriendAccepted(requesterProfile.userId, req.user.id, accepterName);
+      }
+      
       res.json(friendship);
     } catch (error) {
       console.error("Error accepting friend request:", error);
@@ -653,6 +673,19 @@ export function registerRoutes(app: Express): Server {
         res.json({ liked: false });
       } else {
         await storage.likePost(postId, activeProfile.id);
+        
+        // Send notification for new like
+        const { notificationService } = await import('./notifications');
+        const post = await db.select().from(posts).where(eq(posts.id, postId));
+        if (post[0]) {
+          const postOwnerProfile = await storage.getProfile(post[0].profileId);
+          if (postOwnerProfile?.userId && postOwnerProfile.userId !== req.user.id) {
+            const likerUser = await storage.getUser(req.user.id);
+            const likerName = `${likerUser?.firstName} ${likerUser?.lastName}`;
+            await notificationService.notifyPostLike(postOwnerProfile.userId, req.user.id, likerName, postId);
+          }
+        }
+        
         res.json({ liked: true });
       }
     } catch (error) {
@@ -736,6 +769,19 @@ export function registerRoutes(app: Express): Server {
       });
 
       const comment = await storage.createComment(commentData);
+      
+      // Send notification for new comment
+      const { notificationService } = await import('./notifications');
+      const post = await db.select().from(posts).where(eq(posts.id, postId));
+      if (post[0]) {
+        const postOwnerProfile = await storage.getProfile(post[0].profileId);
+        if (postOwnerProfile?.userId && postOwnerProfile.userId !== req.user.id) {
+          const commenterUser = await storage.getUser(req.user.id);
+          const commenterName = `${commenterUser?.firstName} ${commenterUser?.lastName}`;
+          await notificationService.notifyPostComment(postOwnerProfile.userId, req.user.id, commenterName, postId);
+        }
+      }
+      
       res.json(comment);
     } catch (error) {
       console.error("Error creating comment:", error);
@@ -798,6 +844,21 @@ export function registerRoutes(app: Express): Server {
         role,
         permissions,
       });
+
+      // Send notification if the invited user exists
+      const { notificationService } = await import('./notifications');
+      const inviterUser = await storage.getUser(req.user.id);
+      const profile = await storage.getProfile(profileId);
+      const inviterName = `${inviterUser?.firstName} ${inviterUser?.lastName}`;
+      
+      if (profile) {
+        await notificationService.notifyProfileInvite(
+          invitedEmail, 
+          req.user.id, 
+          inviterName, 
+          profile.name
+        );
+      }
 
       res.json(invitation);
     } catch (error) {
@@ -893,6 +954,98 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error fetching invitations:", error);
       res.status(500).json({ message: "Failed to fetch invitations" });
+    }
+  });
+
+  // Notification routes
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const { limit = 20, offset = 0 } = req.query;
+      const { notificationService } = await import('./notifications');
+      
+      const notifications = await notificationService.getUserNotifications(
+        req.user.id,
+        parseInt(limit),
+        parseInt(offset)
+      );
+      
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get('/api/notifications/unread-count', isAuthenticated, async (req: any, res) => {
+    try {
+      const { notificationService } = await import('./notifications');
+      const count = await notificationService.getUnreadCount(req.user.id);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+      res.status(500).json({ message: "Failed to fetch unread count" });
+    }
+  });
+
+  app.post('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      const { notificationService } = await import('./notifications');
+      
+      await notificationService.markAsRead(notificationId, req.user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.post('/api/notifications/mark-all-read', isAuthenticated, async (req: any, res) => {
+    try {
+      const { notificationService } = await import('./notifications');
+      await notificationService.markAllAsRead(req.user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  app.delete('/api/notifications/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      const { notificationService } = await import('./notifications');
+      
+      await notificationService.deleteNotification(notificationId, req.user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ message: "Failed to delete notification" });
+    }
+  });
+
+  app.get('/api/notification-settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const { notificationService } = await import('./notifications');
+      const settings = await notificationService.getUserNotificationSettings(req.user.id);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching notification settings:", error);
+      res.status(500).json({ message: "Failed to fetch notification settings" });
+    }
+  });
+
+  app.put('/api/notification-settings/:type', isAuthenticated, async (req: any, res) => {
+    try {
+      const { type } = req.params;
+      const settings = req.body;
+      const { notificationService } = await import('./notifications');
+      
+      await notificationService.updateNotificationSettings(req.user.id, type, settings);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating notification settings:", error);
+      res.status(500).json({ message: "Failed to update notification settings" });
     }
   });
 

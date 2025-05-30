@@ -15,9 +15,10 @@ import {
 import CreateProfileModal from "./create-profile-modal";
 import SharedProfilesWidget from "./shared-profiles-widget";
 import { useState } from "react";
-import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3 } from "lucide-react";
+import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import NotificationsPanel from "./notifications-panel";
 
 export default function Sidebar() {
   const [location, setLocation] = useLocation();
@@ -59,6 +60,11 @@ export default function Sidebar() {
 
   const { data: friendRequests = [] } = useQuery({
     queryKey: ["/api/friend-requests"],
+  });
+
+  const { data: unreadNotificationCount = 0 } = useQuery({
+    queryKey: ['/api/notifications/unread-count'],
+    refetchInterval: 10000, // Refetch every 10 seconds
   });
 
   const activateProfileMutation = useMutation({
@@ -158,7 +164,7 @@ export default function Sidebar() {
             <DropdownMenuContent align="start" className="w-80">
               <DropdownMenuLabel>Switch Profile</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              
+
               {Array.isArray(profiles) && profiles
                 .sort((a: any, b: any) => {
                   // Put active profile first
@@ -192,7 +198,7 @@ export default function Sidebar() {
                   </div>
                 </DropdownMenuItem>
               ))}
-              
+
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="p-3"
@@ -229,7 +235,7 @@ export default function Sidebar() {
               Profile
             </Button>
           </li>
-          
+
           {/* Dashboard - Only visible for Artist and Venue accounts */}
           {activeProfile && (activeProfile.type === "artist" || activeProfile.type === "venue") && (
             <li>
@@ -247,7 +253,7 @@ export default function Sidebar() {
               </Button>
             </li>
           )}
-          
+
           <li>
             <Button
               variant="ghost"

@@ -272,7 +272,7 @@ export class DatabaseStorage implements IStorage {
       const invitations = await this.getProfileInvitations(profileId);
       
       // Get friendships
-      const friendships = await db.select().from(friendships).where(
+      const profileFriendships = await db.select().from(friendships).where(
         or(
           eq(friendships.requesterId, profileId),
           eq(friendships.addresseeId, profileId)
@@ -295,7 +295,7 @@ export class DatabaseStorage implements IStorage {
         posts: profilePosts,
         memberships: memberships.map(m => m.membership),
         invitations,
-        friendships,
+        friendships: profileFriendships,
         comments,
         likes,
         backedUpAt: new Date(),

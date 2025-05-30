@@ -141,11 +141,6 @@ export const comments = pgTable("comments", {
 });
 
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
-  profiles: many(profiles),
-  profileMemberships: many(profileMemberships),
-  sentInvitations: many(profileInvitations, { relationName: "inviter" }),
-}));
 
 export const profilesRelations = relations(profiles, ({ one, many }) => ({
   user: one(users, {
@@ -348,7 +343,7 @@ export const userNotificationSettingsRelations = relations(userNotificationSetti
   }),
 }));
 
-// Update users relations to include notifications
+// User relations with all associations
 export const usersRelations = relations(users, ({ many }) => ({
   profiles: many(profiles),
   profileMemberships: many(profileMemberships),

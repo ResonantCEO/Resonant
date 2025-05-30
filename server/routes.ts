@@ -218,6 +218,75 @@ export function registerRoutes(app: Express): Server {
     });
   });
 
+  // Cover photo upload endpoint for specific profiles
+  app.post('/api/profiles/:profileId/cover-image', isAuthenticated, (req: any, res, next) => {
+    console.log("POST /api/profiles/:profileId/cover-image - Raw request received");
+    console.log("Content-Type:", req.headers['content-type']);
+    console.log("Profile ID:", req.params.profileId);
+
+    upload.single('coverImage')(req, res, async (err) => {
+      try {
+        console.log("Multer callback executed");
+        console.log("Error:", err);
+        console.log("File:", req.file ? { 
+          filename: req.file.filename, 
+          size: req.file.size, 
+          mimetype: req.file.mimetype,
+          path: req.file.path 
+        } : null);
+
+        if (err) {
+          console.error("Multer error:", err);
+          return res.status(400).json({ message: err.message });
+        }
+
+        if (!req.file) {
+          console.log("No file received by multer");
+          return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const profileId = parseInt(req.params.profileId);
+        const coverImageUrl = `/uploads/${req.file.filename}`;
+
+        console.log("Updating profile cover image:", { profileId, coverImageUrl });
+
+        // Update profile's cover image URL in database
+        await storage.updateProfile(profileId, { coverImageUrl });
+
+        console.log("Profile cover image updated successfully");
+
+        res.json({ 
+          message: "Cover photo updated successfully",
+          coverImageUrl 
+        });
+      } catch (error) {
+        console.error("Error uploading profile cover photo:", error);
+        res.status(500).json({ message: "Failed to upload cover photo" });
+      }
+    });
+  });
+
+  // Remove cover photo endpoint for specific profiles
+  app.delete('/api/profiles/:profileId/cover-image', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.profileId);
+      
+      console.log("Removing profile cover image:", { profileId });
+
+      // Update profile's cover image URL to null in database
+      await storage.updateProfile(profileId, { coverImageUrl: null });
+
+      console.log("Profile cover image removed successfully");
+
+      res.json({ 
+        message: "Cover photo removed successfully"
+      });
+    } catch (error) {
+      console.error("Error removing profile cover photo:", error);
+      res.status(500).json({ message: "Failed to remove cover photo" });
+    }
+  });
+
   // Cover photo upload endpoint
   app.post('/api/user/cover-image', isAuthenticated, (req: any, res, next) => {
     console.log("POST /api/user/cover-image - Raw request received");

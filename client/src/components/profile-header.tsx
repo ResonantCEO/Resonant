@@ -201,14 +201,14 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('coverImage', file);
-      return await apiRequest("POST", "/api/user/cover-image", formData);
+      return await apiRequest("POST", `/api/profiles/${profile.id}/cover-image`, formData);
     },
     onSuccess: async (data) => {
       console.log("Cover photo upload response:", data);
       
-      // Invalidate and refetch user data to get updated cover photo
-      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      await queryClient.refetchQueries({ queryKey: ["/api/user"] });
+      // Invalidate and refetch profile data to get updated cover photo
+      await queryClient.invalidateQueries({ queryKey: ["/api/profiles", profile.id] });
+      await queryClient.refetchQueries({ queryKey: ["/api/profiles", profile.id] });
       
       toast({
         title: "Cover Photo Updated",
@@ -227,10 +227,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
   const removeCoverPhotoMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("DELETE", "/api/user/cover-image");
+      return await apiRequest("DELETE", `/api/profiles/${profile.id}/cover-image`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles", profile.id] });
       toast({
         title: "Cover Photo Removed",
         description: "Your cover photo has been removed.",
@@ -322,18 +322,18 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
           
           {/* Cover photo image - only show if coverImageUrl exists */}
-          {user?.coverImageUrl && (
+          {profile?.coverImageUrl && (
             <img 
-              src={user.coverImageUrl} 
+              src={profile.coverImageUrl} 
               alt="Cover photo" 
               className="w-full h-48 object-cover absolute inset-0 transition-opacity duration-300"
               onError={(e) => {
-                console.log("Cover image failed to load:", user.coverImageUrl);
+                console.log("Cover image failed to load:", profile.coverImageUrl);
                 // Hide the broken image and show gradient background
                 e.currentTarget.style.display = 'none';
               }}
               onLoad={() => {
-                console.log("Cover image loaded successfully:", user.coverImageUrl);
+                console.log("Cover image loaded successfully:", profile.coverImageUrl);
               }}
             />
           )}
@@ -342,7 +342,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
           
           {/* Cover photo placeholder text when no image is set */}
-          {!user?.coverImageUrl && (
+          {!profile?.coverImageUrl && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-white/70 text-center">
                 <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
@@ -353,7 +353,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
           {isOwn && (
             <div className="absolute bottom-4 right-4 flex space-x-2">
-              {user?.coverImageUrl && (
+              {profile?.coverImageUrl && (
                 <Button
                   variant="secondary"
                   size="sm"
@@ -372,7 +372,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 disabled={uploadCoverPhotoMutation.isPending}
               >
                 <Camera className="w-4 h-4 mr-2" />
-                {uploadCoverPhotoMutation.isPending ? "Uploading..." : user?.coverImageUrl ? "Change Cover" : "Add Cover"}
+                {uploadCoverPhotoMutation.isPending ? "Uploading..." : profile?.coverImageUrl ? "Change Cover" : "Add Cover"}
               </Button>
               <input
                 type="file"

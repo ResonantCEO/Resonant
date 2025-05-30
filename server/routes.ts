@@ -65,44 +65,15 @@ export function registerRoutes(app: Express): Server {
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
-      // Direct database query to ensure we get the coverImageUrl field
-      const [user] = await db.select().from(users).where(eq(users.id, req.user.id));
-
+      const user = await storage.getUser(req.user.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      console.log("API - Direct DB query result:", JSON.stringify(user, null, 2));
-      console.log("API - Cover image URL from DB:", user.coverImageUrl);
+      console.log("API - User from storage:", JSON.stringify(user, null, 2));
+      console.log("API - Cover image URL:", user.coverImageUrl);
 
-      // Ensure coverImageUrl is explicitly handled
-      const responseData = {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl || null,
-        coverImageUrl: user.coverImageUrl || null,
-        showOnlineStatus: user.showOnlineStatus,
-        allowFriendRequests: user.allowFriendRequests,
-        showActivityStatus: user.showActivityStatus,
-        emailNotifications: user.emailNotifications,
-        notifyFriendRequests: user.notifyFriendRequests,
-        notifyMessages: user.notifyMessages,
-        notifyPostLikes: user.notifyPostLikes,
-        notifyComments: user.notifyComments,
-        theme: user.theme,
-        language: user.language,
-        compactMode: user.compactMode,
-        autoplayVideos: user.autoplayVideos,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
-      };
-
-      console.log("Final response data:", JSON.stringify(responseData, null, 2));
-      console.log("Cover image URL being sent:", responseData.coverImageUrl);
-
-      res.status(200).json(responseData);
+      res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

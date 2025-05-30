@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "@wouter";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useParams } from "@wouter";
+import { useQuery } from "@tanstack/react-query";
+import Sidebar from "@/components/sidebar";
 import ProfileHeader from "@/components/profile-header";
 import PostFeed from "@/components/post-feed";
 import FriendsWidget from "@/components/friends-widget";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
@@ -79,7 +76,7 @@ export default function Profile() {
             setActiveTab={setActiveTab}
           />
 
-          {/* Two Column Layout */}
+          {/* Tab Content */}
           {activeTab === "posts" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column - Bio and Friends Widget */}
@@ -92,16 +89,21 @@ export default function Profile() {
                   </div>
                 )}
 
-                {/* Friends Widget - Removed from Members tab */}
-                {/* <FriendsWidget profileId={profileId} /> */}
+                {/* Friends Widget */}
+                <FriendsWidget profileId={profileId} />
               </div>
 
               {/* Right Column - Posts Feed */}
               <div className="lg:col-span-2">
-                {/* Post Feed - Removed from Members tab */}
-                {/* <PostFeed profileId={profileId} /> */}
                 <PostFeed profileId={profileId} />
               </div>
+            </div>
+          )}
+
+          {/* Members Tab - Clean layout without Friends Widget and Post Feed */}
+          {activeTab === "members" && canManageMembers && (
+            <div className="max-w-4xl mx-auto">
+              {/* Members management content will be handled by ProfileHeader */}
             </div>
           )}
         </div>

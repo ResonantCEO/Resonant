@@ -39,6 +39,7 @@ export interface IStorage {
   getActiveProfile(userId: number): Promise<Profile | undefined>;
   createProfile(profile: InsertProfile): Promise<Profile>;
   updateProfile(id: number, updates: Partial<InsertProfile>): Promise<Profile>;
+  deleteProfile(id: number): Promise<void>;
   setActiveProfile(userId: number, profileId: number): Promise<void>;
   searchProfiles(query: string, limit?: number): Promise<Profile[]>;
 
@@ -191,6 +192,44 @@ export class DatabaseStorage implements IStorage {
       .update(profiles)
       .set({ isActive: true })
       .where(eq(profiles.id, profileId));
+  }
+
+  async deleteProfile(id: number): Promise<void> {
+    console.log(`Attempting to delete profile with id: ${id}`);
+
+    try {
+      // First delete any related posts (which will cascade to comments and likes)
+      const profilePosts = await db.select().from(posts).where(eq(posts.profileId, id));
+      for (const post of profilePosts) {
+        await this.deletePost(post.id);
+      }
+
+      // Delete any friendships involving this profile
+      await db.delete(friendships).where(
+        or(
+          eq(friendships.requesterId, id),
+          eq(friendships.addresseeId, id)
+        )
+      );
+
+      // Delete profile memberships
+      await db.delete(profileMemberships).where(eq(profileMemberships.profileId, id));
+
+      // Delete profile invitations
+      await db.delete(profileInvitations).where(eq(profileInvitations.profileId, id));
+
+      // Finally delete the profile
+      const result = await db.delete(profiles).where(eq(profiles.id, id));
+      
+      if (result.rowCount === 0) {
+        throw new Error(`Profile with id ${id} not found or already deleted`);
+      }
+
+      console.log(`Successfully deleted profile ${id}`);
+    } catch (error) {
+      console.error(`Error deleting profile ${id}:`, error);
+      throw error;
+    }
   }
 
   async searchProfiles(query: string, limit = 20): Promise<Profile[]> {

@@ -78,11 +78,16 @@ export function registerRoutes(app: Express): Server {
       // Send the complete user object (excluding password)
       const { password, ...userResponse } = user;
 
-      console.log("API - Final response:", JSON.stringify(userResponse, null, 2));
-      console.log("API - Sending coverImageUrl:", userResponse.coverImageUrl);
+      console.log("API - Final response BEFORE sending:", JSON.stringify(userResponse, null, 2));
+      console.log("API - Response coverImageUrl field exists:", 'coverImageUrl' in userResponse);
+      console.log("API - Response coverImageUrl value:", userResponse.coverImageUrl);
       
       res.setHeader('Content-Type', 'application/json');
-      res.status(200).json(userResponse);
+      const responseJson = JSON.stringify(userResponse);
+      console.log("API - Stringified response:", responseJson);
+      console.log("API - Stringified response includes coverImageUrl:", responseJson.includes('coverImageUrl'));
+      
+      res.status(200).send(responseJson);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

@@ -319,23 +319,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
         <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
-          {(() => {
-            console.log("ProfileHeader - User data:", user);
-            console.log("ProfileHeader - Cover image URL:", user?.coverImageUrl);
-            
-            // Force direct API call to bypass cache
-            if (user && !user.coverImageUrl) {
-              fetch('/api/user', { credentials: 'include' })
-                .then(res => res.json())
-                .then(data => {
-                  console.log("Direct API call response:", data);
-                  console.log("Direct API coverImageUrl:", data?.coverImageUrl);
-                })
-                .catch(err => console.error("Direct API error:", err));
-            }
-            
-            return null;
-          })()}
+
           
           {/* Cover photo image - only show if coverImageUrl exists */}
           {user?.coverImageUrl && (

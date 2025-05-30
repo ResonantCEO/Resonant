@@ -189,12 +189,8 @@ export function setupAuth(app: Express) {
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');
     
-    res.json({ 
-      id: user.id, 
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      profileImageUrl: user.profileImageUrl
-    });
+    // Send the complete user object (excluding password)
+    const { password, ...userResponse } = user;
+    res.json(userResponse);
   });
 }

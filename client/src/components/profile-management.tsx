@@ -77,16 +77,16 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch profile members
+  // Fetch profile members (enable for owners and those who can manage members)
   const { data: members = [], isLoading: membersLoading } = useQuery({
     queryKey: ['/api/profiles', profileId, 'members'],
-    enabled: canManageMembers,
+    enabled: isOwner || canManageMembers,
   });
 
   // Fetch profile invitations
   const { data: invitations = [], isLoading: invitationsLoading } = useQuery({
     queryKey: ['/api/profiles', profileId, 'invitations'],
-    enabled: canManageMembers,
+    enabled: isOwner || canManageMembers,
   });
 
   // Invite user mutation
@@ -181,7 +181,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
     );
   };
 
-  if (!canManageMembers) {
+  if (!canManageMembers && !isOwner) {
     return (
       <Card>
         <CardHeader>

@@ -800,9 +800,12 @@ export function registerRoutes(app: Express): Server {
     try {
       const profileId = parseInt(req.params.id);
 
-      // Check if user has permission to view members
+      // Check if user has permission to view members OR is the profile owner
+      const profile = await storage.getProfile(profileId);
       const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "view_analytics");
-      if (!hasPermission) {
+      const isOwner = profile?.userId === req.user.id;
+      
+      if (!hasPermission && !isOwner) {
         return res.status(403).json({ message: "Permission denied" });
       }
 

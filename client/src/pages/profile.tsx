@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
-  
+
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
   });
@@ -56,7 +56,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen flex bg-neutral-50">
       <Sidebar />
-      
+
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-neutral-200 z-40">
         <div className="flex items-center justify-between p-4">
@@ -68,7 +68,7 @@ export default function Profile() {
       <div className="flex-1 lg:ml-0 pt-16 lg:pt-0">
         <div className="max-w-4xl mx-auto p-6">
           <ProfileHeader profile={profile} isOwn={isOwn} canManageMembers={canManageMembers} />
-          
+
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Bio and Friends Widget */}
@@ -80,7 +80,7 @@ export default function Profile() {
                   <p className="text-neutral-700 leading-relaxed">{profile.bio}</p>
                 </div>
               )}
-              
+
               {/* Friends Widget */}
               <FriendsWidget profileId={profileId} />
             </div>
@@ -92,6 +92,12 @@ export default function Profile() {
           </div>
         </div>
       </div>
+      <ProfileManagement 
+                profileId={profile.id}
+                profileType={profile.type}
+                isOwner={isOwn}
+                canManageMembers={canManageMembers || isOwn}
+              />
     </div>
   );
 }

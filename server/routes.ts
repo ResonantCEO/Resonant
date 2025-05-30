@@ -364,6 +364,40 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.delete('/api/profiles/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      // Verify ownership
+      const profile = await storage.getProfile(profileId);
+      if (!profile || profile.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      // Don't allow deletion of audience profiles
+      if (profile.type === 'audience') {
+        return res.status(400).json({ message: "Cannot delete audience profile" });
+      }
+
+      // Check if this is the active profile and switch to audience if so
+      const activeProfile = await storage.getActiveProfile(userId);
+      if (activeProfile?.id === profileId) {
+        const userProfiles = await storage.getProfilesByUserId(userId);
+        const audienceProfile = userProfiles.find(p => p.type === 'audience');
+        if (audienceProfile) {
+          await storage.setActiveProfile(userId, audienceProfile.id);
+        }
+      }
+
+      await storage.deleteProfile(profileId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting profile:", error);
+      res.status(500).json({ message: "Failed to delete profile" });
+    }
+  });
+
   // Auto-activate audience profile
   app.post('/api/activate-audience-profile', isAuthenticated, async (req: any, res) => {
     try {

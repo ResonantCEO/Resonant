@@ -1,12 +1,12 @@
 import {
   users,
   profiles,
+  posts,
+  comments,
+  friendships,
+  postLikes,
   profileMemberships,
   profileInvitations,
-  friendships,
-  posts,
-  postLikes,
-  comments,
   type User,
   type InsertUser,
   type Profile,
@@ -24,7 +24,7 @@ import {
   type PostLike,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, or, desc, count, sql, inArray } from "drizzle-orm";
+import { eq, desc, asc, and, or, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -50,7 +50,7 @@ export interface IStorage {
   updateProfileMembership(id: number, updates: Partial<InsertProfileMembership>): Promise<ProfileMembership>;
   removeProfileMembership(id: number): Promise<void>;
   checkProfilePermission(userId: number, profileId: number, permission: string): Promise<boolean>;
-  
+
   // Profile invitation operations
   createProfileInvitation(invitation: InsertProfileInvitation): Promise<ProfileInvitation>;
   getProfileInvitations(profileId: number): Promise<ProfileInvitation[]>;
@@ -596,7 +596,7 @@ export class DatabaseStorage implements IStorage {
   async createProfileInvitation(invitation: InsertProfileInvitation): Promise<ProfileInvitation> {
     // Generate unique token
     const token = require('crypto').randomBytes(32).toString('hex');
-    
+
     const [newInvitation] = await db
       .insert(profileInvitations)
       .values({

@@ -2,26 +2,23 @@ import {
   users,
   profiles,
   posts,
+  postLikes,
   comments,
   friendships,
-  postLikes,
-  profileMemberships,
+  notifications,
+  userNotificationSettings,
   profileInvitations,
+  profileMemberships,
   type User,
-  type InsertUser,
   type Profile,
-  type InsertProfile,
-  type ProfileMembership,
-  type InsertProfileMembership,
+  type Post,
+  type Comment,
+  type PostLike,
+  type Friendship,
+  type Notification,
+  type InsertNotification,
   type ProfileInvitation,
   type InsertProfileInvitation,
-  type Post,
-  type InsertPost,
-  type Friendship,
-  type InsertFriendship,
-  type Comment,
-  type InsertComment,
-  type PostLike,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, and, or, sql, inArray, isNotNull, isNull, lt } from "drizzle-orm";
@@ -181,6 +178,18 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
 
+    // If this is a shared profile (artist/venue), create owner membership
+    if ((profile.type === 'artist' || profile.type === 'venue') && profile.userId) {
+      await db.insert(profileMemberships).values({
+        profileId: newProfile.id,
+        userId: profile.userId,
+        role: 'owner',
+        permissions: ['manage_profile', 'manage_members', 'manage_posts', 'manage_events', 'manage_bookings', 'view_analytics', 'moderate_content'],
+        status: 'active',
+        invitedBy: profile.userId,
+      });
+    }
+
     return newProfile;
   }
 
@@ -227,7 +236,7 @@ export class DatabaseStorage implements IStorage {
 
       // Get all members for email notifications
       const members = await this.getProfileMemberships(id);
-      
+
       // Get the user who deleted the profile for notification
       const deletedByUser = deletedBy ? await this.getUser(deletedBy) : null;
       const deletedByName = deletedByUser ? `${deletedByUser.firstName} ${deletedByUser.lastName}` : 'System';
@@ -270,7 +279,7 @@ export class DatabaseStorage implements IStorage {
       const profilePosts = await db.select().from(posts).where(eq(posts.profileId, profileId));
       const memberships = await this.getProfileMemberships(profileId);
       const invitations = await this.getProfileInvitations(profileId);
-      
+
       // Get friendships
       const profileFriendships = await db.select().from(friendships).where(
         or(
@@ -314,7 +323,7 @@ export class DatabaseStorage implements IStorage {
     deletedAt: Date
   ): Promise<void> {
     const { notificationService } = await import('./notifications');
-    
+
     // Calculate restoration deadline (30 days from deletion)
     const restorationDeadline = new Date(deletedAt);
     restorationDeadline.setDate(restorationDeadline.getDate() + 30);
@@ -423,7 +432,7 @@ export class DatabaseStorage implements IStorage {
 
       // Finally delete the profile
       const result = await db.delete(profiles).where(eq(profiles.id, id));
-      
+
       if (result.rowCount === 0) {
         throw new Error(`Profile with id ${id} not found or already deleted`);
       }
@@ -450,7 +459,7 @@ export class DatabaseStorage implements IStorage {
 
   async cleanupExpiredProfiles(): Promise<number> {
     console.log('Starting cleanup of expired soft-deleted profiles');
-    
+
     try {
       // Find profiles deleted more than 30 days ago
       const thirtyDaysAgo = new Date();
@@ -909,6 +918,7 @@ export class DatabaseStorage implements IStorage {
           eq(profileInvitations.profileId, profileId),
           eq(profileInvitations.status, "pending")
         )
+```text
       )
       .orderBy(profileInvitations.createdAt);
 

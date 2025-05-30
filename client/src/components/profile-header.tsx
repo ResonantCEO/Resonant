@@ -457,16 +457,33 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </TabsList>
           </div>
           
+          {/* Tab Content using Radix UI TabsContent components */}
+          <TabsContent value="posts" className="p-0">
+            {/* This content is handled by setActiveTab callback */}
+          </TabsContent>
+          
+          <TabsContent value="about" className="p-0">
+            {/* This content is handled by setActiveTab callback */}
+          </TabsContent>
+          
+          <TabsContent value="friends" className="p-0">
+            {/* This content is handled by setActiveTab callback */}
+          </TabsContent>
+          
+          <TabsContent value="photos" className="p-0">
+            {/* This content is handled by setActiveTab callback */}
+          </TabsContent>
+          
           {/* Management tab content - only show when on management tab */}
-          {activeTab === "management" && (profile.type === "artist" || profile.type === "venue") && (
-            <div className="p-6">
+          {(profile.type === "artist" || profile.type === "venue") && (
+            <TabsContent value="management" className="p-6">
               <ProfileManagement 
                 profileId={profile.id}
                 profileType={profile.type}
                 isOwner={isOwn}
                 canManageMembers={canManageMembers || false}
               />
-            </div>
+            </TabsContent>
           )}
         </Tabs>
       </div>

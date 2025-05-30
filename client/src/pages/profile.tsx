@@ -133,13 +133,6 @@ export default function Profile() {
               </div>
             </div>
           )}
-
-          {/* Management Tab */}
-          {activeTab === "management" && isSharedProfile && (
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
-              {/* Management content will be handled by ProfileHeader */}
-            </div>
-          )}
         </div>
       </div>
 

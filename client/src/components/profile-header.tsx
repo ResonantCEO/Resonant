@@ -163,7 +163,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
       toast({
         title: "Cover Photo Updated",
         description: "Your cover photo has been successfully updated.",

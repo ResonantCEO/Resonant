@@ -82,7 +82,7 @@ export function registerRoutes(app: Express): Server {
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
-        coverImageUrl: user.coverImageUrl,
+        coverImageUrl: user.coverImageUrl, // Ensure this field is explicitly included
         showOnlineStatus: user.showOnlineStatus,
         allowFriendRequests: user.allowFriendRequests,
         showActivityStatus: user.showActivityStatus,
@@ -98,6 +98,10 @@ export function registerRoutes(app: Express): Server {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
+      
+      // Debug logging to verify the field is included
+      console.log("Final safeUser object:", JSON.stringify(safeUser, null, 2));
+      console.log("Cover image in final response:", safeUser.coverImageUrl);
       
       console.log("API - Final response coverImageUrl:", safeUser.coverImageUrl);
       res.json(safeUser);
@@ -265,6 +269,7 @@ export function registerRoutes(app: Express): Server {
         const updatedUser = await storage.updateUser(userId, { coverImageUrl });
 
         console.log("Cover image updated successfully");
+        console.log("Updated user with cover image:", JSON.stringify(updatedUser, null, 2));
 
         res.json({ 
           message: "Cover photo updated successfully",

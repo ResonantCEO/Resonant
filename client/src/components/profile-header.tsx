@@ -204,7 +204,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
       console.log("Cover photo upload response:", data);
       
       // Invalidate and refetch user data to get updated cover photo
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      
+      // Force refetch to ensure we get the latest data
+      await queryClient.refetchQueries({ queryKey: ["/api/user"] });
       
       toast({
         title: "Cover Photo Updated",

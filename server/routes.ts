@@ -100,6 +100,7 @@ export function registerRoutes(app: Express): Server {
       };
 
       console.log("API - Final response:", JSON.stringify(userResponse, null, 2));
+      console.log("API - Sending coverImageUrl:", userResponse.coverImageUrl);
       res.json(userResponse);
     } catch (error) {
       console.error("Error fetching user:", error);

@@ -322,6 +322,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           {(() => {
             console.log("ProfileHeader - User data:", user);
             console.log("ProfileHeader - Cover image URL:", user?.coverImageUrl);
+            // Force a fresh API call to debug the issue
+            if (user && !user.coverImageUrl) {
+              console.log("Missing coverImageUrl, forcing cache refresh...");
+              queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+            }
             return null;
           })()}
           

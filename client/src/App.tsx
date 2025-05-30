@@ -21,7 +21,8 @@ function Router() {
         <Route path="/" component={AuthPage} />
       ) : (
         <>
-          <Route path="/" component={Home} />
+          <Route path="/" component={Profile} />
+          <Route path="/home" component={Home} />
           <Route path="/profile" component={Profile} />
           <Route path="/profile/:id" component={Profile} />
           <Route path="/settings" component={Settings} />

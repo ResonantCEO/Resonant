@@ -138,6 +138,13 @@ export default function Profile() {
               </div>
             </div>
           )}
+
+          {/* Management Tab - actual member management */}
+          {activeTab === "management" && (
+            <div>
+              {/* This content is handled by ProfileHeader component */}
+            </div>
+          )}
         </div>
       </div>
 

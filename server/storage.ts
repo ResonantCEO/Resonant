@@ -13,12 +13,13 @@ import {
   type Profile,
   type Post,
   type Comment,
-  type PostLike,
   type Friendship,
   type Notification,
   type InsertNotification,
   type ProfileInvitation,
   type InsertProfileInvitation,
+  type ProfileMembership,
+  type InsertProfileMembership,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, and, or, sql, inArray, isNotNull, isNull, lt } from "drizzle-orm";
@@ -45,7 +46,7 @@ export interface IStorage {
   searchProfiles(query: string, limit?: number): Promise<Profile[]>;
 
   // Shared profile operations
-  getProfileMemberships(profileId: number): Promise<{ membership: ProfileMembership; user: User }[]>;
+  getProfileMemberships(profileId: number): Promise<{ membership: ProfileMembership; user: User, audienceProfile?: Profile }[]>;
   getUserMemberships(userId: number): Promise<{ membership: ProfileMembership; profile: Profile }[]>;
   getUserProfileRole(userId: number, profileId: number): Promise<ProfileMembership | undefined>;
   createProfileMembership(membership: InsertProfileMembership): Promise<ProfileMembership>;
@@ -318,7 +319,7 @@ export class DatabaseStorage implements IStorage {
 
   private async sendDeletionNotifications(
     profile: Profile, 
-    members: { membership: ProfileMembership; user: User }[],
+    members: { membership: ProfileMembership; user: User, audienceProfile?: Profile }[],
     deletedByName: string,
     deletedAt: Date
   ): Promise<void> {
@@ -809,8 +810,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Shared profile operations
-  async getProfileMemberships(profileId: number): Promise<{ membership: ProfileMembership; user: User }[]> {
+  async getProfileMemberships(profileId: number): Promise<{ membership: ProfileMembership; user: User, audienceProfile?: Profile }[]> {
     try {
       console.log(`Getting memberships for profile ${profileId}`);
 
@@ -833,9 +833,19 @@ export class DatabaseStorage implements IStorage {
             email: users.email,
             profileImageUrl: users.profileImageUrl,
           },
+          audienceProfile: {
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+          }
         })
         .from(profileMemberships)
         .innerJoin(users, eq(profileMemberships.userId, users.id))
+        .leftJoin(profiles, and(
+          eq(profiles.userId, users.id),
+          eq(profiles.type, 'audience'),
+          isNull(profiles.deletedAt)
+        ))
         .where(eq(profileMemberships.profileId, profileId));
 
       console.log("Actual memberships found:", JSON.stringify(memberships, null, 2));
@@ -864,6 +874,7 @@ export class DatabaseStorage implements IStorage {
                 email: owner.email,
                 profileImageUrl: owner.profileImageUrl,
               },
+              audienceProfile: undefined
             }];
           }
         }

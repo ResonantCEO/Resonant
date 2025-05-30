@@ -42,9 +42,10 @@ import { formatDistanceToNow } from "date-fns";
 
 interface PostFeedProps {
   profileId?: number;
+  showCreatePost?: boolean;
 }
 
-export default function PostFeed({ profileId }: PostFeedProps) {
+export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [newPost, setNewPost] = useState("");
@@ -116,17 +117,17 @@ export default function PostFeed({ profileId }: PostFeedProps) {
         if (!oldData) return [];
         return oldData.filter((post: any) => post.id !== deletePostMutation.variables);
       });
-      
+
       if (profileId) {
         queryClient.setQueryData([`/api/profiles/${profileId}/posts`], (oldData: any) => {
           if (!oldData) return [];
           return oldData.filter((post: any) => post.id !== deletePostMutation.variables);
         });
       }
-      
+
       // Also force a refresh to ensure consistency
       queryClient.refetchQueries({ queryKey: ["/api/posts"] });
-      
+
       toast({
         title: "Post Deleted",
         description: "Your post has been deleted successfully.",
@@ -233,13 +234,13 @@ export default function PostFeed({ profileId }: PostFeedProps) {
         posts.map((post: any) => {
           console.log("Post data:", post); // Debug log
           console.log("Profile image URL:", post.profile?.profileImageUrl || post.profileImageUrl);
-          
+
           // For posts by the current user, use their current profile image, not the saved one
           const isOwnPost = post.profileId === activeProfile?.id;
           const profileImageUrl = isOwnPost && user?.profileImageUrl 
             ? user.profileImageUrl 
             : (post.profile?.profileImageUrl || post.profileImageUrl || "");
-          
+
           return (
             <Card key={post.id}>
             <CardContent className="p-6">
@@ -316,7 +317,7 @@ export default function PostFeed({ profileId }: PostFeedProps) {
               {/* Post Content */}
               <div className="mb-4">
                 <p className="text-neutral-900 leading-relaxed mb-4">{post.content}</p>
-                
+
                 {/* Post Image */}
                 {post.imageUrl && (
                   <img 
@@ -336,7 +337,7 @@ export default function PostFeed({ profileId }: PostFeedProps) {
                   </span>
                   <span>{post.commentsCount || 0} comments</span>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-1">
                   <Button 
                     variant="ghost" 

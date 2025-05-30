@@ -102,18 +102,10 @@ export default function Profile() {
           {/* About Tab */}
           {activeTab === "about" && (
             <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4">About {profile.name}</h3>
-              {profile.bio ? (
-                <p className="text-neutral-700 leading-relaxed">{profile.bio}</p>
-              ) : (
-                <p className="text-neutral-500 italic">No bio available.</p>
-              )}
-              {profile.location && (
-                <div className="mt-4">
-                  <h4 className="font-medium text-neutral-900 mb-2">Location</h4>
-                  <p className="text-neutral-700">{profile.location}</p>
-                </div>
-              )}
+              <div className="text-center text-gray-500">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-4">About</h3>
+                <p>About functionality coming soon...</p>
+              </div>
             </div>
           )}
 
@@ -133,6 +125,16 @@ export default function Profile() {
               <div className="text-center text-gray-500">
                 <h3 className="text-lg font-semibold text-neutral-900 mb-4">Photos</h3>
                 <p>Photo gallery coming soon...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Members Tab */}
+          {activeTab === "members" && (
+            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+              <div className="text-center text-gray-500">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Members</h3>
+                <p>Members functionality coming soon...</p>
               </div>
             </div>
           )}

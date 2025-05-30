@@ -142,6 +142,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers }: Prof
       queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
       queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
       toast({
         title: "Profile Picture Updated",
         description: "Your profile picture has been successfully updated.",

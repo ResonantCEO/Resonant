@@ -75,14 +75,14 @@ export function registerRoutes(app: Express): Server {
       console.log("API - Direct DB query result:", JSON.stringify(user, null, 2));
       console.log("API - Cover image URL from DB:", user.coverImageUrl);
 
-      // Return user data directly from database with only safe fields
-      const safeUser = {
+      // Ensure coverImageUrl is explicitly handled
+      const responseData = {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl,
-        coverImageUrl: user.coverImageUrl,
+        profileImageUrl: user.profileImageUrl || null,
+        coverImageUrl: user.coverImageUrl || null,
         showOnlineStatus: user.showOnlineStatus,
         allowFriendRequests: user.allowFriendRequests,
         showActivityStatus: user.showActivityStatus,
@@ -99,10 +99,10 @@ export function registerRoutes(app: Express): Server {
         updatedAt: user.updatedAt
       };
 
-      console.log("Final response being sent:", JSON.stringify(safeUser, null, 2));
-      console.log("Cover image URL in response:", safeUser.coverImageUrl);
+      console.log("Final response data:", JSON.stringify(responseData, null, 2));
+      console.log("Cover image URL being sent:", responseData.coverImageUrl);
 
-      res.json(safeUser);
+      res.status(200).json(responseData);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });

@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
+  const [activeTab, setActiveTab] = useState("posts");
 
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
@@ -50,9 +51,7 @@ export default function Profile() {
   const isSharedProfile = profile?.type === "artist" || profile?.type === "venue";
 
   // For shared profiles, always show management if user owns the profile
-  // We'll simplify this to avoid the hooks order issue
   const canManageMembers = isOwn && isSharedProfile;
-    const [activeTab, setActiveTab] = useState("posts");
 
   return (
     <div className="min-h-screen flex bg-neutral-50">

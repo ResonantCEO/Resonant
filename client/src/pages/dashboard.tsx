@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Users, Music, Building, BarChart3, Settings, Plus, Check, User, Image } from "lucide-react";
+import ProfileManagement from "@/components/profile-management";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -396,6 +397,15 @@ export default function Dashboard() {
             </Card>
           </div>
 
+          {/* Members Management Section */}
+          <div className="mt-8">
+            <ProfileManagement 
+              profileId={activeProfile.id}
+              profileType={activeProfile.type}
+              isOwner={true}
+              canManageMembers={true}
+            />
+          </div>
 
         </div>
       </div>

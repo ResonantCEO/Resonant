@@ -503,17 +503,17 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   Community
                 </TabsTrigger>
               )}
-              {/* Management tab - visible for all users on artist/venue profiles */}
-              {(profile.type === "artist" || profile.type === "venue") && (
+              {/* Management tab - visible only for venue profiles (artist members moved to dashboard) */}
+              {profile.type === "venue" && (
                 <TabsTrigger value="management" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
-                  {profile.type === "artist" ? "Members" : "Staff"}
+                  Staff
                 </TabsTrigger>
               )}
             </TabsList>
           </div>
           
-          {/* Management tab content - only show when on management tab */}
-          {(profile.type === "artist" || profile.type === "venue") && (
+          {/* Management tab content - only show for venue profiles */}
+          {profile.type === "venue" && (
             <TabsContent value="management" className="p-6">
               <ProfileManagement 
                 profileId={profile.id}

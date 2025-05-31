@@ -299,65 +299,100 @@ function SettingsContent() {
               <Separator />
 
               <div>
-                <Label htmlFor="profileImage">Profile Picture</Label>
-                    <Input
-                      id="profileImage"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) setProfileImageFile(file);
-                      }}
-                    />
-                    {user?.profileImageUrl && (
-                      <div className="mt-2">
-                        <img
-                          src={user.profileImageUrl}
-                          alt="Profile"
-                          className="w-20 h-20 rounded-full object-cover"
-                        />
+                <Label>Profile Picture</Label>
+                <div className="mt-2">
+                  <div
+                    className="relative w-20 h-20 rounded-full overflow-hidden cursor-pointer group"
+                    onClick={() => document.getElementById('profileImageInput')?.click()}
+                  >
+                    {user?.profileImageUrl ? (
+                      <img
+                        src={user.profileImageUrl}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500 text-sm">No Image</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
+                      <span className="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        Click to change
+                      </span>
+                    </div>
+                    {uploadProfileImageMutation.isPending && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       </div>
                     )}
                   </div>
+                  <input
+                    id="profileImageInput"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleProfileImageUpload}
+                    className="hidden"
+                  />
+                </div>
+              </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="coverImage">Cover Photo</Label>
-                    <div className="space-y-3">
-                      <Input
-                        ref={coverFileInputRef}
-                        id="coverImage"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleCoverPhotoChange}
-                        disabled={uploadCoverPhotoMutation.isPending}
+              <div className="space-y-2">
+                <Label>Cover Photo</Label>
+                <div className="space-y-3">
+                  <div
+                    className="relative w-full h-32 rounded-lg overflow-hidden cursor-pointer group"
+                    onClick={() => document.getElementById('coverImageInput')?.click()}
+                  >
+                    {user?.coverImageUrl ? (
+                      <img
+                        src={user.coverImageUrl}
+                        alt="Cover"
+                        className="w-full h-full object-cover"
                       />
-                      {user?.coverImageUrl && (
-                        <div className="space-y-2">
-                          <div className="relative">
-                            <img
-                              src={user.coverImageUrl}
-                              alt="Cover"
-                              className="w-full h-32 rounded-lg object-cover"
-                            />
-                          </div>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={handleRemoveCoverPhoto}
-                            disabled={removeCoverPhotoMutation.isPending}
-                          >
-                            {removeCoverPhotoMutation.isPending ? "Removing..." : "Remove Cover Photo"}
-                          </Button>
-                        </div>
-                      )}
-                      {uploadCoverPhotoMutation.isPending && (
-                        <div className="text-sm text-muted-foreground">
-                          Uploading cover photo...
-                        </div>
-                      )}
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500">Click to add cover photo</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
+                      <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        Click to change cover photo
+                      </span>
                     </div>
+                    {uploadCoverPhotoMutation.isPending && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
                   </div>
+                  <input
+                    id="coverImageInput"
+                    ref={coverFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverPhotoChange}
+                    disabled={uploadCoverPhotoMutation.isPending}
+                    className="hidden"
+                  />
+                  {user?.coverImageUrl && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleRemoveCoverPhoto}
+                      disabled={removeCoverPhotoMutation.isPending}
+                    >
+                      {removeCoverPhotoMutation.isPending ? "Removing..." : "Remove Cover Photo"}
+                    </Button>
+                  )}
+                  {uploadCoverPhotoMutation.isPending && (
+                    <div className="text-sm text-muted-foreground">
+                      Uploading cover photo...
+                    </div>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

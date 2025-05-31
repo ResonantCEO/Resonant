@@ -57,8 +57,10 @@ export interface IStorage {
   createProfileInvitation(invitation: InsertProfileInvitation): Promise<ProfileInvitation>;
   getProfileInvitations(profileId: number): Promise<ProfileInvitation[]>;
   getInvitationByToken(token: string): Promise<ProfileInvitation | undefined>;
+  getInvitationById(id: number): Promise<ProfileInvitation | undefined>;
   acceptProfileInvitation(token: string, userId: number): Promise<ProfileMembership>;
   declineProfileInvitation(token: string): Promise<void>;
+  deleteProfileInvitation(id: number): Promise<void>;
 
   // Friendship operations
   getFriends(profileId: number): Promise<Profile[]>;
@@ -1022,6 +1024,20 @@ export class DatabaseStorage implements IStorage {
       .update(profileInvitations)
       .set({ status: "declined", updatedAt: new Date() })
       .where(eq(profileInvitations.token, token));
+  }
+
+  async getInvitationById(id: number): Promise<ProfileInvitation | undefined> {
+    const [invitation] = await db
+      .select()
+      .from(profileInvitations)
+      .where(eq(profileInvitations.id, id));
+    return invitation;
+  }
+
+  async deleteProfileInvitation(id: number): Promise<void> {
+    await db
+      .delete(profileInvitations)
+      .where(eq(profileInvitations.id, id));
   }
 }
 

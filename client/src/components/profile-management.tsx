@@ -158,6 +158,26 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
     },
   });
 
+  const deleteInvitationMutation = useMutation({
+    mutationFn: async (invitationId: number) => {
+      return apiRequest("DELETE", `/api/profile-invitations/${invitationId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invitation deleted",
+        description: "The invitation has been deleted.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles', profileId, 'invitations'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete invitation",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleInviteSubmit = () => {
     if (!inviteEmail) {
       toast({
@@ -181,6 +201,14 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
         ? prev.filter(p => p !== permission)
         : [...prev, permission]
     );
+  };
+
+  const handleUpdateMember = async (memberId: number, data: { role: string; permissions: string[] }) => {
+    updateMemberMutation.mutate({ memberId, data });
+  };
+
+  const handleDeleteInvitation = (invitationId: number) => {
+    deleteInvitationMutation.mutate(invitationId);
   };
 
   if (!canManageMembers && !isOwner) {
@@ -360,9 +388,19 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
                         </p>
                       </div>
                     </div>
-                    <Badge className={ROLE_COLORS[invitation.role as keyof typeof ROLE_COLORS]}>
-                      {invitation.role}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={ROLE_COLORS[invitation.role as keyof typeof ROLE_COLORS]}>
+                        {invitation.role}
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteInvitation(invitation.id)}
+                        disabled={deleteInvitationMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -1087,6 +1087,31 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Delete profile invitation
+  app.delete('/api/invitations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const invitationId = parseInt(req.params.id);
+
+      // Get the invitation to check permissions
+      const invitation = await storage.getInvitationById(invitationId);
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+
+      // Check if user has permission to manage members for this profile
+      const hasPermission = await storage.checkProfilePermission(req.user.id, invitation.profileId, "manage_members");
+      if (!hasPermission) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      await storage.deleteProfileInvitation(invitationId);
+      res.json({ message: "Invitation deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting invitation:", error);
+      res.status(500).json({ message: "Failed to delete invitation" });
+    }
+  });
+
   // Notification routes
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {

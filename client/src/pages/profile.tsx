@@ -153,6 +153,11 @@ export default function Profile() {
                 <PostFeed profileId={profileId} showCreatePost={isOwn} />
               </div>
 
+              {/* Friends Section */}
+              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+                <FriendsTab profile={profile} isOwn={isOwn} />
+              </div>
+
               {/* Community Features */}
               <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
                 <div className="space-y-6">

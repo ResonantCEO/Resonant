@@ -307,6 +307,13 @@ export default function Profile() {
             </div>
           )}
 
+          {/* Stats Tab - only for artist profiles */}
+          {activeTab === "stats" && profile.type === "artist" && (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-neutral-200 dark:border-gray-700 p-6">
+              <StatsTab profile={profile} isOwn={isOwn} />
+            </div>
+          )}
+
           {/* Members Tab */}
           {activeTab === "members" && (
             <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">

@@ -6,6 +6,7 @@ import ProfileHeader from "@/components/profile-header";
 import PostFeed from "@/components/post-feed";
 import FriendsWidget from "@/components/friends-widget";
 import EPKTab from "@/components/epk-tab";
+import FriendsTab from "@/components/friends-tab";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
@@ -113,10 +114,7 @@ export default function Profile() {
           {/* Friends Tab */}
           {activeTab === "friends" && (
             <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <div className="text-center text-gray-500">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Friends</h3>
-                <p>Friends functionality coming soon...</p>
-              </div>
+              <FriendsTab profile={profile} isOwn={isOwn} />
             </div>
           )}
 

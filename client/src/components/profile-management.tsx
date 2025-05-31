@@ -85,7 +85,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
 
   // Fetch profile invitations
   const { data: invitations = [], isLoading: invitationsLoading } = useQuery({
-    queryKey: ['/api/profiles', profileId, 'invitations'],
+    queryKey: [`/api/profiles/${profileId}/invitations`],
     enabled: isOwner || canManageMembers,
   });
 
@@ -103,7 +103,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
       setInviteRole("member");
       setInvitePermissions([]);
       setIsInviteModalOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/profiles', profileId, 'invitations'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}/invitations`] });
     },
     onError: (error: any) => {
       toast({
@@ -124,7 +124,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
         title: "Member updated",
         description: "Member role and permissions have been updated.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/profiles', profileId, 'members'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}/members`] });
     },
     onError: (error: any) => {
       toast({
@@ -167,7 +167,7 @@ export default function ProfileManagement({ profileId, profileType, isOwner, can
         title: "Invitation deleted",
         description: "The invitation has been deleted.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/profiles', profileId, 'invitations'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}/invitations`] });
     },
     onError: (error: any) => {
       toast({

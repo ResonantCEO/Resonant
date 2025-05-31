@@ -1088,7 +1088,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Delete profile invitation
-  app.delete('/api/invitations/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/profile-invitations/:id', isAuthenticated, async (req: any, res) => {
     try {
       const invitationId = parseInt(req.params.id);
 

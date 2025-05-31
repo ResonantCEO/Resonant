@@ -4,7 +4,7 @@ import Sidebar from "@/components/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Users, Music, Building, BarChart3, Settings, Plus } from "lucide-react";
+import { Calendar, Users, Music, Building, BarChart3, Settings, Plus, Check, User, Image } from "lucide-react";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -43,6 +43,27 @@ export default function Dashboard() {
   const isArtist = activeProfile.type === "artist";
   const isVenue = activeProfile.type === "venue";
 
+  // Check completion status for getting started tasks
+  const hasProfileInfo = activeProfile.bio && activeProfile.bio.trim().length > 0;
+  const hasCoverPhoto = activeProfile.coverImageUrl && activeProfile.coverImageUrl.trim().length > 0;
+  
+  // Get posts for this profile to check if they have created any
+  const { data: posts } = useQuery({
+    queryKey: [`/api/profiles/${activeProfile.id}/posts`],
+    enabled: !!activeProfile.id,
+  });
+  const hasCreatedPost = posts && posts.length > 0;
+
+  const completedTasks = [
+    hasProfileInfo,
+    hasCoverPhoto,
+    hasCreatedPost,
+    // Additional tasks can be added here
+  ].filter(Boolean).length;
+
+  const totalTasks = 3;
+  const progressPercentage = Math.round((completedTasks / totalTasks) * 100);
+
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900">
       <div className="w-80 bg-white dark:bg-gray-900 shadow-lg border-r border-neutral-200 dark:border-gray-700 hidden lg:block">
@@ -80,6 +101,141 @@ export default function Dashboard() {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Getting Started Section */}
+          <div className="mb-8">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Getting Started</CardTitle>
+                  <div className="flex items-center space-x-2">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {completedTasks}/{totalTasks} completed
+                    </div>
+                    <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${progressPercentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-gray-600 dark:text-gray-400 mb-4">
+                  <p>
+                    {isArtist 
+                      ? "Welcome to your artist dashboard! Complete these steps to get the most out of your profile."
+                      : "Welcome to your venue dashboard! Complete these steps to attract artists and audiences."
+                    }
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {/* Complete Profile Information */}
+                  <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                      hasProfileInfo 
+                        ? 'bg-green-100 dark:bg-green-900' 
+                        : 'bg-gray-100 dark:bg-gray-800'
+                    }`}>
+                      {hasProfileInfo ? (
+                        <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      ) : (
+                        <User className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`font-medium ${hasProfileInfo ? 'line-through text-gray-500' : ''}`}>
+                        Complete your profile information
+                      </p>
+                      {!hasProfileInfo && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Add a bio to tell people about yourself
+                        </p>
+                      )}
+                    </div>
+                    {!hasProfileInfo && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setLocation(`/profile/${activeProfile.id}`)}
+                      >
+                        Complete
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Upload Cover Photo */}
+                  <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                      hasCoverPhoto 
+                        ? 'bg-green-100 dark:bg-green-900' 
+                        : 'bg-gray-100 dark:bg-gray-800'
+                    }`}>
+                      {hasCoverPhoto ? (
+                        <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      ) : (
+                        <Image className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`font-medium ${hasCoverPhoto ? 'line-through text-gray-500' : ''}`}>
+                        Upload a cover photo
+                      </p>
+                      {!hasCoverPhoto && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Make your profile stand out with a cover image
+                        </p>
+                      )}
+                    </div>
+                    {!hasCoverPhoto && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setLocation(`/profile/${activeProfile.id}`)}
+                      >
+                        Upload
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Create First Post */}
+                  <div className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                      hasCreatedPost 
+                        ? 'bg-green-100 dark:bg-green-900' 
+                        : 'bg-gray-100 dark:bg-gray-800'
+                    }`}>
+                      {hasCreatedPost ? (
+                        <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      ) : (
+                        <Plus className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`font-medium ${hasCreatedPost ? 'line-through text-gray-500' : ''}`}>
+                        Create your first post
+                      </p>
+                      {!hasCreatedPost && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Share something with your audience
+                        </p>
+                      )}
+                    </div>
+                    {!hasCreatedPost && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setLocation("/post")}
+                      >
+                        Create
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Stats Cards */}
@@ -240,34 +396,7 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Additional Info */}
-          <div className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Getting Started</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-gray-600 dark:text-gray-400">
-                  <p className="mb-4">
-                    {isArtist 
-                      ? "Welcome to your artist dashboard! Here you can manage your music, connect with fans, and track your performance."
-                      : "Welcome to your venue dashboard! Here you can manage events, bookings, and connect with artists and audiences."
-                    }
-                  </p>
-                  <div className="space-y-2">
-                    <p className="font-medium">Next steps:</p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li>Complete your profile information</li>
-                      <li>Upload a cover photo</li>
-                      <li>Create your first post</li>
-                      {isArtist && <li>Upload your music</li>}
-                      {isVenue && <li>Set up your venue information</li>}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+
         </div>
       </div>
     </div>

@@ -1,6 +1,129 @@
 # Resonant Changelog
 
-## Version 2.8 - Authentication System & UI Refinements (Latest)
+## Version 2.9 - Profile Members Management System (Latest)
+
+### Profile Management Architecture
+
+#### 🏗️ Shared Profile System Implementation
+- **Multi-User Profile Support**: Complete implementation of shared artist and venue profiles supporting multiple members
+- **Role-Based Access Control**: Comprehensive role hierarchy with Owner, Admin, Manager, and Member levels
+- **Permission System**: Granular permission controls for profile management, posts, events, bookings, analytics, and content moderation
+- **Profile Membership Database**: New `profileMemberships` table with full relationship tracking between users and shared profiles
+- **Automatic Owner Assignment**: Profile creators automatically assigned owner role with full permissions
+
+#### 👥 Member Management Interface
+- **Members Tab Integration**: Dynamic tab system displaying "Members" for artist profiles and "Staff" for venue profiles
+- **Member Directory Display**: Complete member listings with profile pictures, names, emails, and role badges
+- **Real-time Member Count**: Live count display in tab headers showing current members and pending invitations
+- **Role Badge System**: Color-coded badges with icons (Crown for owner, Shield for admin, Settings for manager, User for member)
+- **Member Actions**: Remove member functionality with proper permission validation
+- **Profile Type Detection**: Intelligent tab naming based on profile type (artist vs venue)
+
+#### 🎯 Invitation Management System
+- **Email-Based Invitations**: Complete invitation workflow for adding new members to shared profiles
+- **Role Assignment**: Dropdown selection for member, manager, and admin roles during invitation
+- **Permission Grid**: Checkbox-based permission assignment with six core permissions
+- **Invitation Tracking**: Separate invitations tab showing pending invitations with email, role, and creation date
+- **Invitation Status**: Real-time status tracking for sent, pending, and expired invitations
+- **Security Validation**: Email validation and duplicate invitation prevention
+
+#### 🔐 Access Control & Permissions
+- **Permission-Based Tab Visibility**: Management tab only visible to users with appropriate permissions
+- **Owner Override**: Profile owners always have access regardless of explicit permissions
+- **API-Level Security**: Backend permission validation for all member management operations
+- **Role Restrictions**: Admin role assignment restricted to profile owners only
+- **Member Removal Safeguards**: Owners cannot be removed from profiles they created
+
+### Technical Infrastructure
+
+#### 🗄️ Database Schema Enhancements
+- **Profile Memberships Table**: Complete membership tracking with user associations, roles, permissions, and timestamps
+- **Invitation System**: Database support for invitation tokens, expiration dates, and status tracking
+- **Permission Arrays**: PostgreSQL array support for flexible permission assignment
+- **Cascade Deletions**: Proper foreign key relationships with cascade delete for data integrity
+- **Status Tracking**: Membership status fields (active, pending, suspended) for lifecycle management
+
+#### 🔧 Backend API Implementation
+- **Member Retrieval**: `GET /api/profiles/:id/members` endpoint with permission validation
+- **Invitation Creation**: `POST /api/profiles/:id/invite` endpoint with role and permission assignment
+- **Member Management**: `PATCH /api/profile-memberships/:id` for role updates and `DELETE` for removal
+- **Permission Checking**: Centralized permission validation system across all member operations
+- **User Membership**: `GET /api/user/memberships` endpoint for user's profile associations
+
+#### 🎨 Frontend Component Architecture
+- **ProfileManagement Component**: Comprehensive member management interface with tabs and modals
+- **Permission Constants**: Centralized role icons, colors, and permission definitions
+- **React Query Integration**: Optimistic updates and cache invalidation for immediate UI feedback
+- **Form Validation**: Client-side validation for email addresses and permission selection
+- **Loading States**: Real-time feedback during invitation sending and member operations
+
+#### 📊 User Experience Features
+- **Intuitive Role Selection**: Dropdown interface for role assignment with appropriate restrictions
+- **Visual Permission Grid**: Checkbox grid for granular permission control during invitations
+- **Toast Notifications**: Success and error feedback for all member management actions
+- **Responsive Design**: Mobile-optimized member management interface
+- **Profile Context Awareness**: Interface adapts to artist vs venue profile types
+- **Real-time Updates**: Instant reflection of member additions, removals, and role changes
+
+### Member Management Workflow
+
+#### 👤 Adding New Members
+1. **Access Control**: Only owners and users with manage_members permission can invite
+2. **Invitation Modal**: Email input, role selection, and permission assignment interface
+3. **Validation**: Email format validation and duplicate invitation prevention
+4. **Permission Assignment**: Six-checkbox grid for granular permission control
+5. **Invitation Sending**: Backend invitation creation with notification system integration
+6. **Real-time Updates**: Immediate invitation display in pending invitations tab
+
+#### 🎭 Role Management
+- **Owner Role**: Automatic assignment to profile creator with all permissions
+- **Admin Role**: Can only be assigned by owners, includes most management permissions
+- **Manager Role**: Mid-level role with selective permissions for day-to-day operations
+- **Member Role**: Basic access with limited permissions for content interaction
+
+#### 🔧 Member Operations
+- **Role Updates**: Ability to modify member roles and permissions (permission-gated)
+- **Member Removal**: Remove members with proper validation (owners cannot be removed)
+- **Permission Modification**: Update individual permissions without changing role
+- **Status Management**: Active, pending, and suspended status tracking
+
+### Integration Points
+
+#### 🔗 Profile Header Integration
+- **Management Tab**: Seamless integration into profile tab system
+- **Conditional Display**: Tab only appears for artist and venue profiles
+- **Permission-Based Access**: Tab visibility based on user permissions and ownership
+- **Active Tab Management**: Proper tab state management with URL routing support
+
+#### 📱 Settings Page Integration
+- **Shared Profiles Widget**: Display of user's profile memberships in settings
+- **Role Indication**: Clear display of user's role in each shared profile
+- **Quick Access**: Direct links to profile management from settings page
+- **Membership Overview**: Complete list of user's profile associations
+
+#### 🔔 Notification System Integration
+- **Invitation Notifications**: Email notifications for profile invitations
+- **Member Activity**: Notifications for member additions, removals, and role changes
+- **Permission Updates**: Notifications when user permissions are modified
+- **Profile Activity**: Integration with existing notification system for profile-related activities
+
+### Security & Validation
+
+#### 🛡️ Permission Validation
+- **API-Level Checks**: All endpoints validate user permissions before operations
+- **Frontend Guards**: UI elements hidden/disabled based on user permissions
+- **Role Hierarchy**: Proper role-based access control with inheritance
+- **Owner Protection**: Profile owners cannot be demoted or removed
+
+#### 📧 Invitation Security
+- **Token-Based System**: Secure invitation tokens with expiration dates
+- **Email Validation**: Server-side email format and deliverability checking
+- **Duplicate Prevention**: System prevents multiple invitations to same email
+- **Expiration Handling**: Automatic cleanup of expired invitations
+
+---
+
+## Version 2.8 - Authentication System & UI Refinements
 
 ### Authentication System Enhancements
 

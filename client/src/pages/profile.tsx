@@ -7,6 +7,7 @@ import PostFeed from "@/components/post-feed";
 import FriendsWidget from "@/components/friends-widget";
 import EPKTab from "@/components/epk-tab";
 import FriendsTab from "@/components/friends-tab";
+import StatsTab from "@/components/stats-tab";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {

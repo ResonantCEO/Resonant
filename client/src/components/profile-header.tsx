@@ -34,6 +34,11 @@ interface ProfileHeaderProps {
 export default function ProfileHeader({ profile, isOwn, canManageMembers, activeTab = "posts", setActiveTab }: ProfileHeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  
+  // Get viewer's active profile to check their type
+  const { data: viewerProfile } = useQuery({
+    queryKey: ["/api/profiles/active"],
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -485,9 +490,12 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   Posts
                 </TabsTrigger>
               )}
-              <TabsTrigger value="about" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
-                About
-              </TabsTrigger>
+              {/* About tab - hidden for artist profiles */}
+              {profile.type !== "artist" && (
+                <TabsTrigger value="about" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  About
+                </TabsTrigger>
+              )}
               {/* Friends tab - only for non-artist profiles */}
               {profile.type !== "artist" && (
                 <TabsTrigger value="friends" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
@@ -501,6 +509,12 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               {profile.type === "artist" && (
                 <TabsTrigger value="community" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                   Community
+                </TabsTrigger>
+              )}
+              {/* Stats tab - only visible for artist profiles and only to artist/venue viewers */}
+              {profile.type === "artist" && viewerProfile && (viewerProfile.type === "artist" || viewerProfile.type === "venue") && (
+                <TabsTrigger value="stats" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Stats
                 </TabsTrigger>
               )}
               {/* Management tab - visible only for venue profiles (artist members moved to dashboard) */}

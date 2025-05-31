@@ -78,7 +78,8 @@ export default function Profile() {
           />
 
           {/* Tab Content */}
-          {activeTab === "posts" && (
+          {/* Posts Tab - only for non-artist profiles */}
+          {activeTab === "posts" && profile.type !== "artist" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column - Bio and Friends Widget */}
               <div className="lg:col-span-1 space-y-6">
@@ -111,8 +112,8 @@ export default function Profile() {
             </div>
           )}
 
-          {/* Friends Tab */}
-          {activeTab === "friends" && (
+          {/* Friends Tab - only for non-artist profiles */}
+          {activeTab === "friends" && profile.type !== "artist" && (
             <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
               <FriendsTab profile={profile} isOwn={isOwn} />
             </div>

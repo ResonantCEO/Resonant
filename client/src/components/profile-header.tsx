@@ -479,15 +479,21 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   EPK
                 </TabsTrigger>
               )}
-              <TabsTrigger value="posts" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
-                Posts
-              </TabsTrigger>
+              {/* Posts tab - only for non-artist profiles */}
+              {profile.type !== "artist" && (
+                <TabsTrigger value="posts" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Posts
+                </TabsTrigger>
+              )}
               <TabsTrigger value="about" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                 About
               </TabsTrigger>
-              <TabsTrigger value="friends" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
-                Friends
-              </TabsTrigger>
+              {/* Friends tab - only for non-artist profiles */}
+              {profile.type !== "artist" && (
+                <TabsTrigger value="friends" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Friends
+                </TabsTrigger>
+              )}
               <TabsTrigger value="photos" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                 Photos
               </TabsTrigger>

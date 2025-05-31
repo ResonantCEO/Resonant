@@ -276,6 +276,7 @@ export default function Sidebar() {
                   ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
+              onClick={() => setLocation("/friends")}
             >
               <Users className="w-5 h-5 mr-3" />
               Friends

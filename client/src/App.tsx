@@ -11,6 +11,7 @@ import Profile from "@/pages/profile";
 import Settings from "@/pages/settings";
 import Discover from "@/pages/discover";
 import Dashboard from "@/pages/dashboard";
+import Friends from "@/pages/friends";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -29,6 +30,7 @@ function Router() {
           <Route path="/profile/:id" component={Profile} />
           <Route path="/settings" component={Settings} />
           <Route path="/discover" component={Discover} />
+          <Route path="/friends" component={Friends} />
         </>
       )}
       <Route component={NotFound} />

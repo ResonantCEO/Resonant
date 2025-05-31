@@ -485,6 +485,12 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               <TabsTrigger value="photos" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                 Photos
               </TabsTrigger>
+              {/* EPK tab - only visible for artist profiles */}
+              {profile.type === "artist" && (
+                <TabsTrigger value="epk" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  EPK
+                </TabsTrigger>
+              )}
               {/* Management tab - visible for all users on artist/venue profiles */}
               {(profile.type === "artist" || profile.type === "venue") && (
                 <TabsTrigger value="management" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">

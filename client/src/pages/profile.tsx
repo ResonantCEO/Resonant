@@ -5,6 +5,7 @@ import Sidebar from "@/components/sidebar";
 import ProfileHeader from "@/components/profile-header";
 import PostFeed from "@/components/post-feed";
 import FriendsWidget from "@/components/friends-widget";
+import EPKTab from "@/components/epk-tab";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
@@ -126,6 +127,13 @@ export default function Profile() {
                 <h3 className="text-lg font-semibold text-neutral-900 mb-4">Photos</h3>
                 <p>Photo gallery coming soon...</p>
               </div>
+            </div>
+          )}
+
+          {/* EPK Tab - only for artist profiles */}
+          {activeTab === "epk" && profile.type === "artist" && (
+            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+              <EPKTab profile={profile} isOwn={isOwn} />
             </div>
           )}
 

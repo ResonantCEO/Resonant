@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import Profile from "@/pages/profile";
 import Settings from "@/pages/settings";
 import Discover from "@/pages/discover";
+import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,6 +24,7 @@ function Router() {
         <>
           <Route path="/" component={Profile} />
           <Route path="/home" component={Home} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/profile" component={Profile} />
           <Route path="/profile/:id" component={Profile} />
           <Route path="/settings" component={Settings} />

@@ -160,6 +160,9 @@ function SettingsContent() {
     },
   });
 
+  // Alias for compatibility
+  const uploadCoverPhotoMutation = uploadCoverImageMutation;
+
   // Remove cover photo mutation
   const removeCoverPhotoMutation = useMutation({
     mutationFn: async () => {

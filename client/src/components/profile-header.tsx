@@ -321,67 +321,88 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
 
           
-          {/* Cover photo image - only show if coverImageUrl exists */}
-          {profile?.coverImageUrl && (
-            <img 
-              src={profile.coverImageUrl} 
-              alt="Cover photo" 
-              className="w-full h-48 object-cover absolute inset-0 transition-opacity duration-300"
-              onError={(e) => {
-                console.log("Cover image failed to load:", profile.coverImageUrl);
-                // Hide the broken image and show gradient background
-                e.currentTarget.style.display = 'none';
-              }}
-              onLoad={() => {
-                console.log("Cover image loaded successfully:", profile.coverImageUrl);
-              }}
-            />
-          )}
-          
-          {/* Overlay gradient for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-          
-          {/* Cover photo placeholder text when no image is set */}
-          {!profile?.coverImageUrl && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-white/70 text-center">
-                <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p className="text-sm font-medium">Add a cover photo</p>
+          {/* Clickable cover photo area */}
+          <div 
+            className={`absolute inset-0 ${isOwn ? 'cursor-pointer' : ''}`}
+            onClick={isOwn ? handleCoverPhotoClick : undefined}
+          >
+            {/* Cover photo image - only show if coverImageUrl exists */}
+            {profile?.coverImageUrl && (
+              <img 
+                src={profile.coverImageUrl} 
+                alt="Cover photo" 
+                className="w-full h-48 object-cover absolute inset-0 transition-opacity duration-300"
+                onError={(e) => {
+                  console.log("Cover image failed to load:", profile.coverImageUrl);
+                  // Hide the broken image and show gradient background
+                  e.currentTarget.style.display = 'none';
+                }}
+                onLoad={() => {
+                  console.log("Cover image loaded successfully:", profile.coverImageUrl);
+                }}
+              />
+            )}
+            
+            {/* Overlay gradient for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            
+            {/* Cover photo placeholder text when no image is set */}
+            {!profile?.coverImageUrl && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-white/70 text-center">
+                  <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm font-medium">{isOwn ? "Click to add a cover photo" : "No cover photo"}</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {isOwn && (
-            <div className="absolute bottom-4 right-4 flex space-x-2">
-              {profile?.coverImageUrl && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="bg-red-500/90 hover:bg-red-600/90 text-white"
-                  onClick={handleRemoveCoverPhoto}
-                  disabled={removeCoverPhotoMutation.isPending}
-                >
-                  {removeCoverPhotoMutation.isPending ? "Removing..." : "Remove"}
-                </Button>
-              )}
+            {/* Hover overlay for owned profiles */}
+            {isOwn && (
+              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
+                <div className="text-white text-center">
+                  <Camera className="w-8 h-8 mx-auto mb-2" />
+                  <p className="text-sm font-medium">
+                    {uploadCoverPhotoMutation.isPending ? "Uploading..." : profile?.coverImageUrl ? "Change Cover Photo" : "Add Cover Photo"}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Upload progress indicator */}
+            {uploadCoverPhotoMutation.isPending && (
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+          </div>
+
+          {/* Remove button - only show when there's a cover photo */}
+          {isOwn && profile?.coverImageUrl && (
+            <div className="absolute bottom-4 right-4">
               <Button
                 variant="secondary"
                 size="sm"
-                className="bg-white/90 hover:bg-white"
-                onClick={() => coverFileInputRef.current?.click()}
-                disabled={uploadCoverPhotoMutation.isPending}
+                className="bg-red-500/90 hover:bg-red-600/90 text-white"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the cover photo click
+                  handleRemoveCoverPhoto();
+                }}
+                disabled={removeCoverPhotoMutation.isPending}
               >
-                <Camera className="w-4 h-4 mr-2" />
-                {uploadCoverPhotoMutation.isPending ? "Uploading..." : profile?.coverImageUrl ? "Change Cover" : "Add Cover"}
+                {removeCoverPhotoMutation.isPending ? "Removing..." : "Remove"}
               </Button>
-              <input
-                type="file"
-                ref={coverFileInputRef}
-                onChange={handleCoverUpload}
-                accept="image/*"
-                className="hidden"
-              />
             </div>
+          )}
+
+          {/* Hidden file input for cover upload */}
+          {isOwn && (
+            <input
+              type="file"
+              ref={coverFileInputRef}
+              onChange={handleCoverUpload}
+              accept="image/*"
+              className="hidden"
+            />
           )}
         </div>
 

@@ -287,6 +287,27 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Remove user cover photo endpoint
+  app.delete('/api/user/cover-image', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      console.log("Removing user cover image:", { userId });
+
+      // Update user's cover image URL to null in database
+      await storage.updateUser(userId, { coverImageUrl: null });
+
+      console.log("User cover image removed successfully");
+
+      res.json({ 
+        message: "Cover photo removed successfully"
+      });
+    } catch (error) {
+      console.error("Error removing user cover photo:", error);
+      res.status(500).json({ message: "Failed to remove cover photo" });
+    }
+  });
+
   // Cover photo upload endpoint
   app.post('/api/user/cover-image', isAuthenticated, (req: any, res, next) => {
     console.log("POST /api/user/cover-image - Raw request received");

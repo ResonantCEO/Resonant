@@ -376,23 +376,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             )}
           </div>
 
-          {/* Remove button - only show when there's a cover photo */}
-          {isOwn && profile?.coverImageUrl && (
-            <div className="absolute bottom-4 right-4">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="bg-red-500/90 hover:bg-red-600/90 text-white"
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering the cover photo click
-                  handleRemoveCoverPhoto();
-                }}
-                disabled={removeCoverPhotoMutation.isPending}
-              >
-                {removeCoverPhotoMutation.isPending ? "Removing..." : "Remove"}
-              </Button>
-            </div>
-          )}
+          
 
           {/* Hidden file input for cover upload */}
           {isOwn && (

@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -31,6 +30,7 @@ function SettingsContent() {
   const queryClient = useQueryClient();
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch user profiles
   const { data: profiles = [] } = useQuery({
@@ -103,7 +103,7 @@ function SettingsContent() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('profileImage', file);
-      
+
       const response = await fetch('/api/user/profile-image', {
         method: 'POST',
         credentials: 'include',
@@ -134,7 +134,7 @@ function SettingsContent() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('coverImage', file);
-      
+
       const response = await fetch('/api/user/cover-image', {
         method: 'POST',
         credentials: 'include',
@@ -160,6 +160,32 @@ function SettingsContent() {
     },
   });
 
+  // Remove cover photo mutation
+  const removeCoverPhotoMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/user/cover-image', {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to remove cover photo');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Cover photo removed",
+        description: "Your cover photo has been removed successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove cover photo",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleUpdateSetting = (key: string, value: any) => {
     updateUserMutation.mutate({ [key]: value });
   };
@@ -180,6 +206,22 @@ function SettingsContent() {
     }
   };
 
+  const handleCoverPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverImageFile(file);
+      uploadCoverImageMutation.mutate(file);
+    }
+  };
+
+  const handleRemoveCoverPhoto = async () => {
+    await removeCoverPhotoMutation.mutateAsync();
+    // Clear the input to allow re-uploading the same image
+    if (coverFileInputRef.current) {
+      coverFileInputRef.current.value = '';
+    }
+  };
+
   const artistProfiles = profiles.filter((p: any) => p.type === 'artist');
   const venueProfiles = profiles.filter((p: any) => p.type === 'venue');
 
@@ -190,7 +232,7 @@ function SettingsContent() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold mb-8">Settings</h1>
-      
+
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="profile" className="flex items-center gap-2">
@@ -240,7 +282,7 @@ function SettingsContent() {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -255,39 +297,64 @@ function SettingsContent() {
 
               <div>
                 <Label htmlFor="profileImage">Profile Picture</Label>
-                <Input
-                  id="profileImage"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleProfileImageUpload}
-                  disabled={uploadProfileImageMutation.isPending}
-                />
-                {user.profileImageUrl && (
-                  <img
-                    src={user.profileImageUrl}
-                    alt="Profile"
-                    className="mt-2 w-20 h-20 rounded-full object-cover"
-                  />
-                )}
-              </div>
+                    <Input
+                      id="profileImage"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) setProfileImageFile(file);
+                      }}
+                    />
+                    {user?.profileImageUrl && (
+                      <div className="mt-2">
+                        <img
+                          src={user.profileImageUrl}
+                          alt="Profile"
+                          className="w-20 h-20 rounded-full object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
 
-              <div>
-                <Label htmlFor="coverImage">Cover Photo</Label>
-                <Input
-                  id="coverImage"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCoverImageUpload}
-                  disabled={uploadCoverImageMutation.isPending}
-                />
-                {user.coverImageUrl && (
-                  <img
-                    src={user.coverImageUrl}
-                    alt="Cover"
-                    className="mt-2 w-full h-32 rounded-lg object-cover"
-                  />
-                )}
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="coverImage">Cover Photo</Label>
+                    <div className="space-y-3">
+                      <Input
+                        ref={coverFileInputRef}
+                        id="coverImage"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCoverPhotoChange}
+                        disabled={uploadCoverPhotoMutation.isPending}
+                      />
+                      {user?.coverImageUrl && (
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <img
+                              src={user.coverImageUrl}
+                              alt="Cover"
+                              className="w-full h-32 rounded-lg object-cover"
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleRemoveCoverPhoto}
+                            disabled={removeCoverPhotoMutation.isPending}
+                          >
+                            {removeCoverPhotoMutation.isPending ? "Removing..." : "Remove Cover Photo"}
+                          </Button>
+                        </div>
+                      )}
+                      {uploadCoverPhotoMutation.isPending && (
+                        <div className="text-sm text-muted-foreground">
+                          Uploading cover photo...
+                        </div>
+                      )}
+                    </div>
+                  </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -473,6 +473,12 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
           <div className="border-b border-neutral-200">
             <TabsList className="w-full justify-start rounded-none border-0 bg-transparent px-6">
+              {/* EPK tab - first tab for artist profiles */}
+              {profile.type === "artist" && (
+                <TabsTrigger value="epk" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  EPK
+                </TabsTrigger>
+              )}
               <TabsTrigger value="posts" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                 Posts
               </TabsTrigger>
@@ -485,10 +491,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               <TabsTrigger value="photos" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                 Photos
               </TabsTrigger>
-              {/* EPK tab - only visible for artist profiles */}
+              {/* Community tab - only visible for artist profiles */}
               {profile.type === "artist" && (
-                <TabsTrigger value="epk" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
-                  EPK
+                <TabsTrigger value="community" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Community
                 </TabsTrigger>
               )}
               {/* Management tab - visible for all users on artist/venue profiles */}

@@ -414,7 +414,7 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
       </Card>
 
       {/* Events Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-6">
         {/* Upcoming Events */}
         <Card>
           <CardHeader>
@@ -446,39 +446,47 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
                       <Calendar className="w-4 h-4 inline mr-1" />
                       July 15, 2024 • 8:00 PM
                     </p>
-                    <Badge variant="secondary" className="mt-2">
-                      Headliner
-                    </Badge>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="default">
+                        Headliner
+                      </Badge>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        • 2,000 capacity
+                      </span>
+                    </div>
                   </div>
-                  {isOwn && (
-                    <Button variant="ghost" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                  )}
+                  <div className="text-right">
+                    <span className="text-lg font-bold text-green-600 dark:text-green-400">$75</span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">per ticket</p>
+                  </div>
                 </div>
               </div>
 
               <div className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 dark:text-white">The Blue Note</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Acoustic Nights</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       <MapPin className="w-4 h-4 inline mr-1" />
-                      Greenwich Village, NYC
+                      Blue Note Jazz Club, NYC
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       <Calendar className="w-4 h-4 inline mr-1" />
                       August 3, 2024 • 9:30 PM
                     </p>
-                    <Badge variant="outline" className="mt-2">
-                      Supporting Act
-                    </Badge>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="secondary">
+                        Supporting Act
+                      </Badge>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        • 300 capacity
+                      </span>
+                    </div>
                   </div>
-                  {isOwn && (
-                    <Button variant="ghost" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                  )}
+                  <div className="text-right">
+                    <span className="text-lg font-bold text-green-600 dark:text-green-400">$45</span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">per ticket</p>
+                  </div>
                 </div>
               </div>
 
@@ -534,45 +542,21 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
               <div className="border rounded-lg p-4 opacity-75">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 dark:text-white">Jazz & Wine Night</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Winter Sessions</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       <MapPin className="w-4 h-4 inline mr-1" />
-                      Smalls Jazz Club, NYC
+                      Madison Square Garden, NYC
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       <Calendar className="w-4 h-4 inline mr-1" />
-                      February 14, 2024
+                      December 15, 2023
                     </p>
                     <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="outline">
-                        Featured Artist
-                      </Badge>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        • 150 attendees
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border rounded-lg p-4 opacity-75">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 dark:text-white">Winter Session</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      <MapPin className="w-4 h-4 inline mr-1" />
-                      Mercury Lounge, NYC
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      <Calendar className="w-4 h-4 inline mr-1" />
-                      January 8, 2024
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Badge variant="outline">
+                      <Badge variant="secondary">
                         Opening Act
                       </Badge>
                       <span className="text-xs text-gray-500 dark:text-gray-400">
-                        • 200 attendees
+                        • 20,000 attendees
                       </span>
                     </div>
                   </div>

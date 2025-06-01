@@ -1,6 +1,246 @@
 # Resonant Changelog
 
-## Version 2.9 - Profile Members Management System (Latest)
+## Version 2.13 - Social Media Integration & UI Polish (Latest)
+*Timeline: Last 6 hours*
+
+### Social Media Integration Enhancements
+
+#### 🔗 Profile Header Social Media System
+- **Complete Social Media Button Implementation**: Added Facebook, Instagram, Snapchat, TikTok, and X (Twitter) buttons to profile headers
+- **Conditional Visibility Logic**: Social media buttons visible to profile owners at all times, only visible to public when accounts are connected
+- **Brand-Accurate Styling**: Each platform uses authentic brand colors and hover effects
+- **Circular Button Design**: Modern circular social media buttons with proper spacing and visual consistency
+- **Interactive Functionality**: Working click handlers that open social media profiles in new tabs
+- **Disabled State Management**: Proper disabled states for unconnected accounts with visual feedback
+
+#### 🎨 Visual Design Improvements
+- **Platform-Specific Colors**: 
+  - Facebook: Blue (#1877F2) with darker hover states
+  - Instagram: Purple to pink gradient with enhanced hover effects
+  - Snapchat: Yellow (#FFFC00) with proper contrast for text
+  - TikTok: Black with gray hover states
+  - X (Twitter): Black with consistent hover styling
+- **Accessibility Focus**: Proper contrast ratios and focus states for all social media buttons
+- **Responsive Layout**: Social media buttons adapt properly to different screen sizes
+- **Icon Integration**: Clean icon implementation with consistent sizing across all platforms
+
+#### 🔧 Technical Implementation
+- **Database Schema Support**: Backend support for storing social media URLs for all platforms
+- **Profile Context Integration**: Social media buttons work seamlessly across all profile types
+- **Permission-Based Display**: Intelligent showing/hiding based on user ownership and account connection status
+- **Error Handling**: Robust error handling for missing or invalid social media URLs
+
+---
+
+## Version 2.12 - EPK Media Assets & Content Organization
+*Timeline: 6-12 hours ago*
+
+### Electronic Press Kit Enhancements
+
+#### 📁 Media Assets Management System
+- **Media Assets Section**: Complete implementation of media assets management at the top of EPK tab
+- **File Upload Interface**: User-friendly media upload system for press materials, photos, and promotional content
+- **Asset Organization**: Categorized media management with proper file type validation
+- **Professional Layout**: Clean, organized presentation of media assets for industry professionals
+
+#### 📅 Event Management Restructuring
+- **Upcoming Events Priority**: Moved upcoming events to prominent position above past events
+- **Chronological Organization**: Logical flow from future to past events for better user experience
+- **Enhanced Event Display**: Improved visual presentation of event information
+- **Professional EPK Layout**: Industry-standard organization for electronic press kit materials
+
+#### 🎨 Content Structure Optimization
+- **Hierarchical Information**: Media assets → Upcoming events → Past events flow
+- **Visual Consistency**: Unified styling across all EPK sections
+- **Professional Presentation**: Layout optimized for industry professionals and booking agents
+- **Responsive Design**: EPK content adapts properly to all screen sizes
+
+---
+
+## Version 2.11 - Profile Header Enhancements & Social Media Foundation
+*Timeline: 12-18 hours ago*
+
+### Profile Header System Improvements
+
+#### 🖼️ Full-Width Profile Headers
+- **Edge-to-Edge Design**: Profile headers now span the full width of the page for all profile types
+- **Immersive Visual Experience**: Enhanced visual impact with full-width cover photos and gradient backgrounds
+- **Consistent Layout**: Unified header design across audience, artist, and venue profiles
+- **Professional Appearance**: Industry-standard profile presentation for enhanced credibility
+
+#### 🔧 Header Layout Optimization
+- **Container Adjustments**: Updated profile page containers to support full-width headers
+- **Responsive Behavior**: Headers maintain full-width appearance across all device sizes
+- **Content Positioning**: Proper alignment of profile information within full-width headers
+- **Visual Hierarchy**: Enhanced focus on profile content with expanded header real estate
+
+#### 🎨 Design System Consistency
+- **Unified Styling**: Consistent header styling across all profile types
+- **Enhanced Visual Impact**: Larger header area for better brand representation
+- **Modern Aesthetics**: Contemporary design that meets current social platform standards
+- **Professional Polish**: Refined appearance suitable for business and creative professionals
+
+---
+
+## Version 2.10 - EPK Content Structure & Event Management
+*Timeline: 18-24 hours ago*
+
+### Electronic Press Kit Development
+
+#### 📋 EPK Tab Content Architecture
+- **Comprehensive Event System**: Built complete upcoming and past events sections for EPK tab
+- **Professional Event Display**: Industry-standard event listings with dates, venues, and details
+- **Event Status Management**: Clear differentiation between upcoming and completed events
+- **Booking Information**: Event details formatted for industry professionals and booking agents
+
+#### 🎯 EPK Information Organization
+- **Press Kit Structure**: Organized EPK content in logical, industry-standard format
+- **Event History Tracking**: Complete record of past performances and upcoming bookings
+- **Professional Presentation**: Layout optimized for music industry professionals
+- **Contact Integration**: Easy access to booking and management information
+
+#### 🔧 Content Management System
+- **Event Creation Interface**: User-friendly system for adding and managing events
+- **Date Management**: Proper handling of event dates and scheduling
+- **Venue Integration**: Connection between events and venue information
+- **Professional Documentation**: Complete event documentation for press and booking purposes
+
+### Technical Foundation
+
+#### 📊 Database Architecture
+- **Event Management Schema**: Database structure supporting comprehensive event tracking
+- **EPK Content Storage**: Proper data modeling for electronic press kit information
+- **Relationship Management**: Connected events, venues, and artist profiles
+- **Professional Data Structure**: Industry-standard information organization
+
+#### 🎨 User Interface Enhancement
+- **EPK-Specific Styling**: Professional styling appropriate for industry use
+- **Event Timeline Display**: Chronological organization of events and activities
+- **Responsive EPK Layout**: Professional presentation across all devices
+- **Print-Friendly Design**: EPK content optimized for both digital and print distribution
+
+---
+
+## Version 2.9 - Profile Members Management System
+
+### Profile Management Architecture
+
+#### 🏗️ Shared Profile System Implementation
+- **Multi-User Profile Support**: Complete implementation of shared artist and venue profiles supporting multiple members
+- **Role-Based Access Control**: Comprehensive role hierarchy with Owner, Admin, Manager, and Member levels
+- **Permission System**: Granular permission controls for profile management, posts, events, bookings, analytics, and content moderation
+- **Profile Membership Database**: New `profileMemberships` table with full relationship tracking between users and shared profiles
+- **Automatic Owner Assignment**: Profile creators automatically assigned owner role with full permissions
+
+#### 👥 Member Management Interface
+- **Members Tab Integration**: Dynamic tab system displaying "Members" for artist profiles and "Staff" for venue profiles
+- **Member Directory Display**: Complete member listings with profile pictures, names, emails, and role badges
+- **Real-time Member Count**: Live count display in tab headers showing current members and pending invitations
+- **Role Badge System**: Color-coded badges with icons (Crown for owner, Shield for admin, Settings for manager, User for member)
+- **Member Actions**: Remove member functionality with proper permission validation
+- **Profile Type Detection**: Intelligent tab naming based on profile type (artist vs venue)
+
+#### 🎯 Invitation Management System
+- **Email-Based Invitations**: Complete invitation workflow for adding new members to shared profiles
+- **Role Assignment**: Dropdown selection for member, manager, and admin roles during invitation
+- **Permission Grid**: Checkbox-based permission assignment with six core permissions
+- **Invitation Tracking**: Separate invitations tab showing pending invitations with email, role, and creation date
+- **Invitation Status**: Real-time status tracking for sent, pending, and expired invitations
+- **Security Validation**: Email validation and duplicate invitation prevention
+
+#### 🔐 Access Control & Permissions
+- **Permission-Based Tab Visibility**: Management tab only visible to users with appropriate permissions
+- **Owner Override**: Profile owners always have access regardless of explicit permissions
+- **API-Level Security**: Backend permission validation for all member management operations
+- **Role Restrictions**: Admin role assignment restricted to profile owners only
+- **Member Removal Safeguards**: Owners cannot be removed from profiles they created
+
+### Technical Infrastructure
+
+#### 🗄️ Database Schema Enhancements
+- **Profile Memberships Table**: Complete membership tracking with user associations, roles, permissions, and timestamps
+- **Invitation System**: Database support for invitation tokens, expiration dates, and status tracking
+- **Permission Arrays**: PostgreSQL array support for flexible permission assignment
+- **Cascade Deletions**: Proper foreign key relationships with cascade delete for data integrity
+- **Status Tracking**: Membership status fields (active, pending, suspended) for lifecycle management
+
+#### 🔧 Backend API Implementation
+- **Member Retrieval**: `GET /api/profiles/:id/members` endpoint with permission validation
+- **Invitation Creation**: `POST /api/profiles/:id/invite` endpoint with role and permission assignment
+- **Member Management**: `PATCH /api/profile-memberships/:id` for role updates and `DELETE` for removal
+- **Permission Checking**: Centralized permission validation system across all member operations
+- **User Membership**: `GET /api/user/memberships` endpoint for user's profile associations
+
+#### 🎨 Frontend Component Architecture
+- **ProfileManagement Component**: Comprehensive member management interface with tabs and modals
+- **Permission Constants**: Centralized role icons, colors, and permission definitions
+- **React Query Integration**: Optimistic updates and cache invalidation for immediate UI feedback
+- **Form Validation**: Client-side validation for email addresses and permission selection
+- **Loading States**: Real-time feedback during invitation sending and member operations
+
+#### 📊 User Experience Features
+- **Intuitive Role Selection**: Dropdown interface for role assignment with appropriate restrictions
+- **Visual Permission Grid**: Checkbox grid for granular permission control during invitations
+- **Toast Notifications**: Success and error feedback for all member management actions
+- **Responsive Design**: Mobile-optimized member management interface
+- **Profile Context Awareness**: Interface adapts to artist vs venue profile types
+- **Real-time Updates**: Instant reflection of member additions, removals, and role changes
+
+### Member Management Workflow
+
+#### 👤 Adding New Members
+1. **Access Control**: Only owners and users with manage_members permission can invite
+2. **Invitation Modal**: Email input, role selection, and permission assignment interface
+3. **Validation**: Email format validation and duplicate invitation prevention
+4. **Permission Assignment**: Six-checkbox grid for granular permission control
+5. **Invitation Sending**: Backend invitation creation with notification system integration
+6. **Real-time Updates**: Immediate invitation display in pending invitations tab
+
+#### 🎭 Role Management
+- **Owner Role**: Automatic assignment to profile creator with all permissions
+- **Admin Role**: Can only be assigned by owners, includes most management permissions
+- **Manager Role**: Mid-level role with selective permissions for day-to-day operations
+- **Member Role**: Basic access with limited permissions for content interaction
+
+#### 🔧 Member Operations
+- **Role Updates**: Ability to modify member roles and permissions (permission-gated)
+- **Member Removal**: Remove members with proper validation (owners cannot be removed)
+- **Permission Modification**: Update individual permissions without changing role
+- **Status Management**: Active, pending, and suspended status tracking
+
+### Integration Points
+
+#### 🔗 Profile Header Integration
+- **Management Tab**: Seamless integration into profile tab system
+- **Conditional Display**: Tab only appears for artist and venue profiles
+- **Permission-Based Access**: Tab visibility based on user permissions and ownership
+- **Active Tab Management**: Proper tab state management with URL routing support
+
+#### 📱 Settings Page Integration
+- **Shared Profiles Widget**: Display of user's profile memberships in settings
+- **Role Indication**: Clear display of user's role in each shared profile
+- **Quick Access**: Direct links to profile management from settings page
+- **Membership Overview**: Complete list of user's profile associations
+
+#### 🔔 Notification System Integration
+- **Invitation Notifications**: Email notifications for profile invitations
+- **Member Activity**: Notifications for member additions, removals, and role changes
+- **Permission Updates**: Notifications when user permissions are modified
+- **Profile Activity**: Integration with existing notification system for profile-related activities
+
+### Security & Validation
+
+#### 🛡️ Permission Validation
+- **API-Level Checks**: All endpoints validate user permissions before operations
+- **Frontend Guards**: UI elements hidden/disabled based on user permissions
+- **Role Hierarchy**: Proper role-based access control with inheritance
+- **Owner Protection**: Profile owners cannot be demoted or removed
+
+#### 📧 Invitation Security
+- **Token-Based System**: Secure invitation tokens with expiration dates
+- **Email Validation**: Server-side email format and deliverability checking
+- **Duplicate Prevention**: System prevents multiple invitations to same email
+- **Expiration Handling**: Automatic cleanup of expired invitations
 
 ### Profile Management Architecture
 

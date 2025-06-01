@@ -10,8 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Music, 
-  Users, 
-  Globe, 
   Download, 
   Edit, 
   Save, 
@@ -20,10 +18,8 @@ import {
   ExternalLink,
   Calendar,
   MapPin,
-  Award,
-  Star,
-  Instagram,
-  MessageCircle
+  Users,
+  Award
 } from "lucide-react";
 
 interface EPKTabProps {
@@ -32,6 +28,7 @@ interface EPKTabProps {
 }
 
 export default function EPKTab({ profile, isOwn }: EPKTabProps) {
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     bio: profile?.bio || "",
@@ -126,111 +123,50 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Artist Profile Header */}
-      <div className="relative h-96 rounded-xl overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        {/* Background Image */}
-        {profile?.coverImageUrl && (
-          <img 
-            src={profile.coverImageUrl} 
-            alt="Artist background" 
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
-
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black bg-opacity-60"></div>
-
-        {/* Content */}
-        <div className="relative h-full flex items-end p-8">
-          <div className="flex items-end space-x-6 w-full">
-            {/* Album/Artist Images */}
-            <div className="flex space-x-3 mb-4">
-              <div className="w-20 h-20 bg-gray-300 rounded-lg overflow-hidden shadow-lg">
-                {profile?.profileImageUrl ? (
-                  <img src={profile.profileImageUrl} alt="Album cover" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400"></div>
-                )}
-              </div>
-              <div className="w-16 h-16 bg-gray-300 rounded-lg overflow-hidden shadow-lg">
-                <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-500"></div>
-              </div>
-              <div className="w-12 h-12 bg-gray-300 rounded-lg overflow-hidden shadow-lg">
-                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500"></div>
-              </div>
-            </div>
-
-            {/* Artist Info */}
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold text-white mb-2">{profile?.name || "Artist Name"}</h1>
-
-              {/* Rating */}
-              <div className="flex items-center space-x-2 mb-2">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                ))}
-              </div>
-
-              {/* Location and Genre */}
-              <div className="flex items-center space-x-4 text-white/80 mb-4">
-                <div className="flex items-center space-x-1">
-                  <MapPin className="w-4 h-4" />
-                  <span>{profile?.hometown || "Location"}</span>
-                </div>
-                <div className="text-sm">
-                  {profile?.genre || "Genre"}
-                </div>
-              </div>
-
-              {/* Description */}
-              <p className="text-white/90 text-sm mb-4 max-w-md">
-                {profile?.bio || "Front Range folkadelic-rock featuring soulful harmonies"}
-              </p>
-
-              {/* Social Media Icons */}
-              <div className="flex space-x-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors">
-                  <Globe className="w-5 h-5 text-white" />
-                </div>
-                <div className="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-pink-700 transition-colors">
-                  <Instagram className="w-5 h-5 text-white" />
-                </div>
-                <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-yellow-600 transition-colors">
-                  <MessageCircle className="w-5 h-5 text-white" />
-                </div>
-                <div className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-800 transition-colors">
-                  <Music className="w-5 h-5 text-white" />
-                </div>
-                <div className="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors">
-                  <Globe className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </div>
-
-            {/* Edit Button */}
-            {isOwn && (
-              <div className="flex space-x-2">
-                {isEditing ? (
-                  <>
-                    <Button onClick={handleSave} size="sm" className="bg-white text-black hover:bg-gray-100">
-                      <Save className="w-4 h-4 mr-2" />
-                      Save
-                    </Button>
-                    <Button onClick={handleCancel} variant="outline" size="sm" className="text-white border-white hover:bg-white hover:text-black">
-                      <X className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="text-white border-white hover:bg-white hover:text-black">
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit EPK
-                  </Button>
-                )}
-              </div>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Electronic Press Kit
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Professional materials for media, venues, and promoters
+          </p>
+        </div>
+        {isOwn && (
+          <div className="flex space-x-2">
+            {isEditing ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={updateEPKMutation.isPending}
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  disabled={updateEPKMutation.isPending}
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  {updateEPKMutation.isPending ? "Saving..." : "Save"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export EPK
+                </Button>
+                <Button onClick={() => setIsEditing(true)}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              </>
             )}
           </div>
-        </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

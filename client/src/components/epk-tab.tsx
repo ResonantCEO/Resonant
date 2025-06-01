@@ -413,6 +413,267 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
         </CardContent>
       </Card>
 
+      {/* Media Assets */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center">
+              <Music className="w-5 h-5 mr-2" />
+              Media Assets
+            </span>
+            {isOwn && (
+              <Button variant="outline" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Media
+              </Button>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Photos Gallery */}
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center">
+                <Music className="w-4 h-4 mr-2" />
+                Press Photos
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {/* Sample photos - replace with real data */}
+                <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden hover:opacity-80 cursor-pointer transition-opacity">
+                  <img
+                    src="/uploads/profile-1748664951577-631724166.jpg"
+                    alt="Press photo"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden hover:opacity-80 cursor-pointer transition-opacity">
+                  <img
+                    src="/uploads/profile-1748664993224-153368943.png"
+                    alt="Press photo"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden hover:opacity-80 cursor-pointer transition-opacity">
+                  <img
+                    src="/uploads/profile-1748644829759-713150937.jpg"
+                    alt="Press photo"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {isOwn && (
+                  <div className="aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center hover:border-blue-500 cursor-pointer transition-colors">
+                    <div className="text-center">
+                      <Plus className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Add Photo</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Audio Samples */}
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center">
+                <Music className="w-4 h-4 mr-2" />
+                Audio Samples
+              </h4>
+              <div className="space-y-3">
+                {/* Sample audio tracks - replace with real data */}
+                <div className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <Music className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-gray-900 dark:text-white">Midnight Dreams</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">3:42 • Studio Recording</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="ghost" size="sm">
+                        <Music className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      {isOwn && (
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                        <Music className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-gray-900 dark:text-white">Electric Sunrise</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">4:15 • Live Performance</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="ghost" size="sm">
+                        <Music className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      {isOwn && (
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {isOwn && (
+                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-blue-500 cursor-pointer transition-colors">
+                    <Music className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Upload Audio Sample</p>
+                    <p className="text-xs text-gray-400">MP3, WAV, FLAC up to 25MB</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Video Content */}
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Videos
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Sample videos - replace with real data */}
+                <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative group cursor-pointer">
+                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <ExternalLink className="w-12 h-12 mx-auto mb-2 opacity-75" />
+                      <p className="text-sm font-medium">Live at Blue Note</p>
+                      <p className="text-xs opacity-75">YouTube • 2.1K views</p>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                    <ExternalLink className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+
+                <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative group cursor-pointer">
+                  <div className="w-full h-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <ExternalLink className="w-12 h-12 mx-auto mb-2 opacity-75" />
+                      <p className="text-sm font-medium">Studio Session</p>
+                      <p className="text-xs opacity-75">Vimeo • 850 views</p>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                    <ExternalLink className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+
+                {isOwn && (
+                  <div className="aspect-video border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center hover:border-blue-500 cursor-pointer transition-colors">
+                    <div className="text-center">
+                      <Plus className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Add Video</p>
+                      <p className="text-xs text-gray-400">YouTube, Vimeo links or upload</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Press Materials */}
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center">
+                <Download className="w-4 h-4 mr-2" />
+                Press Materials
+              </h4>
+              <div className="space-y-3">
+                {/* Sample press materials - replace with real data */}
+                <div className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                        <Download className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-gray-900 dark:text-white">Press Kit Package</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">High-res photos, bio, tech rider • 15.2 MB</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="ghost" size="sm">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      {isOwn && (
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <Download className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-gray-900 dark:text-white">Technical Rider</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Stage plot, sound requirements • 2.1 MB</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="ghost" size="sm">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      {isOwn && (
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {isOwn && (
+                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-500 cursor-pointer transition-colors">
+                    <div className="flex items-center justify-center space-x-2">
+                      <Plus className="w-5 h-5 text-gray-400" />
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Add Press Material</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Empty state when no media assets */}
+            {false && (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <Music className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium mb-2">No media assets yet</h3>
+                <p className="text-sm mb-4">Upload photos, audio samples, videos, and press materials</p>
+                {isOwn && (
+                  <Button variant="outline">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add First Media Asset
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Events Section */}
       <div className="space-y-6">
         {/* Upcoming Events */}
@@ -576,19 +837,7 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
         </Card>
       </div>
 
-      {/* Media Assets */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Media Assets</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <Music className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Media assets feature coming soon</p>
-            <p className="text-sm">Upload photos, music samples, and press materials</p>
-          </div>
-        </CardContent>
-      </Card>
+      
     </div>
   );
 }

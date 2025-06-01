@@ -413,6 +413,185 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
         </CardContent>
       </Card>
 
+      {/* Events Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Upcoming Events */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center">
+                <Calendar className="w-5 h-5 mr-2" />
+                Upcoming Events
+              </span>
+              {isOwn && (
+                <Button variant="outline" size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Event
+                </Button>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Sample upcoming events - replace with real data */}
+              <div className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Summer Music Festival</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      Central Park, New York
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <Calendar className="w-4 h-4 inline mr-1" />
+                      July 15, 2024 • 8:00 PM
+                    </p>
+                    <Badge variant="secondary" className="mt-2">
+                      Headliner
+                    </Badge>
+                  </div>
+                  {isOwn && (
+                    <Button variant="ghost" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white">The Blue Note</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      Greenwich Village, NYC
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <Calendar className="w-4 h-4 inline mr-1" />
+                      August 3, 2024 • 9:30 PM
+                    </p>
+                    <Badge variant="outline" className="mt-2">
+                      Supporting Act
+                    </Badge>
+                  </div>
+                  {isOwn && (
+                    <Button variant="ghost" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Empty state for no upcoming events */}
+              {false && (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No upcoming events</p>
+                  {isOwn && (
+                    <p className="text-sm">Add your first event to get started</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Past Events */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Calendar className="w-5 h-5 mr-2" />
+              Past Events
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Sample past events - replace with real data */}
+              <div className="border rounded-lg p-4 opacity-75">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Spring Showcase</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      Brooklyn Bowl, Brooklyn
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <Calendar className="w-4 h-4 inline mr-1" />
+                      March 20, 2024
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="secondary">
+                        Headliner
+                      </Badge>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        • 500 attendees
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 opacity-75">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Jazz & Wine Night</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      Smalls Jazz Club, NYC
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <Calendar className="w-4 h-4 inline mr-1" />
+                      February 14, 2024
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="outline">
+                        Featured Artist
+                      </Badge>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        • 150 attendees
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 opacity-75">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Winter Session</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      Mercury Lounge, NYC
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <Calendar className="w-4 h-4 inline mr-1" />
+                      January 8, 2024
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="outline">
+                        Opening Act
+                      </Badge>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        • 200 attendees
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Empty state for no past events */}
+              {false && (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No past events</p>
+                  <p className="text-sm">Event history will appear here</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Media Assets */}
       <Card>
         <CardHeader>

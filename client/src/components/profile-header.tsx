@@ -22,6 +22,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import ProfileManagement from "./profile-management";
+import { Facebook, Instagram, MessageCircle, Twitter } from "lucide-react";
 
 interface ProfileHeaderProps {
   profile: any;
@@ -34,7 +35,7 @@ interface ProfileHeaderProps {
 export default function ProfileHeader({ profile, isOwn, canManageMembers, activeTab = "posts", setActiveTab }: ProfileHeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  
+
   // Get viewer's active profile to check their type
   const { data: viewerProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
@@ -184,7 +185,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         });
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast({
@@ -210,11 +211,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     },
     onSuccess: async (data) => {
       console.log("Cover photo upload response:", data);
-      
+
       // Invalidate and refetch profile data to get updated cover photo
       await queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
       await queryClient.refetchQueries({ queryKey: [`/api/profiles/${profile.id}`] });
-      
+
       toast({
         title: "Cover Photo Updated",
         description: "Your cover photo has been successfully updated.",
@@ -325,7 +326,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         {/* Cover Photo */}
         <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
 
-          
+
           {/* Clickable cover photo area */}
           <div 
             className={`absolute inset-0 ${isOwn ? 'cursor-pointer' : ''}`}
@@ -347,10 +348,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 }}
               />
             )}
-            
+
             {/* Overlay gradient for better text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-            
+
             {/* Cover photo placeholder text when no image is set */}
             {!profile?.coverImageUrl && (
               <div className="absolute inset-0 flex items-center justify-center">
@@ -381,7 +382,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             )}
           </div>
 
-          
+
 
           {/* Hidden file input for cover upload */}
           {isOwn && (
@@ -446,7 +447,75 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     )}
                   </div>
                 </div>
-                
+
+                {/* Social Media Buttons */}
+                <div className="flex items-center space-x-2 mb-4">
+                  {/* Facebook */}
+                  {(isOwn || profile.facebookUrl) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="p-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                      onClick={() => profile.facebookUrl && window.open(profile.facebookUrl, '_blank')}
+                      disabled={!profile.facebookUrl && !isOwn}
+                    >
+                      <Facebook className="w-4 h-4" />
+                    </Button>
+                  )}
+
+                  {/* Instagram */}
+                  {(isOwn || profile.instagramUrl) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0"
+                      onClick={() => profile.instagramUrl && window.open(profile.instagramUrl, '_blank')}
+                      disabled={!profile.instagramUrl && !isOwn}
+                    >
+                      <Instagram className="w-4 h-4" />
+                    </Button>
+                  )}
+
+                  {/* Snapchat */}
+                  {(isOwn || profile.snapchatUrl) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="p-2 bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400"
+                      onClick={() => profile.snapchatUrl && window.open(profile.snapchatUrl, '_blank')}
+                      disabled={!profile.snapchatUrl && !isOwn}
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </Button>
+                  )}
+
+                  {/* TikTok */}
+                  {(isOwn || profile.tiktokUrl) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="p-2 bg-black hover:bg-gray-800 text-white border-black"
+                      onClick={() => profile.tiktokUrl && window.open(profile.tiktokUrl, '_blank')}
+                      disabled={!profile.tiktokUrl && !isOwn}
+                    >
+                      <div className="w-4 h-4 font-bold text-xs flex items-center justify-center">T</div>
+                    </Button>
+                  )}
+
+                  {/* X (Twitter) */}
+                  {(isOwn || profile.twitterUrl) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="p-2 bg-black hover:bg-gray-800 text-white border-black"
+                      onClick={() => profile.twitterUrl && window.open(profile.twitterUrl, '_blank')}
+                      disabled={!profile.twitterUrl && !isOwn}
+                    >
+                      <Twitter className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+
                 {/* Action Buttons */}
                 {renderActionButtons()}
               </div>
@@ -525,7 +594,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               )}
             </TabsList>
           </div>
-          
+
           {/* Management tab content - only show for venue profiles */}
           {profile.type === "venue" && (
             <TabsContent value="management" className="p-6">
@@ -539,7 +608,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
         </Tabs>
       </div>
-      
+
       {/* Hidden file inputs for uploads */}
       {isOwn && (
         <>

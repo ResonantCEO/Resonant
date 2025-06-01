@@ -39,7 +39,12 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
     pressQuotes: profile?.pressQuotes || "",
     technicalRequirements: profile?.technicalRequirements || "",
     bookingInfo: profile?.bookingInfo || "",
-    socialLinks: profile?.socialLinks || []
+    socialLinks: profile?.socialLinks || [],
+    facebookUrl: profile?.facebookUrl || "",
+    instagramUrl: profile?.instagramUrl || "",
+    snapchatUrl: profile?.snapchatUrl || "",
+    tiktokUrl: profile?.tiktokUrl || "",
+    twitterUrl: profile?.twitterUrl || ""
   });
 
   // Fetch EPK-specific data
@@ -84,7 +89,12 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
       pressQuotes: profile?.pressQuotes || "",
       technicalRequirements: profile?.technicalRequirements || "",
       bookingInfo: profile?.bookingInfo || "",
-      socialLinks: profile?.socialLinks || []
+      socialLinks: profile?.socialLinks || [],
+      facebookUrl: profile?.facebookUrl || "",
+      instagramUrl: profile?.instagramUrl || "",
+      snapchatUrl: profile?.snapchatUrl || "",
+      tiktokUrl: profile?.tiktokUrl || "",
+      twitterUrl: profile?.twitterUrl || ""
     });
     setIsEditing(false);
   };
@@ -769,8 +779,7 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Calendar className="w-5 h-5 mr-2" />
-              Past Events
+              <Calendar className="w-5 h-5 mr-2" />              Past Events
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -837,7 +846,7 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
         </Card>
       </div>
 
-      
+
     </div>
   );
 }

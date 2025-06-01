@@ -1,7 +1,6 @@
 # Resonant Changelog
 
 ## Version 2.14 - Advanced Artist Profile Feature Suite (Latest)
-*Timeline: Last 6 hours*
 
 ### Artist Profile Professional Feature Enhancement
 
@@ -100,7 +99,6 @@
 ---
 
 ## Version 2.13 - Social Media Integration & UI Polish
-*Timeline: Last 6 hours*
 
 ### Social Media Integration Enhancements
 
@@ -132,7 +130,6 @@
 ---
 
 ## Version 2.12 - EPK Media Assets & Content Organization
-*Timeline: 6-12 hours ago*
 
 ### Electronic Press Kit Enhancements
 
@@ -157,7 +154,6 @@
 ---
 
 ## Version 2.11 - Profile Header Enhancements & Social Media Foundation
-*Timeline: 12-18 hours ago*
 
 ### Profile Header System Improvements
 
@@ -182,7 +178,6 @@
 ---
 
 ## Version 2.10 - EPK Content Structure & Event Management
-*Timeline: 18-24 hours ago*
 
 ### Electronic Press Kit Development
 

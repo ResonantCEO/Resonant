@@ -10,7 +10,7 @@ import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useToast } from '../hooks/use-toast';
-import { Trash2, User, Palette, Bell, Shield, Globe } from 'lucide-react';
+import { Trash2, User, Palette, Bell, Shield, Globe, Camera } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +30,9 @@ function SettingsContent() {
   const queryClient = useQueryClient();
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
+  const backgroundFileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch user profiles
   const { data: profiles = [] } = useQuery({
@@ -222,6 +224,79 @@ function SettingsContent() {
     // Clear the input to allow re-uploading the same image
     if (coverFileInputRef.current) {
       coverFileInputRef.current.value = '';
+    }
+  };
+
+  // Background photo upload mutation
+  const uploadBackgroundMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch('/api/user/background-image', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      
+      if (!response.ok) throw new Error('Failed to upload background image');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Background uploaded",
+        description: "Your background image has been uploaded successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to upload background image",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Remove background photo mutation
+  const removeBackgroundMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/user/background-image', {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to remove background image');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Background removed",
+        description: "Your background image has been removed successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove background image",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleBackgroundPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBackgroundImageFile(file);
+      uploadBackgroundMutation.mutate(file);
+    }
+  };
+
+  const handleRemoveBackgroundPhoto = async () => {
+    await removeBackgroundMutation.mutateAsync();
+    // Clear the input to allow re-uploading the same image
+    if (backgroundFileInputRef.current) {
+      backgroundFileInputRef.current.value = '';
     }
   };
 
@@ -471,9 +546,35 @@ function SettingsContent() {
                     <SelectItem value="solid-light">Light Solid</SelectItem>
                     <SelectItem value="pattern-dots">Dotted Pattern</SelectItem>
                     <SelectItem value="pattern-waves">Wave Pattern</SelectItem>
+                    <SelectItem value="custom-photo">Custom Photo</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {user.profileBackground === 'custom-photo' && (
+                <div className="space-y-3">
+                  <Label>Upload Custom Background Photo</Label>
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBackgroundPhotoUpload}
+                      className="hidden"
+                      ref={backgroundFileInputRef}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => backgroundFileInputRef.current?.click()}
+                      disabled={uploadBackgroundMutation.isPending}
+                    >
+                      <Camera className="w-4 h-4 mr-2" />
+                      {uploadBackgroundMutation.isPending ? 'Uploading...' : 'Choose Photo'}
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Upload a custom photo to use as your profile page background.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

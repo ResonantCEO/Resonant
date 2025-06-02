@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as React from "react";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/sidebar";
@@ -13,7 +14,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
-  const [activeTab, setActiveTab] = useState("posts");
+  // Set default tab based on profile type
+  const getDefaultTab = (profileType: string) => {
+    if (profileType === "artist") {
+      return "epk"; // First tab for artist profiles
+    }
+    return "posts"; // First tab for non-artist profiles
+  };
+
+  const [activeTab, setActiveTab] = useState(() => 
+    profile ? getDefaultTab(profile.type) : "posts"
+  );
   const { isCollapsed } = useSidebar();
 
   const { data: activeProfile } = useQuery({
@@ -44,6 +55,13 @@ export default function Profile() {
       </div>
     );
   }
+
+  // Update active tab when profile changes
+  React.useEffect(() => {
+    if (profile) {
+      setActiveTab(getDefaultTab(profile.type));
+    }
+  }, [profile?.id, profile?.type]);
 
   if (!profile) {
     return (

@@ -261,7 +261,7 @@ function SettingsContent() {
   // Remove background photo mutation
   const removeBackgroundMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/user/background-image', {
+      const response = await fetch('/api/profile/background-image', {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -273,7 +273,7 @@ function SettingsContent() {
         title: "Background removed",
         description: "Your background image has been removed successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles/active'] });
     },
     onError: (error: any) => {
       toast({

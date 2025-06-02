@@ -135,7 +135,7 @@ export default function Profile() {
             }}
           />
         )}
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="container-responsive mx-auto px-responsive py-responsive">
           <ProfileHeader 
             profile={profile} 
             isOwn={isOwn}

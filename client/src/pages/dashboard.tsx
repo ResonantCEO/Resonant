@@ -309,7 +309,7 @@ export default function Dashboard() {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-responsive-1-2 gap-responsive">
             {/* Recent Activity */}
             <Card>
               <CardHeader>

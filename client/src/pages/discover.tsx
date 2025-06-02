@@ -77,7 +77,7 @@ export default function Discover() {
     const matchesType = selectedType === "all" || item.type === selectedType;
     const matchesLocation = selectedLocation === "all-locations" || !selectedLocation || item.location?.includes(selectedLocation);
     const matchesGenre = selectedGenre === "all-genres" || !selectedGenre || item.genre?.includes(selectedGenre);
-    
+
     return matchesSearch && matchesType && matchesLocation && matchesGenre;
   });
 
@@ -102,7 +102,7 @@ export default function Discover() {
   return (
     <div className="min-h-screen flex bg-neutral-50">
       <Sidebar />
-      
+
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-neutral-200 z-40">
         <div className="flex items-center justify-between p-4">
@@ -113,7 +113,7 @@ export default function Discover() {
       {/* Main Content */}
       <div className="flex-1 lg:ml-0 pt-16 lg:pt-0">
         <div className="max-w-7xl mx-auto p-6">
-          
+
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-neutral-900 mb-2">Discover</h1>
@@ -123,7 +123,7 @@ export default function Discover() {
           {/* Compact Search and Filters */}
           <div className="bg-white rounded-lg border border-neutral-200 p-4 mb-8">
             <div className="flex gap-3 items-center">
-              
+
               {/* Main Search Bar */}
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
@@ -284,7 +284,7 @@ export default function Discover() {
           {/* Featured Section */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-neutral-900 mb-6">Featured This Week</h2>
-            
+
             {/* Featured Artists */}
             {filteredData.filter(item => item.type === "artist").length > 0 && (
               <div className="mb-8">
@@ -308,7 +308,7 @@ export default function Discover() {
                           {getTypeIcon(item.type)}
                         </div>
                       </div>
-                      
+
                       {/* Quick Actions - appear on hover */}
                       {hoveredItem === item.id && (
                         <div className="absolute top-4 right-4 flex gap-2">
@@ -382,7 +382,7 @@ export default function Discover() {
                               <span className="text-sm font-medium text-neutral-700">{item.location}</span>
                             </div>
                           )}
-                          
+
                           {item.capacity && (
                             <div className="flex items-center gap-2">
                               <Users className="h-4 w-4 text-green-500" />
@@ -441,7 +441,7 @@ export default function Discover() {
                               {getTypeIcon(item.type)}
                             </div>
                           </div>
-                          
+
                           {/* Quick Actions - appear on hover */}
                           {hoveredItem === item.id && (
                             <div className="absolute top-4 right-4 flex gap-2">
@@ -515,7 +515,7 @@ export default function Discover() {
                                   <span className="text-sm font-medium text-neutral-700">{item.location}</span>
                                 </div>
                               )}
-                              
+
                               {item.capacity && (
                                 <div className="flex items-center gap-2">
                                   <Users className="h-4 w-4 text-emerald-500" />
@@ -574,7 +574,7 @@ export default function Discover() {
                               {getTypeIcon(item.type)}
                             </div>
                           </div>
-                          
+
                           {/* Quick Actions - appear on hover */}
                           {hoveredItem === item.id && (
                             <div className="absolute top-4 right-4 flex gap-2">
@@ -648,7 +648,7 @@ export default function Discover() {
                                   <span className="text-sm font-medium text-neutral-700">{item.location}</span>
                                 </div>
                               )}
-                              
+
                               {item.capacity && (
                                 <div className="flex items-center gap-2">
                                   <Users className="h-4 w-4 text-violet-500" />
@@ -685,6 +685,29 @@ export default function Discover() {
             )}
           </div>
 
+          /* Custom responsive grid */
+          .grid-responsive-1-2-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjust minmax value as needed */
+            gap: 1.5rem; /* Adjust gap as needed */
+          }
+
+          /* Responsive text classes */
+          .text-responsive-base {
+            font-size: 1rem; /* Default size */
+          }
+
+          .text-responsive-sm {
+            font-size: 0.875rem; /* Equivalent to text-sm */
+          }
+
+          .text-responsive-xs {
+            font-size: 0.75rem; /* Equivalent to text-xs */
+          }
+
+          .gap-responsive {
+              gap: 0.75rem; /* Equivalent to gap-3 */
+          }
           {/* Results Section */}
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -705,127 +728,79 @@ export default function Discover() {
             </div>
 
             {/* Results Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredData.map((item) => (
-                <Card 
-                  key={item.id}
-                  className="group hover:shadow-lg transition-all duration-200 cursor-pointer relative"
-                  onMouseEnter={() => setHoveredItem(item.id)}
-                  onMouseLeave={() => setHoveredItem(null)}
-                >
-                  <CardContent className="p-0">
-                    {/* Enhanced Header */}
-                    <div className="h-56 bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-20 h-20 rounded-2xl bg-white shadow-lg flex items-center justify-center text-4xl">
-                          {getTypeIcon(item.type)}
-                        </div>
-                      </div>
-                      
-                      {/* Quick Actions - appear on hover */}
-                      {hoveredItem === item.id && (
-                        <div className="absolute top-4 right-4 flex gap-2">
-                          <Button size="sm" variant="secondary" className="h-9 w-9 p-0 shadow-lg">
-                            <Bookmark className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="secondary" className="h-9 w-9 p-0 shadow-lg">
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
+            <div className="grid grid-responsive-1-2-3 gap-responsive">
+                {filteredData.map((item) => (
+                  <Card key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className="relative">
+                        {/* Cover Image */}
+                        <div className="aspect-video bg-gradient-to-br from-purple-400 via-pink-400 to-red-400 relative overflow-hidden">
+                          {item.image && (
+                            <img 
+                              src={item.image} 
+                              alt={item.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ```python
+                          )}
+                          <div className="absolute inset-0 bg-black bg-opacity-20"></div>
 
-                      {/* Type Badge */}
-                      <div className="absolute top-4 left-4">
-                        <Badge variant="secondary" className="capitalize font-medium px-3 py-1">
-                          {item.type}
-                        </Badge>
-                      </div>
+                          {/* Type Badge */}
+                          <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
+                            <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-xs sm:text-sm">
+                              {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                            </Badge>
+                          </div>
 
-                      {/* Availability Badge */}
-                      {item.availability && (
-                        <div className="absolute bottom-4 left-4">
-                          <Badge className={`${getAvailabilityColor(item.availability)} font-medium px-3 py-1`}>
-                            {item.availability}
-                          </Badge>
-                        </div>
-                      )}
-
-                      {/* Rating Badge */}
-                      {item.rating && (
-                        <div className="absolute bottom-4 right-4">
-                          <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1 shadow-lg">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm font-semibold text-neutral-700">{item.rating}</span>
+                          {/* Availability Badge */}
+                          <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
+                            <Badge className={`${getAvailabilityColor(item.availability)} font-bold border-0 shadow-lg text-xs sm:text-sm`}>
+                              {item.availability}
+                            </Badge>
                           </div>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Enhanced Content */}
-                    <div className="p-6">
-                      <div className="mb-4">
-                        <h3 className="font-bold text-xl text-neutral-900 group-hover:text-blue-600 transition-colors mb-2">
-                          {item.name}
-                        </h3>
+                        {/* Content */}
+                        <div className="p-3 sm:p-4 md:p-6">
+                          {/* Header with Name and Location */}
+                          <div className="mb-3 sm:mb-4">
+                            <h3 className="text-responsive-base font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors line-clamp-1">
+                              {item.name}
+                            </h3>
+                            {item.location && (
+                              <p className="text-responsive-xs text-gray-500 flex items-center">
+                                📍 {item.location}
+                              </p>
+                            )}
+                            {item.genre && (
+                              <p className="text-responsive-xs text-purple-600 font-medium mt-1">
+                                🎵 {item.genre}
+                              </p>
+                            )}
+                          </div>
 
-                        {/* Location/Date and Capacity */}
-                        <div className="space-y-2">
-                          {item.type === "event" && item.eventDate ? (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-blue-500" />
-                              <span className="text-sm font-medium text-neutral-700">
-                                {new Date(item.eventDate).toLocaleDateString('en-US', { 
-                                  weekday: 'short', 
-                                  year: 'numeric', 
-                                  month: 'short', 
-                                  day: 'numeric' 
-                                })}
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-blue-500" />
-                              <span className="text-sm font-medium text-neutral-700">{item.location}</span>
-                            </div>
-                          )}
-                          
-                          {item.capacity && (
-                            <div className="flex items-center gap-2">
-                              <Users className="h-4 w-4 text-green-500" />
-                              <span className="text-sm font-medium text-neutral-700">{item.capacity.toLocaleString()} capacity</span>
-                            </div>
-                          )}
+                       {/* Description */}
+                          <p className="text-responsive-xs text-neutral-600 mb-3 sm:mb-4 leading-relaxed line-clamp-2">
+                            {item.description}
+                          </p>
+
+                          {/* Tags */}
+                          <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-5">
+                            {item.tags?.slice(0, 2).map((tag, index) => (
+                              <Badge key={index} variant="outline" className="text-xs font-medium px-1.5 sm:px-2 py-1 border-purple-300 bg-purple-500 text-white">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+
+                          {/* Action Button */}
+                          <Button className="w-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-bold shadow-lg border-0 text-sm sm:text-base py-2 sm:py-2.5">
+                            <span className="drop-shadow-sm">View Profile</span>
+                          </Button>
                         </div>
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-sm text-neutral-700 font-medium mb-4 leading-relaxed">
-                        {item.description}
-                      </p>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {item.tags?.slice(0, 3).map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs font-medium px-3 py-1 border-blue-300 bg-blue-500 text-white">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-3">
-                        <Button variant="outline" size="sm" className="flex-1 font-bold text-neutral-800 border-2 border-neutral-300 hover:bg-neutral-100">
-                          View Profile
-                        </Button>
-                        <Button size="sm" className="flex-1 font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
-                          <Plus className="h-4 w-4 mr-2" />
-                          <span className="drop-shadow-sm">Add to Event</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      </CardContent>
+                    </Card>
+                  ))}
             </div>
 
             {/* Load More */}

@@ -106,7 +106,7 @@ export default function Dashboard() {
 
           {/* Getting Started Section */}
           <div className="mb-8">
-            <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
+            <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Getting Started</CardTitle>
@@ -241,7 +241,7 @@ export default function Dashboard() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {isArtist ? "Followers" : "Bookings"}
@@ -256,7 +256,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {isArtist ? "Tracks" : "Events"}
@@ -275,7 +275,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Views</CardTitle>
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -288,7 +288,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {isArtist ? "Plays" : "Capacity"}
@@ -311,7 +311,7 @@ export default function Dashboard() {
           {/* Main Content Grid */}
           <div className="grid grid-responsive-1-2 gap-responsive">
             {/* Recent Activity */}
-            <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
+            <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
               </CardHeader>
@@ -327,7 +327,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Quick Actions */}
-            <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
+            <Card>
               <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>

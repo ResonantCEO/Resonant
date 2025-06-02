@@ -108,7 +108,8 @@ export function registerRoutes(app: Express): Server {
         compactMode,
         autoplayVideos,
         theme,
-        language
+        language,
+        profileBackground
       } = req.body;
 
       const updateData: any = {};
@@ -123,6 +124,7 @@ export function registerRoutes(app: Express): Server {
       if (autoplayVideos !== undefined) updateData.autoplayVideos = autoplayVideos;
       if (theme !== undefined) updateData.theme = theme;
       if (language !== undefined) updateData.language = language;
+      if (profileBackground !== undefined) updateData.profileBackground = profileBackground;
       const updatedUser = await storage.updateUser(req.user.id, updateData);
       res.json(updatedUser);
     } catch (error) {

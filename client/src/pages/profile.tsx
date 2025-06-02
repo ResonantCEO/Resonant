@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
+  
   // Set default tab based on profile type
   const getDefaultTab = (profileType: string) => {
     if (profileType === "artist") {
@@ -22,9 +23,7 @@ export default function Profile() {
     return "posts"; // First tab for non-artist profiles
   };
 
-  const [activeTab, setActiveTab] = useState(() => 
-    profile ? getDefaultTab(profile.type) : "posts"
-  );
+  const [activeTab, setActiveTab] = useState("posts");
   const { isCollapsed } = useSidebar();
 
   const { data: activeProfile } = useQuery({

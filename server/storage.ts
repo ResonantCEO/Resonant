@@ -111,6 +111,7 @@ export class DatabaseStorage implements IStorage {
       language: users.language,
       compactMode: users.compactMode,
       autoplayVideos: users.autoplayVideos,
+      profileBackground: users.profileBackground,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
     }).from(users).where(eq(users.id, id));
@@ -139,6 +140,7 @@ export class DatabaseStorage implements IStorage {
       language: users.language,
       compactMode: users.compactMode,
       autoplayVideos: users.autoplayVideos,
+      profileBackground: users.profileBackground,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
     }).from(users).where(eq(users.email, email));
@@ -894,7 +896,7 @@ export class DatabaseStorage implements IStorage {
 
       // Always add the profile creator as owner if not already in memberships
       const ownerMembership = memberships.find(m => m.membership.userId === profile.userId && m.membership.role === "owner");
-      
+
       if (!ownerMembership) {
         const owner = await this.getUser(profile.userId);
         if (owner) {
@@ -917,7 +919,7 @@ export class DatabaseStorage implements IStorage {
               profileImageUrl: owner.profileImageUrl,
             },
           };
-          
+
           // Add owner at the beginning of the list
           return [ownerEntry, ...memberships];
         }

@@ -134,50 +134,22 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Electronic Press Kit
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Professional materials for media, venues, and promoters
-          </p>
-        </div>
-        {isOwn && (
-          <div className="flex space-x-2">
-            {isEditing ? (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={updateEPKMutation.isPending}
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSave}
-                  disabled={updateEPKMutation.isPending}
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  {updateEPKMutation.isPending ? "Saving..." : "Save"}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline">
-                  <Download className="w-4 h-4 mr-2" />
-                  Export EPK
-                </Button>
-                <Button onClick={() => setIsEditing(true)}>
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
-              </>
-            )}
+      <div className="mb-6">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Electronic Press Kit</h2>
+            <p className="text-gray-600 dark:text-gray-400">Professional materials for media, venues, and promoters</p>
           </div>
-        )}
-      </div>
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              Export EPK
+            </Button>
+            <Button className="flex items-center gap-2">
+              <Edit className="w-4 h-4" />
+              Edit
+            </Button>
+          </div>
+        </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Artist Bio */}

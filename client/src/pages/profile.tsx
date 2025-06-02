@@ -87,10 +87,6 @@ export default function Profile() {
     }
   };
 
-  const backgroundStyle = profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl 
-    ? { backgroundImage: `url(${profile.backgroundImageUrl})`, backgroundSize: 'auto', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }
-    : {};
-
   return (
     <div className="min-h-screen flex">
       <Sidebar />
@@ -104,9 +100,21 @@ export default function Profile() {
 
       {/* Main Content */}
       <div 
-        className={`flex-1 lg:ml-0 pt-16 lg:pt-0 min-h-screen ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
-        style={backgroundStyle}
+        className={`flex-1 lg:ml-0 pt-16 lg:pt-0 min-h-screen relative ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
       >
+        {/* Fixed Background Image */}
+        {profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl && (
+          <div 
+            className="fixed top-0 bottom-0 left-64 right-0 lg:left-64 lg:right-0 pointer-events-none z-0"
+            style={{
+              backgroundImage: `url(${profile.backgroundImageUrl})`,
+              backgroundSize: 'auto',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              left: 'clamp(0px, 16rem, 16rem)' // 64 * 0.25rem = 16rem (sidebar width)
+            }}
+          />
+        )}
         <div className="max-w-4xl mx-auto p-6">
           <ProfileHeader 
             profile={profile} 

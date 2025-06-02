@@ -87,13 +87,13 @@ export default function Profile() {
     }
   };
 
-  const backgroundStyle = user?.profileBackground === 'custom-photo' && user?.backgroundImageUrl 
-    ? { backgroundImage: `url(${user.backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+  const backgroundStyle = profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl 
+    ? { backgroundImage: `url(${profile.backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : {};
 
   return (
     <div 
-      className={`min-h-screen flex ${getPageBackground(user?.profileBackground || 'default', user?.backgroundImageUrl)}`}
+      className={`min-h-screen flex ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
       style={backgroundStyle}
     >
       <Sidebar />

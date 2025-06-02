@@ -60,6 +60,8 @@ export const profiles = pgTable("profiles", {
   bio: text("bio"),
   profileImageUrl: varchar("profile_image_url"),
   coverImageUrl: varchar("cover_image_url"),
+  backgroundImageUrl: varchar("background_image_url"),
+  profileBackground: text("profile_background"), // 'sunset', 'ocean', 'forest', 'gradient-1', etc., or 'custom-photo'
   visibility: varchar("visibility").notNull().default("public"), // 'public', 'friends', 'private'
   location: varchar("location"),
   isActive: boolean("is_active").default(false), // which profile is currently active

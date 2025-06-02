@@ -508,6 +508,74 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Profile background image routes
+  app.post('/api/profile/background-image', isAuthenticated, upload.single('background'), async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      console.log("Uploading profile background image for user:", userId);
+      
+      // Get the active profile
+      const activeProfile = await storage.getActiveProfile(userId);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile found" });
+      }
+
+      const backgroundImageUrl = `/uploads/${req.file.filename}`;
+      
+      // Update the profile's background image
+      const updatedProfile = await storage.updateProfile(activeProfile.id, { 
+        backgroundImageUrl,
+        profileBackground: 'custom-photo'
+      });
+
+      console.log("Profile background image uploaded successfully:", backgroundImageUrl);
+
+      res.json({ 
+        message: "Profile background image uploaded successfully",
+        backgroundImageUrl,
+        profile: updatedProfile
+      });
+    } catch (error) {
+      console.error("Error uploading profile background image:", error);
+      res.status(500).json({ message: "Failed to upload profile background image" });
+    }
+  });
+
+  app.delete('/api/profile/background-image', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+
+      console.log("Removing profile background image for user:", userId);
+
+      // Get the active profile
+      const activeProfile = await storage.getActiveProfile(userId);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile found" });
+      }
+
+      // Update profile's background image URL to null in database
+      const updatedProfile = await storage.updateProfile(activeProfile.id, { 
+        backgroundImageUrl: null,
+        profileBackground: null
+      });
+
+      console.log("Profile background image removed successfully");
+
+      res.json({ 
+        message: "Profile background image removed successfully",
+        profile: updatedProfile
+      });
+    } catch (error) {
+      console.error("Error removing profile background image:", error);
+      res.status(500).json({ message: "Failed to remove profile background image" });
+    }
+  });
+
   // Profile routes
   app.get('/api/profiles', isAuthenticated, async (req: any, res) => {
     try {

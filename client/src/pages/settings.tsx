@@ -231,9 +231,9 @@ function SettingsContent() {
   const uploadBackgroundMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('background', file);
       
-      const response = await fetch('/api/user/background-image', {
+      const response = await fetch('/api/profile/background-image', {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -247,7 +247,7 @@ function SettingsContent() {
         title: "Background uploaded",
         description: "Your background image has been uploaded successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles/active'] });
     },
     onError: (error: any) => {
       toast({

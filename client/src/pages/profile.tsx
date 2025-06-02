@@ -88,7 +88,7 @@ export default function Profile() {
   };
 
   const backgroundStyle = profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl 
-    ? { backgroundImage: `url(${profile.backgroundImageUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    ? { backgroundImage: `url(${profile.backgroundImageUrl})`, backgroundSize: 'auto', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }
     : {};
 
   return (

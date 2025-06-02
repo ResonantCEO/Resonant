@@ -130,7 +130,7 @@ export default function Sidebar() {
 
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white dark:bg-neutral-900 shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block transition-all duration-300 fixed top-0 left-0 h-screen overflow-hidden z-40`}>
+    <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md shadow-lg border-r border-white/20 dark:border-neutral-700/30 hidden lg:block transition-all duration-300 fixed top-0 left-0 h-screen overflow-hidden z-40`}>
       {/* Collapse toggle button positioned in the middle of the sidebar */}
       <div className="absolute top-1/2 -translate-y-1/2 right-0 z-50">
         <Button
@@ -148,7 +148,7 @@ export default function Sidebar() {
       </div>
 
       {/* Header */}
-      <div className={`${isCollapsed ? 'p-2' : 'p-6'} border-b border-neutral-200 dark:border-neutral-700`}>
+      <div className={`${isCollapsed ? 'p-2' : 'p-6'} border-b border-white/10 dark:border-neutral-700/30 backdrop-blur-sm`}>
         {!isCollapsed && (
           <div className="flex justify-center mb-6">
             <img src="/resonant-logo.png" alt="Resonant" className="h-16 block dark:hidden" />

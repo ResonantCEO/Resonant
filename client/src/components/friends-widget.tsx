@@ -84,7 +84,7 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
   return (
     <div className="space-y-6">
       {/* Friends Widget */}
-      <Card>
+      <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Friends</CardTitle>
@@ -122,7 +122,7 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
 
       {/* Friend Requests (only show if user has pending requests) */}
       {friendRequests.length > 0 && (
-        <Card>
+        <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
           <CardHeader>
             <CardTitle className="text-lg">Friend Requests</CardTitle>
           </CardHeader>

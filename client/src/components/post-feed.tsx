@@ -225,7 +225,7 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
 
       {/* Posts Feed */}
       {posts.length === 0 ? (
-        <Card>
+        <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
           <CardContent className="p-8 text-center">
             <p className="text-neutral-600">No posts yet.</p>
           </CardContent>
@@ -242,7 +242,7 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
             : (post.profile?.profileImageUrl || post.profileImageUrl || "");
 
           return (
-            <Card key={post.id}>
+            <Card key={post.id} className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
             <CardContent className="p-6">
               {/* Post Header */}
               <div className="flex items-start justify-between mb-4">

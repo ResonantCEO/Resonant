@@ -607,6 +607,18 @@ export function registerRoutes(app: Express): Server {
         userId,
       });
 
+      // Prevent creation of multiple audience profiles
+      if (profileData.type === 'audience') {
+        const existingProfiles = await storage.getProfilesByUserId(userId);
+        const existingAudienceProfile = existingProfiles.find(p => p.type === 'audience' && !p.deletedAt);
+        
+        if (existingAudienceProfile) {
+          return res.status(400).json({ 
+            message: "You can only have one audience profile. Use your existing audience profile instead." 
+          });
+        }
+      }
+
       const profile = await storage.createProfile(profileData);
       res.json(profile);
     } catch (error) {

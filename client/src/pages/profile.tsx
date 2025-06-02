@@ -92,10 +92,7 @@ export default function Profile() {
     : {};
 
   return (
-    <div 
-      className={`min-h-screen flex ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
-      style={backgroundStyle}
-    >
+    <div className="min-h-screen flex">
       <Sidebar />
 
       {/* Mobile Header */}
@@ -106,7 +103,10 @@ export default function Profile() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-0 pt-16 lg:pt-0">
+      <div 
+        className={`flex-1 lg:ml-0 pt-16 lg:pt-0 min-h-screen ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
+        style={backgroundStyle}
+      >
         <div className="max-w-4xl mx-auto p-6">
           <ProfileHeader 
             profile={profile} 

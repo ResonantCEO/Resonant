@@ -350,7 +350,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       {/* Profile Header */}
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
         {/* Cover Photo */}
-        <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
+        <div className={`h-48 relative overflow-hidden ${!profile?.coverImageUrl ? getProfileBackground(user?.profileBackground || 'default') : 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700'}`}>
 
 
           {/* Clickable cover photo area */}

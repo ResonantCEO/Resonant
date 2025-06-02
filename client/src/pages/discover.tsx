@@ -685,29 +685,6 @@ export default function Discover() {
             )}
           </div>
 
-          /* Custom responsive grid */
-          .grid-responsive-1-2-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjust minmax value as needed */
-            gap: 1.5rem; /* Adjust gap as needed */
-          }
-
-          /* Responsive text classes */
-          .text-responsive-base {
-            font-size: 1rem; /* Default size */
-          }
-
-          .text-responsive-sm {
-            font-size: 0.875rem; /* Equivalent to text-sm */
-          }
-
-          .text-responsive-xs {
-            font-size: 0.75rem; /* Equivalent to text-xs */
-          }
-
-          .gap-responsive {
-              gap: 0.75rem; /* Equivalent to gap-3 */
-          }
           {/* Results Section */}
           <div>
             <div className="flex items-center justify-between mb-6">
@@ -728,7 +705,7 @@ export default function Discover() {
             </div>
 
             {/* Results Grid */}
-            <div className="grid grid-responsive-1-2-3 gap-responsive">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredData.map((item) => (
                   <Card key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 overflow-hidden">
                     <CardContent className="p-0">
@@ -764,23 +741,23 @@ export default function Discover() {
                         <div className="p-3 sm:p-4 md:p-6">
                           {/* Header with Name and Location */}
                           <div className="mb-3 sm:mb-4">
-                            <h3 className="text-responsive-base font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors line-clamp-1">
+                            <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors line-clamp-1">
                               {item.name}
                             </h3>
                             {item.location && (
-                              <p className="text-responsive-xs text-gray-500 flex items-center">
+                              <p className="text-xs text-gray-500 flex items-center">
                                 📍 {item.location}
                               </p>
                             )}
                             {item.genre && (
-                              <p className="text-responsive-xs text-purple-600 font-medium mt-1">
+                              <p className="text-xs text-purple-600 font-medium mt-1">
                                 🎵 {item.genre}
                               </p>
                             )}
                           </div>
 
                        {/* Description */}
-                          <p className="text-responsive-xs text-neutral-600 mb-3 sm:mb-4 leading-relaxed line-clamp-2">
+                          <p className="text-xs text-neutral-600 mb-3 sm:mb-4 leading-relaxed line-clamp-2">
                             {item.description}
                           </p>
 

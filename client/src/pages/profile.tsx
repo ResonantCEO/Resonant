@@ -107,7 +107,9 @@ export default function Profile() {
         {/* Fixed Background Image */}
         {profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl && (
           <div 
-            className="fixed top-0 bottom-0 left-0 lg:left-80 right-0 pointer-events-none z-0"
+            className={`fixed top-0 bottom-0 left-0 right-0 pointer-events-none z-0 ${
+              isCollapsed ? 'lg:left-16' : 'lg:left-80'
+            }`}
             style={{
               backgroundImage: `url(${profile.backgroundImageUrl})`,
               backgroundSize: '100% auto', // Scale width to 100%, keep original height

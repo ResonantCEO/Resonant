@@ -42,6 +42,13 @@ export default function Profile() {
     queryKey: ["/api/user"],
   });
 
+  // Update active tab when profile changes
+  React.useEffect(() => {
+    if (profile) {
+      setActiveTab(getDefaultTab(profile.type));
+    }
+  }, [profile?.id, profile?.type]);
+
   if (profileLoading) {
     return (
       <div className="min-h-screen flex">
@@ -54,13 +61,6 @@ export default function Profile() {
       </div>
     );
   }
-
-  // Update active tab when profile changes
-  React.useEffect(() => {
-    if (profile) {
-      setActiveTab(getDefaultTab(profile.type));
-    }
-  }, [profile?.id, profile?.type]);
 
   if (!profile) {
     return (

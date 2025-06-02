@@ -157,13 +157,6 @@ export class DatabaseStorage implements IStorage {
 
   async updateUser(id: number, data: Partial<typeof users.$inferInsert>) {
     console.log("Updating user with data:", data);
-    
-    // Check if there's any data to update
-    if (!data || Object.keys(data).length === 0) {
-      console.log("No data to update, returning current user");
-      return this.getUser(id);
-    }
-    
     const [updatedUser] = await db
       .update(users)
       .set(data)

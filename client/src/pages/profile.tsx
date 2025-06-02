@@ -105,13 +105,13 @@ export default function Profile() {
         {/* Fixed Background Image */}
         {profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl && (
           <div 
-            className="fixed top-0 bottom-0 left-64 right-0 lg:left-64 lg:right-0 pointer-events-none z-0"
+            className="fixed top-0 bottom-0 right-0 pointer-events-none z-0 lg:left-64"
             style={{
               backgroundImage: `url(${profile.backgroundImageUrl})`,
               backgroundSize: 'auto',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              left: 'clamp(0px, 16rem, 16rem)' // 64 * 0.25rem = 16rem (sidebar width)
+              left: '16rem' // Start after sidebar width (64 * 0.25rem = 16rem)
             }}
           />
         )}

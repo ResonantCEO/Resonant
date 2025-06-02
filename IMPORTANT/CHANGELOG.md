@@ -1,6 +1,33 @@
 # Resonant Changelog
 
-## Version 0.3.5 - Enhanced UI Experience & System Refinements (Latest)
+## Version 0.3.6 - Glassmorphism UI Enhancement (Latest)
+
+### Visual Design System Enhancement
+
+#### 🎨 Complete Glassmorphism Implementation
+- **Unified Glass Effect Styling**: Applied comprehensive glassmorphism design language across all content areas for modern, professional aesthetic
+- **Content Card Enhancement**: Updated all Card components with `backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30` styling
+- **Post Feed Glassmorphism**: Enhanced PostFeed component with glass effects for create post form, empty state display, and individual post cards
+- **Friends Widget Styling**: Applied glassmorphism to FriendsWidget including friends list and friend request sections
+- **Profile Page Integration**: Updated profile page community features section with consistent glass effect styling
+- **Cross-Component Consistency**: Ensured uniform glassmorphism application across PostFeed, FriendsWidget, and profile page sections
+
+#### ✨ Enhanced Visual Experience
+- **Improved Content Hierarchy**: Glass effects create subtle depth and visual separation while maintaining readability
+- **Dark Mode Compatibility**: Glassmorphism styling seamlessly adapts between light and dark themes
+- **Professional Aesthetic**: Modern glass design language elevates overall platform visual appeal
+- **Preserved Functionality**: All existing features and interactions maintained while enhancing visual presentation
+- **Responsive Design**: Glass effects remain consistent across all screen sizes and device types
+
+### Technical Implementation
+- **Systematic Component Updates**: Updated Card components across PostFeed, FriendsWidget, and profile sections
+- **Consistent Styling Pattern**: Applied uniform glassmorphism classes for visual consistency
+- **Performance Optimization**: Efficient CSS implementation with no impact on application performance
+- **Accessibility Maintained**: Glass effects preserve text contrast and accessibility standards
+
+---
+
+## Version 0.3.5 - Enhanced UI Experience & System Refinements
 
 ### Sidebar Navigation Enhancement & Collapsible Interface
 

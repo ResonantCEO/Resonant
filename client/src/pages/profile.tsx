@@ -26,6 +26,10 @@ export default function Profile() {
     enabled: !!profileId, // Only run query when we have a profile ID
   });
 
+  const { data: user } = useQuery({
+    queryKey: ["/api/user"],
+  });
+
   if (profileLoading) {
     return (
       <div className="min-h-screen flex">
@@ -82,7 +86,7 @@ export default function Profile() {
   };
 
   return (
-    <div className={`min-h-screen flex ${getPageBackground(profile?.user?.profileBackground || profile?.profileBackground || 'default')}`}>
+    <div className={`min-h-screen flex ${getPageBackground(user?.profileBackground || 'default')}`}>
       <Sidebar />
 
       {/* Mobile Header */}

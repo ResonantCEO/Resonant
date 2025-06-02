@@ -755,7 +755,7 @@ export default function Discover() {
                             )}
                           </div>
 
-                       {/* Description */}
+                          {/* Description */}
                           <p className="text-xs text-neutral-600 mb-3 sm:mb-4 leading-relaxed line-clamp-2">
                             {item.description}
                           </p>
@@ -774,9 +774,10 @@ export default function Discover() {
                             <span className="drop-shadow-sm">View Profile</span>
                           </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
 
             {/* Load More */}

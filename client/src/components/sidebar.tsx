@@ -148,7 +148,7 @@ export default function Sidebar() {
       </div>
 
       {/* Header */}
-      <div className={`${isCollapsed ? 'p-2' : 'p-6'} border-b border-neutral-200 dark:border-neutral-700`}>
+      <div className={`${isCollapsed ? 'p-2' : 'p-6'} border-b border-neutral-200 dark:border-neutral-700 absolute top-0 left-0 right-0`}>
         {!isCollapsed && (
           <div className="flex justify-center mb-6">
             <img src="/resonant-logo.png" alt="Resonant" className="h-16 block dark:hidden" />

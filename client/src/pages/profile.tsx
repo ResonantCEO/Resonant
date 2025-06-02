@@ -135,7 +135,7 @@ export default function Profile() {
             }}
           />
         )}
-        <div className="container-responsive mx-auto px-responsive py-responsive backdrop-blur-sm bg-white/30 dark:bg-neutral-950/30 rounded-lg">
+        <div className="container-responsive mx-auto px-responsive py-responsive">
           <ProfileHeader 
             profile={profile} 
             isOwn={isOwn}

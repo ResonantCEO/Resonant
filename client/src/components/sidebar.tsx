@@ -15,7 +15,7 @@ import {
 import CreateProfileModal from "./create-profile-modal";
 import SharedProfilesWidget from "./shared-profiles-widget";
 import { useState } from "react";
-import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell, Menu, X } from "lucide-react";
+import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell, Menu, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -130,16 +130,20 @@ export default function Sidebar() {
 
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white dark:bg-neutral-900 shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block transition-all duration-300`}>
-      {/* Toggle Button */}
-      <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 flex justify-end">
+    <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white dark:bg-neutral-900 shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block transition-all duration-300 relative`}>
+      {/* Collapse toggle button positioned on the right edge */}
+      <div className="absolute top-4 -right-3 z-50">
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="h-8 w-8 p-0"
+          className="h-6 w-6 p-0 rounded-full bg-white dark:bg-neutral-800 border-2 border-neutral-300 dark:border-neutral-600 hover:border-neutral-400 dark:hover:border-neutral-500 shadow-sm hover:shadow-md transition-all duration-200"
         >
-          {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+          {isCollapsed ? (
+            <ChevronRight className="h-3 w-3 text-neutral-600 dark:text-neutral-400" />
+          ) : (
+            <ChevronLeft className="h-3 w-3 text-neutral-600 dark:text-neutral-400" />
+          )}
         </Button>
       </div>
 

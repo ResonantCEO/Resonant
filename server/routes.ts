@@ -108,7 +108,16 @@ export function registerRoutes(app: Express): Server {
         compactMode,
         autoplayVideos,
         theme,
-        language
+        language,
+        profileBackground,
+        showOnlineStatus,
+        allowFriendRequests,
+        showActivityStatus,
+        emailNotifications,
+        notifyFriendRequests,
+        notifyMessages,
+        notifyPostLikes,
+        notifyComments
       } = req.body;
 
       const updateData: any = {};
@@ -123,6 +132,15 @@ export function registerRoutes(app: Express): Server {
       if (autoplayVideos !== undefined) updateData.autoplayVideos = autoplayVideos;
       if (theme !== undefined) updateData.theme = theme;
       if (language !== undefined) updateData.language = language;
+      if (profileBackground !== undefined) updateData.profileBackground = profileBackground;
+      if (showOnlineStatus !== undefined) updateData.showOnlineStatus = showOnlineStatus;
+      if (allowFriendRequests !== undefined) updateData.allowFriendRequests = allowFriendRequests;
+      if (showActivityStatus !== undefined) updateData.showActivityStatus = showActivityStatus;
+      if (emailNotifications !== undefined) updateData.emailNotifications = emailNotifications;
+      if (notifyFriendRequests !== undefined) updateData.notifyFriendRequests = notifyFriendRequests;
+      if (notifyMessages !== undefined) updateData.notifyMessages = notifyMessages;
+      if (notifyPostLikes !== undefined) updateData.notifyPostLikes = notifyPostLikes;
+      if (notifyComments !== undefined) updateData.notifyComments = notifyComments;
       const updatedUser = await storage.updateUser(req.user.id, updateData);
       res.json(updatedUser);
     } catch (error) {

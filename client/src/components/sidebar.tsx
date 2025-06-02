@@ -18,12 +18,13 @@ import { useState } from "react";
 import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell, Menu, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useSidebar } from "@/hooks/useSidebar";
 import NotificationsPanel from "./notifications-panel";
 
 export default function Sidebar() {
   const [location, setLocation] = useLocation();
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isCollapsed, setIsCollapsed } = useSidebar();
   const { user } = useAuth();
 
   // Helper function to format user's display name
@@ -327,17 +328,18 @@ export default function Sidebar() {
 
 
         {/* Logout Button */}
-        <div className="mt-6 pt-6 border-t border-neutral-200">
+        <div className={`mt-6 pt-6 border-t border-neutral-200 ${isCollapsed ? 'border-neutral-700' : ''}`}>
           <Button
             variant="outline"
-            className="w-full"
+            className={`${isCollapsed ? 'w-full p-2' : 'w-full'}`}
             onClick={async () => {
               await apiRequest("POST", "/api/logout");
               queryClient.clear();
               window.location.href = "/";
             }}
           >
-            Logout
+            {!isCollapsed && "Logout"}
+            {isCollapsed && <Settings className="w-4 h-4" />}
           </Button>
         </div>
       </nav>

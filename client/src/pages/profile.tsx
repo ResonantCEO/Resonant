@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/sidebar";
+import { useSidebar } from "@/hooks/useSidebar";
 import ProfileHeader from "@/components/profile-header";
 import PostFeed from "@/components/post-feed";
 import FriendsWidget from "@/components/friends-widget";
@@ -13,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("posts");
+  const { isCollapsed } = useSidebar();
 
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],

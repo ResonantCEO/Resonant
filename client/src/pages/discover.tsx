@@ -712,13 +712,12 @@ export default function Discover() {
                       <div className="relative">
                         {/* Cover Image */}
                         <div className="aspect-video bg-gradient-to-br from-purple-400 via-pink-400 to-red-400 relative overflow-hidden">
-                          {item.image && (
+                          {item.profileImageUrl && (
                             <img 
-                              src={item.image} 
+                              src={item.profileImageUrl} 
                               alt={item.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
-                          ```python
                           )}
                           <div className="absolute inset-0 bg-black bg-opacity-20"></div>
 

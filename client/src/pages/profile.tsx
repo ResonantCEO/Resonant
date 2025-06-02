@@ -152,9 +152,9 @@ export default function Profile() {
               <div className="lg:col-span-1 space-y-6">
                 {/* Bio Section */}
                 {profile.bio && (
-                  <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-                    <h3 className="text-lg font-semibold text-neutral-900 mb-3">About</h3>
-                    <p className="text-neutral-700 leading-relaxed">{profile.bio}</p>
+                  <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
+                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">About</h3>
+                    <p className="text-neutral-700 dark:text-gray-300 leading-relaxed">{profile.bio}</p>
                   </div>
                 )}
 
@@ -171,9 +171,9 @@ export default function Profile() {
 
           {/* About Tab */}
           {activeTab === "about" && (
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <div className="text-center text-gray-500">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-4">About</h3>
+            <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
+              <div className="text-center text-gray-500 dark:text-gray-400">
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">About</h3>
                 <p>About functionality coming soon...</p>
               </div>
             </div>
@@ -181,16 +181,16 @@ export default function Profile() {
 
           {/* Friends Tab - only for non-artist profiles */}
           {activeTab === "friends" && profile.type !== "artist" && (
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+            <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
               <FriendsTab profile={profile} isOwn={isOwn} />
             </div>
           )}
 
           {/* Photos Tab */}
           {activeTab === "photos" && (
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-              <div className="text-center text-gray-500">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Photos</h3>
+            <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
+              <div className="text-center text-gray-500 dark:text-gray-400">
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Photos</h3>
                 <p>Photo gallery coming soon...</p>
               </div>
             </div>
@@ -198,7 +198,7 @@ export default function Profile() {
 
           {/* EPK Tab - only for artist profiles */}
           {activeTab === "epk" && profile.type === "artist" && (
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+            <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
               <EPKTab profile={profile} isOwn={isOwn} />
             </div>
           )}
@@ -207,7 +207,7 @@ export default function Profile() {
           {activeTab === "community" && profile.type === "artist" && (
             <div className="space-y-6">
               {/* Posts Section */}
-              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+              <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -224,7 +224,7 @@ export default function Profile() {
 
 
               {/* Community Features */}
-              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+              <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">

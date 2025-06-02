@@ -450,30 +450,7 @@ function SettingsContent() {
 
               <Separator />
 
-              <div>
-                <Label htmlFor="profileBackground">Profile Background</Label>
-                <p className="text-sm text-muted-foreground mb-3">Choose a background style for your profile page</p>
-                <Select
-                  value={user.profileBackground || 'default'}
-                  onValueChange={(value) => handleUpdateSetting('profileBackground', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="default">Default (Cover Photo)</SelectItem>
-                    <SelectItem value="gradient-blue">Blue Gradient</SelectItem>
-                    <SelectItem value="gradient-purple">Purple Gradient</SelectItem>
-                    <SelectItem value="gradient-green">Green Gradient</SelectItem>
-                    <SelectItem value="gradient-orange">Orange Gradient</SelectItem>
-                    <SelectItem value="gradient-pink">Pink Gradient</SelectItem>
-                    <SelectItem value="solid-dark">Dark Solid</SelectItem>
-                    <SelectItem value="solid-light">Light Solid</SelectItem>
-                    <SelectItem value="pattern-dots">Dotted Pattern</SelectItem>
-                    <SelectItem value="pattern-waves">Wave Pattern</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              
             </CardContent>
           </Card>
         </TabsContent>

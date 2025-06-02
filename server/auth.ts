@@ -138,22 +138,35 @@ export function setupAuth(app: Express) {
           return res.status(500).json({ message: "Failed to fetch user data" });
         }
         
-        // Automatically set audience profile as active on login
+        // Automatically create and set audience profile as active on login
         try {
           console.log("LOGIN: Setting audience profile as active for user", user.id);
           const userProfiles = await storage.getProfilesByUserId(user.id);
           console.log("LOGIN: User profiles found:", userProfiles.map(p => ({ id: p.id, type: p.type, name: p.name })));
           
-          const audienceProfile = userProfiles.find(p => p.type === 'audience');
+          let audienceProfile = userProfiles.find(p => p.type === 'audience' && !p.deletedAt);
           console.log("LOGIN: Audience profile found:", audienceProfile ? { id: audienceProfile.id, name: audienceProfile.name } : "None");
           
-          if (audienceProfile) {
-            console.log("LOGIN: Setting audience profile as active:", audienceProfile.id);
-            await storage.setActiveProfile(user.id, audienceProfile.id);
-            console.log("LOGIN: Successfully set audience profile as active");
+          if (!audienceProfile) {
+            // Create audience profile if it doesn't exist
+            console.log("LOGIN: Creating audience profile for user", user.id);
+            const userName = completeUser.firstName && completeUser.lastName 
+              ? `${completeUser.firstName} ${completeUser.lastName}`
+              : completeUser.firstName || completeUser.lastName || "My Profile";
+            
+            audienceProfile = await storage.createProfile({
+              userId: user.id,
+              type: 'audience',
+              name: userName,
+              bio: '',
+              isActive: true
+            });
+            console.log("LOGIN: Created new audience profile:", audienceProfile.id);
           } else {
-            console.log("LOGIN: No audience profile found for user");
+            console.log("LOGIN: Setting existing audience profile as active:", audienceProfile.id);
+            await storage.setActiveProfile(user.id, audienceProfile.id);
           }
+          console.log("LOGIN: Successfully set audience profile as active");
         } catch (error) {
           console.error("Error setting audience profile as active:", error);
           // Don't fail login if profile activation fails

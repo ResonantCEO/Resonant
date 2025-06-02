@@ -130,7 +130,7 @@ export default function Sidebar() {
 
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white dark:bg-neutral-900 shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block transition-all duration-300 relative min-h-screen overflow-hidden`}>
+    <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white dark:bg-neutral-900 shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block transition-all duration-300 fixed top-0 left-0 h-screen overflow-hidden z-40`}>
       {/* Collapse toggle button positioned in the middle of the sidebar */}
       <div className="absolute top-1/2 -translate-y-1/2 right-0 z-50">
         <Button

@@ -97,12 +97,90 @@ export default function Profile() {
         {/* Background image overlay for custom photo */}
         {profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl && (
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
             style={{ backgroundImage: `url(${profile.backgroundImageUrl})` }}
           >
             <div className="absolute inset-0 bg-black/20 dark:bg-black/40"></div>
           </div>
-        )}</div>
+        )}
+
+        {/* Main content */}
+        <div className="relative z-10 p-6">
+          <ProfileHeader 
+            profile={profile} 
+            isOwn={isOwn}
+            canManageMembers={canManageMembers}
+          />
+
+          {/* Navigation tabs */}
+          <div className="flex space-x-6 mb-6 border-b border-neutral-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg px-4">
+            <button
+              onClick={() => setActiveTab("posts")}
+              className={`py-3 px-2 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === "posts"
+                  ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                  : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
+            >
+              Posts
+            </button>
+            <button
+              onClick={() => setActiveTab("friends")}
+              className={`py-3 px-2 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === "friends"
+                  ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                  : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
+            >
+              {isSharedProfile ? "Members" : "Friends"}
+            </button>
+            {isSharedProfile && (
+              <button
+                onClick={() => setActiveTab("epk")}
+                className={`py-3 px-2 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === "epk"
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                }`}
+              >
+                EPK
+              </button>
+            )}
+            <button
+              onClick={() => setActiveTab("stats")}
+              className={`py-3 px-2 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === "stats"
+                  ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                  : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
+            >
+              Stats
+            </button>
+          </div>
+
+          {/* Content area */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main content */}
+            <div className="lg:col-span-2">
+              {activeTab === "posts" && <PostFeed profileId={profileId} />}
+              {activeTab === "friends" && (
+                <FriendsTab 
+                  profileId={profileId} 
+                  canManageMembers={canManageMembers}
+                  isSharedProfile={isSharedProfile}
+                />
+              )}
+              {activeTab === "epk" && isSharedProfile && <EPKTab profile={profile} />}
+              {activeTab === "stats" && <StatsTab profileId={profileId} />}
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <FriendsWidget profileId={profileId} />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

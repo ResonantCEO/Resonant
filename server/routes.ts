@@ -97,7 +97,6 @@ export function registerRoutes(app: Express): Server {
   // Update current user
   app.put("/api/user", isAuthenticated, async (req: any, res) => {
     try {
-      const updateData = req.body;
       const {
         firstName,
         lastName,

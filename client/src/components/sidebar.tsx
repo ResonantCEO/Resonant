@@ -15,7 +15,7 @@ import {
 import CreateProfileModal from "./create-profile-modal";
 import SharedProfilesWidget from "./shared-profiles-widget";
 import { useState } from "react";
-import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell } from "lucide-react";
+import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell, Menu, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationsPanel from "./notifications-panel";
@@ -23,6 +23,7 @@ import NotificationsPanel from "./notifications-panel";
 export default function Sidebar() {
   const [location, setLocation] = useLocation();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { user } = useAuth();
 
   // Helper function to format user's display name
@@ -128,16 +129,30 @@ export default function Sidebar() {
 
 
   return (
-    <div className="w-80 bg-white dark:bg-neutral-900 shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block">
+    <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white dark:bg-neutral-900 shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block transition-all duration-300`}>
+      {/* Toggle Button */}
+      <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 flex justify-end">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="h-8 w-8 p-0"
+        >
+          {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+        </Button>
+      </div>
+
       {/* Header */}
-      <div className="p-6 border-b border-neutral-200 dark:border-neutral-700">
-        <div className="flex justify-center mb-6">
-          <img src="/resonant-logo.png" alt="Resonant" className="h-16 block dark:hidden" />
-          <img src="/resonant-logo-white.png" alt="Resonant" className="h-20 hidden dark:block" />
-        </div>
+      <div className={`${isCollapsed ? 'p-2' : 'p-6'} border-b border-neutral-200 dark:border-neutral-700`}>
+        {!isCollapsed && (
+          <div className="flex justify-center mb-6">
+            <img src="/resonant-logo.png" alt="Resonant" className="h-16 block dark:hidden" />
+            <img src="/resonant-logo-white.png" alt="Resonant" className="h-20 hidden dark:block" />
+          </div>
+        )}
 
         {/* Active Profile Display with Dropdown */}
-        {activeProfile && user && (
+        {activeProfile && user && !isCollapsed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 cursor-pointer hover:bg-blue-100 transition-colors">
@@ -219,20 +234,20 @@ export default function Sidebar() {
 
 
       {/* Navigation Menu */}
-      <nav className="p-6">
+      <nav className={`${isCollapsed ? 'p-2' : 'p-6'}`}>
         <ul className="space-y-2">
           <li>
             <Button
               variant="ghost"
-              className={`w-full justify-start ${
+              className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
                 isActivePath("/profile") 
                   ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
               onClick={() => setLocation("/profile")}
             >
-              <Home className="w-5 h-5 mr-3" />
-              Profile
+              <Home className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
+              {!isCollapsed && "Profile"}
             </Button>
           </li>
 
@@ -241,15 +256,15 @@ export default function Sidebar() {
             <li>
               <Button
                 variant="ghost"
-                className={`w-full justify-start ${
+                className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
                   isActivePath("/dashboard") 
                     ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
                     : "text-neutral-600 hover:bg-neutral-100"
                 }`}
                 onClick={() => setLocation("/dashboard")}
               >
-                <BarChart3 className="w-5 h-5 mr-3" />
-                Dashboard
+                <BarChart3 className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
+                {!isCollapsed && "Dashboard"}
               </Button>
             </li>
           )}
@@ -257,33 +272,38 @@ export default function Sidebar() {
           <li>
             <Button
               variant="ghost"
-              className={`w-full justify-start ${
+              className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
                 isActivePath("/discover") 
                   ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
               onClick={() => setLocation("/discover")}
             >
-              <Search className="w-5 h-5 mr-3" />
-              Discover
+              <Search className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
+              {!isCollapsed && "Discover"}
             </Button>
           </li>
           <li>
             <Button
               variant="ghost"
-              className={`w-full justify-start ${
+              className={`${isCollapsed ? 'w-full justify-center p-2 relative' : 'w-full justify-start'} ${
                 isActivePath("/friends") 
                   ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
               onClick={() => setLocation("/friends")}
             >
-              <Users className="w-5 h-5 mr-3" />
-              Friends
-              {friendRequests.length > 0 && (
+              <Users className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
+              {!isCollapsed && "Friends"}
+              {!isCollapsed && friendRequests.length > 0 && (
                 <Badge className="ml-auto bg-blue-500 text-white text-xs">
                   {friendRequests.length}
                 </Badge>
+              )}
+              {isCollapsed && friendRequests.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                  {friendRequests.length}
+                </span>
               )}
             </Button>
           </li>
@@ -291,15 +311,15 @@ export default function Sidebar() {
           <li>
             <Button
               variant="ghost"
-              className={`w-full justify-start ${
+              className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
                 isActivePath("/settings") 
                   ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
               onClick={() => setLocation("/settings")}
             >
-              <Settings className="w-5 h-5 mr-3" />
-              Settings
+              <Settings className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
+              {!isCollapsed && "Settings"}
             </Button>
           </li>
         </ul>

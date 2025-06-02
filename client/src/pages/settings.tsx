@@ -23,6 +23,7 @@ import {
   AlertDialogTrigger,
 } from '../components/ui/alert-dialog';
 import Sidebar from '../components/sidebar';
+import { useSidebar } from '../hooks/useSidebar';
 
 function SettingsContent() {
   const { user, updateUser } = useAuth();
@@ -816,10 +817,12 @@ function SettingsContent() {
 }
 
 export default function Settings() {
+  const { isCollapsed } = useSidebar();
+  
   return (
-    <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       <Sidebar />
-      <div className="flex-1 overflow-auto">
+      <div className={`${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} min-h-screen`}>
         <SettingsContent />
       </div>
     </div>

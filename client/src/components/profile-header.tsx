@@ -23,6 +23,32 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import ProfileManagement from "./profile-management";
 import { Facebook, Instagram, MessageCircle, Twitter } from "lucide-react";
+import Sidebar from '../components/sidebar';
+
+const getProfileBackground = (backgroundType: string) => {
+  switch (backgroundType) {
+    case 'gradient-blue':
+      return 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700';
+    case 'gradient-purple':
+      return 'bg-gradient-to-r from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700';
+    case 'gradient-green':
+      return 'bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700';
+    case 'gradient-orange':
+      return 'bg-gradient-to-r from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700';
+    case 'gradient-pink':
+      return 'bg-gradient-to-r from-pink-500 to-pink-600 dark:from-pink-600 dark:to-pink-700';
+    case 'solid-dark':
+      return 'bg-gray-800 dark:bg-gray-900';
+    case 'solid-light':
+      return 'bg-gray-100 dark:bg-gray-800';
+    case 'pattern-dots':
+      return 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.3)_1px,transparent_0)] bg-[length:20px_20px]';
+    case 'pattern-waves':
+      return 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 bg-[url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")]';
+    default:
+      return 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700';
+  }
+};
 
 interface ProfileHeaderProps {
   profile: any;

@@ -41,10 +41,11 @@ export const users = pgTable("users", {
   notifyMessages: boolean("notify_messages").default(true),
   notifyPostLikes: boolean("notify_post_likes").default(true),
   notifyComments: boolean("notify_comments").default(true),
-  theme: varchar("theme").default("light"), // 'light', 'dark', 'system'
-  language: varchar("language").default("en"),
+  theme: text("theme").default("light"), // 'light', 'dark', 'system'
+  language: text("language").default("en"),
   compactMode: boolean("compact_mode").default(false),
   autoplayVideos: boolean("autoplay_videos").default(true),
+  profileBackground: text("profile_background"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

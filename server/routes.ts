@@ -81,12 +81,12 @@ export function registerRoutes(app: Express): Server {
       console.log("API - Final response BEFORE sending:", JSON.stringify(userResponse, null, 2));
       console.log("API - Response coverImageUrl field exists:", 'coverImageUrl' in userResponse);
       console.log("API - Response coverImageUrl value:", userResponse.coverImageUrl);
-      
+
       res.setHeader('Content-Type', 'application/json');
       const responseJson = JSON.stringify(userResponse);
       console.log("API - Stringified response:", responseJson);
       console.log("API - Stringified response includes coverImageUrl:", responseJson.includes('coverImageUrl'));
-      
+
       res.status(200).send(responseJson);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -98,6 +98,34 @@ export function registerRoutes(app: Express): Server {
   app.put("/api/user", isAuthenticated, async (req: any, res) => {
     try {
       const updateData = req.body;
+      const {
+        firstName,
+        lastName,
+        email,
+        bio,
+        location,
+        website,
+        coverImageUrl,
+        compactMode,
+        autoplayVideos,
+        theme,
+        language,
+        profileBackground
+      } = req.body;
+
+      const updateData: any = {};
+      if (firstName !== undefined) updateData.firstName = firstName;
+      if (lastName !== undefined) updateData.lastName = lastName;
+      if (email !== undefined) updateData.email = email;
+      if (bio !== undefined) updateData.bio = bio;
+      if (location !== undefined) updateData.location = location;
+      if (website !== undefined) updateData.website = website;
+      if (coverImageUrl !== undefined) updateData.coverImageUrl = coverImageUrl;
+      if (compactMode !== undefined) updateData.compactMode = compactMode;
+      if (autoplayVideos !== undefined) updateData.autoplayVideos = autoplayVideos;
+      if (theme !== undefined) updateData.theme = theme;
+      if (language !== undefined) updateData.language = language;
+      if (profileBackground !== undefined) updateData.profileBackground = profileBackground;
       const updatedUser = await storage.updateUser(req.user.id, updateData);
       res.json(updatedUser);
     } catch (error) {
@@ -109,7 +137,20 @@ export function registerRoutes(app: Express): Server {
   // Update user preferences
   app.put("/api/user/preferences", isAuthenticated, async (req: any, res) => {
     try {
-      const updateData = req.body;
+      const {
+        compactMode,
+        autoplayVideos,
+        theme,
+        language,
+        profileBackground
+      } = req.body;
+
+      const updateData: any = {};
+      if (compactMode !== undefined) updateData.compactMode = compactMode;
+      if (autoplayVideos !== undefined) updateData.autoplayVideos = autoplayVideos;
+      if (theme !== undefined) updateData.theme = theme;
+      if (language !== undefined) updateData.language = language;
+      if (profileBackground !== undefined) updateData.profileBackground = profileBackground;
       const updatedUser = await storage.updateUser(req.user.id, updateData);
       res.json(updatedUser);
     } catch (error) {
@@ -270,7 +311,7 @@ export function registerRoutes(app: Express): Server {
   app.delete('/api/profiles/:profileId/cover-image', isAuthenticated, async (req: any, res) => {
     try {
       const profileId = parseInt(req.params.profileId);
-      
+
       console.log("Removing profile cover image:", { profileId });
 
       // Update profile's cover image URL to null in database
@@ -291,7 +332,7 @@ export function registerRoutes(app: Express): Server {
   app.delete('/api/user/cover-image', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       console.log("Removing user cover image:", { userId });
 
       // Update user's cover image URL to null in database
@@ -363,14 +404,14 @@ export function registerRoutes(app: Express): Server {
   app.delete('/api/user/cover-image', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       console.log("Removing cover photo for user:", userId);
-      
+
       // Update user's cover image URL to null in database
       const updatedUser = await storage.updateUser(userId, { coverImageUrl: null });
-      
+
       console.log("Cover photo removed successfully");
-      
+
       res.json({ 
         message: "Cover photo removed successfully",
         user: updatedUser
@@ -903,12 +944,12 @@ export function registerRoutes(app: Express): Server {
       // Check if user has permission to view members OR is the profile owner
       const profile = await storage.getProfile(profileId);
       console.log("Profile:", profile);
-      
+
       const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_members");
       const isOwner = profile?.userId === req.user.id;
-      
+
       console.log("Permission check:", { hasPermission, isOwner, profileUserId: profile?.userId, requestUserId: req.user.id });
-      
+
       // Allow access if user is the profile owner or has explicit permission
       if (!hasPermission && !isOwner) {
         return res.status(403).json({ message: "Permission denied" });

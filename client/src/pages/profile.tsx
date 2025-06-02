@@ -108,8 +108,8 @@ export default function Profile() {
             className="fixed top-0 bottom-0 right-0 pointer-events-none z-0 hidden lg:block"
             style={{
               backgroundImage: `url(${profile.backgroundImageUrl})`,
-              backgroundSize: 'auto',
-              backgroundPosition: 'center',
+              backgroundSize: '100% auto', // Scale width to 100%, keep original height
+              backgroundPosition: 'center top',
               backgroundRepeat: 'no-repeat',
               left: '20rem' // Start after sidebar width (w-80 = 20rem)
             }}

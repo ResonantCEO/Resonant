@@ -33,7 +33,6 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   coverImageUrl: varchar("cover_image_url"),
-  profileBackground: text("profile_background"),
   showOnlineStatus: boolean("show_online_status").default(true),
   allowFriendRequests: boolean("allow_friend_requests").default(true),
   showActivityStatus: boolean("show_activity_status").default(true),
@@ -46,6 +45,7 @@ export const users = pgTable("users", {
   language: text("language").default("en"),
   compactMode: boolean("compact_mode").default(false),
   autoplayVideos: boolean("autoplay_videos").default(true),
+  profileBackground: text("profile_background"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

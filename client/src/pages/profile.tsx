@@ -102,7 +102,7 @@ export default function Profile() {
 
       {/* Main Content */}
       <div 
-        className={`flex-1 lg:ml-0 pt-16 lg:pt-0 min-h-screen relative ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
+        className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0 min-h-screen relative transition-all duration-300 ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
       >
         {/* Fixed Background Image */}
         {profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl && (

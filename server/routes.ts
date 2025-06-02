@@ -435,6 +435,79 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Background image upload endpoint
+  app.post('/api/user/background-image', isAuthenticated, (req: any, res, next) => {
+    console.log("POST /api/user/background-image - Raw request received");
+    console.log("Content-Type:", req.headers['content-type']);
+
+    const uploadSingle = upload.single('image');
+
+    uploadSingle(req, res, async (err: any) => {
+      try {
+        console.log("Multer processed:", {
+          error: err,
+          file: req.file ? {
+            filename: req.file.filename,
+            size: req.file.size,
+            mimetype: req.file.mimetype,
+            path: req.file.path
+          } : null
+        });
+
+        if (err) {
+          console.error("Multer error:", err);
+          return res.status(400).json({ message: err.message });
+        }
+
+        if (!req.file) {
+          console.log("No file received by multer");
+          return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const userId = req.user.id;
+        const backgroundImageUrl = `/uploads/${req.file.filename}`;
+
+        console.log("Updating background image:", { userId, backgroundImageUrl });
+
+        // Update user's background image URL in database
+        const updatedUser = await storage.updateUser(userId, { backgroundImageUrl });
+
+        console.log("Background image updated successfully");
+
+        res.json({ 
+          message: "Background image updated successfully",
+          backgroundImageUrl,
+          user: updatedUser
+        });
+      } catch (error) {
+        console.error("Error uploading background image:", error);
+        res.status(500).json({ message: "Failed to upload background image" });
+      }
+    });
+  });
+
+  // Remove background image endpoint
+  app.delete('/api/user/background-image', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+
+      console.log("Removing background image for user:", userId);
+
+      // Update user's background image URL to null in database
+      const updatedUser = await storage.updateUser(userId, { backgroundImageUrl: null });
+
+      console.log("Background image removed successfully");
+
+      res.json({ 
+        message: "Background image removed successfully",
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error("Error removing background image:", error);
+      res.status(500).json({ message: "Failed to remove background image" });
+    }
+  });
+
   // Profile routes
   app.get('/api/profiles', isAuthenticated, async (req: any, res) => {
     try {

@@ -17,7 +17,8 @@ import {
   Lock,
   UserPlus,
   UserMinus,
-  Clock
+  Clock,
+  Music
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -472,6 +473,24 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                       </span>
                     )}
                   </div>
+
+                  {/* Genre and Hometown for Artist profiles */}
+                  {profile.type === "artist" && (
+                    <div className="flex items-center space-x-4 text-neutral-600 mb-4">
+                      {profile.genre && (
+                        <span className="flex items-center">
+                          <Music className="w-4 h-4 mr-2" />
+                          {profile.genre}
+                        </span>
+                      )}
+                      {profile.hometown && (
+                        <span className="flex items-center">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          {profile.hometown}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Social Media Buttons */}

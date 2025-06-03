@@ -185,42 +185,9 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Genre
-              </Label>
-              {isEditing ? (
-                <Input
-                  value={editData.genre}
-                  onChange={(e) => setEditData(prev => ({ ...prev, genre: e.target.value }))}
-                  placeholder="e.g., Indie Rock, Electronic, Jazz"
-                />
-              ) : (
-                <p className="text-gray-900 dark:text-white">
-                  {profile?.genre || "Not specified"}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                <MapPin className="w-4 h-4 inline mr-1" />
-                Hometown
-              </Label>
-              {isEditing ? (
-                <Input
-                  value={editData.hometown}
-                  onChange={(e) => setEditData(prev => ({ ...prev, hometown: e.target.value }))}
-                  placeholder="City, State/Country"
-                />
-              ) : (
-                <p className="text-gray-900 dark:text-white">
-                  {profile?.hometown || "Not specified"}
-                </p>
-              )}
-            </div>
-
-
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              Basic artist information is now displayed in the profile header above.
+            </p>
           </CardContent>
         </Card>
 

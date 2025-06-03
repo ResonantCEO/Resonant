@@ -349,9 +349,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   return (
     <>
       {/* Profile Header */}
-      <div className="bg-white dark:bg-gray-900 shadow-lg border border-neutral-200 dark:border-gray-800 mb-6 overflow-hidden">
-        {/* Cover Photo - Increased height for better visual impact */}
-        <div className="h-64 relative overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-black">
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden">
+        {/* Cover Photo */}
+        <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
+
+
           {/* Clickable cover photo area */}
           <div 
             className={`absolute inset-0 ${isOwn ? 'cursor-pointer' : ''}`}
@@ -362,9 +364,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               <img 
                 src={profile.coverImageUrl} 
                 alt="Cover photo" 
-                className="w-full h-64 object-cover absolute inset-0 transition-opacity duration-300"
+                className="w-full h-48 object-cover absolute inset-0 transition-opacity duration-300"
                 onError={(e) => {
                   console.log("Cover image failed to load:", profile.coverImageUrl);
+                  // Hide the broken image and show gradient background
                   e.currentTarget.style.display = 'none';
                 }}
                 onLoad={() => {
@@ -373,24 +376,24 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               />
             )}
 
-            {/* Enhanced overlay gradient for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+            {/* Overlay gradient for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
 
             {/* Cover photo placeholder text when no image is set */}
             {!profile?.coverImageUrl && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-white/70 text-center">
-                  <Camera className="w-16 h-16 mx-auto mb-3 opacity-50" />
-                  <p className="text-lg font-medium">{isOwn ? "Click to add a cover photo" : "No cover photo"}</p>
+                  <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm font-medium">{isOwn ? "Click to add a cover photo" : "No cover photo"}</p>
                 </div>
               </div>
             )}
 
             {/* Hover overlay for owned profiles */}
             {isOwn && (
-              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
+              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
                 <div className="text-white text-center">
-                  <Camera className="w-10 h-10 mx-auto mb-2" />
+                  <Camera className="w-8 h-8 mx-auto mb-2" />
                   <p className="text-sm font-medium">
                     {uploadCoverPhotoMutation.isPending ? "Uploading..." : profile?.coverImageUrl ? "Change Cover Photo" : "Add Cover Photo"}
                   </p>
@@ -406,6 +409,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             )}
           </div>
 
+
+
           {/* Hidden file input for cover upload */}
           {isOwn && (
             <input
@@ -418,103 +423,88 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
         </div>
 
-        {/* Profile Info Section - Enhanced layout */}
-        <div className="relative px-8 py-6">
-          {/* Profile Picture - Repositioned and enhanced */}
-          <div className="absolute -top-16 left-8">
-            <div className="relative">
-              <Avatar 
-                className={`w-32 h-32 border-4 border-white dark:border-gray-900 shadow-2xl ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
-                onClick={handleProfilePictureClick}
-              >
-                <AvatarImage src={profile.profileImageUrl || ""} />
-                <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                  {getDisplayName().slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {isOwn && (
-                <>
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                    onClick={handleProfilePictureClick}
-                  >
-                    <Camera className="w-8 h-8 text-white" />
-                  </div>
-                  {uploadProfilePictureMutation.isPending && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                      <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        {/* Profile Info */}
+        <div className="p-6 pt-12">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
+            {/* Profile Picture */}
+            <div className="relative -mt-20">
+              <div className="relative">
+                <Avatar 
+                  className={`w-32 h-32 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                  onClick={handleProfilePictureClick}
+                >
+                  <AvatarImage src={profile.profileImageUrl || ""} />
+                  <AvatarFallback className="text-2xl">
+                    {getDisplayName().slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {isOwn && (
+                  <>
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                      onClick={handleProfilePictureClick}
+                    >
+                      <Camera className="w-8 h-8 text-white" />
                     </div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Profile Details - Better organized layout */}
-          <div className="ml-40 pt-2">
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-              {/* Left side - Name and info */}
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-4">
-                  <h1 className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {getDisplayName()}
-                  </h1>
-                  <Badge className={`${getProfileTypeColor(profile.type)} text-white font-medium px-3 py-1`}>
-                    {getProfileTypeName(profile.type)}
-                  </Badge>
-                </div>
-
-                {/* Stats and basic info */}
-                <div className="flex flex-wrap items-center gap-6 text-gray-600 dark:text-gray-300 mb-4">
-                  <span className="flex items-center gap-2 font-medium">
-                    <Users className="w-5 h-5" />
-                    <span className="text-gray-900 dark:text-white font-semibold">{friends.length}</span> friends
-                  </span>
-                  
-                  {/* Genre for Artist profiles */}
-                  {profile.type === "artist" && profile.genre && (
-                    <span className="flex items-center gap-2">
-                      <Music className="w-5 h-5" />
-                      {profile.genre}
-                    </span>
-                  )}
-                  
-                  {/* Location info */}
-                  {(profile.location || profile.hometown) && (
-                    <span className="flex items-center gap-2">
-                      <MapPin className="w-5 h-5" />
-                      {profile.location || profile.hometown}
-                    </span>
-                  )}
-                  
-                  {/* Profile visibility */}
-                  <div className="flex items-center gap-2">
-                    {getVisibilityIcon(profile.visibility)}
-                    <span className="capitalize">{profile.visibility} Profile</span>
-                  </div>
-                </div>
-
-                {/* Additional info for Artist profiles */}
-                {profile.type === "artist" && profile.hometown && profile.location && profile.hometown !== profile.location && (
-                  <div className="text-gray-600 dark:text-gray-300 mb-4">
-                    <span className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      Hometown: {profile.hometown}
-                    </span>
-                  </div>
+                    {uploadProfilePictureMutation.isPending && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
+            </div>
 
-              {/* Right side - Social media and actions */}
-              <div className="flex flex-col items-end gap-4">
-                {/* Social Media Buttons - Enhanced styling */}
-                <div className="flex items-center gap-2">
+            {/* Profile Details */}
+            <div className="flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-3 tracking-tight">{getDisplayName()}</h1>
+                  
+                  <div className="space-y-3">
+                    {/* Friends and Location */}
+                    <div className="flex items-center space-x-6 text-neutral-600 dark:text-neutral-400">
+                      <span className="flex items-center space-x-2 bg-neutral-50 dark:bg-neutral-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                        <Users className="w-4 h-4 text-blue-500" />
+                        <span>{friends.length} friends</span>
+                      </span>
+                      {profile.location && (
+                        <span className="flex items-center space-x-2 bg-neutral-50 dark:bg-neutral-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                          <MapPin className="w-4 h-4 text-green-500" />
+                          <span>{profile.location}</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Genre and Hometown for Artist profiles */}
+                    {profile.type === "artist" && (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 px-3 py-2 rounded-lg border border-purple-100 dark:border-purple-800">
+                          <Music className="w-4 h-4 text-purple-500" />
+                          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                            {profile.genre || "Genre not specified"}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 px-3 py-2 rounded-lg border border-emerald-100 dark:border-emerald-800">
+                          <MapPin className="w-4 h-4 text-emerald-500" />
+                          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                            {profile.hometown || "Hometown not specified"}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Social Media Buttons */}
+                <div className="flex items-center space-x-2 mb-4">
                   {/* Facebook */}
                   {(isOwn || profile.facebookUrl) && (
                     <Button
                       variant="outline"
                       size="sm"
-                      className="p-2.5 bg-[#1877F2] hover:bg-[#166FE5] text-white border-[#1877F2] rounded-full shadow-md transition-all duration-200"
+                      className="p-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 rounded-full"
                       onClick={() => profile.facebookUrl && window.open(profile.facebookUrl, '_blank')}
                       disabled={!profile.facebookUrl && !isOwn}
                     >
@@ -527,7 +517,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     <Button
                       variant="outline"
                       size="sm"
-                      className="p-2.5 bg-gradient-to-r from-[#E4405F] to-[#F56040] hover:from-[#D73447] hover:to-[#F4553A] text-white border-0 rounded-full shadow-md transition-all duration-200"
+                      className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-full"
                       onClick={() => profile.instagramUrl && window.open(profile.instagramUrl, '_blank')}
                       disabled={!profile.instagramUrl && !isOwn}
                     >
@@ -540,7 +530,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     <Button
                       variant="outline"
                       size="sm"
-                      className="p-2.5 bg-[#FFFC00] hover:bg-[#F0ED00] text-black border-[#FFFC00] rounded-full shadow-md transition-all duration-200"
+                      className="p-2 bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400 rounded-full"
                       onClick={() => profile.snapchatUrl && window.open(profile.snapchatUrl, '_blank')}
                       disabled={!profile.snapchatUrl && !isOwn}
                     >
@@ -553,7 +543,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     <Button
                       variant="outline"
                       size="sm"
-                      className="p-2.5 bg-black hover:bg-gray-800 text-white border-black rounded-full shadow-md transition-all duration-200"
+                      className="p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
                       onClick={() => profile.tiktokUrl && window.open(profile.tiktokUrl, '_blank')}
                       disabled={!profile.tiktokUrl && !isOwn}
                     >
@@ -566,7 +556,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     <Button
                       variant="outline"
                       size="sm"
-                      className="p-2.5 bg-black hover:bg-gray-800 text-white border-black rounded-full shadow-md transition-all duration-200"
+                      className="p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
                       onClick={() => profile.twitterUrl && window.open(profile.twitterUrl, '_blank')}
                       disabled={!profile.twitterUrl && !isOwn}
                     >
@@ -575,16 +565,26 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   )}
                 </div>
 
-                {/* Action Buttons - Enhanced styling */}
-                <div className="flex gap-3">
-                  {renderActionButtons()}
+                {/* Action Buttons */}
+                {renderActionButtons()}
+              </div>
+
+
+
+              {/* Profile Type & Visibility */}
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 text-sm text-neutral-600">
+                  {getVisibilityIcon(profile.visibility)}
+                  <span className="capitalize">{profile.visibility} Profile</span>
                   {isOwn && (
-                    <Button variant="outline" size="sm" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white border-gray-300 dark:border-gray-600">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Profile
+                    <Button variant="link" size="sm" className="text-blue-500 p-0 h-auto">
+                      Change
                     </Button>
                   )}
                 </div>
+                <Badge className={`${getProfileTypeColor(profile.type)} text-white`}>
+                  {getProfileTypeName(profile.type)}
+                </Badge>
               </div>
             </div>
           </div>
@@ -630,7 +630,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 </TabsTrigger>
               )}
               {/* Stats tab - only visible for artist profiles and only to artist/venue viewers */}
-              {profile.type === "artist" && viewerProfile && 'type' in viewerProfile && (viewerProfile.type === "artist" || viewerProfile.type === "venue") && (
+              {profile.type === "artist" && viewerProfile && (viewerProfile.type === "artist" || viewerProfile.type === "venue") && (
                 <TabsTrigger value="stats" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                   Stats
                 </TabsTrigger>

@@ -460,41 +460,33 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             <div className="flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-3 tracking-tight">{getDisplayName()}</h1>
-                  
-                  <div className="space-y-3">
-                    {/* Friends and Location */}
-                    <div className="flex items-center space-x-6 text-neutral-600 dark:text-neutral-400">
-                      <span className="flex items-center space-x-2 bg-neutral-50 dark:bg-neutral-800 px-3 py-1.5 rounded-full text-sm font-medium">
-                        <Users className="w-4 h-4 text-blue-500" />
-                        <span>{friends.length} friends</span>
+                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">{getDisplayName()}</h1>
+                  <div className="flex items-center space-x-4 text-neutral-600 mb-4">
+                    <span className="flex items-center">
+                      <Users className="w-4 h-4 mr-2" />
+                      {friends.length} friends
+                    </span>
+                    {profile.location && (
+                      <span className="flex items-center">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        {profile.location}
                       </span>
-                      {profile.location && (
-                        <span className="flex items-center space-x-2 bg-neutral-50 dark:bg-neutral-800 px-3 py-1.5 rounded-full text-sm font-medium">
-                          <MapPin className="w-4 h-4 text-green-500" />
-                          <span>{profile.location}</span>
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Genre and Hometown for Artist profiles */}
-                    {profile.type === "artist" && (
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 px-3 py-2 rounded-lg border border-purple-100 dark:border-purple-800">
-                          <Music className="w-4 h-4 text-purple-500" />
-                          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                            {profile.genre || "Genre not specified"}
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-2 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 px-3 py-2 rounded-lg border border-emerald-100 dark:border-emerald-800">
-                          <MapPin className="w-4 h-4 text-emerald-500" />
-                          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                            {profile.hometown || "Hometown not specified"}
-                          </span>
-                        </div>
-                      </div>
                     )}
                   </div>
+
+                  {/* Genre and Hometown for Artist profiles */}
+                  {profile.type === "artist" && (
+                    <div className="space-y-2 text-neutral-600 mb-4">
+                      <span className="flex items-center">
+                        <Music className="w-4 h-4 mr-2" />
+                        {profile.genre || "Genre not specified"}
+                      </span>
+                      <span className="flex items-center">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        {profile.hometown || "Hometown not specified"}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Social Media Buttons */}

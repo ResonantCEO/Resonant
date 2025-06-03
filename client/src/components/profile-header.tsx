@@ -460,33 +460,35 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             <div className="flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-neutral-900 mb-3">{getDisplayName()}</h1>
-                  <div className="flex items-center space-x-4 text-neutral-600 mb-3">
-                    <span className="flex items-center">
-                      <Users className="w-4 h-4 mr-2" />
-                      {friends.length} friends
-                    </span>
-                    {profile.location && (
+                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">{getDisplayName()}</h1>
+                  <div className="space-y-2 text-neutral-600 mb-2">
+                    <div className="flex items-center space-x-4">
                       <span className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        {profile.location}
+                        <Users className="w-4 h-4 mr-2" />
+                        {friends.length} friends
                       </span>
+                      {profile.location && (
+                        <span className="flex items-center">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          {profile.location}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Genre and Hometown for Artist profiles */}
+                    {profile.type === "artist" && (
+                      <>
+                        <span className="flex items-center">
+                          <Music className="w-4 h-4 mr-2" />
+                          {profile.genre || "Genre not specified"}
+                        </span>
+                        <span className="flex items-center">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          {profile.hometown || "Hometown not specified"}
+                        </span>
+                      </>
                     )}
                   </div>
-
-                  {/* Genre and Hometown for Artist profiles */}
-                  {profile.type === "artist" && (
-                    <div className="space-y-1 text-neutral-600 mb-3">
-                      <span className="flex items-center">
-                        <Music className="w-4 h-4 mr-2" />
-                        {profile.genre || "Genre not specified"}
-                      </span>
-                      <span className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        {profile.hometown || "Hometown not specified"}
-                      </span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Social Media Buttons */}

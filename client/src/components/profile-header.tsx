@@ -476,7 +476,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
                   {/* Genre and Hometown for Artist profiles */}
                   {profile.type === "artist" && (
-                    <div className="flex items-center space-x-4 text-neutral-600 mb-4">
+                    <div className="space-y-2 text-neutral-600 mb-4">
                       <span className="flex items-center">
                         <Music className="w-4 h-4 mr-2" />
                         {profile.genre || "Genre not specified"}

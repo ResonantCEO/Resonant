@@ -220,23 +220,7 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
               )}
             </div>
 
-            <div>
-              <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Musical Influences
-              </Label>
-              {isEditing ? (
-                <Textarea
-                  value={editData.influences}
-                  onChange={(e) => setEditData(prev => ({ ...prev, influences: e.target.value }))}
-                  placeholder="List your key musical influences..."
-                  className="min-h-20"
-                />
-              ) : (
-                <p className="text-gray-900 dark:text-white">
-                  {profile?.influences || "Not specified"}
-                </p>
-              )}
-            </div>
+
           </CardContent>
         </Card>
 

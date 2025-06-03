@@ -460,8 +460,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             <div className="flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">{getDisplayName()}</h1>
-                  <div className="space-y-2 text-neutral-600 mb-2">
+                  <h1 className="text-3xl font-bold text-neutral-900 mb-3">{getDisplayName()}</h1>
+                  <div className="space-y-3 text-neutral-600 mb-3">
                     <div className="flex items-center space-x-4">
                       <span className="flex items-center">
                         <Users className="w-4 h-4 mr-2" />

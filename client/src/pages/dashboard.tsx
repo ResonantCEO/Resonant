@@ -21,19 +21,22 @@ export default function Dashboard() {
     enabled: !!user,
   });
 
-  // Redirect to login if not authenticated
-  if (userError || (!userLoading && !user)) {
+  // Handle redirects and loading states without early returns
+  const shouldRedirectToLogin = userError || (!userLoading && !user);
+  const shouldRedirectToHome = !profileLoading && activeProfile && (activeProfile as any)?.type === "audience";
+  const isLoading = userLoading || profileLoading;
+  const shouldShowDashboard = !isLoading && activeProfile && (activeProfile as any)?.type !== "audience";
+
+  // Perform redirects after all hooks have been called
+  if (shouldRedirectToLogin) {
     setLocation("/login");
-    return null;
   }
-
-  // Redirect non-artist/venue profiles to home
-  if (!profileLoading && activeProfile && (activeProfile as any)?.type === "audience") {
+  
+  if (shouldRedirectToHome) {
     setLocation("/");
-    return null;
   }
 
-  if (userLoading || profileLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex">
         <div className="w-80 bg-white dark:bg-gray-900 shadow-lg border-r border-neutral-200 dark:border-gray-700 hidden lg:block">
@@ -46,7 +49,7 @@ export default function Dashboard() {
     );
   }
 
-  if (!activeProfile || (activeProfile as any)?.type === "audience") {
+  if (!shouldShowDashboard) {
     return null;
   }
 

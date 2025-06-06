@@ -204,7 +204,7 @@ export default function Dashboard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setLocation(`/profile/${activeProfile.id}`)}
+                        onClick={() => setLocation(`/profile/${profile.id}`)}
                       >
                         Upload
                       </Button>

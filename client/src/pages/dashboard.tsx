@@ -12,21 +12,28 @@ import ProfileManagement from "@/components/profile-management";
 export default function Dashboard() {
   const [, setLocation] = useLocation();
 
-  const { data: activeProfile, isLoading } = useQuery({
-    queryKey: ["/api/profiles/active"],
-  });
-
-  const { data: user } = useQuery({
+  const { data: user, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ["/api/user"],
   });
 
+  const { data: activeProfile, isLoading: profileLoading } = useQuery({
+    queryKey: ["/api/profiles/active"],
+    enabled: !!user,
+  });
+
+  // Redirect to login if not authenticated
+  if (userError || (!userLoading && !user)) {
+    setLocation("/login");
+    return null;
+  }
+
   // Redirect non-artist/venue profiles to home
-  if (!isLoading && activeProfile && activeProfile.type === "audience") {
+  if (!profileLoading && activeProfile && (activeProfile as any)?.type === "audience") {
     setLocation("/");
     return null;
   }
 
-  if (isLoading) {
+  if (userLoading || profileLoading) {
     return (
       <div className="min-h-screen flex">
         <div className="w-80 bg-white dark:bg-gray-900 shadow-lg border-r border-neutral-200 dark:border-gray-700 hidden lg:block">
@@ -39,23 +46,24 @@ export default function Dashboard() {
     );
   }
 
-  if (!activeProfile || activeProfile.type === "audience") {
+  if (!activeProfile || (activeProfile as any)?.type === "audience") {
     return null;
   }
 
-  const isArtist = activeProfile.type === "artist";
-  const isVenue = activeProfile.type === "venue";
+  const profile = activeProfile as any;
+  const isArtist = profile.type === "artist";
+  const isVenue = profile.type === "venue";
 
   // Check completion status for getting started tasks
-  const hasProfileInfo = activeProfile.bio && activeProfile.bio.trim().length > 0;
-  const hasCoverPhoto = activeProfile.coverImageUrl && activeProfile.coverImageUrl.trim().length > 0;
+  const hasProfileInfo = profile.bio && profile.bio.trim().length > 0;
+  const hasCoverPhoto = profile.coverImageUrl && profile.coverImageUrl.trim().length > 0;
   
   // Get posts for this profile to check if they have created any
   const { data: posts } = useQuery({
-    queryKey: [`/api/profiles/${activeProfile.id}/posts`],
-    enabled: !!activeProfile.id,
+    queryKey: [`/api/profiles/${profile.id}/posts`],
+    enabled: !!profile.id,
   });
-  const hasCreatedPost = posts && posts.length > 0;
+  const hasCreatedPost = posts && (posts as any[]).length > 0;
 
   const completedTasks = [
     hasProfileInfo,
@@ -83,7 +91,7 @@ export default function Dashboard() {
                   {isArtist ? "Artist Dashboard" : "Venue Dashboard"}
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  Welcome back, {activeProfile.name}
+                  Welcome back, {profile.name}
                 </p>
               </div>
               <div className="flex space-x-3">
@@ -162,7 +170,7 @@ export default function Dashboard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setLocation(`/profile/${activeProfile.id}`)}
+                        onClick={() => setLocation(`/profile/${profile.id}`)}
                       >
                         Complete
                       </Button>
@@ -405,7 +413,7 @@ export default function Dashboard() {
                       <Button
                         variant="outline"
                         className="w-full justify-start"
-                        onClick={() => setLocation(`/profile/${activeProfile.id}`)}
+                        onClick={() => setLocation(`/profile/${profile.id}`)}
                       >
                         <Users className="w-4 h-4 mr-2" />
                         View public profile
@@ -419,8 +427,8 @@ export default function Dashboard() {
             {/* Calendar Tab */}
             <TabsContent value="calendar" className="space-y-6">
               <BookingCalendar 
-                profileId={activeProfile.id} 
-                profileType={activeProfile.type as "artist" | "venue"} 
+                profileId={profile.id} 
+                profileType={profile.type as "artist" | "venue"} 
               />
             </TabsContent>
 
@@ -450,8 +458,8 @@ export default function Dashboard() {
             {/* Management Tab */}
             <TabsContent value="management" className="space-y-6">
               <ProfileManagement 
-                profileId={activeProfile.id}
-                profileType={activeProfile.type}
+                profileId={profile.id}
+                profileType={profile.type}
                 isOwner={true}
                 canManageMembers={true}
               />

@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/sidebar";
+import BookingCalendar from "@/components/booking-calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Users, Music, Building, BarChart3, Settings, Plus, Check, User, Image } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Users, Music, Building, BarChart3, Settings, Plus, Check, User, Image, CalendarDays, Clock } from "lucide-react";
 import ProfileManagement from "@/components/profile-management";
 
 export default function Dashboard() {
@@ -308,104 +310,153 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Main Content Grid */}
-          <div className="grid grid-responsive-1-2 gap-responsive">
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+          {/* Main Dashboard Content */}
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="calendar">
+                <CalendarDays className="w-4 h-4 mr-2" />
+                Calendar
+              </TabsTrigger>
+              <TabsTrigger value="bookings">
+                <Clock className="w-4 h-4 mr-2" />
+                {isVenue ? "Bookings" : "Requests"}
+              </TabsTrigger>
+              <TabsTrigger value="management">Management</TabsTrigger>
+            </TabsList>
+
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-responsive-1-2 gap-responsive">
+                {/* Recent Activity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No recent activity</p>
+                        <p className="text-sm">Start creating content to see your activity here</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Quick Actions */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => setLocation("/post")}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create a new post
+                      </Button>
+                      
+                      {isArtist && (
+                        <>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => setLocation("/upload-music")}
+                          >
+                            <Music className="w-4 h-4 mr-2" />
+                            Upload music
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => setLocation("/events")}
+                          >
+                            <Calendar className="w-4 h-4 mr-2" />
+                            Schedule event
+                          </Button>
+                        </>
+                      )}
+                      
+                      {isVenue && (
+                        <>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => setLocation("/events")}
+                          >
+                            <Calendar className="w-4 h-4 mr-2" />
+                            Create event
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => setLocation("/bookings")}
+                          >
+                            <Building className="w-4 h-4 mr-2" />
+                            Manage bookings
+                          </Button>
+                        </>
+                      )}
+                      
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => setLocation(`/profile/${activeProfile.id}`)}
+                      >
+                        <Users className="w-4 h-4 mr-2" />
+                        View public profile
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Calendar Tab */}
+            <TabsContent value="calendar" className="space-y-6">
+              <BookingCalendar 
+                profileId={activeProfile.id} 
+                profileType={activeProfile.type as "artist" | "venue"} 
+              />
+            </TabsContent>
+
+            {/* Bookings Tab */}
+            <TabsContent value="bookings" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {isVenue ? "Venue Bookings" : "Booking Requests"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No recent activity</p>
-                    <p className="text-sm">Start creating content to see your activity here</p>
+                    <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No {isVenue ? "bookings" : "requests"} yet</p>
+                    <p className="text-sm">
+                      {isVenue 
+                        ? "Booking requests will appear here when artists request your venue"
+                        : "Your booking requests to venues will appear here"
+                      }
+                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => setLocation("/post")}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create a new post
-                  </Button>
-                  
-                  {isArtist && (
-                    <>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => setLocation("/upload-music")}
-                      >
-                        <Music className="w-4 h-4 mr-2" />
-                        Upload music
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => setLocation("/events")}
-                      >
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Schedule event
-                      </Button>
-                    </>
-                  )}
-                  
-                  {isVenue && (
-                    <>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => setLocation("/events")}
-                      >
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Create event
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => setLocation("/bookings")}
-                      >
-                        <Building className="w-4 h-4 mr-2" />
-                        Manage bookings
-                      </Button>
-                    </>
-                  )}
-                  
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={() => setLocation(`/profile/${activeProfile.id}`)}
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    View public profile
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Members Management Section */}
-          <div className="mt-8">
-            <ProfileManagement 
-              profileId={activeProfile.id}
-              profileType={activeProfile.type}
-              isOwner={true}
-              canManageMembers={true}
-            />
-          </div>
+            {/* Management Tab */}
+            <TabsContent value="management" className="space-y-6">
+              <ProfileManagement 
+                profileId={activeProfile.id}
+                profileType={activeProfile.type}
+                isOwner={true}
+                canManageMembers={true}
+              />
+            </TabsContent>
+          </Tabs>
 
         </div>
       </div>

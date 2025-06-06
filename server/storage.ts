@@ -9,6 +9,8 @@ import {
   userNotificationSettings,
   profileInvitations,
   profileMemberships,
+  availabilitySlots,
+  bookings,
   type User,
   type Profile,
   type Post,
@@ -19,6 +21,10 @@ import {
   type InsertNotification,
   type ProfileInvitation,
   type InsertProfileInvitation,
+  type AvailabilitySlot,
+  type Booking,
+  type InsertAvailabilitySlot,
+  type InsertBooking,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, and, or, sql, inArray, isNotNull, isNull, lt } from "drizzle-orm";
@@ -86,6 +92,15 @@ export interface IStorage {
   getComments(postId: number): Promise<{ comment: Comment; profile: Profile }[]>;
   createComment(comment: InsertComment): Promise<Comment>;
   deleteComment(id: number): Promise<void>;
+
+  // Booking calendar operations
+  getAvailabilitySlots(profileId: number): Promise<AvailabilitySlot[]>;
+  createAvailabilitySlot(slot: InsertAvailabilitySlot): Promise<AvailabilitySlot>;
+  updateAvailabilitySlot(id: number, updates: Partial<InsertAvailabilitySlot>): Promise<AvailabilitySlot>;
+  deleteAvailabilitySlot(id: number): Promise<void>;
+  getBookings(profileId: number): Promise<Booking[]>;
+  createBooking(booking: InsertBooking): Promise<Booking>;
+  updateBookingStatus(id: number, status: string): Promise<Booking>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1089,6 +1104,59 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(profileInvitations)
       .where(eq(profileInvitations.id, id));
+  }
+
+  // Booking calendar operations
+  async getAvailabilitySlots(profileId: number): Promise<AvailabilitySlot[]> {
+    const slots = await db
+      .select()
+      .from(availabilitySlots)
+      .where(eq(availabilitySlots.profileId, profileId))
+      .orderBy(asc(availabilitySlots.date), asc(availabilitySlots.startTime));
+    return slots;
+  }
+
+  async createAvailabilitySlot(slot: InsertAvailabilitySlot): Promise<AvailabilitySlot> {
+    const [newSlot] = await db.insert(availabilitySlots).values(slot).returning();
+    return newSlot;
+  }
+
+  async updateAvailabilitySlot(id: number, updates: Partial<InsertAvailabilitySlot>): Promise<AvailabilitySlot> {
+    const [updatedSlot] = await db
+      .update(availabilitySlots)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(availabilitySlots.id, id))
+      .returning();
+    return updatedSlot;
+  }
+
+  async deleteAvailabilitySlot(id: number): Promise<void> {
+    await db
+      .delete(availabilitySlots)
+      .where(eq(availabilitySlots.id, id));
+  }
+
+  async getBookings(profileId: number): Promise<Booking[]> {
+    const bookingsList = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.profileId, profileId))
+      .orderBy(asc(bookings.date), asc(bookings.startTime));
+    return bookingsList;
+  }
+
+  async createBooking(booking: InsertBooking): Promise<Booking> {
+    const [newBooking] = await db.insert(bookings).values(booking).returning();
+    return newBooking;
+  }
+
+  async updateBookingStatus(id: number, status: string): Promise<Booking> {
+    const [updatedBooking] = await db
+      .update(bookings)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(bookings.id, id))
+      .returning();
+    return updatedBooking;
   }
 }
 

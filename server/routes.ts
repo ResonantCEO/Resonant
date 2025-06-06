@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users } from "@shared/schema";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema, insertAvailabilitySlotSchema, insertBookingSchema, posts, users } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -1408,6 +1408,173 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error updating notification settings:", error);
       res.status(500).json({ message: "Failed to update notification settings" });
+    }
+  });
+
+  // Booking Calendar API Routes
+  
+  // Get availability slots for a profile
+  app.get('/api/profiles/:id/availability', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const slots = await storage.getAvailabilitySlots(profileId);
+      res.json(slots);
+    } catch (error) {
+      console.error("Error fetching availability slots:", error);
+      res.status(500).json({ message: "Failed to fetch availability slots" });
+    }
+  });
+
+  // Create availability slot
+  app.post('/api/profiles/:id/availability', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      
+      // Check if user has permission to manage this profile
+      const profile = await storage.getProfile(profileId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      // For shared profiles, check membership and permissions
+      if (profile.isShared) {
+        const membership = await storage.getUserProfileRole(req.user.id, profileId);
+        if (!membership || !membership.permissions.includes('manage_bookings')) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
+      } else if (profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const slotData = insertAvailabilitySlotSchema.parse({
+        ...req.body,
+        profileId
+      });
+      
+      const slot = await storage.createAvailabilitySlot(slotData);
+      res.json(slot);
+    } catch (error) {
+      console.error("Error creating availability slot:", error);
+      res.status(500).json({ message: "Failed to create availability slot" });
+    }
+  });
+
+  // Update availability slot
+  app.patch('/api/profiles/:id/availability/:slotId', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const slotId = parseInt(req.params.slotId);
+      
+      // Check permissions
+      const profile = await storage.getProfile(profileId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      if (profile.isShared) {
+        const membership = await storage.getUserProfileRole(req.user.id, profileId);
+        if (!membership || !membership.permissions.includes('manage_bookings')) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
+      } else if (profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const updates = req.body;
+      const slot = await storage.updateAvailabilitySlot(slotId, updates);
+      res.json(slot);
+    } catch (error) {
+      console.error("Error updating availability slot:", error);
+      res.status(500).json({ message: "Failed to update availability slot" });
+    }
+  });
+
+  // Delete availability slot
+  app.delete('/api/profiles/:id/availability/:slotId', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const slotId = parseInt(req.params.slotId);
+      
+      // Check permissions
+      const profile = await storage.getProfile(profileId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      if (profile.isShared) {
+        const membership = await storage.getUserProfileRole(req.user.id, profileId);
+        if (!membership || !membership.permissions.includes('manage_bookings')) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
+      } else if (profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      await storage.deleteAvailabilitySlot(slotId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting availability slot:", error);
+      res.status(500).json({ message: "Failed to delete availability slot" });
+    }
+  });
+
+  // Get bookings for a profile
+  app.get('/api/profiles/:id/bookings', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const bookings = await storage.getBookings(profileId);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      res.status(500).json({ message: "Failed to fetch bookings" });
+    }
+  });
+
+  // Create booking request
+  app.post('/api/profiles/:id/bookings', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      
+      const bookingData = insertBookingSchema.parse({
+        ...req.body,
+        profileId
+      });
+      
+      const booking = await storage.createBooking(bookingData);
+      res.json(booking);
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      res.status(500).json({ message: "Failed to create booking" });
+    }
+  });
+
+  // Update booking status
+  app.patch('/api/profiles/:id/bookings/:bookingId/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const bookingId = parseInt(req.params.bookingId);
+      const { status } = req.body;
+      
+      // Check permissions
+      const profile = await storage.getProfile(profileId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      if (profile.isShared) {
+        const membership = await storage.getUserProfileRole(req.user.id, profileId);
+        if (!membership || !membership.permissions.includes('manage_bookings')) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
+      } else if (profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const booking = await storage.updateBookingStatus(bookingId, status);
+      res.json(booking);
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      res.status(500).json({ message: "Failed to update booking status" });
     }
   });
 

@@ -144,37 +144,6 @@ export const comments = pgTable("comments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Availability slots table - for setting available time slots
-export const availabilitySlots = pgTable("availability_slots", {
-  id: serial("id").primaryKey(),
-  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
-  date: varchar("date").notNull(), // YYYY-MM-DD format
-  startTime: varchar("start_time").notNull(), // HH:MM format
-  endTime: varchar("end_time").notNull(), // HH:MM format
-  status: varchar("status").notNull().default("available"), // 'available', 'unavailable', 'booked'
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// Bookings table - for actual bookings
-export const bookings = pgTable("bookings", {
-  id: serial("id").primaryKey(),
-  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }), // artist/venue being booked
-  bookerProfileId: integer("booker_profile_id").references(() => profiles.id, { onDelete: "cascade" }), // who made the booking
-  bookerEmail: varchar("booker_email"), // for external bookings
-  bookerName: varchar("booker_name"), // for external bookings
-  date: varchar("date").notNull(), // YYYY-MM-DD format
-  startTime: varchar("start_time").notNull(), // HH:MM format
-  endTime: varchar("end_time").notNull(), // HH:MM format
-  status: varchar("status").notNull().default("pending"), // 'pending', 'confirmed', 'cancelled', 'completed'
-  eventTitle: varchar("event_title").notNull(),
-  eventDescription: text("event_description"),
-  contactInfo: text("contact_info"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
 // Relations
 
 export const profilesRelations = relations(profiles, ({ one, many }) => ({
@@ -189,9 +158,6 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   comments: many(comments),
   memberships: many(profileMemberships),
   invitations: many(profileInvitations),
-  availabilitySlots: many(availabilitySlots),
-  bookings: many(bookings, { relationName: "profileBookings" }),
-  madeBookings: many(bookings, { relationName: "bookerBookings" }),
 }));
 
 export const profileMembershipsRelations = relations(profileMemberships, ({ one }) => ({
@@ -266,26 +232,6 @@ export const commentsRelations = relations(comments, ({ one }) => ({
   }),
 }));
 
-export const availabilitySlotsRelations = relations(availabilitySlots, ({ one }) => ({
-  profile: one(profiles, {
-    fields: [availabilitySlots.profileId],
-    references: [profiles.id],
-  }),
-}));
-
-export const bookingsRelations = relations(bookings, ({ one }) => ({
-  profile: one(profiles, {
-    fields: [bookings.profileId],
-    references: [profiles.id],
-    relationName: "profileBookings",
-  }),
-  booker: one(profiles, {
-    fields: [bookings.bookerProfileId],
-    references: [profiles.id],
-    relationName: "bookerBookings",
-  }),
-}));
-
 // Schema exports for validation
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -341,19 +287,6 @@ export const insertProfileInvitationSchema = createInsertSchema(profileInvitatio
   updatedAt: true,
 });
 
-export const insertAvailabilitySlotSchema = createInsertSchema(availabilitySlots).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertBookingSchema = createInsertSchema(bookings).omit({
-  id: true,
-  status: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
 // Role and permission validation schemas
 export const profileRoleSchema = z.enum(["owner", "admin", "manager", "member"]);
 export const profilePermissionSchema = z.enum([
@@ -365,12 +298,6 @@ export const profilePermissionSchema = z.enum([
   "view_analytics", // View profile analytics
   "moderate_content", // Moderate comments, reports
 ]);
-
-// Type exports
-export type AvailabilitySlot = typeof availabilitySlots.$inferSelect;
-export type Booking = typeof bookings.$inferSelect;
-export type InsertAvailabilitySlot = z.infer<typeof insertAvailabilitySlotSchema>;
-export type InsertBooking = z.infer<typeof insertBookingSchema>;
 
 // Notifications table
 export const notifications = pgTable("notifications", {

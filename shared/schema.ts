@@ -409,5 +409,214 @@ export const notificationTypeSchema = z.enum([
   "profile_deleted",
   "profile_restored",
   "membership_updated",
-  "system_announcement"
+  "system_announcement",
+  "booking_request",
+  "booking_confirmed",
+  "booking_cancelled",
+  "event_reminder"
 ]);
+
+// Events table - for both artists and venues
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  eventType: varchar("event_type").notNull(), // 'concert', 'private_event', 'rehearsal', 'meeting', 'recording', 'show'
+  startDateTime: timestamp("start_date_time").notNull(),
+  endDateTime: timestamp("end_date_time").notNull(),
+  allDay: boolean("all_day").default(false),
+  location: varchar("location"),
+  venueId: integer("venue_id").references(() => profiles.id), // reference to venue profile if applicable
+  maxCapacity: integer("max_capacity"),
+  currentBookings: integer("current_bookings").default(0),
+  ticketPrice: varchar("ticket_price"), // stored as string to handle "Free", "$50", etc.
+  contactEmail: varchar("contact_email"),
+  contactPhone: varchar("contact_phone"),
+  recurring: varchar("recurring"), // 'none', 'daily', 'weekly', 'monthly'
+  recurringEndDate: timestamp("recurring_end_date"),
+  status: varchar("status").notNull().default("draft"), // 'draft', 'published', 'cancelled', 'completed'
+  visibility: varchar("visibility").notNull().default("public"), // 'public', 'private', 'friends'
+  requiresApproval: boolean("requires_approval").default(false), // for venue bookings
+  metadata: jsonb("metadata"), // flexible field for additional event data
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Bookings table - for venue booking requests and confirmations
+export const bookings = pgTable("bookings", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").references(() => events.id, { onDelete: "cascade" }),
+  venueId: integer("venue_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  artistId: integer("artist_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  requestedDateTime: timestamp("requested_date_time").notNull(),
+  endDateTime: timestamp("end_date_time").notNull(),
+  eventTitle: varchar("event_title").notNull(),
+  eventDescription: text("event_description"),
+  expectedAttendance: integer("expected_attendance"),
+  setupRequirements: text("setup_requirements"),
+  equipmentNeeds: text("equipment_needs"),
+  budgetRange: varchar("budget_range"),
+  contactEmail: varchar("contact_email").notNull(),
+  contactPhone: varchar("contact_phone"),
+  status: varchar("status").notNull().default("pending"), // 'pending', 'approved', 'rejected', 'cancelled', 'completed'
+  rejectionReason: text("rejection_reason"),
+  venueNotes: text("venue_notes"), // internal notes from venue
+  artistNotes: text("artist_notes"), // notes from artist
+  contractUrl: varchar("contract_url"), // link to signed contract if applicable
+  depositAmount: varchar("deposit_amount"),
+  totalCost: varchar("total_cost"),
+  paymentStatus: varchar("payment_status").default("pending"), // 'pending', 'partial', 'paid', 'refunded'
+  remindersSent: integer("reminders_sent").default(0),
+  lastReminderSent: timestamp("last_reminder_sent"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Availability table - for venues to set their available time slots
+export const availability = pgTable("availability", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  dayOfWeek: integer("day_of_week").notNull(), // 0 = Sunday, 1 = Monday, etc.
+  startTime: varchar("start_time").notNull(), // "09:00"
+  endTime: varchar("end_time").notNull(), // "17:00"
+  isAvailable: boolean("is_available").default(true),
+  notes: text("notes"), // special notes about this time slot
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Blocked dates table - for specific dates when venues are unavailable
+export const blockedDates = pgTable("blocked_dates", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  reason: varchar("reason"), // 'maintenance', 'private_event', 'holiday', 'other'
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Event attendees table - for tracking who's attending events
+export const eventAttendees = pgTable("event_attendees", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  status: varchar("status").notNull().default("going"), // 'going', 'maybe', 'not_going'
+  ticketsPurchased: integer("tickets_purchased").default(0),
+  totalPaid: varchar("total_paid"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations for booking system
+export const eventsRelations = relations(events, ({ one, many }) => ({
+  profile: one(profiles, {
+    fields: [events.profileId],
+    references: [profiles.id],
+  }),
+  venue: one(profiles, {
+    fields: [events.venueId],
+    references: [profiles.id],
+    relationName: "venue",
+  }),
+  bookings: many(bookings),
+  attendees: many(eventAttendees),
+}));
+
+export const bookingsRelations = relations(bookings, ({ one }) => ({
+  event: one(events, {
+    fields: [bookings.eventId],
+    references: [events.id],
+  }),
+  venue: one(profiles, {
+    fields: [bookings.venueId],
+    references: [profiles.id],
+    relationName: "venue",
+  }),
+  artist: one(profiles, {
+    fields: [bookings.artistId],
+    references: [profiles.id],
+    relationName: "artist",
+  }),
+}));
+
+export const availabilityRelations = relations(availability, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [availability.profileId],
+    references: [profiles.id],
+  }),
+}));
+
+export const blockedDatesRelations = relations(blockedDates, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [blockedDates.profileId],
+    references: [profiles.id],
+  }),
+}));
+
+export const eventAttendeesRelations = relations(eventAttendees, ({ one }) => ({
+  event: one(events, {
+    fields: [eventAttendees.eventId],
+    references: [events.id],
+  }),
+  profile: one(profiles, {
+    fields: [eventAttendees.profileId],
+    references: [profiles.id],
+  }),
+}));
+
+// Booking system schemas
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  currentBookings: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBookingSchema = createInsertSchema(bookings).omit({
+  id: true,
+  status: true,
+  remindersSent: true,
+  lastReminderSent: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAvailabilitySchema = createInsertSchema(availability).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBlockedDateSchema = createInsertSchema(blockedDates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEventAttendeeSchema = createInsertSchema(eventAttendees).omit({
+  id: true,
+  ticketsPurchased: true,
+  totalPaid: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Booking system types
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type Booking = typeof bookings.$inferSelect;
+export type InsertBooking = z.infer<typeof insertBookingSchema>;
+export type Availability = typeof availability.$inferSelect;
+export type InsertAvailability = z.infer<typeof insertAvailabilitySchema>;
+export type BlockedDate = typeof blockedDates.$inferSelect;
+export type InsertBlockedDate = z.infer<typeof insertBlockedDateSchema>;
+export type EventAttendee = typeof eventAttendees.$inferSelect;
+export type InsertEventAttendee = z.infer<typeof insertEventAttendeeSchema>;
+
+// Event and booking validation schemas
+export const eventTypeSchema = z.enum(["concert", "private_event", "rehearsal", "meeting", "recording", "show"]);
+export const bookingStatusSchema = z.enum(["pending", "approved", "rejected", "cancelled", "completed"]);
+export const attendeeStatusSchema = z.enum(["going", "maybe", "not_going"]);

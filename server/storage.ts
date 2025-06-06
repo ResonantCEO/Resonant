@@ -9,6 +9,11 @@ import {
   userNotificationSettings,
   profileInvitations,
   profileMemberships,
+  events,
+  bookings,
+  availability,
+  blockedDates,
+  eventAttendees,
   type User,
   type Profile,
   type Post,
@@ -19,6 +24,22 @@ import {
   type InsertNotification,
   type ProfileInvitation,
   type InsertProfileInvitation,
+  type InsertUser,
+  type InsertProfile,
+  type InsertPost,
+  type InsertComment,
+  type ProfileMembership,
+  type InsertProfileMembership,
+  type Event,
+  type InsertEvent,
+  type Booking,
+  type InsertBooking,
+  type Availability,
+  type InsertAvailability,
+  type BlockedDate,
+  type InsertBlockedDate,
+  type EventAttendee,
+  type InsertEventAttendee,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, and, or, sql, inArray, isNotNull, isNull, lt } from "drizzle-orm";
@@ -86,6 +107,41 @@ export interface IStorage {
   getComments(postId: number): Promise<{ comment: Comment; profile: Profile }[]>;
   createComment(comment: InsertComment): Promise<Comment>;
   deleteComment(id: number): Promise<void>;
+
+  // Event operations
+  getEvents(profileId: number): Promise<Event[]>;
+  getEvent(id: number): Promise<Event | undefined>;
+  createEvent(event: InsertEvent): Promise<Event>;
+  updateEvent(id: number, updates: Partial<InsertEvent>): Promise<Event>;
+  deleteEvent(id: number): Promise<void>;
+  getUpcomingEvents(profileId: number, limit?: number): Promise<Event[]>;
+
+  // Booking operations
+  getBookings(profileId: number): Promise<Booking[]>;
+  getBooking(id: number): Promise<Booking | undefined>;
+  createBooking(booking: InsertBooking): Promise<Booking>;
+  updateBooking(id: number, updates: Partial<InsertBooking>): Promise<Booking>;
+  deleteBooking(id: number): Promise<void>;
+  getBookingsByVenue(venueId: number): Promise<Booking[]>;
+  getBookingsByArtist(artistId: number): Promise<Booking[]>;
+
+  // Availability operations
+  getAvailability(profileId: number): Promise<Availability[]>;
+  setAvailability(availability: InsertAvailability): Promise<Availability>;
+  updateAvailability(id: number, updates: Partial<InsertAvailability>): Promise<Availability>;
+  deleteAvailability(id: number): Promise<void>;
+
+  // Blocked dates operations
+  getBlockedDates(profileId: number): Promise<BlockedDate[]>;
+  createBlockedDate(blockedDate: InsertBlockedDate): Promise<BlockedDate>;
+  updateBlockedDate(id: number, updates: Partial<InsertBlockedDate>): Promise<BlockedDate>;
+  deleteBlockedDate(id: number): Promise<void>;
+
+  // Event attendee operations
+  getEventAttendees(eventId: number): Promise<EventAttendee[]>;
+  addEventAttendee(attendee: InsertEventAttendee): Promise<EventAttendee>;
+  updateEventAttendee(id: number, updates: Partial<InsertEventAttendee>): Promise<EventAttendee>;
+  removeEventAttendee(eventId: number, profileId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1089,6 +1145,233 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(profileInvitations)
       .where(eq(profileInvitations.id, id));
+  }
+
+  // Event operations
+  async getEvents(profileId: number): Promise<Event[]> {
+    const eventList = await db
+      .select()
+      .from(events)
+      .where(eq(events.profileId, profileId))
+      .orderBy(asc(events.startDateTime));
+    return eventList;
+  }
+
+  async getEvent(id: number): Promise<Event | undefined> {
+    const [event] = await db
+      .select()
+      .from(events)
+      .where(eq(events.id, id));
+    return event;
+  }
+
+  async createEvent(event: InsertEvent): Promise<Event> {
+    const [newEvent] = await db
+      .insert(events)
+      .values(event)
+      .returning();
+    return newEvent;
+  }
+
+  async updateEvent(id: number, updates: Partial<InsertEvent>): Promise<Event> {
+    const [updatedEvent] = await db
+      .update(events)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(events.id, id))
+      .returning();
+    return updatedEvent;
+  }
+
+  async deleteEvent(id: number): Promise<void> {
+    await db
+      .delete(events)
+      .where(eq(events.id, id));
+  }
+
+  async getUpcomingEvents(profileId: number, limit = 10): Promise<Event[]> {
+    const upcomingEvents = await db
+      .select()
+      .from(events)
+      .where(
+        and(
+          eq(events.profileId, profileId),
+          or(
+            eq(events.status, "published"),
+            eq(events.status, "draft")
+          )
+        )
+      )
+      .orderBy(asc(events.startDateTime))
+      .limit(limit);
+    return upcomingEvents;
+  }
+
+  // Booking operations
+  async getBookings(profileId: number): Promise<Booking[]> {
+    const bookingList = await db
+      .select()
+      .from(bookings)
+      .where(
+        or(
+          eq(bookings.venueId, profileId),
+          eq(bookings.artistId, profileId)
+        )
+      )
+      .orderBy(desc(bookings.createdAt));
+    return bookingList;
+  }
+
+  async getBooking(id: number): Promise<Booking | undefined> {
+    const [booking] = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.id, id));
+    return booking;
+  }
+
+  async createBooking(booking: InsertBooking): Promise<Booking> {
+    const [newBooking] = await db
+      .insert(bookings)
+      .values(booking)
+      .returning();
+    return newBooking;
+  }
+
+  async updateBooking(id: number, updates: Partial<InsertBooking>): Promise<Booking> {
+    const [updatedBooking] = await db
+      .update(bookings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(bookings.id, id))
+      .returning();
+    return updatedBooking;
+  }
+
+  async deleteBooking(id: number): Promise<void> {
+    await db
+      .delete(bookings)
+      .where(eq(bookings.id, id));
+  }
+
+  async getBookingsByVenue(venueId: number): Promise<Booking[]> {
+    const venueBookings = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.venueId, venueId))
+      .orderBy(asc(bookings.requestedDateTime));
+    return venueBookings;
+  }
+
+  async getBookingsByArtist(artistId: number): Promise<Booking[]> {
+    const artistBookings = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.artistId, artistId))
+      .orderBy(asc(bookings.requestedDateTime));
+    return artistBookings;
+  }
+
+  // Availability operations
+  async getAvailability(profileId: number): Promise<Availability[]> {
+    const availabilityList = await db
+      .select()
+      .from(availability)
+      .where(eq(availability.profileId, profileId))
+      .orderBy(asc(availability.dayOfWeek));
+    return availabilityList;
+  }
+
+  async setAvailability(availabilityData: InsertAvailability): Promise<Availability> {
+    const [newAvailability] = await db
+      .insert(availability)
+      .values(availabilityData)
+      .returning();
+    return newAvailability;
+  }
+
+  async updateAvailability(id: number, updates: Partial<InsertAvailability>): Promise<Availability> {
+    const [updatedAvailability] = await db
+      .update(availability)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(availability.id, id))
+      .returning();
+    return updatedAvailability;
+  }
+
+  async deleteAvailability(id: number): Promise<void> {
+    await db
+      .delete(availability)
+      .where(eq(availability.id, id));
+  }
+
+  // Blocked dates operations
+  async getBlockedDates(profileId: number): Promise<BlockedDate[]> {
+    const blockedDatesList = await db
+      .select()
+      .from(blockedDates)
+      .where(eq(blockedDates.profileId, profileId))
+      .orderBy(asc(blockedDates.startDate));
+    return blockedDatesList;
+  }
+
+  async createBlockedDate(blockedDate: InsertBlockedDate): Promise<BlockedDate> {
+    const [newBlockedDate] = await db
+      .insert(blockedDates)
+      .values(blockedDate)
+      .returning();
+    return newBlockedDate;
+  }
+
+  async updateBlockedDate(id: number, updates: Partial<InsertBlockedDate>): Promise<BlockedDate> {
+    const [updatedBlockedDate] = await db
+      .update(blockedDates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(blockedDates.id, id))
+      .returning();
+    return updatedBlockedDate;
+  }
+
+  async deleteBlockedDate(id: number): Promise<void> {
+    await db
+      .delete(blockedDates)
+      .where(eq(blockedDates.id, id));
+  }
+
+  // Event attendee operations
+  async getEventAttendees(eventId: number): Promise<EventAttendee[]> {
+    const attendeesList = await db
+      .select()
+      .from(eventAttendees)
+      .where(eq(eventAttendees.eventId, eventId))
+      .orderBy(desc(eventAttendees.createdAt));
+    return attendeesList;
+  }
+
+  async addEventAttendee(attendee: InsertEventAttendee): Promise<EventAttendee> {
+    const [newAttendee] = await db
+      .insert(eventAttendees)
+      .values(attendee)
+      .returning();
+    return newAttendee;
+  }
+
+  async updateEventAttendee(id: number, updates: Partial<InsertEventAttendee>): Promise<EventAttendee> {
+    const [updatedAttendee] = await db
+      .update(eventAttendees)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(eventAttendees.id, id))
+      .returning();
+    return updatedAttendee;
+  }
+
+  async removeEventAttendee(eventId: number, profileId: number): Promise<void> {
+    await db
+      .delete(eventAttendees)
+      .where(
+        and(
+          eq(eventAttendees.eventId, eventId),
+          eq(eventAttendees.profileId, profileId)
+        )
+      );
   }
 }
 

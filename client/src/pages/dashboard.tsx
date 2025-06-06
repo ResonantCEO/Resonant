@@ -1,39 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import Sidebar from "@/components/sidebar";
-import BookingCalendar from "@/components/booking-calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Users, Music, Building, BarChart3, Settings, Plus, Check, User, Image, CalendarDays, Clock } from "lucide-react";
+import { Calendar, Users, Music, Building, BarChart3, Settings, Plus, Check, User, Image } from "lucide-react";
 import ProfileManagement from "@/components/profile-management";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
 
-  const { data: user, isLoading: userLoading, error: userError } = useQuery({
+  const { data: activeProfile, isLoading } = useQuery({
+    queryKey: ["/api/profiles/active"],
+  });
+
+  const { data: user } = useQuery({
     queryKey: ["/api/user"],
   });
 
-  const { data: activeProfile, isLoading: profileLoading } = useQuery({
-    queryKey: ["/api/profiles/active"],
-    enabled: !!user,
-  });
-
-  // Handle redirects and loading states without early returns
-  const shouldRedirectToLogin = userError || (!userLoading && !user);
-  const shouldRedirectToHome = !profileLoading && activeProfile && (activeProfile as any)?.type === "audience";
-  const isLoading = userLoading || profileLoading;
-  const shouldShowDashboard = !isLoading && activeProfile && (activeProfile as any)?.type !== "audience";
-
-  // Perform redirects after all hooks have been called
-  if (shouldRedirectToLogin) {
-    setLocation("/login");
-  }
-  
-  if (shouldRedirectToHome) {
+  // Redirect non-artist/venue profiles to home
+  if (!isLoading && activeProfile && activeProfile.type === "audience") {
     setLocation("/");
+    return null;
   }
 
   if (isLoading) {
@@ -49,24 +37,23 @@ export default function Dashboard() {
     );
   }
 
-  if (!shouldShowDashboard) {
+  if (!activeProfile || activeProfile.type === "audience") {
     return null;
   }
 
-  const profile = activeProfile as any;
-  const isArtist = profile.type === "artist";
-  const isVenue = profile.type === "venue";
+  const isArtist = activeProfile.type === "artist";
+  const isVenue = activeProfile.type === "venue";
 
   // Check completion status for getting started tasks
-  const hasProfileInfo = profile.bio && profile.bio.trim().length > 0;
-  const hasCoverPhoto = profile.coverImageUrl && profile.coverImageUrl.trim().length > 0;
+  const hasProfileInfo = activeProfile.bio && activeProfile.bio.trim().length > 0;
+  const hasCoverPhoto = activeProfile.coverImageUrl && activeProfile.coverImageUrl.trim().length > 0;
   
   // Get posts for this profile to check if they have created any
   const { data: posts } = useQuery({
-    queryKey: [`/api/profiles/${profile.id}/posts`],
-    enabled: !!profile.id,
+    queryKey: [`/api/profiles/${activeProfile.id}/posts`],
+    enabled: !!activeProfile.id,
   });
-  const hasCreatedPost = posts && (posts as any[]).length > 0;
+  const hasCreatedPost = posts && posts.length > 0;
 
   const completedTasks = [
     hasProfileInfo,
@@ -94,7 +81,7 @@ export default function Dashboard() {
                   {isArtist ? "Artist Dashboard" : "Venue Dashboard"}
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  Welcome back, {profile.name}
+                  Welcome back, {activeProfile.name}
                 </p>
               </div>
               <div className="flex space-x-3">
@@ -173,7 +160,7 @@ export default function Dashboard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setLocation(`/profile/${profile.id}`)}
+                        onClick={() => setLocation(`/profile/${activeProfile.id}`)}
                       >
                         Complete
                       </Button>
@@ -207,7 +194,7 @@ export default function Dashboard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setLocation(`/profile/${profile.id}`)}
+                        onClick={() => setLocation(`/profile/${activeProfile.id}`)}
                       >
                         Upload
                       </Button>
@@ -321,153 +308,104 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Main Dashboard Content */}
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="calendar">
-                <CalendarDays className="w-4 h-4 mr-2" />
-                Calendar
-              </TabsTrigger>
-              <TabsTrigger value="bookings">
-                <Clock className="w-4 h-4 mr-2" />
-                {isVenue ? "Bookings" : "Requests"}
-              </TabsTrigger>
-              <TabsTrigger value="management">Management</TabsTrigger>
-            </TabsList>
-
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
-              <div className="grid grid-responsive-1-2 gap-responsive">
-                {/* Recent Activity */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p>No recent activity</p>
-                        <p className="text-sm">Start creating content to see your activity here</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Quick Actions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => setLocation("/post")}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create a new post
-                      </Button>
-                      
-                      {isArtist && (
-                        <>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={() => setLocation("/upload-music")}
-                          >
-                            <Music className="w-4 h-4 mr-2" />
-                            Upload music
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={() => setLocation("/events")}
-                          >
-                            <Calendar className="w-4 h-4 mr-2" />
-                            Schedule event
-                          </Button>
-                        </>
-                      )}
-                      
-                      {isVenue && (
-                        <>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={() => setLocation("/events")}
-                          >
-                            <Calendar className="w-4 h-4 mr-2" />
-                            Create event
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={() => setLocation("/bookings")}
-                          >
-                            <Building className="w-4 h-4 mr-2" />
-                            Manage bookings
-                          </Button>
-                        </>
-                      )}
-                      
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                        onClick={() => setLocation(`/profile/${profile.id}`)}
-                      >
-                        <Users className="w-4 h-4 mr-2" />
-                        View public profile
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            {/* Calendar Tab */}
-            <TabsContent value="calendar" className="space-y-6">
-              <BookingCalendar 
-                profileId={profile.id} 
-                profileType={profile.type as "artist" | "venue"} 
-              />
-            </TabsContent>
-
-            {/* Bookings Tab */}
-            <TabsContent value="bookings" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    {isVenue ? "Venue Bookings" : "Booking Requests"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+          {/* Main Content Grid */}
+          <div className="grid grid-responsive-1-2 gap-responsive">
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No {isVenue ? "bookings" : "requests"} yet</p>
-                    <p className="text-sm">
-                      {isVenue 
-                        ? "Booking requests will appear here when artists request your venue"
-                        : "Your booking requests to venues will appear here"
-                      }
-                    </p>
+                    <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No recent activity</p>
+                    <p className="text-sm">Start creating content to see your activity here</p>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* Management Tab */}
-            <TabsContent value="management" className="space-y-6">
-              <ProfileManagement 
-                profileId={profile.id}
-                profileType={profile.type}
-                isOwner={true}
-                canManageMembers={true}
-              />
-            </TabsContent>
-          </Tabs>
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => setLocation("/post")}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create a new post
+                  </Button>
+                  
+                  {isArtist && (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => setLocation("/upload-music")}
+                      >
+                        <Music className="w-4 h-4 mr-2" />
+                        Upload music
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => setLocation("/events")}
+                      >
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Schedule event
+                      </Button>
+                    </>
+                  )}
+                  
+                  {isVenue && (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => setLocation("/events")}
+                      >
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Create event
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => setLocation("/bookings")}
+                      >
+                        <Building className="w-4 h-4 mr-2" />
+                        Manage bookings
+                      </Button>
+                    </>
+                  )}
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => setLocation(`/profile/${activeProfile.id}`)}
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    View public profile
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Members Management Section */}
+          <div className="mt-8">
+            <ProfileManagement 
+              profileId={activeProfile.id}
+              profileType={activeProfile.type}
+              isOwner={true}
+              canManageMembers={true}
+            />
+          </div>
 
         </div>
       </div>

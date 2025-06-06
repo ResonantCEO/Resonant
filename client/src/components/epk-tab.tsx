@@ -21,6 +21,7 @@ import {
   Users,
   Award
 } from "lucide-react";
+import BookingCalendar from "./booking-calendar";
 
 interface EPKTabProps {
   profile: any;
@@ -767,6 +768,25 @@ export default function EPKTab({ profile, isOwn }: EPKTabProps) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Booking Calendar - Only for Artist and Venue profiles */}
+        {(profile?.type === 'artist' || profile?.type === 'venue') && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Calendar className="w-5 h-5 mr-2" />
+                Booking Calendar
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BookingCalendar 
+                profileId={profile?.id} 
+                isOwner={isOwn}
+                profileType={profile?.type}
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
 
 

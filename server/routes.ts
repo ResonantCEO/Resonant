@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users } from "@shared/schema";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema, insertAvailabilitySlotSchema, insertBookingSchema, posts, users } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -1248,241 +1248,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  // Event management routes
-  app.get('/api/profiles/:profileId/events', isAuthenticated, async (req: any, res) => {
-    try {
-      const profileId = parseInt(req.params.profileId);
-      const events = await storage.getEvents(profileId);
-      res.json(events);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-      res.status(500).json({ message: "Failed to fetch events" });
-    }
-  });
-
-  app.post('/api/profiles/:profileId/events', isAuthenticated, async (req: any, res) => {
-    try {
-      const profileId = parseInt(req.params.profileId);
-      
-      // Check if user has permission to create events for this profile
-      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_events");
-      if (!hasPermission) {
-        return res.status(403).json({ message: "Permission denied" });
-      }
-
-      const event = await storage.createEvent({
-        ...req.body,
-        profileId,
-      });
-      
-      res.json(event);
-    } catch (error) {
-      console.error("Error creating event:", error);
-      res.status(500).json({ message: "Failed to create event" });
-    }
-  });
-
-  app.patch('/api/events/:eventId', isAuthenticated, async (req: any, res) => {
-    try {
-      const eventId = parseInt(req.params.eventId);
-      const existingEvent = await storage.getEvent(eventId);
-      
-      if (!existingEvent) {
-        return res.status(404).json({ message: "Event not found" });
-      }
-
-      // Check if user has permission to edit this event
-      const hasPermission = await storage.checkProfilePermission(req.user.id, existingEvent.profileId, "manage_events");
-      if (!hasPermission) {
-        return res.status(403).json({ message: "Permission denied" });
-      }
-
-      const updatedEvent = await storage.updateEvent(eventId, req.body);
-      res.json(updatedEvent);
-    } catch (error) {
-      console.error("Error updating event:", error);
-      res.status(500).json({ message: "Failed to update event" });
-    }
-  });
-
-  app.delete('/api/events/:eventId', isAuthenticated, async (req: any, res) => {
-    try {
-      const eventId = parseInt(req.params.eventId);
-      const existingEvent = await storage.getEvent(eventId);
-      
-      if (!existingEvent) {
-        return res.status(404).json({ message: "Event not found" });
-      }
-
-      // Check if user has permission to delete this event
-      const hasPermission = await storage.checkProfilePermission(req.user.id, existingEvent.profileId, "manage_events");
-      if (!hasPermission) {
-        return res.status(403).json({ message: "Permission denied" });
-      }
-
-      await storage.deleteEvent(eventId);
-      res.json({ message: "Event deleted" });
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      res.status(500).json({ message: "Failed to delete event" });
-    }
-  });
-
-  // Booking management routes
-  app.get('/api/profiles/:profileId/bookings', isAuthenticated, async (req: any, res) => {
-    try {
-      const profileId = parseInt(req.params.profileId);
-      const bookings = await storage.getBookings(profileId);
-      res.json(bookings);
-    } catch (error) {
-      console.error("Error fetching bookings:", error);
-      res.status(500).json({ message: "Failed to fetch bookings" });
-    }
-  });
-
-  app.post('/api/bookings', isAuthenticated, async (req: any, res) => {
-    try {
-      const booking = await storage.createBooking({
-        ...req.body,
-      });
-      
-      res.json(booking);
-    } catch (error) {
-      console.error("Error creating booking:", error);
-      res.status(500).json({ message: "Failed to create booking" });
-    }
-  });
-
-  app.patch('/api/bookings/:bookingId', isAuthenticated, async (req: any, res) => {
-    try {
-      const bookingId = parseInt(req.params.bookingId);
-      const existingBooking = await storage.getBooking(bookingId);
-      
-      if (!existingBooking) {
-        return res.status(404).json({ message: "Booking not found" });
-      }
-
-      // Check if user has permission to update this booking
-      const hasVenuePermission = await storage.checkProfilePermission(req.user.id, existingBooking.venueId, "manage_bookings");
-      const hasArtistPermission = await storage.checkProfilePermission(req.user.id, existingBooking.artistId, "manage_bookings");
-      
-      if (!hasVenuePermission && !hasArtistPermission) {
-        return res.status(403).json({ message: "Permission denied" });
-      }
-
-      const updatedBooking = await storage.updateBooking(bookingId, req.body);
-      res.json(updatedBooking);
-    } catch (error) {
-      console.error("Error updating booking:", error);
-      res.status(500).json({ message: "Failed to update booking" });
-    }
-  });
-
-  app.delete('/api/bookings/:bookingId', isAuthenticated, async (req: any, res) => {
-    try {
-      const bookingId = parseInt(req.params.bookingId);
-      const existingBooking = await storage.getBooking(bookingId);
-      
-      if (!existingBooking) {
-        return res.status(404).json({ message: "Booking not found" });
-      }
-
-      // Check if user has permission to delete this booking
-      const hasVenuePermission = await storage.checkProfilePermission(req.user.id, existingBooking.venueId, "manage_bookings");
-      const hasArtistPermission = await storage.checkProfilePermission(req.user.id, existingBooking.artistId, "manage_bookings");
-      
-      if (!hasVenuePermission && !hasArtistPermission) {
-        return res.status(403).json({ message: "Permission denied" });
-      }
-
-      await storage.deleteBooking(bookingId);
-      res.json({ message: "Booking deleted" });
-    } catch (error) {
-      console.error("Error deleting booking:", error);
-      res.status(500).json({ message: "Failed to delete booking" });
-    }
-  });
-
-  // Get venues for booking requests (public endpoint)
-  app.get('/api/venues', async (req, res) => {
-    try {
-      const venues = await storage.searchProfiles("", 100);
-      const venueProfiles = venues.filter(profile => profile.type === "venue");
-      res.json(venueProfiles);
-    } catch (error) {
-      console.error("Error fetching venues:", error);
-      res.status(500).json({ message: "Failed to fetch venues" });
-    }
-  });
-
-  // Availability management routes
-  app.get('/api/profiles/:profileId/availability', isAuthenticated, async (req: any, res) => {
-    try {
-      const profileId = parseInt(req.params.profileId);
-      const availability = await storage.getAvailability(profileId);
-      res.json(availability);
-    } catch (error) {
-      console.error("Error fetching availability:", error);
-      res.status(500).json({ message: "Failed to fetch availability" });
-    }
-  });
-
-  app.post('/api/profiles/:profileId/availability', isAuthenticated, async (req: any, res) => {
-    try {
-      const profileId = parseInt(req.params.profileId);
-      
-      // Check if user has permission to manage this profile's availability
-      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_profile");
-      if (!hasPermission) {
-        return res.status(403).json({ message: "Permission denied" });
-      }
-
-      const availability = await storage.setAvailability({
-        ...req.body,
-        profileId,
-      });
-      
-      res.json(availability);
-    } catch (error) {
-      console.error("Error setting availability:", error);
-      res.status(500).json({ message: "Failed to set availability" });
-    }
-  });
-
-  // Blocked dates management routes
-  app.get('/api/profiles/:profileId/blocked-dates', isAuthenticated, async (req: any, res) => {
-    try {
-      const profileId = parseInt(req.params.profileId);
-      const blockedDates = await storage.getBlockedDates(profileId);
-      res.json(blockedDates);
-    } catch (error) {
-      console.error("Error fetching blocked dates:", error);
-      res.status(500).json({ message: "Failed to fetch blocked dates" });
-    }
-  });
-
-  app.post('/api/profiles/:profileId/blocked-dates', isAuthenticated, async (req: any, res) => {
-    try {
-      const profileId = parseInt(req.params.profileId);
-      
-      // Check if user has permission to manage this profile's blocked dates
-      const hasPermission = await storage.checkProfilePermission(req.user.id, profileId, "manage_profile");
-      if (!hasPermission) {
-        return res.status(403).json({ message: "Permission denied" });
-      }
-
-      const blockedDate = await storage.createBlockedDate({
-        ...req.body,
-        profileId,
-      });
-      
-      res.json(blockedDate);
-    } catch (error) {
-      console.error("Error creating blocked date:", error);
-      res.status(500).json({ message: "Failed to create blocked date" });
-    }
-  });
-
   // Remove member from profile
   app.delete('/api/profile-memberships/:memberId', isAuthenticated, async (req: any, res) => {
     try {
@@ -1643,6 +1408,173 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error updating notification settings:", error);
       res.status(500).json({ message: "Failed to update notification settings" });
+    }
+  });
+
+  // Booking Calendar API Routes
+  
+  // Get availability slots for a profile
+  app.get('/api/profiles/:id/availability', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const slots = await storage.getAvailabilitySlots(profileId);
+      res.json(slots);
+    } catch (error) {
+      console.error("Error fetching availability slots:", error);
+      res.status(500).json({ message: "Failed to fetch availability slots" });
+    }
+  });
+
+  // Create availability slot
+  app.post('/api/profiles/:id/availability', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      
+      // Check if user has permission to manage this profile
+      const profile = await storage.getProfile(profileId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      // For shared profiles, check membership and permissions
+      if (profile.isShared) {
+        const membership = await storage.getUserProfileRole(req.user.id, profileId);
+        if (!membership || !membership.permissions.includes('manage_bookings')) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
+      } else if (profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const slotData = insertAvailabilitySlotSchema.parse({
+        ...req.body,
+        profileId
+      });
+      
+      const slot = await storage.createAvailabilitySlot(slotData);
+      res.json(slot);
+    } catch (error) {
+      console.error("Error creating availability slot:", error);
+      res.status(500).json({ message: "Failed to create availability slot" });
+    }
+  });
+
+  // Update availability slot
+  app.patch('/api/profiles/:id/availability/:slotId', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const slotId = parseInt(req.params.slotId);
+      
+      // Check permissions
+      const profile = await storage.getProfile(profileId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      if (profile.isShared) {
+        const membership = await storage.getUserProfileRole(req.user.id, profileId);
+        if (!membership || !membership.permissions.includes('manage_bookings')) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
+      } else if (profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const updates = req.body;
+      const slot = await storage.updateAvailabilitySlot(slotId, updates);
+      res.json(slot);
+    } catch (error) {
+      console.error("Error updating availability slot:", error);
+      res.status(500).json({ message: "Failed to update availability slot" });
+    }
+  });
+
+  // Delete availability slot
+  app.delete('/api/profiles/:id/availability/:slotId', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const slotId = parseInt(req.params.slotId);
+      
+      // Check permissions
+      const profile = await storage.getProfile(profileId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      if (profile.isShared) {
+        const membership = await storage.getUserProfileRole(req.user.id, profileId);
+        if (!membership || !membership.permissions.includes('manage_bookings')) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
+      } else if (profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      await storage.deleteAvailabilitySlot(slotId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting availability slot:", error);
+      res.status(500).json({ message: "Failed to delete availability slot" });
+    }
+  });
+
+  // Get bookings for a profile
+  app.get('/api/profiles/:id/bookings', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const bookings = await storage.getBookings(profileId);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      res.status(500).json({ message: "Failed to fetch bookings" });
+    }
+  });
+
+  // Create booking request
+  app.post('/api/profiles/:id/bookings', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      
+      const bookingData = insertBookingSchema.parse({
+        ...req.body,
+        profileId
+      });
+      
+      const booking = await storage.createBooking(bookingData);
+      res.json(booking);
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      res.status(500).json({ message: "Failed to create booking" });
+    }
+  });
+
+  // Update booking status
+  app.patch('/api/profiles/:id/bookings/:bookingId/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const bookingId = parseInt(req.params.bookingId);
+      const { status } = req.body;
+      
+      // Check permissions
+      const profile = await storage.getProfile(profileId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+      
+      if (profile.isShared) {
+        const membership = await storage.getUserProfileRole(req.user.id, profileId);
+        if (!membership || !membership.permissions.includes('manage_bookings')) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
+      } else if (profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      const booking = await storage.updateBookingStatus(bookingId, status);
+      res.json(booking);
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      res.status(500).json({ message: "Failed to update booking status" });
     }
   });
 

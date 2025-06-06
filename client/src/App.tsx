@@ -21,12 +21,7 @@ function Router() {
   return (
     <Switch>
       {isLoading || !isAuthenticated ? (
-        <>
-          <Route path="/" component={AuthPage} />
-          <Route path="/login" component={AuthPage} />
-          <Route path="/register" component={AuthPage} />
-          <Route component={AuthPage} />
-        </>
+        <Route path="/" component={AuthPage} />
       ) : (
         <>
           <Route path="/" component={Profile} />
@@ -37,9 +32,9 @@ function Router() {
           <Route path="/settings" component={Settings} />
           <Route path="/discover" component={Discover} />
           <Route path="/friends" component={Friends} />
-          <Route component={NotFound} />
         </>
       )}
+      <Route component={NotFound} />
     </Switch>
   );
 }

@@ -424,7 +424,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         </div>
 
         {/* Profile Info */}
-        <div className="p-6 pt-12">
+        <div className="p-6 pt-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Profile Picture */}
             <div className="relative -mt-20">
@@ -460,7 +460,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             <div className="flex-1">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-neutral-900 mb-3">{getDisplayName()}</h1>
+                  <h1 className="text-3xl font-bold text-neutral-900 mb-2">{getDisplayName()}</h1>
                   <div className="flex items-center space-x-4 text-neutral-600 mb-3">
                     <span className="flex items-center">
                       <Users className="w-4 h-4 mr-2" />

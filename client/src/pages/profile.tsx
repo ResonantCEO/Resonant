@@ -151,11 +151,13 @@ export default function Profile() {
         />
       )}
 
-      {/* Mobile Collapsible Sidebar */}
-      <div className={`lg:hidden fixed top-0 left-0 h-full w-80 bg-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <Sidebar />
+      {/* Mobile Sliding Sidebar Panel */}
+      <div className={`lg:hidden fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md shadow-xl border-r border-white/20 dark:border-neutral-700/30 z-40 transform transition-all duration-300 ease-in-out ${
+        isMobileMenuOpen ? 'w-80 translate-x-0' : 'w-0 -translate-x-full'
+      } overflow-hidden`}>
+        <div className="w-80">
+          <Sidebar />
+        </div>
       </div>
 
       {/* Main Content */}

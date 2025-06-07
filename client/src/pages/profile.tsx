@@ -16,6 +16,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 import Sidebar from "@/components/sidebar";
 import CreateProfileModal from "@/components/create-profile-modal";
@@ -409,10 +417,17 @@ export default function Profile() {
         </div>
       </div>
 
-      <CreateProfileModal 
-        open={showCreateModal} 
-        onOpenChange={setShowCreateModal} 
-      />
+      <Dialog>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Profile</DialogTitle>
+            <DialogDescription>
+              Create a new profile to manage different aspects of your presence.
+            </DialogDescription>
+          </DialogHeader>
+          <CreateProfileModal />
+        </DialogContent>
+      </Dialog>
 
       {/* Main Content */}
       <div 

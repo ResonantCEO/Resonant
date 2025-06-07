@@ -1,13 +1,11 @@
 import { useState } from "react";
 import * as React from "react";
-import { useParams, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useParams } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
-import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import Sidebar from "@/components/sidebar";
 import ProfileHeader from "@/components/profile-header";
@@ -17,11 +15,10 @@ import EPKTab from "@/components/epk-tab";
 import FriendsTab from "@/components/friends-tab";
 import StatsTab from "@/components/stats-tab";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings } from "lucide-react";
+import { Users, BarChart3, FileText, MessageSquare, Menu } from "lucide-react";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
-  const [location, setLocation] = useLocation();
 
   // Set default tab based on profile type
   const getDefaultTab = (profileType: string) => {
@@ -34,14 +31,6 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState("posts");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isCollapsed } = useSidebar();
-
-  const { data: profiles = [] } = useQuery({
-    queryKey: ["/api/profiles"],
-  });
-
-  const { data: friendRequests = [] } = useQuery({
-    queryKey: ["/api/friend-requests"],
-  });
 
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
@@ -141,24 +130,15 @@ export default function Profile() {
       <Sidebar />
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border-b border-white/20 dark:border-neutral-700/30 z-40">
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-neutral-200 z-40">
         <div className="flex items-center justify-between p-4">
-          <div className="flex items-center space-x-3">
-            <img src="/resonant-logo.png" alt="Resonant" className="h-8 block dark:hidden" />
-            <img src="/resonant-logo-white.png" alt="Resonant" className="h-8 hidden dark:block" />
-          </div>
+          <h1 className="text-lg font-bold text-neutral-900">Resonant</h1>
           <Button 
             variant="ghost" 
             size="icon"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="relative"
           >
             <Menu className="h-5 w-5" />
-            {friendRequests.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                {friendRequests.length}
-              </span>
-            )}
           </Button>
         </div>
       </div>
@@ -171,159 +151,12 @@ export default function Profile() {
         />
       )}
 
-      {/* Mobile Full-Featured Sidebar */}
-      <div className={`lg:hidden fixed top-0 left-0 h-full w-80 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md shadow-xl border-r border-white/20 dark:border-neutral-700/30 z-40 transform transition-all duration-300 ease-in-out ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+      {/* Mobile Sliding Sidebar Panel */}
+      <div className={`lg:hidden fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md shadow-xl border-r border-white/20 dark:border-neutral-700/30 z-40 transform transition-all duration-300 ease-in-out ${
+        isMobileMenuOpen ? 'w-80 translate-x-0' : 'w-0 -translate-x-full'
       } overflow-hidden`}>
-        <div className="h-full flex flex-col">
-          {/* Mobile Sidebar Header */}
-          <div className="p-6 border-b border-white/10 dark:border-neutral-700/30">
-            <div className="flex justify-center mb-6">
-              <img src="/resonant-logo.png" alt="Resonant" className="h-16 block dark:hidden" />
-              <img src="/resonant-logo-white.png" alt="Resonant" className="h-20 hidden dark:block" />
-            </div>
-
-            {/* Active Profile Display with Dropdown - Mobile Version */}
-            {activeProfile && user && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/30 rounded-xl p-4">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="w-12 h-12 border-2 border-blue-500">
-                    <AvatarImage src={activeProfile.profileImageUrl || ""} />
-                    <AvatarFallback>{activeProfile.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-semibold text-neutral-900 dark:text-white">{activeProfile.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Active Profile</p>
-                      <Badge className={`${activeProfile.type === 'artist' ? 'bg-artist-green' : activeProfile.type === 'venue' ? 'bg-venue-red' : 'bg-fb-blue'} text-white text-xs`}>
-                        {activeProfile.type === 'artist' ? 'Artist' : activeProfile.type === 'venue' ? 'Venue' : 'Audience'}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Navigation Menu */}
-          <div className="flex-1 p-6 overflow-y-auto">
-            <ul className="space-y-2">
-              <li>
-                <Button
-                  variant="ghost"
-                  className={`w-full justify-start ${
-                    location === "/profile" || location === "/"
-                      ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
-                      : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                  }`}
-                  onClick={() => {
-                    setLocation("/profile");
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <Home className="w-5 h-5 mr-3" />
-                  Profile
-                </Button>
-              </li>
-
-              {/* Dashboard - Only visible for Artist and Venue accounts */}
-              {activeProfile && (activeProfile.type === "artist" || activeProfile.type === "venue") && (
-                <li>
-                  <Button
-                    variant="ghost"
-                    className={`w-full justify-start ${
-                      location === "/dashboard"
-                        ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
-                        : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                    }`}
-                    onClick={() => {
-                      setLocation("/dashboard");
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    <BarChart3 className="w-5 h-5 mr-3" />
-                    Dashboard
-                  </Button>
-                </li>
-              )}
-
-              <li>
-                <Button
-                  variant="ghost"
-                  className={`w-full justify-start ${
-                    location === "/discover"
-                      ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
-                      : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                  }`}
-                  onClick={() => {
-                    setLocation("/discover");
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <Search className="w-5 h-5 mr-3" />
-                  Discover
-                </Button>
-              </li>
-
-              <li>
-                <Button
-                  variant="ghost"
-                  className={`w-full justify-start relative ${
-                    location === "/friends"
-                      ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
-                      : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                  }`}
-                  onClick={() => {
-                    setLocation("/friends");
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <Users className="w-5 h-5 mr-3" />
-                  Friends
-                  {friendRequests.length > 0 && (
-                    <Badge className="ml-auto bg-blue-500 text-white text-xs">
-                      {friendRequests.length}
-                    </Badge>
-                  )}
-                </Button>
-              </li>
-
-              <li>
-                <Button
-                  variant="ghost"
-                  className={`w-full justify-start ${
-                    location === "/settings"
-                      ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
-                      : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                  }`}
-                  onClick={() => {
-                    setLocation("/settings");
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <Settings className="w-5 h-5 mr-3" />
-                  Settings
-                </Button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Mobile Sidebar Footer */}
-          <div className="p-6 border-t border-white/10 dark:border-neutral-700/30">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={async () => {
-                await apiRequest("POST", "/api/logout");
-                queryClient.clear();
-                window.location.href = "/";
-              }}
-            >
-              Logout
-            </Button>
-          </div>
+        <div className="w-80">
+          <Sidebar />
         </div>
       </div>
 

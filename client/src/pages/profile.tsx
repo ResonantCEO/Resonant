@@ -150,7 +150,7 @@ export default function Profile() {
               height: '100vh'
             }}
           />
-        )}</div>
+        )}
         <div className="container-responsive mx-auto px-responsive py-responsive">
           <ProfileHeader 
             profile={profile} 

@@ -8,6 +8,14 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import Sidebar from "@/components/sidebar";
 import ProfileHeader from "@/components/profile-header";
@@ -17,7 +25,7 @@ import EPKTab from "@/components/epk-tab";
 import FriendsTab from "@/components/friends-tab";
 import StatsTab from "@/components/stats-tab";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings } from "lucide-react";
+import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings, ChevronDown, UserPlus, Globe } from "lucide-react";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
@@ -185,25 +193,89 @@ export default function Profile() {
 
             {/* Active Profile Display with Dropdown - Mobile Version */}
             {activeProfile && user && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/30 rounded-xl p-4">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="w-12 h-12 border-2 border-blue-500">
-                    <AvatarImage src={activeProfile.profileImageUrl || ""} />
-                    <AvatarFallback>{activeProfile.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-semibold text-neutral-900 dark:text-white">{activeProfile.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400">Active Profile</p>
-                      <Badge className={`${activeProfile.type === 'artist' ? 'bg-artist-green' : activeProfile.type === 'venue' ? 'bg-venue-red' : 'bg-fb-blue'} text-white text-xs`}>
-                        {activeProfile.type === 'artist' ? 'Artist' : activeProfile.type === 'venue' ? 'Venue' : 'Audience'}
-                      </Badge>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/30 rounded-xl p-4 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="w-12 h-12 border-2 border-blue-500">
+                        <AvatarImage src={activeProfile.profileImageUrl || ""} />
+                        <AvatarFallback>{activeProfile.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="font-semibold text-neutral-900 dark:text-white">{activeProfile.name}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <p className="text-sm text-neutral-600 dark:text-neutral-400">Active Profile</p>
+                          <Badge className={`${activeProfile.type === 'artist' ? 'bg-artist-green' : activeProfile.type === 'venue' ? 'bg-venue-red' : 'bg-fb-blue'} text-white text-xs`}>
+                            {activeProfile.type === 'artist' ? 'Artist' : activeProfile.type === 'venue' ? 'Venue' : 'Audience'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <ChevronDown className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
                     </div>
                   </div>
-                </div>
-              </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-80">
+                  <DropdownMenuLabel>Switch Profile</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+
+                  {Array.isArray(profiles) && profiles
+                    .sort((a: any, b: any) => {
+                      // Put active profile first
+                      if (a.id === activeProfile?.id) return -1;
+                      if (b.id === activeProfile?.id) return 1;
+                      return 0;
+                    })
+                    .map((profileOption: any) => (
+                    <DropdownMenuItem
+                      key={profileOption.id}
+                      className={`p-3 ${profileOption.id === activeProfile?.id ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
+                      onClick={() => {
+                        if (profileOption.id !== activeProfile?.id) {
+                          // Add profile switching logic here
+                          window.location.reload(); // Temporary solution - you might want to implement proper switching
+                        }
+                      }}
+                    >
+                      <div className="flex items-center space-x-3 w-full">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={profileOption.profileImageUrl || ""} />
+                          <AvatarFallback>{profileOption.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-medium text-neutral-900 dark:text-white">{profileOption.name}</span>
+                            <Badge className={`${profileOption.type === 'artist' ? 'bg-artist-green' : profileOption.type === 'venue' ? 'bg-venue-red' : 'bg-fb-blue'} text-white text-xs`}>
+                              {profileOption.type === 'artist' ? 'Artist' : profileOption.type === 'venue' ? 'Venue' : 'Audience'}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Globe className="w-3 h-3 text-green-500" />
+                            <span className="text-xs text-neutral-600 dark:text-neutral-400 capitalize">{profileOption.visibility}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="p-3"
+                    onClick={() => {
+                      // Add create profile logic here
+                      console.log("Create new profile");
+                    }}
+                  >
+                    <div className="flex items-center space-x-3 w-full">
+                      <div className="w-8 h-8 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-full flex items-center justify-center">
+                        <UserPlus className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
+                      </div>
+                      <span className="text-neutral-600 dark:text-neutral-400">Create New Profile</span>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
 

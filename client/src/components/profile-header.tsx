@@ -353,12 +353,29 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         {/* Cover Photo */}
         <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
 
+          {/* Profile Type & Visibility - Top Right */}
+          <div className="absolute top-4 right-4 z-20">
+            <div className="flex items-center space-x-2 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2">
+              <div className="flex items-center space-x-2 text-sm text-white">
+                {getVisibilityIcon(profile.visibility)}
+                <span className="capitalize">{profile.visibility} Profile</span>
+                {isOwn && (
+                  <Button variant="link" size="sm" className="text-blue-300 hover:text-blue-200 p-0 h-auto">
+                    Change
+                  </Button>
+                )}
+              </div>
+              <Badge className={`${getProfileTypeColor(profile.type)} text-white`}>
+                {getProfileTypeName(profile.type)}
+              </Badge>
+            </div>
+          </div>
 
           {/* Clickable cover photo area */}
           <div 
             className={`absolute inset-0 ${isOwn ? 'cursor-pointer' : ''}`}
             onClick={isOwn ? handleCoverPhotoClick : undefined}
-          >
+          ></div>
             {/* Cover photo image - only show if coverImageUrl exists */}
             {profile?.coverImageUrl && (
               <img 
@@ -597,21 +614,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
 
 
-              {/* Profile Type & Visibility */}
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm text-neutral-600">
-                  {getVisibilityIcon(profile.visibility)}
-                  <span className="capitalize">{profile.visibility} Profile</span>
-                  {isOwn && (
-                    <Button variant="link" size="sm" className="text-blue-500 p-0 h-auto">
-                      Change
-                    </Button>
-                  )}
-                </div>
-                <Badge className={`${getProfileTypeColor(profile.type)} text-white`}>
-                  {getProfileTypeName(profile.type)}
-                </Badge>
-              </div>
+              
             </div>
           </div>
         </div>

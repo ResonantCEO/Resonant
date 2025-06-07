@@ -410,11 +410,6 @@ export default function Profile() {
         </div>
       </div>
 
-      <CreateProfileModal 
-        open={showCreateModal} 
-        onOpenChange={setShowCreateModal} 
-      />
-
       {/* Main Content */}
       <div 
         className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0 min-h-screen relative ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
@@ -699,6 +694,14 @@ export default function Profile() {
           )}
         </div>
       </div>
+
+      {/* Conditional Create Profile Modal */}
+      {showCreateModal && (
+        <CreateProfileModal 
+          open={showCreateModal} 
+          onOpenChange={setShowCreateModal} 
+        />
+      )}
 
     </div>
   );

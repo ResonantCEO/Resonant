@@ -375,7 +375,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           <div 
             className={`absolute inset-0 ${isOwn ? 'cursor-pointer' : ''}`}
             onClick={isOwn ? handleCoverPhotoClick : undefined}
-          ></div>
+          />
+          
+          {/* Cover photo content */}
+          <>
             {/* Cover photo image - only show if coverImageUrl exists */}
             {profile?.coverImageUrl && (
               <img 
@@ -424,7 +427,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
-          </div>
+          </>
+        </div>
 
 
 

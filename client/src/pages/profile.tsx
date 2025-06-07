@@ -17,7 +17,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-
 import Sidebar from "@/components/sidebar";
 import CreateProfileModal from "@/components/create-profile-modal";
 import ProfileHeader from "@/components/profile-header";
@@ -410,6 +409,11 @@ export default function Profile() {
         </div>
       </div>
 
+      <CreateProfileModal 
+        open={showCreateModal} 
+        onOpenChange={setShowCreateModal} 
+      />
+
       {/* Main Content */}
       <div 
         className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0 min-h-screen relative ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
@@ -695,11 +699,6 @@ export default function Profile() {
         </div>
       </div>
 
-      </div>
-    
-    <CreateProfileModal 
-      open={showCreateModal} 
-      onOpenChange={setShowCreateModal} 
-    />
+    </div>
   );
 }

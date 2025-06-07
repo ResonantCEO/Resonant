@@ -423,38 +423,72 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
         </div>
 
-        {/* Profile Info */}
-        <div className={`p-6 ${profile.type === 'artist' ? 'pt-4 pb-4' : 'pt-6'}`}>
-          <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
-            {/* Profile Picture */}
-            <div className={`relative ${profile.type === 'artist' ? '-mt-44' : '-mt-28'}`}>
-              <div className="relative">
-                <Avatar 
-                  className={`w-40 h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
-                  onClick={handleProfilePictureClick}
-                >
-                  <AvatarImage src={profile.profileImageUrl || ""} />
-                  <AvatarFallback className="text-3xl">
-                    {getDisplayName().slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                {isOwn && (
-                  <>
-                    <div 
-                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                      onClick={handleProfilePictureClick}
-                    >
-                      <Camera className="w-8 h-8 text-white" />
+        {/* Profile Picture - Absolutely positioned for artist profiles */}
+        {profile.type === 'artist' && (
+          <div className="absolute left-6 top-32 z-10">
+            <div className="relative">
+              <Avatar 
+                className={`w-40 h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                onClick={handleProfilePictureClick}
+              >
+                <AvatarImage src={profile.profileImageUrl || ""} />
+                <AvatarFallback className="text-3xl">
+                  {getDisplayName().slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              {isOwn && (
+                <>
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                    onClick={handleProfilePictureClick}
+                  >
+                    <Camera className="w-8 h-8 text-white" />
+                  </div>
+                  {uploadProfilePictureMutation.isPending && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                      <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                     </div>
-                    {uploadProfilePictureMutation.isPending && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+                  )}
+                </>
+              )}
             </div>
+          </div>
+        )}
+
+        {/* Profile Info */}
+        <div className={`p-6 ${profile.type === 'artist' ? 'pt-4 pb-4 pl-52' : 'pt-6'}`}>
+          <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
+            {/* Profile Picture - for non-artist profiles */}
+            {profile.type !== 'artist' && (
+              <div className="relative -mt-28">
+                <div className="relative">
+                  <Avatar 
+                    className={`w-40 h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                    onClick={handleProfilePictureClick}
+                  >
+                    <AvatarImage src={profile.profileImageUrl || ""} />
+                    <AvatarFallback className="text-3xl">
+                      {getDisplayName().slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {isOwn && (
+                    <>
+                      <div 
+                        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                        onClick={handleProfilePictureClick}
+                      >
+                        <Camera className="w-8 h-8 text-white" />
+                      </div>
+                      {uploadProfilePictureMutation.isPending && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                          <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Profile Details */}
             <div className="flex-1">

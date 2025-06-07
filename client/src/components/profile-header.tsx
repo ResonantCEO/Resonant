@@ -376,6 +376,12 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             className={`absolute inset-0 ${isOwn ? 'cursor-pointer' : ''}`}
             onClick={isOwn ? handleCoverPhotoClick : undefined}
           ></div>
+
+          {/* Clickable cover photo area */}
+          <div 
+            className={`absolute inset-0 ${isOwn ? 'cursor-pointer' : ''}`}
+            onClick={isOwn ? handleCoverPhotoClick : undefined}
+          ></div>
             {/* Cover photo image - only show if coverImageUrl exists */}
             {profile?.coverImageUrl && (
               <img 

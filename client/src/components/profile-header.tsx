@@ -317,14 +317,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
   const renderActionButtons = () => {
     if (isOwn) {
-      return (
-        <div className="flex space-x-3">
-          <Button variant="outline">
-            <Share className="w-4 h-4 mr-2" />
-            Share
-          </Button>
-        </div>
-      );
+      return null;
     }
 
     // TODO: Implement friendship status checking
@@ -337,10 +330,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         >
           <UserPlus className="w-4 h-4 mr-2" />
           Add Friend
-        </Button>
-        <Button variant="outline">
-          <Share className="w-4 h-4 mr-2" />
-          Share
         </Button>
       </div>
     );
@@ -613,8 +602,13 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 )}
               </div>
 
-
-
+              {/* Share Button - Bottom Right */}
+              <div className="absolute bottom-4 right-4">
+                <Button variant="outline" size="sm">
+                  <Share className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+              </div>
               
             </div>
           </div>

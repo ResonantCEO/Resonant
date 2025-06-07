@@ -425,7 +425,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
         {/* Profile Picture - Absolutely positioned for artist profiles */}
         {profile.type === 'artist' && (
-          <div className="absolute left-6 top-32 z-10">
+          <div className="absolute left-6 top-36 z-10">
             <div className="relative">
               <Avatar 
                 className={`w-40 h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}

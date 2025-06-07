@@ -133,20 +133,18 @@ export default function Profile() {
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-neutral-200 z-40">
         <div className="flex items-center justify-between p-4">
           <h1 className="text-lg font-bold text-neutral-900">Resonant</h1>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 p-0">
+              <Sidebar />
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-
-      {/* Mobile Sidebar Sheet */}
-      <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-        <SheetContent side="left" className="w-80 p-0">
-          <Sidebar />
-        </SheetContent>
-      </Sheet>
 
       {/* Main Content */}
       <div 

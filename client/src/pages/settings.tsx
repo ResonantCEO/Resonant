@@ -817,9 +817,12 @@ function SettingsContent() {
 }
 
 export default function Settings() {
+  const { isCollapsed } = useSidebar();
+  
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
-      <div className="min-h-screen backdrop-blur-sm bg-white/30 dark:bg-neutral-950/30">
+      <Sidebar />
+      <div className={`${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} min-h-screen backdrop-blur-sm bg-white/30 dark:bg-neutral-950/30`}>
         <SettingsContent />
       </div>
     </div>

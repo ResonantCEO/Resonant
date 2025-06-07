@@ -120,7 +120,9 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex">
+      <Sidebar />
+
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-neutral-200 z-40">
         <div className="flex items-center justify-between p-4">

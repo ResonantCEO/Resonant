@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { SidebarProvider } from "@/hooks/useSidebar";
+import { SidebarProvider, useSidebar } from "@/hooks/useSidebar";
 import Sidebar from "@/components/sidebar";
 import BottomNav from "@/components/bottom-nav";
 import AuthPage from "@/pages/auth-page";
@@ -41,6 +41,27 @@ function Router() {
   );
 }
 
+function AppLayout() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const { isCollapsed } = useSidebar();
+
+  if (isLoading || !isAuthenticated) {
+    return <Router />;
+  }
+
+  return (
+    <div className="min-h-screen flex">
+      <Sidebar />
+      <div className={`flex-1 transition-all duration-300 ${
+        isCollapsed ? 'lg:ml-16' : 'lg:ml-80'
+      } pb-16 lg:pb-0`}>
+        <Router />
+      </div>
+      <BottomNav />
+    </div>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -48,7 +69,7 @@ function App() {
         <SidebarProvider>
           <TooltipProvider>
             <Toaster />
-            <Router />
+            <AppLayout />
           </TooltipProvider>
         </SidebarProvider>
       </ThemeProvider>

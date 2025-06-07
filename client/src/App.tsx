@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { SidebarProvider } from "@/hooks/useSidebar";
+import Sidebar from "@/components/sidebar";
+import BottomNav from "@/components/bottom-nav";
 import AuthPage from "@/pages/auth-page";
 import Home from "@/pages/home";
 import Profile from "@/pages/profile";

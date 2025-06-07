@@ -618,11 +618,13 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
 
 
-              
+
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Content Tabs */}
+      
 
       {/* Content Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6">

@@ -442,7 +442,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               className="hidden"
             />
           )}
-        </div>
 
         {/* Profile Picture - Absolutely positioned for artist profiles */}
         {profile.type === 'artist' && (

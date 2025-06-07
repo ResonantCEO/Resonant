@@ -2,8 +2,12 @@ import { useState } from "react";
 import * as React from "react";
 import { useParams } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import Sidebar from "@/components/sidebar";
+import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import Sidebar from "@/components/sidebar";
 import ProfileHeader from "@/components/profile-header";
 import PostFeed from "@/components/post-feed";
 import FriendsWidget from "@/components/friends-widget";
@@ -11,6 +15,7 @@ import EPKTab from "@/components/epk-tab";
 import FriendsTab from "@/components/friends-tab";
 import StatsTab from "@/components/stats-tab";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Users, BarChart3, FileText, MessageSquare, Menu } from "lucide-react";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +29,7 @@ export default function Profile() {
   };
 
   const [activeTab, setActiveTab] = useState("posts");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isCollapsed } = useSidebar();
 
   const { data: activeProfile } = useQuery({
@@ -127,8 +133,20 @@ export default function Profile() {
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-neutral-200 z-40">
         <div className="flex items-center justify-between p-4">
           <h1 className="text-lg font-bold text-neutral-900">Resonant</h1>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
         </div>
       </div>
+
+      {/* Mobile Sidebar Sheet */}
+      <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+        <SheetContent side="left" className="w-80 p-0">
+          <Sidebar />
+        </SheetContent>
+      </Sheet>
 
       {/* Main Content */}
       <div 

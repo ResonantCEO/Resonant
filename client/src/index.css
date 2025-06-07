@@ -135,6 +135,19 @@
   --radius: 0.5rem;
 }
 
+/* Background image styling for full window coverage */
+.bg-image-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
 /* Enhanced dark mode specific styling */
 .dark .bg-white {
   background-color: hsl(var(--card));

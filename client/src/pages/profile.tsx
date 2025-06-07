@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
-  
+
   // Set default tab based on profile type
   const getDefaultTab = (profileType: string) => {
     if (profileType === "artist") {
@@ -106,6 +106,19 @@ export default function Profile() {
     }
   };
 
+  const getBackgroundImageStyle = (backgroundImageUrl?: string) => {
+    return backgroundImageUrl ? {
+      backgroundImage: `url(${backgroundImageUrl})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
+      minHeight: '100vh',
+      width: '100vw',
+      height: '100vh',
+    } : {}
+  }
+
   return (
     <div className="min-h-screen flex">
       <Sidebar />
@@ -120,6 +133,7 @@ export default function Profile() {
       {/* Main Content */}
       <div 
         className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0 min-h-screen relative ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
+        style={profile?.profileBackground === 'custom-photo' ? getBackgroundImageStyle(profile?.backgroundImageUrl) : {}}
       >
         {/* Fixed Background Image */}
         {profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl && (
@@ -129,9 +143,15 @@ export default function Profile() {
             }`}
             style={{
               backgroundImage: `url(${profile.backgroundImageUrl})`,
-              backgroundSize: '100% auto', // Scale width to 100%, keep original height
-              backgroundPosition: 'center top',
-              backgroundRepeat: 'no-repeat'
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              backgroundAttachment: 'fixed',
+              minHeight: '100vh',
+              width: '100vw',
+              height: '100vh',
+              left: 0,
+              top: 0
             }}
           />
         )}

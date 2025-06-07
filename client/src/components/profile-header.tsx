@@ -545,8 +545,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 {renderActionButtons()}
               </div>
 
-              {/* Social Media Buttons - Centered at bottom */}
-              <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center space-x-2 pt-4">
+              {/* Social Media Buttons - Inline with profile content */}
+              <div className="flex justify-center items-center space-x-2 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                 {/* Facebook */}
                 {(isOwn || profile.facebookUrl) && (
                   <Button

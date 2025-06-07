@@ -138,23 +138,19 @@ export default function Profile() {
         {/* Fixed Background Image */}
         {profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl && (
           <div 
-            className={`fixed top-0 bottom-0 left-0 right-0 pointer-events-none z-0 ${
-              isCollapsed ? 'lg:left-16' : 'lg:left-80'
-            }`}
+            className="fixed top-0 bottom-0 right-0 pointer-events-none z-0"
             style={{
               backgroundImage: `url(${profile.backgroundImageUrl})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
               backgroundAttachment: 'fixed',
+              left: isCollapsed ? '64px' : '320px',
               minHeight: '100vh',
-              width: '100vw',
-              height: '100vh',
-              left: 0,
-              top: 0
+              height: '100vh'
             }}
           />
-        )}
+        )}</div>
         <div className="container-responsive mx-auto px-responsive py-responsive">
           <ProfileHeader 
             profile={profile} 

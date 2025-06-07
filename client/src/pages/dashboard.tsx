@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Users, Music, Building, BarChart3, Settings, Plus, Check, User, Image } from "lucide-react";
 import ProfileManagement from "@/components/profile-management";
+import BookingCalendar from "@/components/booking-calendar";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -395,6 +396,11 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Booking Calendar Section */}
+          <div className="mt-8">
+            <BookingCalendar profileType={activeProfile.type as 'artist' | 'venue'} />
           </div>
 
           {/* Members Management Section */}

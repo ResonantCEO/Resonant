@@ -130,18 +130,10 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Background Image Layer */}
-      {activeProfile?.backgroundImageUrl && user?.profileBackground === 'custom-photo' && (
-        <div style={getBackgroundImageStyle(activeProfile.backgroundImageUrl)} />
-      )}
-
       {/* Main Content */}
       <div 
-        className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0 transition-all duration-300 ${
-          activeProfile?.backgroundImageUrl && user?.profileBackground === 'custom-photo' 
-            ? 'bg-transparent' 
-            : getPageBackground(user?.profileBackground || 'gradient-blue', activeProfile?.backgroundImageUrl)
-        }`}
+        className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0 min-h-screen relative ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
+        style={profile?.profileBackground === 'custom-photo' ? getBackgroundImageStyle(profile?.backgroundImageUrl) : {}}
       >
         {/* Fixed Background Image */}
         {profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl && (

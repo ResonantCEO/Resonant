@@ -353,16 +353,29 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         {/* Cover Photo */}
         <div className="h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
 
-          
+          {/* Profile Type & Visibility - Top Right */}
+          <div className="absolute top-4 right-4 z-20">
+            <div className="flex items-center space-x-2 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-2">
+              <div className="flex items-center space-x-2 text-sm text-white">
+                {getVisibilityIcon(profile.visibility)}
+                <span className="capitalize">{profile.visibility} Profile</span>
+                {isOwn && (
+                  <Button variant="link" size="sm" className="text-blue-300 hover:text-blue-200 p-0 h-auto">
+                    Change
+                  </Button>
+                )}
+              </div>
+              <Badge className={`${getProfileTypeColor(profile.type)} text-white`}>
+                {getProfileTypeName(profile.type)}
+              </Badge>
+            </div>
+          </div>
 
           {/* Clickable cover photo area */}
           <div 
             className={`absolute inset-0 ${isOwn ? 'cursor-pointer' : ''}`}
             onClick={isOwn ? handleCoverPhotoClick : undefined}
-          />
-          
-          {/* Cover photo content */}
-          <>
+          ></div>
             {/* Cover photo image - only show if coverImageUrl exists */}
             {profile?.coverImageUrl && (
               <img 
@@ -411,8 +424,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
-          </>
-        </div>
+          </div>
 
 
 
@@ -426,6 +438,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               className="hidden"
             />
           )}
+        </div>
 
         {/* Profile Picture - Absolutely positioned for artist profiles */}
         {profile.type === 'artist' && (
@@ -460,25 +473,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         )}
 
         {/* Profile Info */}
-        <div className={`p-6 ${profile.type === 'artist' ? 'pt-4 pb-4 pl-52' : 'pt-6'} relative`}>
-          {/* Profile Type & Visibility - Top Right of Content Area */}
-          <div className="absolute top-4 right-4">
-            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
-                {getVisibilityIcon(profile.visibility)}
-                <span className="capitalize">{profile.visibility} Profile</span>
-                {isOwn && (
-                  <Button variant="link" size="sm" className="text-blue-500 hover:text-blue-600 p-0 h-auto">
-                    Change
-                  </Button>
-                )}
-              </div>
-              <Badge className={`${getProfileTypeColor(profile.type)} text-white`}>
-                {getProfileTypeName(profile.type)}
-              </Badge>
-            </div>
-          </div>
-
+        <div className={`p-6 ${profile.type === 'artist' ? 'pt-4 pb-4 pl-52' : 'pt-6'}`}>
           <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Profile Picture - for non-artist profiles */}
             {profile.type !== 'artist' && (
@@ -616,6 +611,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 {/* Action Buttons */}
                 {renderActionButtons()}
               </div>
+
+
+
+              
             </div>
           </div>
         </div>

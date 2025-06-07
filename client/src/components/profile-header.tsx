@@ -619,7 +619,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </div>
           </div>
         </div>
-        </div>
       </div>
 
       {/* Content Tabs */}

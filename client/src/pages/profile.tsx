@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import Sidebar from "@/components/sidebar";
+import CreateProfileModal from "@/components/create-profile-modal";
 import ProfileHeader from "@/components/profile-header";
 import PostFeed from "@/components/post-feed";
 import FriendsWidget from "@/components/friends-widget";
@@ -25,7 +26,7 @@ import EPKTab from "@/components/epk-tab";
 import FriendsTab from "@/components/friends-tab";
 import StatsTab from "@/components/stats-tab";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings, ChevronDown, UserPlus, Globe } from "lucide-react";
+import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings, ChevronDown, UserPlus, Globe, UserCheck, Lock } from "lucide-react";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
@@ -56,19 +57,6 @@ export default function Profile() {
     queryKey: ["/api/profiles/active"],
   });
 
-  const activateProfileMutation = useMutation({
-    mutationFn: async (profileId: number) => {
-      return await apiRequest("POST", `/api/profiles/${profileId}/activate`);
-    },
-    onSuccess: () => {
-      // Invalidate relevant queries to refetch data
-      queryClient.invalidateQueries(["/api/profiles/active"]);
-      queryClient.invalidateQueries(["/api/profiles"]);
-      // Refresh the page to reflect the new active profile
-      window.location.reload();
-    },
-  });
-
   // If no ID is provided, use the active profile ID
   const profileId = id ? parseInt(id) : activeProfile?.id;
 
@@ -79,6 +67,16 @@ export default function Profile() {
 
   const { data: user } = useQuery({
     queryKey: ["/api/user"],
+  });
+
+  const activateProfileMutation = useMutation({
+    mutationFn: async (profileId: number) => {
+      await apiRequest("POST", `/api/profiles/${profileId}/activate`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+    },
   });
 
   // Update active tab when profile changes
@@ -241,32 +239,33 @@ export default function Profile() {
                       if (b.id === activeProfile?.id) return 1;
                       return 0;
                     })
-                    .map((profileOption: any) => (
+                    .map((profile: any) => (
                     <DropdownMenuItem
-                      key={profileOption.id}
-                      className={`p-3 ${profileOption.id === activeProfile?.id ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
+                      key={profile.id}
+                      className={`p-3 ${profile.id === activeProfile?.id ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
                       onClick={() => {
-                    if (profileOption.id !== activeProfile?.id) {
-                      activateProfileMutation.mutate(profileOption.id);
-                    }
-                    setIsMobileMenuOpen(false);
-                  }}
+                        if (profile.id !== activeProfile?.id) {
+                          activateProfileMutation.mutate(profile.id);
+                        }
+                      }}
                     >
                       <div className="flex items-center space-x-3 w-full">
                         <Avatar className="w-8 h-8">
-                          <AvatarImage src={profileOption.profileImageUrl || ""} />
-                          <AvatarFallback>{profileOption.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                          <AvatarImage src={profile.profileImageUrl || ""} />
+                          <AvatarFallback>{profile.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium text-neutral-900 dark:text-white">{profileOption.name}</span>
-                            <Badge className={`${profileOption.type === 'artist' ? 'bg-artist-green' : profileOption.type === 'venue' ? 'bg-venue-red' : 'bg-fb-blue'} text-white text-xs`}>
-                              {profileOption.type === 'artist' ? 'Artist' : profileOption.type === 'venue' ? 'Venue' : 'Audience'}
+                            <span className="font-medium text-neutral-900 dark:text-white">{profile.name}</span>
+                            <Badge className={`${profile.type === 'artist' ? 'bg-artist-green' : profile.type === 'venue' ? 'bg-venue-red' : 'bg-fb-blue'} text-white text-xs`}>
+                              {profile.type === 'artist' ? 'Artist' : profile.type === 'venue' ? 'Venue' : 'Audience'}
                             </Badge>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Globe className="w-3 h-3 text-green-500" />
-                            <span className="text-xs text-neutral-600 dark:text-neutral-400 capitalize">{profileOption.visibility}</span>
+                            {profile.visibility === "public" && <Globe className="w-3 h-3 text-green-500" />}
+                            {profile.visibility === "friends" && <UserCheck className="w-3 h-3 text-blue-500" />}
+                            {profile.visibility === "private" && <Lock className="w-3 h-3 text-red-500" />}
+                            <span className="text-xs text-neutral-600 dark:text-neutral-400 capitalize">{profile.visibility}</span>
                           </div>
                         </div>
                       </div>
@@ -276,10 +275,7 @@ export default function Profile() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="p-3"
-                    onClick={() => {
-                    setShowCreateModal(true);
-                    setIsMobileMenuOpen(false);
-                  }}
+                    onClick={() => setShowCreateModal(true)}
                   >
                     <div className="flex items-center space-x-3 w-full">
                       <div className="w-8 h-8 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-full flex items-center justify-center">
@@ -412,6 +408,11 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      <CreateProfileModal 
+        open={showCreateModal} 
+        onOpenChange={setShowCreateModal} 
+      />
 
       {/* Main Content */}
       <div 

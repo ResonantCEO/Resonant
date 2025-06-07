@@ -417,17 +417,10 @@ export default function Profile() {
         </div>
       </div>
 
-      <Dialog>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Profile</DialogTitle>
-            <DialogDescription>
-              Create a new profile to manage different aspects of your presence.
-            </DialogDescription>
-          </DialogHeader>
-          <CreateProfileModal />
-        </DialogContent>
-      </Dialog>
+      <CreateProfileModal 
+        open={showCreateModal} 
+        onOpenChange={setShowCreateModal} 
+      />
 
       {/* Main Content */}
       <div 

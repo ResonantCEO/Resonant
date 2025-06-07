@@ -41,6 +41,7 @@ export default function Profile() {
 
   const [activeTab, setActiveTab] = useState("posts");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const { isCollapsed } = useSidebar();
 
   const { data: profiles = [] } = useQuery({
@@ -53,6 +54,19 @@ export default function Profile() {
 
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
+  });
+
+  const activateProfileMutation = useMutation({
+    mutationFn: async (profileId: number) => {
+      return await apiRequest("POST", `/api/profiles/${profileId}/activate`);
+    },
+    onSuccess: () => {
+      // Invalidate relevant queries to refetch data
+      queryClient.invalidateQueries(["/api/profiles/active"]);
+      queryClient.invalidateQueries(["/api/profiles"]);
+      // Refresh the page to reflect the new active profile
+      window.location.reload();
+    },
   });
 
   // If no ID is provided, use the active profile ID
@@ -232,11 +246,11 @@ export default function Profile() {
                       key={profileOption.id}
                       className={`p-3 ${profileOption.id === activeProfile?.id ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
                       onClick={() => {
-                        if (profileOption.id !== activeProfile?.id) {
-                          // Add profile switching logic here
-                          window.location.reload(); // Temporary solution - you might want to implement proper switching
-                        }
-                      }}
+                    if (profileOption.id !== activeProfile?.id) {
+                      activateProfileMutation.mutate(profileOption.id);
+                    }
+                    setIsMobileMenuOpen(false);
+                  }}
                     >
                       <div className="flex items-center space-x-3 w-full">
                         <Avatar className="w-8 h-8">
@@ -263,9 +277,9 @@ export default function Profile() {
                   <DropdownMenuItem
                     className="p-3"
                     onClick={() => {
-                      // Add create profile logic here
-                      console.log("Create new profile");
-                    }}
+                    setShowCreateModal(true);
+                    setIsMobileMenuOpen(false);
+                  }}
                   >
                     <div className="flex items-center space-x-3 w-full">
                       <div className="w-8 h-8 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-full flex items-center justify-center">

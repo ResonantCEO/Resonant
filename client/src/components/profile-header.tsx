@@ -456,8 +456,26 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         )}
 
         {/* Profile Info */}
-        <div className={`p-6 ${profile.type === 'artist' ? 'pt-4 pb-4 pl-52' : 'pt-6'}`}>
-          <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
+        <div className={`p-6 ${profile.type === 'artist' ? 'pt-4 pb-4 pl-52' : 'pt-6'} relative`}>
+          {/* Profile Type & Visibility - Top Right of Content Area */}
+          <div className="absolute top-4 right-4">
+            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
+                {getVisibilityIcon(profile.visibility)}
+                <span className="capitalize">{profile.visibility} Profile</span>
+                {isOwn && (
+                  <Button variant="link" size="sm" className="text-blue-500 hover:text-blue-600 p-0 h-auto">
+                    Change
+                  </Button>
+                )}
+              </div>
+              <Badge className={`${getProfileTypeColor(profile.type)} text-white`}>
+                {getProfileTypeName(profile.type)}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6"></div>
             {/* Profile Picture - for non-artist profiles */}
             {profile.type !== 'artist' && (
               <div className="relative -mt-28">
@@ -597,21 +615,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
 
 
-              {/* Profile Type & Visibility */}
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm text-neutral-600">
-                  {getVisibilityIcon(profile.visibility)}
-                  <span className="capitalize">{profile.visibility} Profile</span>
-                  {isOwn && (
-                    <Button variant="link" size="sm" className="text-blue-500 p-0 h-auto">
-                      Change
-                    </Button>
-                  )}
-                </div>
-                <Badge className={`${getProfileTypeColor(profile.type)} text-white`}>
-                  {getProfileTypeName(profile.type)}
-                </Badge>
-              </div>
+              
             </div>
           </div>
         </div>

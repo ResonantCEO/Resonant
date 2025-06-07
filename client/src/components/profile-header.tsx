@@ -500,27 +500,24 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                       <Users className="w-4 h-4 mr-2" />
                       {friends.length} friends
                     </span>
-                    {/* Show location for non-artist profiles or hometown for artist profiles */}
-                    {profile.type !== "artist" && profile.location && (
+                    {profile.location && (
                       <span className="flex items-center">
                         <MapPin className="w-4 h-4 mr-2" />
                         {profile.location}
                       </span>
                     )}
-                    {profile.type === "artist" && profile.hometown && (
-                      <span className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        {profile.hometown}
-                      </span>
-                    )}
                   </div>
 
-                  {/* Genre for Artist profiles */}
+                  {/* Genre and Hometown for Artist profiles */}
                   {profile.type === "artist" && (
-                    <div className="text-neutral-600 mb-2">
+                    <div className="space-y-0.5 text-neutral-600 mb-2">
                       <span className="flex items-center">
                         <Music className="w-4 h-4 mr-2" />
                         {profile.genre || "Genre not specified"}
+                      </span>
+                      <span className="flex items-center">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        {profile.hometown || "Hometown not specified"}
                       </span>
                     </div>
                   )}

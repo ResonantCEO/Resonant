@@ -695,14 +695,11 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Conditional Create Profile Modal */}
-      {showCreateModal && (
-        <CreateProfileModal 
-          open={showCreateModal} 
-          onOpenChange={setShowCreateModal} 
-        />
-      )}
-
-    </div>
+      </div>
+    
+    <CreateProfileModal 
+      open={showCreateModal} 
+      onOpenChange={setShowCreateModal} 
+    />
   );
 }

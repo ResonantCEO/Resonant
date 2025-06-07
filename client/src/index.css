@@ -214,6 +214,27 @@
   }
 }
 
+/* Mobile-specific profile header fixes */
+@media (max-width: 640px) {
+  .profile-header-mobile {
+    min-height: 200px;
+  }
+  
+  .profile-info-mobile {
+    padding-top: 2rem !important;
+  }
+  
+  .profile-avatar-mobile {
+    width: 6rem !important;
+    height: 6rem !important;
+  }
+  
+  .profile-name-mobile {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
+}
+
 /* Enhanced scrollbars for dark mode */
 .dark ::-webkit-scrollbar {
   width: 8px;

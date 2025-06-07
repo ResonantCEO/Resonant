@@ -204,7 +204,13 @@
   }
   
   .mobile-content {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+    min-height: calc(100vh - 64px); /* Account for top header */
+  }
+  
+  /* Ensure content doesn't overlap with bottom nav */
+  .mobile-content > div:last-child {
+    margin-bottom: 2rem;
   }
 }
 
@@ -370,6 +376,21 @@
   
   .py-responsive {
     @apply py-3 sm:py-4 md:py-6 lg:py-8;
+  }
+  
+  /* Mobile-specific spacing */
+  @media (max-width: 640px) {
+    .mobile-px {
+      @apply px-3;
+    }
+    
+    .mobile-py {
+      @apply py-3;
+    }
+    
+    .mobile-gap {
+      @apply gap-3;
+    }
   }
   
   .m-responsive {

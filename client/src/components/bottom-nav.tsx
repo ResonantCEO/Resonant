@@ -57,7 +57,7 @@ export default function BottomNav() {
   return (
     <>
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md border-t border-neutral-200 dark:border-neutral-700 z-50 shadow-lg mobile-safe-area">
-        <div className="flex items-center justify-around px-3 py-3">
+        <div className="flex items-center justify-around px-2 py-2">
           {/* Main navigation items */}
           
           <Sheet>
@@ -65,10 +65,10 @@ export default function BottomNav() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex flex-col items-center justify-center h-14 min-w-[60px] flex-1 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                className="flex flex-col items-center justify-center h-12 min-w-[50px] flex-1 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 px-1"
               >
-                <Menu className="w-5 h-5 mb-1" />
-                <span className="text-xs font-medium">Menu</span>
+                <Menu className="w-4 h-4 mb-0.5" />
+                <span className="text-xs font-medium leading-tight">Menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-80 p-0">
@@ -81,17 +81,17 @@ export default function BottomNav() {
               key={item.path}
               variant="ghost"
               size="sm"
-              className={`flex flex-col items-center justify-center h-14 min-w-[60px] flex-1 relative ${
+              className={`flex flex-col items-center justify-center h-12 min-w-[50px] flex-1 relative px-1 ${
                 isActivePath(item.path)
                   ? "bg-blue-500 !text-white hover:bg-blue-600 rounded-lg"
                   : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
               }`}
               onClick={() => setLocation(item.path)}
             >
-              <item.icon className="w-5 h-5 mb-1" />
-              <span className="text-xs font-medium">{item.label}</span>
+              <item.icon className="w-4 h-4 mb-0.5" />
+              <span className="text-xs font-medium leading-tight">{item.label}</span>
               {item.badge && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold text-[10px]">
                   {item.badge}
                 </span>
               )}

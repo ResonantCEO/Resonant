@@ -415,7 +415,7 @@ export default function Profile() {
 
       {/* Main Content */}
       <div 
-        className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0 min-h-screen relative ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
+        className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0 min-h-screen relative mobile-content ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
         style={profile?.profileBackground === 'custom-photo' ? getBackgroundImageStyle(profile?.backgroundImageUrl) : {}}
       >
         {/* Fixed Background Image */}
@@ -434,7 +434,7 @@ export default function Profile() {
             }}
           />
         )}
-        <div className="container-responsive mx-auto px-responsive py-responsive">
+        <div className="container-responsive mx-auto px-4 lg:px-responsive py-4 lg:py-responsive pb-24 lg:pb-responsive">
           <ProfileHeader 
             profile={profile} 
             isOwn={isOwn}

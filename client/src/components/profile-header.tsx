@@ -459,8 +459,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         <div className={`p-6 ${profile.type === 'artist' ? 'pt-4 pb-4 pl-52' : 'pt-6'} relative`}>
           {/* Profile Type & Visibility - Top Right of Content Area */}
           <div className="absolute top-4 right-4">
-            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                 {getVisibilityIcon(profile.visibility)}
                 <span className="capitalize">{profile.visibility} Profile</span>
                 {isOwn && (

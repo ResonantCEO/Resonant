@@ -1,6 +1,32 @@
 # Resonant Changelog
 
-## Version 0.3.7 - Profile Header Refinements & Booking Calendar Integration (Latest)
+## Version 0.3.8 - Mobile Header Layout Optimization (Latest)
+
+### Mobile User Experience Enhancement
+
+#### 📱 Mobile Header Layout Fixes
+- **Mobile Header Positioning**: Fixed header layout issues in mobile view for improved visual presentation and functionality
+- **Profile Header Mobile Optimization**: Enhanced profile header component responsiveness for better mobile display
+- **CSS Mobile Adjustments**: Updated global styles to ensure proper header rendering across all mobile device sizes
+- **Cross-Device Consistency**: Improved header layout consistency between desktop and mobile views
+- **Mobile Navigation Enhancement**: Optimized header navigation elements for touch-friendly mobile interaction
+
+#### 🎨 Mobile UI/UX Improvements
+- **Responsive Header Design**: Enhanced header component to adapt properly to mobile screen constraints
+- **Mobile Layout Stability**: Fixed layout shifting issues that occurred in mobile view
+- **Touch-Friendly Interface**: Improved mobile header elements for better touch interaction
+- **Visual Mobile Polish**: Enhanced mobile header appearance for professional presentation on smaller screens
+- **Mobile Performance**: Optimized header rendering performance on mobile devices
+
+#### 🔧 Technical Mobile Enhancements
+- **Mobile CSS Optimization**: Updated CSS rules specifically for mobile header layout improvements
+- **Responsive Component Updates**: Enhanced profile header component with mobile-specific styling adjustments
+- **Mobile Breakpoint Refinements**: Improved responsive design breakpoints for better mobile display
+- **Cross-Browser Mobile Compatibility**: Ensured header fixes work consistently across mobile browsers
+
+---
+
+## Version 0.3.7 - Profile Header Refinements & Booking Calendar Integration
 
 ### Profile Header System Enhancements
 

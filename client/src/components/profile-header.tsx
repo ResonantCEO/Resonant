@@ -18,7 +18,8 @@ import {
   UserPlus,
   UserMinus,
   Clock,
-  Music
+  Music,
+  Book
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -607,6 +608,16 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   </Button>
                 )}
               </div>
+
+              {/* Booking Button - Only for venue profiles */}
+              {profile.type === 'venue' && (
+                <div className="absolute right-2 sm:right-4 bottom-12 sm:bottom-12">
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
+                    <Book className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Book</span>
+                  </Button>
+                </div>
+              )}
 
               {/* Share Button - Bottom Right */}
               <div className={`absolute right-2 sm:right-4 ${profile.type === 'artist' ? '-bottom-2 sm:-bottom-2' : 'bottom-6 sm:bottom-6'}`}>

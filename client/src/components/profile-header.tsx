@@ -443,7 +443,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         )}
 
         {/* Profile Info */}
-        <div className={`p-4 sm:p-6 ${profile.type === 'artist' ? 'pt-8 sm:pt-4 pb-4 pl-32 sm:pl-52' : 'pt-6 pb-4'} relative`}>
+        <div className={`p-4 sm:p-6 ${profile.type === 'artist' ? 'pt-8 sm:pt-4 pb-32 pl-32 sm:pl-52' : 'pt-6'} relative`}>
           {/* Profile Type & Visibility - Top Right of Content Area */}
           <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
             <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
@@ -536,7 +536,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               </div>
 
               {/* Social Media Buttons - Position based on profile type */}
-              <div className={`flex items-center space-x-2 justify-center mt-4 mb-2`}>
+              <div className={`flex items-center space-x-2 ${profile.type === 'artist' ? 'absolute -bottom-2 left-0 right-0 justify-center' : 'justify-center absolute -bottom-2 left-0 right-0 pt-4'}`}>
                 {/* Facebook */}
                 {(isOwn || profile.facebookUrl) && (
                   <Button
@@ -603,8 +603,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 )}
               </div>
 
-              {/* Share Button - Add to social media button row */}
-              <div className="ml-4">
+              {/* Share Button - Bottom Right */}
+              <div className="absolute -bottom-2 sm:-bottom-2 right-2 sm:right-4">
                 <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
                   <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span className="hidden sm:inline">Share</span>

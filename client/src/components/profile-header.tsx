@@ -498,7 +498,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             )}
 
             {/* Profile Details */}
-            <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-16 sm:-mt-20' : 'mt-2 sm:mt-0'}`}>
+            <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-24 sm:-mt-28' : 'mt-2 sm:mt-0'}`}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 flex-1">
                   <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>

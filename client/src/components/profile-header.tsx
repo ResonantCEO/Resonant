@@ -498,9 +498,9 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             )}
 
             {/* Profile Details */}
-            <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-32 sm:-mt-40' : 'mt-2 sm:mt-0'}`}>
+            <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-8 sm:-mt-12' : 'mt-2 sm:mt-0'}`}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div className={`min-w-0 flex-1 ${profile.type !== 'artist' ? '-mt-32 sm:-mt-40' : ''}`}>
+                <div className={`min-w-0 flex-1 ${profile.type !== 'artist' ? '-mt-8 sm:-mt-12' : ''}`}>
                   <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-neutral-600 mb-3 space-y-1 sm:space-y-0">
                     <span className="flex items-center text-sm">

@@ -538,7 +538,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               </div>
 
               {/* Social Media Buttons - Position based on profile type */}
-              <div className={`flex items-center space-x-2 ${profile.type === 'artist' ? 'absolute bottom-2 left-0 right-0 flex justify-center w-full' : 'justify-center absolute bottom-4 left-0 right-0 pt-4'}`}>
+              <div className={`flex items-center space-x-2 ${profile.type === 'artist' ? 'absolute bottom-4 left-0 right-0 justify-center' : 'justify-center absolute bottom-4 left-0 right-0 pt-4'}`}>
                 {/* Facebook */}
                 {(isOwn || profile.facebookUrl) && (
                   <Button
@@ -612,7 +612,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   <span className="hidden sm:inline">Share</span>
                 </Button>
               </div>
-
+              
             </div>
           </div>
         </div>

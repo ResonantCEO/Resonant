@@ -67,7 +67,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   const [showBookingDialog, setShowBookingDialog] = useState(false);
 
   // Get viewer's active profile to check their type
-  const { data: viewerProfile } = useQuery({
+  const { data: viewerProfile, isLoading: viewerProfileLoading } = useQuery({
     queryKey: ["/api/profiles/active"],
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -645,7 +645,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               {profile.type === 'venue' && (
                 <div className="absolute right-2 sm:right-4 bottom-6 sm:bottom-6 flex flex-col space-y-2">
                   {/* Booking Button - Only visible to artist profile types */}
-                  {viewerProfile?.type === 'artist' && !isOwn && (
+                  {!viewerProfileLoading && viewerProfile?.type === 'artist' && !isOwn && (
                     <Button 
                       variant="outline" 
                       size="sm" 

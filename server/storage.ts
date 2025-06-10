@@ -908,8 +908,7 @@ export class DatabaseStorage implements IStorage {
           console.log("Adding profile creator as owner");
           const ownerEntry = {
             membership: {
-```text
-      id: -1, // Special ID for profile owner
+id: -1, // Special ID for profile owner
               profileId: profileId,
               userId: profile.userId,
               role: "owner" as const,

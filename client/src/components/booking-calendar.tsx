@@ -23,6 +23,12 @@ interface Booking {
   notes?: string;
 }
 
+interface UnavailableDate {
+  id: string;
+  date: Date;
+  reason?: string;
+}
+
 interface BookingCalendarProps {
   profileType: 'artist' | 'venue';
 }
@@ -57,6 +63,19 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     }
   ]);
 
+  const [unavailableDates, setUnavailableDates] = useState<UnavailableDate[]>([
+    {
+      id: '1',
+      date: new Date(2025, 5, 18),
+      reason: 'Personal time off'
+    },
+    {
+      id: '2',
+      date: new Date(2025, 5, 25),
+      reason: 'Equipment maintenance'
+    }
+  ]);
+
   const [newBooking, setNewBooking] = useState({
     title: '',
     date: '',
@@ -66,6 +85,12 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     client: '',
     location: '',
     notes: ''
+  });
+
+  const [showUnavailableDialog, setShowUnavailableDialog] = useState(false);
+  const [newUnavailableDate, setNewUnavailableDate] = useState({
+    date: '',
+    reason: ''
   });
 
   // Calendar navigation
@@ -104,6 +129,20 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     );
   };
 
+  // Check if a date is marked as unavailable
+  const isDateUnavailable = (date: Date) => {
+    return unavailableDates.some(unavailableDate => 
+      unavailableDate.date.toDateString() === date.toDateString()
+    );
+  };
+
+  // Get unavailable date info for a specific date
+  const getUnavailableDateInfo = (date: Date) => {
+    return unavailableDates.find(unavailableDate => 
+      unavailableDate.date.toDateString() === date.toDateString()
+    );
+  };
+
   // Handle adding new booking
   const handleAddBooking = () => {
     if (newBooking.title && newBooking.date && newBooking.startTime && newBooking.endTime) {
@@ -126,6 +165,28 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       });
       setShowBookingDialog(false);
     }
+  };
+
+  // Handle adding unavailable date
+  const handleAddUnavailableDate = () => {
+    if (newUnavailableDate.date) {
+      const unavailableDate: UnavailableDate = {
+        id: Date.now().toString(),
+        date: new Date(newUnavailableDate.date),
+        reason: newUnavailableDate.reason
+      };
+      setUnavailableDates([...unavailableDates, unavailableDate]);
+      setNewUnavailableDate({
+        date: '',
+        reason: ''
+      });
+      setShowUnavailableDialog(false);
+    }
+  };
+
+  // Handle removing unavailable date
+  const handleRemoveUnavailableDate = (dateId: string) => {
+    setUnavailableDates(unavailableDates.filter(date => date.id !== dateId));
   };
 
   const monthNames = [
@@ -162,13 +223,14 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
             <Calendar className="w-5 h-5" />
             <span>{profileType === 'artist' ? 'Event' : 'Event'} Calendar</span>
           </CardTitle>
-          <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700 !text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Add {profileType === 'artist' ? 'Booking' : 'Event'}
-              </Button>
-            </DialogTrigger>
+          <div className="flex space-x-2">
+            <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 !text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add {profileType === 'artist' ? 'Booking' : 'Event'}
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>New {profileType === 'artist' ? 'Booking' : 'Event'}</DialogTitle>
@@ -265,6 +327,50 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
               </div>
             </DialogContent>
           </Dialog>
+          
+          <Dialog open={showUnavailableDialog} onOpenChange={setShowUnavailableDialog}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline" className="border-red-500 text-red-600 hover:bg-red-50">
+                <Plus className="w-4 h-4 mr-2" />
+                Mark Unavailable
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Mark Date as Unavailable</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="unavailable-date">Date</Label>
+                  <Input
+                    id="unavailable-date"
+                    type="date"
+                    value={newUnavailableDate.date}
+                    onChange={(e) => setNewUnavailableDate({...newUnavailableDate, date: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="reason">Reason (Optional)</Label>
+                  <Textarea
+                    id="reason"
+                    value={newUnavailableDate.reason}
+                    onChange={(e) => setNewUnavailableDate({...newUnavailableDate, reason: e.target.value})}
+                    placeholder="Personal time, maintenance, vacation, etc."
+                    rows={3}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setShowUnavailableDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAddUnavailableDate} className="bg-red-600 hover:bg-red-700 text-white">
+                    Mark Unavailable
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -296,20 +402,28 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
               const isCurrentMonth = day.getMonth() === currentDate.getMonth();
               const isToday = day.toDateString() === new Date().toDateString();
               const dayBookings = getBookingsForDate(day);
+              const isUnavailable = isDateUnavailable(day);
               
               return (
                 <div
                   key={index}
                   className={`min-h-[80px] p-1 border border-gray-200 cursor-pointer hover:bg-gray-50 ${
                     !isCurrentMonth ? 'bg-gray-50 text-gray-400' : ''
-                  } ${isToday ? 'bg-blue-50 border-blue-200' : ''}`}
+                  } ${isToday ? 'bg-blue-50 border-blue-200' : ''} ${
+                    isUnavailable ? 'bg-red-50 border-red-200' : ''
+                  }`}
                   onClick={() => setSelectedDate(day)}
                 >
-                  <div className={`text-sm font-medium ${isToday ? 'text-blue-600' : ''}`}>
+                  <div className={`text-sm font-medium ${isToday ? 'text-blue-600' : ''} ${isUnavailable ? 'text-red-600' : ''}`}>
                     {day.getDate()}
                   </div>
                   <div className="mt-1 space-y-1">
-                    {dayBookings.slice(0, 2).map(booking => (
+                    {isUnavailable && (
+                      <div className="text-xs p-1 rounded bg-red-500 text-white truncate">
+                        Unavailable
+                      </div>
+                    )}
+                    {dayBookings.slice(0, isUnavailable ? 1 : 2).map(booking => (
                       <div
                         key={booking.id}
                         className={`text-xs p-1 rounded text-white truncate ${getTypeColor(booking.type)}`}
@@ -318,9 +432,9 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                         {booking.title}
                       </div>
                     ))}
-                    {dayBookings.length > 2 && (
+                    {dayBookings.length > (isUnavailable ? 1 : 2) && (
                       <div className="text-xs text-gray-500">
-                        +{dayBookings.length - 2} more
+                        +{dayBookings.length - (isUnavailable ? 1 : 2)} more
                       </div>
                     )}
                   </div>
@@ -343,6 +457,33 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {isDateUnavailable(selectedDate) && (
+                  <div className="mb-4 p-3 border border-red-200 rounded-lg bg-red-50">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-red-800">Date Unavailable</h4>
+                        {getUnavailableDateInfo(selectedDate)?.reason && (
+                          <p className="text-sm text-red-600 mt-1">
+                            {getUnavailableDateInfo(selectedDate)?.reason}
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-600 hover:text-red-800"
+                        onClick={() => {
+                          const unavailableInfo = getUnavailableDateInfo(selectedDate);
+                          if (unavailableInfo) {
+                            handleRemoveUnavailableDate(unavailableInfo.id);
+                          }
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 {getBookingsForDate(selectedDate).length > 0 ? (
                   <div className="space-y-3">
                     {getBookingsForDate(selectedDate).map(booking => (
@@ -384,11 +525,11 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                       </div>
                     ))}
                   </div>
-                ) : (
+                ) : !isDateUnavailable(selectedDate) ? (
                   <p className="text-gray-500 text-center py-4">
                     No {profileType === 'artist' ? 'bookings' : 'events'} scheduled for this day
                   </p>
-                )}
+                ) : null}
               </CardContent>
             </Card>
           )}

@@ -234,7 +234,7 @@ async function createMockData() {
 }
 
 // Run the script if called directly
-if (require.main === module) {
+if (process.argv[1] && process.argv[1].includes('create-mock-data')) {
   createMockData()
     .then(() => {
       console.log('Script completed successfully');

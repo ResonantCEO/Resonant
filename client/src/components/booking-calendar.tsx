@@ -160,7 +160,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
             <Calendar className="w-5 h-5" />
-            <span>{profileType === 'artist' ? 'Booking' : 'Event'} Calendar</span>
+            <span>{profileType === 'artist' ? 'Event' : 'Event'} Calendar</span>
           </CardTitle>
           <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
             <DialogTrigger asChild>

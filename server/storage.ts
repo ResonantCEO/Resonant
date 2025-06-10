@@ -908,7 +908,8 @@ export class DatabaseStorage implements IStorage {
           console.log("Adding profile creator as owner");
           const ownerEntry = {
             membership: {
-              id: -1, // Special ID for profile owner
+```text
+      id: -1, // Special ID for profile owner
               profileId: profileId,
               userId: profile.userId,
               role: "owner" as const,
@@ -1089,6 +1090,90 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(profileInvitations)
       .where(eq(profileInvitations.id, id));
+  }
+
+  // Booking request methods
+  async createBookingRequest(data: {
+    artistProfileId: number;
+    venueProfileId: number;
+    status: string;
+    requestedAt: Date;
+  }) {
+    const [bookingRequest] = await db
+      .insert(sql`booking_requests`)
+      .values({
+        artistProfileId: data.artistProfileId,
+        venueProfileId: data.venueProfileId,
+        status: data.status,
+        requestedAt: data.requestedAt.toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })
+      .returning();
+
+    return bookingRequest;
+  }
+
+  async getBookingRequests(profileId: number, profileType: string) {
+      if (profileType === 'artist') {
+          // Get requests sent by this artist
+          const bookingRequests = await db
+              .select({
+                  id: sql`booking_requests.id`,
+                  venueProfileId: sql`booking_requests.venue_profile_id`,
+                  venueName: sql`venue_profiles.name`,
+                  venueImage: sql`venue_profiles.profileImageUrl`,
+                  status: sql`booking_requests.status`,
+                  requestedAt: sql`booking_requests.requested_at`,
+                  updatedAt: sql`booking_requests.updated_at`
+              })
+              .from(sql`booking_requests`)
+              .leftJoin(sql`profiles as venue_profiles`, sql`venue_profiles.id = booking_requests.venue_profile_id`)
+              .where(eq(sql`booking_requests.artistProfileId`, profileId))
+              .orderBy(desc(sql`booking_requests.createdAt`));
+          return bookingRequests;
+      } else if (profileType === 'venue') {
+          // Get requests received by this venue
+          const bookingRequests = await db
+              .select({
+                  id: sql`booking_requests.id`,
+                  artistProfileId: sql`booking_requests.artist_profile_id`,
+                  artistName: sql`artist_profiles.name`,
+                  artistImage: sql`artist_profiles.profileImageUrl`,
+                  artistGenre: sql`artist_profiles.genre`,
+                  status: sql`booking_requests.status`,
+                  requestedAt: sql`booking_requests.requested_at`,
+                  updatedAt: sql`booking_requests.updated_at`
+              })
+              .from(sql`booking_requests`)
+              .leftJoin(sql`profiles as artist_profiles`, sql`artist_profiles.id = booking_requests.artist_profile_id`)
+              .where(eq(sql`booking_requests.venueProfileId`, profileId))
+              .orderBy(desc(sql`booking_requests.createdAt`));
+          return bookingRequests
+      }
+      return [];
+  }
+
+  async getBookingRequestById(id: number) {
+    const [bookingRequest] = await db
+      .select()
+      .from(sql`booking_requests`)
+      .where(eq(sql`booking_requests.id`, id));
+
+    return bookingRequest;
+  }
+
+  async updateBookingRequestStatus(requestId: number, status: string, profileId: number) {
+    const [updatedRequest] = await db
+      .update(sql`booking_requests`)
+      .set({
+        status,
+        updatedAt: new Date().toISOString()
+      })
+      .where(and(eq(sql`booking_requests.id`, requestId), eq(sql`booking_requests.venueProfileId`, profileId)))
+      .returning();
+
+    return updatedRequest;
   }
 }
 

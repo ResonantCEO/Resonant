@@ -1,4 +1,3 @@
-
 import { db } from "./db";
 import { 
   notifications, 
@@ -266,7 +265,7 @@ export class NotificationService {
     });
   }
 
-  async notifyProfileInvite(recipientEmail: string, senderId: number, senderName: string, profileName: string): Promise<void> {
+  async notifyProfileInvite(recipientEmail: string, senderId: number, senderName: string, profileName: string) {
     // Find user by email
     const [recipient] = await db
       .select({ id: users.id })
@@ -304,6 +303,29 @@ export class NotificationService {
         },
       });
     }
+  }
+
+  async notifyBookingRequest(venueUserId: number, artistUserId: number, artistName: string, artistProfileName: string) {
+    await this.createNotification({
+      recipientId: venueUserId,
+      senderId: artistUserId,
+      type: 'booking_request',
+      title: 'New Booking Request',
+      message: `${artistName} (${artistProfileName}) wants to book your venue`,
+      data: { artistUserId, artistName, artistProfileName }
+    });
+  }
+
+  async notifyBookingResponse(artistUserId: number, venueUserId: number, venueName: string, venueProfileName: string, status: string) {
+    const statusText = status === 'accepted' ? 'accepted' : 'declined';
+    await this.createNotification({
+      recipientId: artistUserId,
+      senderId: venueUserId,
+      type: 'booking_response',
+      title: `Booking Request ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
+      message: `${venueName} (${venueProfileName}) has ${statusText} your booking request`,
+      data: { venueUserId, venueName, venueProfileName, status }
+    });
   }
 }
 

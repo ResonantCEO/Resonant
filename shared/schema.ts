@@ -370,9 +370,9 @@ export type Friendship = typeof friendships.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Comment = typeof comments.$inferSelect;
 export type PostLike = typeof postLikes.$inferSelect;
-export type InsertProfileMembership = z.infer<typeof insertProfileMembershipSchema>;
+export type InsertProfileMembership = z.infer<typeof profileMembershipSchema>;
 export type ProfileMembership = typeof profileMemberships.$inferSelect;
-export type InsertProfileInvitation = z.infer<typeof insertProfileInvitationSchema>;
+export type InsertProfileInvitation = z.infer<typeof profileInvitationSchema>;
 export type ProfileInvitation = typeof profileInvitations.$inferSelect;
 export type ProfileRole = z.infer<typeof profileRoleSchema>;
 export type ProfilePermission = z.infer<typeof profilePermissionSchema>;
@@ -411,3 +411,13 @@ export const notificationTypeSchema = z.enum([
   "membership_updated",
   "system_announcement"
 ]);
+
+export const bookingRequests = pgTable("booking_requests", {
+  id: serial("id").primaryKey(),
+  artistProfileId: integer("artist_profile_id").references(() => profiles.id).notNull(),
+  venueProfileId: integer("venue_profile_id").references(() => profiles.id).notNull(),
+  status: varchar("status", { length: 20 }).default("pending").notNull(), // pending, accepted, rejected
+  requestedAt: timestamp("requested_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

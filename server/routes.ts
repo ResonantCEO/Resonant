@@ -1386,6 +1386,104 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Booking request routes
+  app.post('/api/booking-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const { venueId } = req.body;
+      const artistProfile = await storage.getActiveProfile(req.user.id);
+
+      if (!artistProfile || artistProfile.type !== 'artist') {
+        return res.status(400).json({ message: "Only artist profiles can send booking requests" });
+      }
+
+      // Verify the target is a venue
+      const venueProfile = await storage.getProfile(venueId);
+      if (!venueProfile || venueProfile.type !== 'venue') {
+        return res.status(400).json({ message: "Invalid venue profile" });
+      }
+
+      // Create booking request
+      const bookingRequest = await storage.createBookingRequest({
+        artistProfileId: artistProfile.id,
+        venueProfileId: venueId,
+        status: 'pending',
+        requestedAt: new Date()
+      });
+
+      // Send notification to venue owner
+      const { notificationService } = await import('./notifications');
+      if (venueProfile.userId) {
+        const artistUser = await storage.getUser(req.user.id);
+        const artistName = `${artistUser?.firstName} ${artistUser?.lastName}`;
+        await notificationService.notifyBookingRequest(
+          venueProfile.userId, 
+          req.user.id, 
+          artistName, 
+          artistProfile.name
+        );
+      }
+
+      res.json(bookingRequest);
+    } catch (error) {
+      console.error("Error creating booking request:", error);
+      res.status(500).json({ message: "Failed to send booking request" });
+    }
+  });
+
+  app.get('/api/booking-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const bookingRequests = await storage.getBookingRequests(activeProfile.id, activeProfile.type);
+      res.json(bookingRequests);
+    } catch (error) {
+      console.error("Error fetching booking requests:", error);
+      res.status(500).json({ message: "Failed to fetch booking requests" });
+    }
+  });
+
+  app.patch('/api/booking-requests/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const { status } = req.body;
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const updatedRequest = await storage.updateBookingRequestStatus(requestId, status, activeProfile.id);
+
+      // Send notification back to artist if status changed
+      if (status === 'accepted' || status === 'rejected') {
+        const { notificationService } = await import('./notifications');
+        const bookingRequest = await storage.getBookingRequestById(requestId);
+        if (bookingRequest) {
+          const artistProfile = await storage.getProfile(bookingRequest.artistProfileId);
+          if (artistProfile?.userId) {
+            const venueUser = await storage.getUser(req.user.id);
+            const venueName = `${venueUser?.firstName} ${venueUser?.lastName}`;
+            await notificationService.notifyBookingResponse(
+              artistProfile.userId,
+              req.user.id,
+              venueName,
+              activeProfile.name,
+              status
+            );
+          }
+        }
+      }
+
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Error updating booking request:", error);
+      res.status(500).json({ message: "Failed to update booking request" });
+    }
+  });
+
   app.get('/api/notification-settings', isAuthenticated, async (req: any, res) => {
     try {
       const { notificationService } = await import('./notifications');

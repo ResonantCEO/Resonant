@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { 
   Camera, 
   Edit, 
@@ -63,6 +64,7 @@ interface ProfileHeaderProps {
 export default function ProfileHeader({ profile, isOwn, canManageMembers, activeTab = "posts", setActiveTab }: ProfileHeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
 
   // Get viewer's active profile to check their type
   const { data: viewerProfile } = useQuery({
@@ -124,6 +126,26 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       toast({
         title: "Error",
         description: error.message || "Failed to send friend request",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const sendBookingRequestMutation = useMutation({
+    mutationFn: async (venueId: number) => {
+      return await apiRequest("POST", "/api/booking-requests", { venueId });
+    },
+    onSuccess: () => {
+      setShowBookingDialog(false);
+      toast({
+        title: "Booking Request Sent",
+        description: "Your booking request has been sent to the venue for review.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send booking request",
         variant: "destructive",
       });
     },
@@ -308,6 +330,16 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   // Handler functions - defined after all hooks
   const handleSendFriendRequest = () => {
     sendFriendRequestMutation.mutate(profile.id);
+  };
+
+  const handleBookingRequest = () => {
+    if (viewerProfile?.type === 'artist' && profile.type === 'venue') {
+      setShowBookingDialog(true);
+    }
+  };
+
+  const handleConfirmBooking = () => {
+    sendBookingRequestMutation.mutate(profile.id);
   };
 
   const handleRemoveCoverPhoto = () => {
@@ -612,11 +644,18 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               {/* Button Stack - Only for venue profiles */}
               {profile.type === 'venue' && (
                 <div className="absolute right-2 sm:right-4 bottom-6 sm:bottom-6 flex flex-col space-y-2">
-                  {/* Booking Button */}
-                  <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
-                    <Book className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">Book</span>
-                  </Button>
+                  {/* Booking Button - Only visible to artist profile types */}
+                  {viewerProfile?.type === 'artist' && !isOwn && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]"
+                      onClick={handleBookingRequest}
+                    >
+                      <Book className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Book</span>
+                    </Button>
+                  )}
                   {/* Share Button */}
                   <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
                     <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -706,6 +745,37 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
         </Tabs>
       </div>
+
+      {/* Booking Confirmation Dialog */}
+      <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Booking Request</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to send a booking request to <span className="font-semibold">{profile.name}</span>? 
+              Your artist profile will be sent to the venue for review and they will contact you if they're interested in booking you.
+            </p>
+          </div>
+          <DialogFooter className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowBookingDialog(false)}
+              disabled={sendBookingRequestMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirmBooking}
+              disabled={sendBookingRequestMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {sendBookingRequestMutation.isPending ? "Sending..." : "Send Request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Hidden file inputs for uploads */}
       {isOwn && (

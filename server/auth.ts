@@ -107,8 +107,29 @@ export function setupAuth(app: Express) {
         lastName,
       });
 
-      req.login(user, (err) => {
+      req.login(user, async (err) => {
         if (err) return next(err);
+        
+        // Automatically create and set audience profile as active on registration
+        try {
+          console.log("REGISTRATION: Setting audience profile as active for user", user.id);
+          const userName = firstName && lastName 
+            ? `${firstName} ${lastName}`
+            : firstName || lastName || "My Profile";
+          
+          const audienceProfile = await storage.createProfile({
+            userId: user.id,
+            type: 'audience',
+            name: userName,
+            bio: '',
+            isActive: true
+          });
+          console.log("REGISTRATION: Created new audience profile:", audienceProfile.id);
+        } catch (error) {
+          console.error("Error creating audience profile during registration:", error);
+          // Don't fail registration if profile creation fails
+        }
+        
         res.status(201).json({ id: user.id, email: user.email });
       });
     } catch (error) {

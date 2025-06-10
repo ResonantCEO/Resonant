@@ -501,7 +501,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-16 sm:-mt-28' : 'mt-2 sm:mt-0'}`}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1></div>
+                  <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-neutral-600 mb-3 space-y-1 sm:space-y-0">
                     <span className="flex items-center text-sm">
                       <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />

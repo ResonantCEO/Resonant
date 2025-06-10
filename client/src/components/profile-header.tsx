@@ -644,8 +644,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               {/* Button Stack - Only for venue profiles */}
               {profile.type === 'venue' && (
                 <div className="absolute right-2 sm:right-4 bottom-6 sm:bottom-6 flex flex-col space-y-2">
-                  {/* Booking Button - Only visible to artist profile types */}
-                  {!viewerProfileLoading && viewerProfile?.type === 'artist' && !isOwn && (
+                  {/* Booking Button - Temporarily visible to all for testing */}
+                  {!isOwn && (
                     <Button 
                       variant="outline" 
                       size="sm" 

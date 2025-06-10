@@ -466,7 +466,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Profile Picture - for non-artist profiles */}
             {profile.type !== 'artist' && (
-              <div className="relative -mt-8 sm:-mt-14">
+              // Modified the top position here
+              <div className="relative -mt-8 sm:-mt-14"></div>
                 <div className="relative">
                   <Avatar 
                     className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
@@ -497,9 +498,9 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             )}
 
             {/* Profile Details */}
-            <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-22 sm:-mt-26' : 'mt-2 sm:mt-0'}`}>
+            <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-22 sm:-mt-26' : 'mt-2 sm:mt-0'}`}></div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div className={`min-w-0 flex-1 ${profile.type !== 'artist' ? '-mt-26 sm:-mt-34' : ''}`}>
+                <div className={`min-w-0 flex-1 ${profile.type !== 'artist' ? '-mt-26 sm:-mt-34' : ''}`}></div>
                   <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-neutral-600 mb-3 space-y-1 sm:space-y-0">
                     <span className="flex items-center text-sm">

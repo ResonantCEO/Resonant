@@ -464,38 +464,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           </div>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
-            {/* Profile Picture - for non-artist profiles */}
-            {profile.type !== 'artist' && (
-              <div className="relative -mt-16 sm:-mt-28">
-                <div className="relative">
-                  <Avatar 
-                    className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
-                    onClick={handleProfilePictureClick}
-                  >
-                    <AvatarImage src={profile.profileImageUrl || ""} />
-                    <AvatarFallback className="text-lg sm:text-3xl">
-                      {getDisplayName().slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {isOwn && (
-                    <>
-                      <div 
-                        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                        onClick={handleProfilePictureClick}
-                      >
-                        <Camera className="w-8 h-8 text-white" />
-                      </div>
-                      {uploadProfilePictureMutation.isPending && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                          <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* Profile Details */}
             <div className="flex-1 mt-2 sm:mt-0">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">

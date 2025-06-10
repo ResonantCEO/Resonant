@@ -338,9 +338,9 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   return (
     <>
       {/* Profile Header */}
-      <div className={`bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden ${profile.type === 'artist' ? 'min-h-[275px] sm:min-h-[375px]' : 'min-h-[300px] sm:min-h-[340px]'}`}>
+      <div className={`bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden ${profile.type === 'artist' ? 'min-h-[280px] sm:min-h-[375px]' : 'min-h-[320px] sm:min-h-[340px]'}`}>
         {/* Cover Photo */}
-        <div className="h-32 sm:h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
+        <div className="h-36 sm:h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700"></div>
           {/* Clickable cover photo area */}
           <div 
             className={`absolute inset-0 ${isOwn ? 'cursor-pointer' : ''}`}
@@ -412,10 +412,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
         {/* Profile Picture - Absolutely positioned for artist profiles */}
         {profile.type === 'artist' && (
-          <div className="absolute left-4 sm:left-6 top-20 sm:top-40 z-10">
+          <div className="absolute left-4 sm:left-6 top-24 sm:top-40 z-10">
             <div className="relative">
               <Avatar 
-                className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                className={`w-28 h-28 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
                 onClick={handleProfilePictureClick}
               >
                 <AvatarImage src={profile.profileImageUrl || ""} />
@@ -443,7 +443,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         )}
 
         {/* Profile Info */}
-        <div className={`p-4 sm:p-6 ${profile.type === 'artist' ? 'pt-8 sm:pt-4 pb-32 pl-32 sm:pl-52' : 'pt-6 pb-16'} relative`}>
+        <div className={`p-4 sm:p-6 ${profile.type === 'artist' ? 'pt-10 sm:pt-4 pb-20 pl-36 sm:pl-52' : 'pt-8 pb-20'} relative`}>
           {/* Profile Type & Visibility - Top Right of Content Area */}
           <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
             <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
@@ -466,10 +466,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Profile Picture - for non-artist profiles */}
             {profile.type !== 'artist' && (
-              <div className="relative -mt-16 sm:-mt-28">
+              <div className="relative -mt-20 sm:-mt-28">
                 <div className="relative">
                   <Avatar 
-                    className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                    className={`w-28 h-28 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
                     onClick={handleProfilePictureClick}
                   >
                     <AvatarImage src={profile.profileImageUrl || ""} />
@@ -500,15 +500,15 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             <div className="flex-1 mt-2 sm:mt-0">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-neutral-600 mb-3 space-y-1 sm:space-y-0">
+                  <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-2 truncate">{getDisplayName()}</h1>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-neutral-600 mb-4 space-y-1 sm:space-y-0">
                     <span className="flex items-center text-sm">
-                      <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <Users className="w-4 h-4 sm:w-4 sm:h-4 mr-2" />
                       {friends.length} friends
                     </span>
                     {profile.location && (
                       <span className="flex items-center text-sm">
-                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <MapPin className="w-4 h-4 sm:w-4 sm:h-4 mr-2" />
                         <span className="truncate">{profile.location}</span>
                       </span>
                     )}
@@ -516,13 +516,13 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
                   {/* Genre and Hometown for Artist profiles */}
                   {profile.type === "artist" && (
-                    <div className="space-y-0.5 text-neutral-600 mb-2">
+                    <div className="space-y-1 text-neutral-600 mb-3">
                       <span className="flex items-center text-sm">
-                        <Music className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <Music className="w-4 h-4 sm:w-4 sm:h-4 mr-2" />
                         <span className="truncate">{profile.genre || "Genre not specified"}</span>
                       </span>
                       <span className="flex items-center text-sm">
-                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <MapPin className="w-4 h-4 sm:w-4 sm:h-4 mr-2" />
                         <span className="truncate">{profile.hometown || "Hometown not specified"}</span>
                       </span>
                     </div>
@@ -536,7 +536,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               </div>
 
               {/* Social Media Buttons - Position based on profile type */}
-              <div className={`flex items-center space-x-2 ${profile.type === 'artist' ? 'absolute -bottom-2 left-0 right-0 justify-center' : 'justify-center absolute -bottom-2 left-0 right-0 pt-4'}`}>
+              <div className={`flex items-center space-x-3 ${profile.type === 'artist' ? 'absolute -bottom-3 left-0 right-0 justify-center' : 'justify-center absolute -bottom-3 left-0 right-0 pt-2'}`}>
                 {/* Facebook */}
                 {(isOwn || profile.facebookUrl) && (
                   <Button
@@ -604,9 +604,9 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               </div>
 
               {/* Share Button - Bottom Right */}
-              <div className="absolute -bottom-2 sm:-bottom-2 right-2 sm:right-4">
-                <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
-                  <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <div className="absolute -bottom-3 sm:-bottom-2 right-3 sm:right-4">
+                <Button variant="outline" size="sm" className="text-xs sm:text-sm px-3 sm:px-3 h-8">
+                  <Share className="w-4 h-4 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span className="hidden sm:inline">Share</span>
                 </Button>
               </div>

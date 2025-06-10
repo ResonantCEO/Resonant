@@ -164,7 +164,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
           </CardTitle>
           <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
             <DialogTrigger asChild>
-              <Button size="sm" className="text-white">
+              <Button size="sm" className="!text-white">
                 <Plus className="w-4 h-4 mr-2" />
                 Add {profileType === 'artist' ? 'Booking' : 'Event'}
               </Button>

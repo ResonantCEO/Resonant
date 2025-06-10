@@ -466,7 +466,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Profile Picture - for non-artist profiles */}
             {profile.type !== 'artist' && (
-              <div className="relative -mt-8 sm:-mt-12">
+              <div className="relative -mt-12 sm:-mt-20">
                 <div className="relative">
                   <Avatar 
                     className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
@@ -497,7 +497,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             )}
 
             {/* Profile Details */}
-            <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-8 sm:-mt-12' : 'mt-2 sm:mt-0'}`}>
+            <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-4 sm:-mt-6' : 'mt-2 sm:mt-0'}`}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 flex-1">
                   <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>

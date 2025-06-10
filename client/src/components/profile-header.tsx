@@ -609,23 +609,31 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 )}
               </div>
 
-              {/* Booking Button - Only for venue profiles */}
+              {/* Button Stack - Only for venue profiles */}
               {profile.type === 'venue' && (
-                <div className="absolute right-2 sm:right-4 bottom-12 sm:bottom-12">
-                  <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
+                <div className="absolute right-2 sm:right-4 bottom-6 sm:bottom-6 flex flex-col space-y-2">
+                  {/* Booking Button */}
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
                     <Book className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     <span className="hidden sm:inline">Book</span>
+                  </Button>
+                  {/* Share Button */}
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
+                    <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Share</span>
                   </Button>
                 </div>
               )}
 
-              {/* Share Button - Bottom Right */}
-              <div className={`absolute right-2 sm:right-4 ${profile.type === 'artist' ? '-bottom-2 sm:-bottom-2' : 'bottom-6 sm:bottom-6'}`}>
-                <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
-                  <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Share</span>
-                </Button>
-              </div>
+              {/* Share Button - Bottom Right (for non-venue profiles) */}
+              {profile.type !== 'venue' && (
+                <div className={`absolute right-2 sm:right-4 ${profile.type === 'artist' ? '-bottom-2 sm:-bottom-2' : 'bottom-6 sm:bottom-6'}`}>
+                  <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
+                    <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Share</span>
+                  </Button>
+                </div>
+              )}
 
             </div>
           </div>

@@ -537,9 +537,89 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 </div>
               </div>
 
-              {/* Social Media Buttons - Position based on profile type */}
-              <div className={`flex items-center space-x-2 ${profile.type === 'artist' ? 'justify-center mt-4 pt-2 w-full' : 'justify-center absolute bottom-4 left-0 right-0 pt-4'}`}>
-                {/* Facebook */}
+              {/* Social Media Buttons - Only for non-artist profiles */}
+              {profile.type !== 'artist' && (
+                <div className="flex items-center space-x-2 justify-center absolute bottom-4 left-0 right-0 pt-4">
+                  {/* Facebook */}
+                  {(isOwn || profile.facebookUrl) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="p-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 rounded-full"
+                      onClick={() => profile.facebookUrl && window.open(profile.facebookUrl, '_blank')}
+                      disabled={!profile.facebookUrl && !isOwn}
+                    >
+                      <Facebook className="w-4 h-4" />
+                    </Button>
+                  )}
+
+                  {/* Instagram */}
+                  {(isOwn || profile.instagramUrl) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-full"
+                      onClick={() => profile.instagramUrl && window.open(profile.instagramUrl, '_blank')}
+                      disabled={!profile.instagramUrl && !isOwn}
+                    >
+                      <Instagram className="w-4 h-4" />
+                    </Button>
+                  )}
+
+                  {/* Snapchat */}
+                  {(isOwn || profile.snapchatUrl) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="p-2 bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400 rounded-full"
+                      onClick={() => profile.snapchatUrl && window.open(profile.snapchatUrl, '_blank')}
+                      disabled={!profile.snapchatUrl && !isOwn}
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </Button>
+                  )}
+
+                  {/* TikTok */}
+                  {(isOwn || profile.tiktokUrl) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
+                      onClick={() => profile.tiktokUrl && window.open(profile.tiktokUrl, '_blank')}
+                      disabled={!profile.tiktokUrl && !isOwn}
+                    >
+                      <div className="w-4 h-4 font-bold text-xs flex items-center justify-center">T</div>
+                    </Button>
+                  )}
+
+                  {/* X (Twitter) */}
+                  {(isOwn || profile.twitterUrl) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
+                      onClick={() => profile.twitterUrl && window.open(profile.twitterUrl, '_blank')}
+                      disabled={!profile.twitterUrl && !isOwn}
+                    >
+                      <Twitter className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              )}</div>
+
+              {/* Share Button - Bottom Right */}
+              <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4">
+                <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
+                  <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Share</span>
+                </Button>
+              </div>
+
+            </div>
+          </div>
+        )}
+            {profile.type === "artist" && (
+              <div className="flex items-center justify-center space-x-2 mt-4">
                 {(isOwn || profile.facebookUrl) && (
                   <Button
                     variant="outline"
@@ -552,7 +632,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   </Button>
                 )}
 
-                {/* Instagram */}
                 {(isOwn || profile.instagramUrl) && (
                   <Button
                     variant="outline"
@@ -565,7 +644,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   </Button>
                 )}
 
-                {/* Snapchat */}
                 {(isOwn || profile.snapchatUrl) && (
                   <Button
                     variant="outline"
@@ -578,7 +656,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   </Button>
                 )}
 
-                {/* TikTok */}
                 {(isOwn || profile.tiktokUrl) && (
                   <Button
                     variant="outline"
@@ -591,7 +668,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   </Button>
                 )}
 
-                {/* X (Twitter) */}
                 {(isOwn || profile.twitterUrl) && (
                   <Button
                     variant="outline"
@@ -604,18 +680,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   </Button>
                 )}
               </div>
-
-              {/* Share Button - Bottom Right */}
-              <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4">
-                <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
-                  <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Share</span>
-                </Button>
-              </div>
-              
-            </div>
-          </div>
-        </div>
+            )}
       </div>
 
       {/* Content Tabs */}

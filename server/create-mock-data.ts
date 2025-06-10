@@ -1,6 +1,6 @@
 
-import { db } from './db.js';
-import { profiles, users, friendships, profileMemberships } from '../shared/schema.js';
+import { db } from './db';
+import { profiles, users, friendships, profileMemberships } from '../shared/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 

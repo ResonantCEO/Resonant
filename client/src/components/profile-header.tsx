@@ -498,9 +498,9 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             )}
 
             {/* Profile Details */}
-            <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-8 sm:-mt-12' : 'mt-2 sm:mt-0'}`}>
+            <div className={`flex-1 ${profile.type !== 'artist' ? '-mt-32 sm:-mt-40' : 'mt-2 sm:mt-0'}`}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div className={`min-w-0 flex-1 ${profile.type !== 'artist' ? '-mt-8 sm:-mt-12' : ''}`}>
+                <div className={`min-w-0 flex-1 ${profile.type !== 'artist' ? '-mt-32 sm:-mt-40' : ''}`}>
                   <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-neutral-600 mb-3 space-y-1 sm:space-y-0">
                     <span className="flex items-center text-sm">
@@ -537,7 +537,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               </div>
 
               {/* Social Media Buttons - Position based on profile type */}
-              <div className={`flex items-center space-x-2 ${profile.type === 'artist' ? 'absolute -bottom-2 left-0 right-0 justify-center' : 'justify-center absolute -bottom-2 left-0 right-0'}`}>
+              <div className={`flex items-center space-x-2 ${profile.type === 'artist' ? 'absolute -bottom-2 left-0 right-0 justify-center' : 'justify-center absolute bottom-2 left-0 right-0'}`}>
                 {/* Facebook */}
                 {(isOwn || profile.facebookUrl) && (
                   <Button
@@ -605,7 +605,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               </div>
 
               {/* Share Button - Bottom Right */}
-              <div className={`absolute right-2 sm:right-4 ${profile.type === 'artist' ? '-bottom-2 sm:-bottom-2' : '-bottom-2 sm:-bottom-2'}`}>
+              <div className={`absolute right-2 sm:right-4 ${profile.type === 'artist' ? '-bottom-2 sm:-bottom-2' : 'bottom-2 sm:bottom-2'}`}>
                 <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
                   <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   <span className="hidden sm:inline">Share</span>

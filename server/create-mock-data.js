@@ -1,6 +1,7 @@
 
 const { db } = require('./db');
 const { profiles, users, friendships, profileMemberships } = require('../shared/schema');
+const { eq } = require('drizzle-orm');
 const bcrypt = require('bcryptjs');
 
 async function createMockData() {
@@ -231,9 +232,6 @@ async function createMockData() {
     throw error;
   }
 }
-
-// Import statements for database
-const { eq } = require('drizzle-orm');
 
 // Run the script
 if (require.main === module) {

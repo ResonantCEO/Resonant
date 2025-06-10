@@ -96,7 +96,7 @@ export default function Dashboard() {
                 </Button>
                 <Button
                   onClick={() => setLocation("/post")}
-                  className="flex items-center space-x-2 text-white"
+                  className="flex items-center space-x-2 !text-white"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create Post</span>

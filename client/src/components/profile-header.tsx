@@ -466,6 +466,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Profile Picture - for non-artist profiles */}
             {profile.type !== 'artist' && (
+              // Modified the top position here
               <div className="relative -mt-16 sm:-mt-28">
                 <div className="relative">
                   <Avatar 

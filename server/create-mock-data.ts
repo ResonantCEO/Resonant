@@ -233,8 +233,8 @@ async function createMockData() {
   }
 }
 
-// Run the script
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run the script if called directly
+if (require.main === module) {
   createMockData()
     .then(() => {
       console.log('Script completed successfully');

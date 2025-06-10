@@ -97,13 +97,15 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     return profile.name;
   };
 
+  // Always call all hooks at the top level - move all useQuery and useMutation calls here
   const { data: friendshipStatus } = useQuery({
     queryKey: [`/api/friendship-status/${profile.id}`],
-    enabled: !isOwn,
+    enabled: !isOwn && !!profile?.id,
   });
 
   const { data: friends = [] } = useQuery<any[]>({
     queryKey: [`/api/profiles/${profile.id}/friends`],
+    enabled: !!profile?.id,
   });
 
   const sendFriendRequestMutation = useMutation({
@@ -161,11 +163,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     }
   };
 
-  const handleSendFriendRequest = () => {
-    sendFriendRequestMutation.mutate(profile.id);
-  };
-
-  // Handle profile picture upload
+  // Handle profile picture upload - moved to top level
   const uploadProfilePictureMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
@@ -229,7 +227,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
 
 
-  // Handle cover photo upload
+  // Handle cover photo upload - moved to top level
   const uploadCoverPhotoMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
@@ -258,6 +256,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     },
   });
 
+  // Remove cover photo mutation - moved to top level
   const removeCoverPhotoMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("DELETE", `/api/profiles/${profile.id}/cover-image`);
@@ -303,6 +302,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
       uploadCoverPhotoMutation.mutate(file);
     }
+  };
+
+  // Handler functions - defined after all hooks
+  const handleSendFriendRequest = () => {
+    sendFriendRequestMutation.mutate(profile.id);
   };
 
   const handleRemoveCoverPhoto = () => {

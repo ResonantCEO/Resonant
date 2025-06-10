@@ -338,7 +338,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   return (
     <>
       {/* Profile Header */}
-      <div className={`bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden ${profile.type === 'artist' ? 'min-h-[275px] sm:min-h-[375px]' : 'min-h-[220px] sm:min-h-[270px]'}`}>
+      <div className={`bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden ${profile.type === 'artist' ? 'min-h-[275px] sm:min-h-[375px]' : 'min-h-[240px] sm:min-h-[290px]'}`}>
         {/* Cover Photo */}
         <div className="h-32 sm:h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
           {/* Clickable cover photo area */}
@@ -610,7 +610,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   <span className="hidden sm:inline">Share</span>
                 </Button>
               </div>
-              
+
             </div>
           </div>
         </div>

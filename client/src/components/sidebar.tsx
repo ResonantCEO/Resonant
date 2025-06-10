@@ -246,7 +246,7 @@ export default function Sidebar() {
               variant="ghost"
               className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
                 isActivePath("/profile") 
-                  ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
+                  ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
               onClick={() => setLocation("/profile")}
@@ -263,7 +263,7 @@ export default function Sidebar() {
                 variant="ghost"
                 className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
                   isActivePath("/dashboard") 
-                    ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
+                    ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
                     : "text-neutral-600 hover:bg-neutral-100"
                 }`}
                 onClick={() => setLocation("/dashboard")}
@@ -279,7 +279,7 @@ export default function Sidebar() {
               variant="ghost"
               className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
                 isActivePath("/discover") 
-                  ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
+                  ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
               onClick={() => setLocation("/discover")}
@@ -293,7 +293,7 @@ export default function Sidebar() {
               variant="ghost"
               className={`${isCollapsed ? 'w-full justify-center p-2 relative' : 'w-full justify-start'} ${
                 isActivePath("/friends") 
-                  ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
+                  ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
               onClick={() => setLocation("/friends")}
@@ -301,7 +301,7 @@ export default function Sidebar() {
               <Users className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
               {!isCollapsed && "Friends"}
               {!isCollapsed && friendRequests.length > 0 && (
-                <Badge className="ml-auto bg-blue-500 text-white text-xs">
+                <Badge className="ml-auto bg-blue-600 text-white text-xs">
                   {friendRequests.length}
                 </Badge>
               )}
@@ -318,7 +318,7 @@ export default function Sidebar() {
               variant="ghost"
               className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
                 isActivePath("/settings") 
-                  ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
+                  ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
               onClick={() => setLocation("/settings")}

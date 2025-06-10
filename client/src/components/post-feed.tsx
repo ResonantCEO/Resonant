@@ -186,7 +186,7 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
             <form onSubmit={handleCreatePost}>
               <div className="flex items-start space-x-4">
                 <Avatar>
-                  <AvatarImage src={user?.profileImageUrl || ""} />
+                  <AvatarImage src={activeProfile?.profileImageUrl || ""} />
                   <AvatarFallback>{getDisplayName(activeProfile).slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">

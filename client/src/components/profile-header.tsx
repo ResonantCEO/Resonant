@@ -657,7 +657,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
 
         {/* Profile Info */}
-        <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 pb-16 pl-32 sm:pl-52' : 'pt-6 pb-16'} relative min-h-[168px] sm:min-h-[192px]`}>
+        <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 pb-16 pl-32 sm:pl-52' : 'pt-6 pb-16'} relative min-h-[200px] sm:min-h-[220px]`}>
           {/* Profile Type & Visibility - Absolutely positioned */}
           <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
             <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
@@ -784,16 +784,17 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             
           </div>
 
-          {/* Add Friend Button - Positioned above share button */}
+          {/* Add Friend Button - Under profile picture */}
           {!isOwn && (
-            <div className="absolute right-2 sm:right-4 bottom-12 sm:bottom-16">
+            <div className="absolute left-4 sm:left-6 top-20 sm:top-32 z-10">
               <Button 
                 onClick={handleSendFriendRequest}
                 disabled={sendFriendRequestMutation.isPending}
-                className="bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]"
+                className="bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm px-2 sm:px-3 w-24 sm:w-40"
               >
                 <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Add Friend</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             </div>
           )}

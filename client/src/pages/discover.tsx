@@ -680,7 +680,7 @@ export default function Discover() {
                         </div>
 
                         {/* Content */}
-                        <div className="p-3 sm:p-4 md:p-6 text-white" style={{backgroundColor: '#2a2e35'}}>
+                        <div className="p-3 sm:p-4 md:p-6 bg-[#2a2e35] text-white">
                           {/* Header with Name and Location */}
                           <div className="mb-3 sm:mb-4">
                             <div className="flex items-center justify-between mb-2">

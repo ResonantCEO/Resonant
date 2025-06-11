@@ -751,8 +751,8 @@ export default function Discover() {
                               <p className="text-xs text-gray-500 flex items-center">
                                 📍 {item.location}
                               </p>
-                            )}```text
-                            {item.genre && (```text
+                            )}
+                            {item.genre && (
                               <p className="text-xs text-purple-600 font-medium mt-1">
                                 🎵 {item.genre}
                               </p>

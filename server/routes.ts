@@ -341,6 +341,37 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Update cover photo position endpoint for specific profiles
+  app.patch('/api/profiles/:profileId/cover-position', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.profileId);
+      const { x, y } = req.body;
+
+      console.log("Updating profile cover position:", { profileId, x, y });
+
+      // Validate position values
+      if (typeof x !== 'number' || typeof y !== 'number' || x < 0 || x > 100 || y < 0 || y > 100) {
+        return res.status(400).json({ message: "Invalid position values. X and Y must be between 0 and 100." });
+      }
+
+      // Update profile's cover position in database
+      await storage.updateProfile(profileId, { 
+        coverPositionX: x,
+        coverPositionY: y 
+      });
+
+      console.log("Profile cover position updated successfully");
+
+      res.json({ 
+        message: "Cover photo position updated successfully",
+        position: { x, y }
+      });
+    } catch (error) {
+      console.error("Error updating profile cover position:", error);
+      res.status(500).json({ message: "Failed to update cover photo position" });
+    }
+  });
+
   // Remove user cover photo endpoint
   app.delete('/api/user/cover-image', isAuthenticated, async (req: any, res) => {
     try {

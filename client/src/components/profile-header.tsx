@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Slider } from "@/components/ui/slider";
 import { 
   Camera, 
   Edit, 
@@ -20,7 +21,10 @@ import {
   UserMinus,
   Clock,
   Music,
-  Book
+  Book,
+  Move,
+  Check,
+  X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -65,6 +69,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   const { toast } = useToast();
   const { user } = useAuth();
   const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const [isPositioningMode, setIsPositioningMode] = useState(false);
+  const [coverPhotoPosition, setCoverPhotoPosition] = useState({ x: 50, y: 50 });
 
   // Don't render if profile is not loaded
   if (!profile) {
@@ -305,6 +311,28 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     },
   });
 
+  // Update cover photo position mutation
+  const updateCoverPositionMutation = useMutation({
+    mutationFn: async (position: { x: number; y: number }) => {
+      return await apiRequest("PATCH", `/api/profiles/${profile.id}/cover-position`, position);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      setIsPositioningMode(false);
+      toast({
+        title: "Cover Photo Position Updated",
+        description: "Your cover photo position has been saved.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update cover photo position",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCoverUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -352,9 +380,32 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   };
 
   const handleCoverPhotoClick = () => {
-    if (isOwn) {
+    if (isOwn && !isPositioningMode) {
       coverFileInputRef.current?.click();
     }
+  };
+
+  const handlePositionMode = () => {
+    if (profile?.coverImageUrl) {
+      setIsPositioningMode(true);
+      // Initialize position from profile data or default to center
+      setCoverPhotoPosition({
+        x: profile.coverPositionX || 50,
+        y: profile.coverPositionY || 50
+      });
+    }
+  };
+
+  const handleSavePosition = () => {
+    updateCoverPositionMutation.mutate(coverPhotoPosition);
+  };
+
+  const handleCancelPosition = () => {
+    setIsPositioningMode(false);
+    setCoverPhotoPosition({
+      x: profile.coverPositionX || 50,
+      y: profile.coverPositionY || 50
+    });
   };
 
   const renderActionButtons = () => {
@@ -385,15 +436,20 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         <div className="h-32 sm:h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
           {/* Clickable cover photo area */}
           <div 
-            className={`absolute inset-0 ${isOwn ? 'cursor-pointer' : ''}`}
-            onClick={isOwn ? handleCoverPhotoClick : undefined}
+            className={`absolute inset-0 ${isOwn && !isPositioningMode ? 'cursor-pointer' : ''}`}
+            onClick={isOwn && !isPositioningMode ? handleCoverPhotoClick : undefined}
           >
             {/* Cover photo image - only show if coverImageUrl exists */}
             {profile?.coverImageUrl && (
               <img 
                 src={profile.coverImageUrl} 
                 alt="Cover photo" 
-                className="w-full h-48 object-cover absolute inset-0 transition-opacity duration-300"
+                className="w-full h-full object-cover absolute inset-0 transition-all duration-300"
+                style={{
+                  objectPosition: isPositioningMode 
+                    ? `${coverPhotoPosition.x}% ${coverPhotoPosition.y}%`
+                    : `${profile.coverPositionX || 50}% ${profile.coverPositionY || 50}%`
+                }}
                 onError={(e) => {
                   console.log("Cover image failed to load:", profile.coverImageUrl);
                   // Hide the broken image and show gradient background
@@ -418,8 +474,66 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               </div>
             )}
 
+            {/* Positioning mode overlay */}
+            {isPositioningMode && (
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-20">
+                <div className="bg-white rounded-lg p-4 m-4 shadow-lg max-w-sm w-full">
+                  <h3 className="text-lg font-semibold mb-4 text-center">Adjust Cover Photo Position</h3>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Horizontal Position: {coverPhotoPosition.x}%
+                      </label>
+                      <Slider
+                        value={[coverPhotoPosition.x]}
+                        onValueChange={(value) => setCoverPhotoPosition(prev => ({ ...prev, x: value[0] }))}
+                        max={100}
+                        min={0}
+                        step={1}
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Vertical Position: {coverPhotoPosition.y}%
+                      </label>
+                      <Slider
+                        value={[coverPhotoPosition.y]}
+                        onValueChange={(value) => setCoverPhotoPosition(prev => ({ ...prev, y: value[0] }))}
+                        max={100}
+                        min={0}
+                        step={1}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex space-x-2 mt-6">
+                    <Button
+                      onClick={handleSavePosition}
+                      disabled={updateCoverPositionMutation.isPending}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      {updateCoverPositionMutation.isPending ? "Saving..." : "Save"}
+                    </Button>
+                    <Button
+                      onClick={handleCancelPosition}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Hover overlay for owned profiles */}
-            {isOwn && (
+            {isOwn && !isPositioningMode && (
               <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
                 <div className="text-white text-center">
                   <Camera className="w-8 h-8 mx-auto mb-2" />
@@ -427,6 +541,29 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     {uploadCoverPhotoMutation.isPending ? "Uploading..." : profile?.coverImageUrl ? "Change Cover Photo" : "Add Cover Photo"}
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Cover photo management buttons */}
+            {isOwn && profile?.coverImageUrl && !isPositioningMode && (
+              <div className="absolute top-2 right-2 flex space-x-2 z-10">
+                <Button
+                  onClick={handlePositionMode}
+                  size="sm"
+                  variant="secondary"
+                  className="bg-white/80 hover:bg-white/90 text-gray-800"
+                >
+                  <Move className="w-4 h-4 mr-1" />
+                  Position
+                </Button>
+                <Button
+                  onClick={handleRemoveCoverPhoto}
+                  size="sm"
+                  variant="destructive"
+                  className="bg-red-500/80 hover:bg-red-500/90"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             )}
 

@@ -47,9 +47,8 @@ export function useAuth() {
     queryClient.setQueryData(["/api/user"], updatedUser);
   };
 
-  // Force loading state until we have a definitive result (success or error)
-  // Keep loading if still loading OR if we haven't gotten any result yet OR minimum time hasn't passed
-  const authLoading = isLoading || (user === undefined && !isError) || !hasMinimumLoadTime;
+  // Only show loading on initial load and during minimum time
+  const authLoading = isLoading && !hasMinimumLoadTime;
 
   return {
     user,

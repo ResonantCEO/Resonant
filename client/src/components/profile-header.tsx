@@ -580,7 +580,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           </div>
 
           {/* Social Media Buttons - Absolutely positioned */}
-          <div className={`absolute flex items-center justify-center space-x-2 ${profile?.type === 'artist' ? '-bottom-4 sm:-bottom-6 left-0 right-0' : 'bottom-8 sm:bottom-12 left-0 right-0'}`}>
+          <div className={`absolute flex items-center justify-center space-x-2 ${profile?.type === 'artist' ? '-bottom-8 sm:-bottom-12 left-0 right-0' : 'bottom-8 sm:bottom-12 left-0 right-0'}`}>
             {/* Facebook */}
             {(isOwn || profile?.facebookUrl) && (
               <Button

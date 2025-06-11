@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -12,28 +13,28 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // Always call useAuth first
   const { user } = useAuth();
+  
+  // Initialize theme state
   const [theme, setTheme] = useState<Theme>(() => {
-    // Initialize from localStorage first
     const saved = localStorage.getItem('app-theme');
     return saved as Theme || "light";
   });
+  
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  const [hasInitialized, setHasInitialized] = useState(false);
 
+  // Handle user theme initialization only once
   useEffect(() => {
-    // Initialize theme from user data or localStorage when user loads
-    if (user?.theme) {
+    if (!hasInitialized && user?.theme) {
       setTheme(user.theme as Theme);
       localStorage.setItem('app-theme', user.theme);
-    } else if (!user) {
-      // Keep current theme when logged out (don't reset)
-      const saved = localStorage.getItem('app-theme');
-      if (saved) {
-        setTheme(saved as Theme);
-      }
+      setHasInitialized(true);
     }
-  }, [user, user?.theme]);
+  }, [user?.theme, hasInitialized]);
 
+  // Handle theme changes and system theme detection
   useEffect(() => {
     const root = window.document.documentElement;
     
@@ -61,7 +62,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const handleSetTheme = (newTheme: Theme) => {
     setTheme(newTheme);
-    // Always save to localStorage for persistence
     localStorage.setItem('app-theme', newTheme);
   };
 

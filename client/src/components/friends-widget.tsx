@@ -121,7 +121,7 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
                   </div>
                 ))}
               </div>
-              
+
               <p className="text-sm text-neutral-600 mt-4 text-center">
                 {friends.length} friends
               </p>
@@ -138,15 +138,15 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {friendRequests.map((request: any) => (
-              <div key={request.friendship.id} className="flex items-center space-x-3">
+              <div key={request.id} className="flex items-center space-x-3">
                 <Avatar className="w-12 h-12">
-                  <AvatarImage src={request.profile.profileImageUrl || ""} />
+                  <AvatarImage src={request.requester.profileImageUrl || ""} />
                   <AvatarFallback>
-                    {request.profile.name.slice(0, 2).toUpperCase()}
+                    {request.requester.name.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <p className="font-medium text-neutral-900">{request.profile.name}</p>
+                  <p className="font-medium text-neutral-900">{request.requester.name}</p>
                   <p className="text-sm text-neutral-600">Wants to be friends</p>
                   <div className="flex space-x-2 mt-2">
                     <Button

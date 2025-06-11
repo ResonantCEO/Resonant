@@ -8,6 +8,7 @@ import {
   serial,
   boolean,
   integer,
+  real,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -60,8 +61,8 @@ export const profiles = pgTable("profiles", {
   bio: text("bio"),
   profileImageUrl: varchar("profile_image_url"),
   coverImageUrl: varchar("cover_image_url"),
-  coverPositionX: integer("cover_position_x").default(50),
-  coverPositionY: integer("cover_position_y").default(50),
+  coverPositionX: real("cover_position_x").default(50),
+  coverPositionY: real("cover_position_y").default(50),
   backgroundImageUrl: varchar("background_image_url"),
   profileBackground: text("profile_background"), // 'sunset', 'ocean', 'forest', 'gradient-1', etc., or 'custom-photo'
   visibility: varchar("visibility").notNull().default("public"), // 'public', 'friends', 'private'

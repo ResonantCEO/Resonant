@@ -241,7 +241,6 @@ export default function Discover() {
                     </div>
                   </PopoverContent>
                 </Popover>
-              </Popover>
 
               {/* Quick Sort */}
               <Select defaultValue="relevance">

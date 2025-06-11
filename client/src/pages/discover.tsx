@@ -684,15 +684,11 @@ export default function Discover() {
                         </div>
 
                         {/* Content */}
-                        <div className={`p-3 sm:p-4 md:p-6 ${
-                          item.type === 'artist' ? 'bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50' :
-                          item.type === 'venue' ? 'bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50' :
-                          'bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50'
-                        }`}>
+                        <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 text-white"></div>
                           {/* Header with Name and Location */}
                           <div className="mb-3 sm:mb-4">
                             <div className="flex items-center justify-between mb-2">
-                              <h3 className="text-base font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">
+                              <h3 className="text-base font-bold text-white group-hover:text-orange-400 transition-colors line-clamp-1">
                                 {item.name}
                               </h3>
                               <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-xs sm:text-sm">
@@ -700,25 +696,25 @@ export default function Discover() {
                               </Badge>
                             </div>
                             {item.location && (
-                              <p className="text-xs text-gray-500 flex items-center">
+                              <p className="text-xs text-gray-300 flex items-center">
                                 📍 {item.location}
                               </p>
                             )}
                             {item.genre && (
-                              <p className="text-xs text-purple-600 font-medium mt-1">
+                              <p className="text-xs text-orange-400 font-medium mt-1">
                                 🎵 {item.genre}                              </p>
                             )}
                           </div>
 
                           {/* Description */}
-                          <p className="text-xs text-neutral-600 mb-3 sm:mb-4 leading-relaxed line-clamp-2">
+                          <p className="text-xs text-gray-300 mb-3 sm:mb-4 leading-relaxed line-clamp-2">
                             {item.description}
                           </p>
 
                           {/* Tags */}
                           <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 sm:mb-5">
                             {item.tags?.slice(0, 2).map((tag, index) => (
-                              <Badge key={index} variant="outline" className="text-xs font-medium px-1.5 sm:px-2 py-1 border-purple-300 bg-purple-500 text-white">
+                              <Badge key={index} variant="outline" className="text-xs font-medium px-1.5 sm:px-2 py-1 border-orange-400 bg-orange-500 text-white">
                                 {tag}
                               </Badge>
                             ))}
@@ -726,7 +722,7 @@ export default function Discover() {
 
                           {/* Action Button */}
                           <Button 
-                            className="w-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-bold shadow-lg border-0 text-sm sm:text-base py-2 sm:py-2.5"
+                            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold shadow-lg border-0 text-sm sm:text-base py-2 sm:py-2.5"
                             onClick={() => handleViewProfile(item.id)}
                           >
                             <span className="drop-shadow-sm">View Profile</span>

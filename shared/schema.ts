@@ -67,6 +67,7 @@ export const profiles = pgTable("profiles", {
   profileBackground: text("profile_background"), // 'sunset', 'ocean', 'forest', 'gradient-1', etc., or 'custom-photo'
   visibility: varchar("visibility").notNull().default("public"), // 'public', 'friends', 'private'
   location: varchar("location"),
+  hometown: varchar("hometown"),
   isActive: boolean("is_active").default(false), // which profile is currently active
   isShared: boolean("is_shared").default(false), // true for artist/venue profiles that can have multiple members
   deletedAt: timestamp("deleted_at"), // soft delete timestamp

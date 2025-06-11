@@ -68,6 +68,10 @@ interface ProfileHeaderProps {
 export default function ProfileHeader({ profile, isOwn, canManageMembers, activeTab = "posts", setActiveTab }: ProfileHeaderProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const { data: activeProfile } = useQuery({
+    queryKey: ["/api/profiles/active"],
+  });
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [isPositioningMode, setIsPositioningMode] = useState(false);
   const [coverPhotoPosition, setCoverPhotoPosition] = useState({ x: 50, y: 50 });
@@ -433,20 +437,20 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !isPositioningMode || !coverContainerRef.current) return;
-    
+
     const container = coverContainerRef.current;
     const rect = container.getBoundingClientRect();
-    
+
     const deltaX = e.clientX - dragStart.x;
     const deltaY = e.clientY - dragStart.y;
-    
+
     // Convert pixel movement to percentage
     const percentX = (deltaX / rect.width) * 100;
     const percentY = (deltaY / rect.height) * 100;
-    
+
     const newX = Math.max(0, Math.min(100, coverPhotoPosition.x - percentX));
     const newY = Math.max(0, Math.min(100, coverPhotoPosition.y - percentY));
-    
+
     setCoverPhotoPosition({ x: newX, y: newY });
     setDragStart({ x: e.clientX, y: e.clientY });
   };
@@ -465,24 +469,24 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || !isPositioningMode || !coverContainerRef.current) return;
-    
+
     const touch = e.touches[0];
     const container = coverContainerRef.current;
     const rect = container.getBoundingClientRect();
-    
+
     const deltaX = touch.clientX - dragStart.x;
     const deltaY = touch.clientY - dragStart.y;
-    
+
     // Convert pixel movement to percentage
     const percentX = (deltaX / rect.width) * 100;
     const percentY = (deltaY / rect.height) * 100;
-    
+
     const newX = Math.max(0, Math.min(100, coverPhotoPosition.x - percentX));
     const newY = Math.max(0, Math.min(100, coverPhotoPosition.y - percentY));
-    
+
     setCoverPhotoPosition({ x: newX, y: newY });
     setDragStart({ x: touch.clientX, y: touch.clientY });
-    
+
     e.preventDefault();
   };
 
@@ -778,10 +782,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 </div>
               )}
 
-              
+
             </div>
 
-            
+
           </div>
 
           {/* Add Friend Button - Aligned vertically with share button, horizontally centered with profile picture */}
@@ -881,6 +885,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           {profile?.type === 'venue' && !isOwn && (
             <div className="absolute right-2 sm:right-4 bottom-16 sm:bottom-16 flex flex-col space-y-2">
               {/* Booking Button */}
+              {(!activeProfile || activeProfile.type !== 'venue') && (
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -890,6 +895,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 <Book className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Book</span>
               </Button>
+              )}
             </div>
           )}
         </div>

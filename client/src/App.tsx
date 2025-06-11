@@ -34,14 +34,8 @@ function Router() {
 
   console.log("Router state:", { isLoading, isAuthenticated, hasUser: !!user });
 
-  // Show loading screen during authentication check OR during auth state transitions
-  if (isLoading || (isAuthenticated === undefined)) {
-    console.log("Showing loading screen");
-    return <LoadingScreen />;
-  }
-
   // If not authenticated, show auth page for all routes
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isLoading) {
     console.log("Not authenticated, showing auth page");
     return (
       <Switch>
@@ -51,9 +45,8 @@ function Router() {
     );
   }
 
-  // If authenticated, show main app routes
-  console.log("Authenticated, showing main routes");
-  return (
+  // Main app routes - show even during loading
+  const mainRoutes = (
     <Switch>
       <Route path="/" component={Profile} />
       <Route path="/home" component={Home} />
@@ -63,9 +56,26 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/discover" component={Discover} />
       <Route path="/friends" component={Friends} />
-      <Route path="/*" component={LoadingScreen} />
+      <Route path="/*" component={Profile} />
     </Switch>
   );
+
+  // Show loading screen over the main routes during loading
+  if (isLoading) {
+    console.log("Showing loading screen with profile behind");
+    return (
+      <div className="relative">
+        {mainRoutes}
+        <div className="fixed inset-0 z-50">
+          <LoadingScreen />
+        </div>
+      </div>
+    );
+  }
+
+  // If authenticated and not loading, show main app routes
+  console.log("Authenticated, showing main routes");
+  return mainRoutes;
 }
 
 function App() {

@@ -27,32 +27,52 @@ interface User {
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const [hasMinimumLoadTime, setHasMinimumLoadTime] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [showLoading, setShowLoading] = useState(true);
   
   const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ["/api/user"],
     retry: false,
   });
 
-  // Ensure minimum loading time of 200ms to prevent flash
+  // Handle 2-second loading period
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setHasMinimumLoadTime(true);
-    }, 200);
+    if (user || isError) {
+      // User data loaded or error occurred
+      if (isInitialLoad) {
+        // On initial load, show loading for full 2 seconds
+        const timer = setTimeout(() => {
+          setShowLoading(false);
+          setIsInitialLoad(false);
+        }, 2000);
 
-    return () => clearTimeout(timer);
-  }, []);
+        return () => clearTimeout(timer);
+      } else {
+        // On subsequent loads, hide loading immediately
+        setShowLoading(false);
+      }
+    }
+  }, [user, isError, isInitialLoad]);
+
+  // Reset loading state when query starts loading again after being idle
+  useEffect(() => {
+    if (isLoading && !user && !isError && !isInitialLoad) {
+      setShowLoading(true);
+      const timer = setTimeout(() => {
+        setShowLoading(false);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, user, isError, isInitialLoad]);
 
   const updateUser = (updatedUser: User) => {
     queryClient.setQueryData(["/api/user"], updatedUser);
   };
 
-  // Only show loading on initial load and during minimum time
-  const authLoading = isLoading && !hasMinimumLoadTime;
-
   return {
     user,
-    isLoading: authLoading,
+    isLoading: showLoading,
     isAuthenticated: !!user,
     updateUser,
   };

@@ -27,44 +27,45 @@ interface User {
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [loadingStartTime, setLoadingStartTime] = useState<number>(() => Date.now());
   const [showLoading, setShowLoading] = useState(true);
+  const [hasReceivedData, setHasReceivedData] = useState(false);
   
   const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ["/api/user"],
     retry: false,
   });
 
-  // Handle 2-second loading period
+  // Track when we receive data (success or error)
   useEffect(() => {
-    if (user || isError) {
-      // User data loaded or error occurred
-      if (isInitialLoad) {
-        // On initial load, show loading for full 2 seconds
-        const timer = setTimeout(() => {
-          setShowLoading(false);
-          setIsInitialLoad(false);
-        }, 2000);
-
-        return () => clearTimeout(timer);
-      } else {
-        // On subsequent loads, hide loading immediately
-        setShowLoading(false);
-      }
+    if ((user !== undefined || isError) && !hasReceivedData) {
+      setHasReceivedData(true);
     }
-  }, [user, isError, isInitialLoad]);
+  }, [user, isError, hasReceivedData]);
 
-  // Reset loading state when query starts loading again after being idle
+  // Handle minimum 2-second loading period
   useEffect(() => {
-    if (isLoading && !user && !isError && !isInitialLoad) {
-      setShowLoading(true);
+    if (hasReceivedData) {
+      const elapsed = Date.now() - loadingStartTime;
+      const remainingTime = Math.max(0, 2000 - elapsed);
+      
       const timer = setTimeout(() => {
         setShowLoading(false);
-      }, 2000);
+      }, remainingTime);
 
       return () => clearTimeout(timer);
     }
-  }, [isLoading, user, isError, isInitialLoad]);
+  }, [hasReceivedData, loadingStartTime]);
+
+  // Reset loading state when authentication changes (logout/login cycles)
+  useEffect(() => {
+    if (isLoading && hasReceivedData) {
+      // New auth cycle started, reset everything
+      setLoadingStartTime(Date.now());
+      setShowLoading(true);
+      setHasReceivedData(false);
+    }
+  }, [isLoading, hasReceivedData]);
 
   const updateUser = (updatedUser: User) => {
     queryClient.setQueryData(["/api/user"], updatedUser);
@@ -73,7 +74,7 @@ export function useAuth() {
   return {
     user,
     isLoading: showLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && !showLoading,
     updateUser,
   };
 }

@@ -34,11 +34,11 @@ export function useAuth() {
     retry: false,
   });
 
-  // Ensure minimum loading time of 500ms to prevent flash
+  // Ensure minimum loading time of 200ms to prevent flash
   useEffect(() => {
     const timer = setTimeout(() => {
       setHasMinimumLoadTime(true);
-    }, 500);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, []);

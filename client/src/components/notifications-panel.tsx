@@ -90,7 +90,16 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: number) => {
-      return apiRequest(`/api/notifications/${notificationId}/read`, "POST");
+      const response = await fetch(`/api/notifications/${notificationId}/read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to mark notification as read');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
@@ -100,7 +109,16 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/notifications/mark-all-read', "POST");
+      const response = await fetch('/api/notifications/mark-all-read', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to mark all notifications as read');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
@@ -114,7 +132,16 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   const deleteNotificationMutation = useMutation({
     mutationFn: async (notificationId: number) => {
-      return apiRequest(`/api/notifications/${notificationId}`, "DELETE");
+      const response = await fetch(`/api/notifications/${notificationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete notification');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });

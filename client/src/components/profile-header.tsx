@@ -130,20 +130,45 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   });
 
   const sendFriendRequestMutation = useMutation({
-    mutationFn: async (addresseeId: number) => {
-      return await apiRequest("POST", "/api/friend-requests", { addresseeId });
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/friend-requests", {
+        addresseeId: profile.id,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile.id}`] });
       toast({
         title: "Friend Request Sent",
-        description: "Your friend request has been sent.",
+        description: "Your friend request has been sent successfully.",
       });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
         description: error.message || "Failed to send friend request",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const unfriendMutation = useMutation({
+    mutationFn: async () => {
+      if (!friendshipStatus) throw new Error("No friendship found");
+      return await apiRequest("DELETE", `/api/friendships/${friendshipStatus.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/friends`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}/friends`] });
+      toast({
+        title: "Unfriended",
+        description: "You are no longer friends with this user.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to unfriend user",
         variant: "destructive",
       });
     },

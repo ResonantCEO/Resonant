@@ -593,6 +593,20 @@ export class Storage {
     return friendship || null;
   }
 
+  async getFriendshipById(friendshipId: number): Promise<Friendship | null> {
+    const [friendship] = await db
+      .select()
+      .from(friendships)
+      .where(eq(friendships.id, friendshipId));
+    return friendship || null;
+  }
+
+  async deleteFriendship(friendshipId: number): Promise<void> {
+    await db
+      .delete(friendships)
+      .where(eq(friendships.id, friendshipId));
+  }
+
   // Profile membership operations
   async getProfileMemberships(profileId: number): Promise<any[]> {
     return await db

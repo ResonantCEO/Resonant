@@ -977,6 +977,34 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.delete('/api/friendships/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const friendshipId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Get the friendship to verify user can delete it
+      const friendship = await storage.getFriendshipById(friendshipId);
+      if (!friendship) {
+        return res.status(404).json({ message: "Friendship not found" });
+      }
+
+      // Check if the current user is part of this friendship
+      if (friendship.requesterId !== activeProfile.id && friendship.addresseeId !== activeProfile.id) {
+        return res.status(403).json({ message: "Unauthorized to delete this friendship" });
+      }
+
+      await storage.deleteFriendship(friendshipId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error unfriending user:", error);
+      res.status(500).json({ message: "Failed to unfriend user" });
+    }
+  });
+
   // Post routes
   app.get('/api/posts', isAuthenticated, async (req: any, res) => {
     try {

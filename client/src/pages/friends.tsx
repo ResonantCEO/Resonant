@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/sidebar";
-import FriendsWidget from "@/components/friends-widget";
 import FriendsTab from "@/components/friends-tab";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -38,23 +37,11 @@ export default function Friends() {
 
       {/* Main Content */}
       <div className="flex-1 lg:ml-0 pt-16 lg:pt-0">
-        <div className="max-w-6xl mx-auto p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Left Sidebar - Friends Widget */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-6">
-                <FriendsWidget profileId={activeProfile?.id} />
-              </div>
-            </div>
-
-            {/* Main Content - Full Friends Management */}
-            <div className="lg:col-span-3">
-              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-                {activeProfile && (
-                  <FriendsTab profile={activeProfile} isOwn={true} />
-                )}
-              </div>
-            </div>
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+            {activeProfile && (
+              <FriendsTab profile={activeProfile} isOwn={true} />
+            )}
           </div>
         </div>
       </div>

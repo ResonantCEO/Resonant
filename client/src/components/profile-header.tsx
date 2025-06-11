@@ -655,20 +655,13 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
               {/* Share Button - Bottom Right (for non-venue profiles) */}
               {profile?.type !== 'venue' && (
-                <div className="absolute right-2 sm:right-4 bottom-6 sm:bottom-6"></div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* End of profile header container */}
+                <div className="absolute right-2 sm:right-4 bottom-6 sm:bottom-6">
                   <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
                     <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     <span className="hidden sm:inline">Share</span>
                   </Button>
                 </div>
               )}
-
             </div>
           </div>
         </div>

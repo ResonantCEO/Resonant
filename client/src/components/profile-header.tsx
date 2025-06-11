@@ -794,6 +794,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               >
                 <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Add Friend</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             </div>
           )}

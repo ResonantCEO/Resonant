@@ -7,9 +7,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Users, Music, Building, BarChart3, Settings, Plus, Check, User, Image } from "lucide-react";
 import ProfileManagement from "@/components/profile-management";
 import BookingCalendar from "@/components/booking-calendar";
+import { useSidebar } from "@/hooks/useSidebar";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
+  const { isCollapsed } = useSidebar();
 
   const { data: activeProfile, isLoading } = useQuery({
     queryKey: ["/api/profiles/active"],
@@ -68,11 +70,9 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900">
-      <div className="w-80 bg-white dark:bg-gray-900 shadow-lg border-r border-neutral-200 dark:border-gray-700 hidden lg:block">
-        <Sidebar />
-      </div>
+      <Sidebar />
 
-      <div className="flex-1 p-6">
+      <div className={`flex-1 p-6 transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'}`}>
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">

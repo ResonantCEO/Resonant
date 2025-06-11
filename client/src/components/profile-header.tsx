@@ -792,7 +792,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 disabled={sendFriendRequestMutation.isPending}
                 variant="outline"
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold"
               >
                 <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Add Friend</span>

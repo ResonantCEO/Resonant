@@ -784,9 +784,9 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             
           </div>
 
-          {/* Add Friend Button - Centered between header bottom and profile picture bottom */}
+          {/* Add Friend Button - Aligned vertically with share button, horizontally centered with profile picture */}
           {!isOwn && (
-            <div className="absolute left-4 sm:left-6 bottom-8 sm:bottom-12 z-10">
+            <div className="absolute left-4 sm:left-6 bottom-2 sm:bottom-4 z-10 flex justify-center w-24 sm:w-40">
               <Button 
                 onClick={handleSendFriendRequest}
                 disabled={sendFriendRequestMutation.isPending}

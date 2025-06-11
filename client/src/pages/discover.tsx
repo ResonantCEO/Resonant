@@ -666,7 +666,7 @@ export default function Discover() {
             {/* Results Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredData.map((item) => (
-                  <Card key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 overflow-hidden">
+                  <Card key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 overflow-hidden">
                     <CardContent className="p-0">
                       <div className="relative">
                         {/* Cover Image */}
@@ -684,7 +684,11 @@ export default function Discover() {
                         </div>
 
                         {/* Content */}
-                        <div className="p-3 sm:p-4 md:p-6">
+                        <div className={`p-3 sm:p-4 md:p-6 ${
+                          item.type === 'artist' ? 'bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50' :
+                          item.type === 'venue' ? 'bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50' :
+                          'bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50'
+                        }`}
                           {/* Header with Name and Location */}
                           <div className="mb-3 sm:mb-4">
                             <div className="flex items-center justify-between mb-2">

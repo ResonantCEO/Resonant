@@ -733,7 +733,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
 
           {/* Profile Details - Absolutely positioned */}
-          <div className={`absolute ${profile?.type === 'artist' ? 'left-32 sm:left-52 top-8 sm:top-6 right-4 sm:right-4' : 'left-32 sm:left-52 top-6 right-4 sm:right-4'}`}>
+          <div className={`absolute ${profile?.type === 'artist' ? 'left-32 sm:left-52 top-6 sm:top-4 right-4 sm:right-4' : 'left-32 sm:left-52 top-4 right-4 sm:right-4'}`}>
             <div className="min-w-0 flex-1">
               <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>
               <div className="flex flex-col text-neutral-600 mb-1 space-y-1">

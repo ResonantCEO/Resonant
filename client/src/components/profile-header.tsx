@@ -484,8 +484,38 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           </div>
         )}
 
+        {/* Profile Picture - Absolutely positioned for all profile types */}
+        <div className={`absolute ${profile?.type === 'artist' ? 'left-4 sm:left-6 top-20 sm:top-40' : 'left-4 sm:left-6 top-16 sm:top-32'} z-10`}>
+          <div className="relative">
+            <Avatar 
+              className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+              onClick={handleProfilePictureClick}
+            >
+              <AvatarImage src={profile.profileImageUrl || ""} />
+              <AvatarFallback className="text-lg sm:text-3xl">
+                {getDisplayName().slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            {isOwn && (
+              <>
+                <div 
+                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                  onClick={handleProfilePictureClick}
+                >
+                  <Camera className="w-8 h-8 text-white" />
+                </div>
+                {uploadProfilePictureMutation.isPending && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                    <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
         {/* Profile Info */}
-        <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 sm:pt-2 pb-32 pl-32 sm:pl-52' : 'pt-6 pb-16 h-32 sm:h-48'} relative`}>
+        <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 sm:pt-2 pb-32 pl-32 sm:pl-52' : 'pt-6 sm:pt-2 pb-32 pl-32 sm:pl-52'} relative`}>
           {/* Profile Type & Visibility - Top Right of Content Area */}
           <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
             <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
@@ -505,182 +535,144 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-4 sm:space-y-0 sm:space-x-6">
-            {/* Profile Picture - for non-artist profiles */}
-            {profile?.type !== 'artist' && (
-              // Modified the top position here
-              <div className="relative -mt-8 sm:-mt-14">
-                <div className="relative">
-                  <Avatar 
-                    className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
-                    onClick={handleProfilePictureClick}
-                  >
-                    <AvatarImage src={profile.profileImageUrl || ""} />
-                    <AvatarFallback className="text-lg sm:text-3xl">
-                      {getDisplayName().slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {isOwn && (
-                    <>
-                      <div 
-                        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                        onClick={handleProfilePictureClick}
-                      >
-                        <Camera className="w-8 h-8 text-white" />
-                      </div>
-                      {uploadProfilePictureMutation.isPending && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                          <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
+          {/* Profile Details - Absolutely positioned */}
+          <div className="absolute top-2 sm:top-0 left-0 right-0">
+            <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-neutral-600 mb-3 space-y-1 sm:space-y-0">
+              <span className="flex items-center text-sm">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                {friends.length} friends
+              </span>
+              {profile?.location && (
+                <span className="flex items-center text-sm">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="truncate">{profile?.location}</span>
+                </span>
+              )}
+            </div>
+
+            {/* Genre and Hometown for Artist profiles only */}
+            {profile?.type === "artist" && (
+              <div className="space-y-0.5 text-neutral-600 mb-2">
+                <span className="flex items-center text-sm">
+                  <Music className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="truncate">{profile?.genre || "Genre not specified"}</span>
+                </span>
+                <span className="flex items-center text-sm">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="truncate">{profile?.hometown || "Hometown not specified"}</span>
+                </span>
               </div>
             )}
-
-            {/* Profile Details */}
-            <div className={`flex-1 ${profile?.type !== 'artist' ? '-mt-32 sm:-mt-40' : 'mt-2 sm:mt-0'}`}>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div className={`min-w-0 flex-1 ${profile?.type !== 'artist' ? '-mt-32 sm:-mt-40' : ''}`}>
-                  <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-neutral-600 mb-3 space-y-1 sm:space-y-0">
-                    <span className="flex items-center text-sm">
-                      <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                      {friends.length} friends
-                    </span>
-                    {profile?.location && (
-                      <span className="flex items-center text-sm">
-                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                        <span className="truncate">{profile?.location}</span>
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Genre and Hometown for Artist profiles */}
-                  {profile?.type === "artist" && (
-                    <div className="space-y-0.5 text-neutral-600 mb-2">
-                      <span className="flex items-center text-sm">
-                        <Music className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                        <span className="truncate">{profile?.genre || "Genre not specified"}</span>
-                      </span>
-                      <span className="flex items-center text-sm">
-                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                        <span className="truncate">{profile?.hometown || "Hometown not specified"}</span>
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="mt-2 sm:mt-0 sm:ml-4">
-                  {renderActionButtons()}
-                </div>
-              </div>
-
-              {/* Social Media Buttons - Position based on profile type */}
-              <div className={`flex items-center space-x-2 ${profile?.type === 'artist' ? 'absolute -bottom-2 left-0 right-0 justify-center' : 'justify-center absolute bottom-6 left-0 right-0'}`}>
-                {/* Facebook */}
-                {(isOwn || profile?.facebookUrl) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="p-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 rounded-full"
-                    onClick={() => profile?.facebookUrl && window.open(profile.facebookUrl, '_blank')}
-                    disabled={!profile?.facebookUrl && !isOwn}
-                  >
-                    <Facebook className="w-4 h-4" />
-                  </Button>
-                )}
-
-                {/* Instagram */}
-                {(isOwn || profile?.instagramUrl) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-full"
-                    onClick={() => profile?.instagramUrl && window.open(profile.instagramUrl, '_blank')}
-                    disabled={!profile?.instagramUrl && !isOwn}
-                  >
-                    <Instagram className="w-4 h-4" />
-                  </Button>
-                )}
-
-                {/* Snapchat */}
-                {(isOwn || profile?.snapchatUrl) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="p-2 bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400 rounded-full"
-                    onClick={() => profile?.snapchatUrl && window.open(profile.snapchatUrl, '_blank')}
-                    disabled={!profile?.snapchatUrl && !isOwn}
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                  </Button>
-                )}
-
-                {/* TikTok */}
-                {(isOwn || profile?.tiktokUrl) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
-                    onClick={() => profile?.tiktokUrl && window.open(profile.tiktokUrl, '_blank')}
-                    disabled={!profile?.tiktokUrl && !isOwn}
-                  >
-                    <div className="w-4 h-4 font-bold text-xs flex items-center justify-center">T</div>
-                  </Button>
-                )}
-
-                {/* X (Twitter) */}
-                {(isOwn || profile?.twitterUrl) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
-                    onClick={() => profile?.twitterUrl && window.open(profile.twitterUrl, '_blank')}
-                    disabled={!profile?.twitterUrl && !isOwn}
-                  >
-                    <Twitter className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-
-              {/* Button Stack - Only for venue profiles */}
-              {profile?.type === 'venue' && (
-                <div className="absolute right-2 sm:right-4 bottom-6 sm:bottom-6 flex flex-col space-y-2">
-                  {/* Booking Button - Temporarily visible to all for testing */}
-                  {!isOwn && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]"
-                      onClick={handleBookingRequest}
-                    >
-                      <Book className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">Book</span>
-                    </Button>
-                  )}
-                  {/* Share Button */}
-                  <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
-                    <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">Share</span>
-                  </Button>
-                </div>
-              )}
-
-              {/* Share Button - Bottom Right (for non-venue profiles) */}
-              {profile?.type !== 'venue' && (
-                <div className={`absolute right-2 sm:right-4 ${profile?.type === 'artist' ? '-bottom-2 sm:-bottom-2' : 'bottom-6 sm:bottom-6'}`}>
-                  <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
-                    <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">Share</span>
-                  </Button>
-                </div>
-              )}
-
-            </div>
           </div>
+
+          {/* Action Buttons - Top Right (only for non-owned profiles) */}
+          {!isOwn && (
+            <div className="absolute top-12 sm:top-16 right-0">
+              {renderActionButtons()}
+            </div>
+          )}
+
+          {/* Social Media Buttons - Absolutely positioned at bottom center */}
+          <div className="absolute -bottom-2 left-0 right-0 flex items-center justify-center space-x-2">
+            {/* Facebook */}
+            {(isOwn || profile?.facebookUrl) && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="p-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 rounded-full"
+                onClick={() => profile?.facebookUrl && window.open(profile.facebookUrl, '_blank')}
+                disabled={!profile?.facebookUrl && !isOwn}
+              >
+                <Facebook className="w-4 h-4" />
+              </Button>
+            )}
+
+            {/* Instagram */}
+            {(isOwn || profile?.instagramUrl) && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-full"
+                onClick={() => profile?.instagramUrl && window.open(profile.instagramUrl, '_blank')}
+                disabled={!profile?.instagramUrl && !isOwn}
+              >
+                <Instagram className="w-4 h-4" />
+              </Button>
+            )}
+
+            {/* Snapchat */}
+            {(isOwn || profile?.snapchatUrl) && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="p-2 bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400 rounded-full"
+                onClick={() => profile?.snapchatUrl && window.open(profile.snapchatUrl, '_blank')}
+                disabled={!profile?.snapchatUrl && !isOwn}
+              >
+                <MessageCircle className="w-4 h-4" />
+              </Button>
+            )}
+
+            {/* TikTok */}
+            {(isOwn || profile?.tiktokUrl) && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
+                onClick={() => profile?.tiktokUrl && window.open(profile.tiktokUrl, '_blank')}
+                disabled={!profile?.tiktokUrl && !isOwn}
+              >
+                <div className="w-4 h-4 font-bold text-xs flex items-center justify-center">T</div>
+              </Button>
+            )}
+
+            {/* X (Twitter) */}
+            {(isOwn || profile?.twitterUrl) && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
+                onClick={() => profile?.twitterUrl && window.open(profile.twitterUrl, '_blank')}
+                disabled={!profile?.twitterUrl && !isOwn}
+              >
+                <Twitter className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Button Stack - Absolutely positioned for venue profiles */}
+          {profile?.type === 'venue' && (
+            <div className="absolute right-2 sm:right-4 -bottom-2 sm:-bottom-2 flex flex-col space-y-2">
+              {/* Booking Button */}
+              {!isOwn && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]"
+                  onClick={handleBookingRequest}
+                >
+                  <Book className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Book</span>
+                </Button>
+              )}
+              {/* Share Button */}
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
+                <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Share</span>
+              </Button>
+            </div>
+          )}
+
+          {/* Share Button - Absolutely positioned for non-venue profiles */}
+          {profile?.type !== 'venue' && (
+            <div className="absolute right-2 sm:right-4 -bottom-2 sm:-bottom-2">
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
+                <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Share</span>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -101,12 +101,15 @@ export default function Profile() {
     );
   }
 
-  if (!profile) {
+  // Only show "Profile Not Found" if we have a specific profile ID that doesn't exist
+  // Don't show it during auth transitions or when using active profile
+  if (!profile && profileId && !profileLoading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-neutral-900">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Profile Not Found</h2>
-          <p className="text-gray-600">The profile you're looking for doesn't exist.</p>
+          <img src="/resonant-logo.png" alt="Resonant" className="h-20 mx-auto mb-4 animate-pulse block dark:hidden" />
+          <img src="/resonant-logo-white.png" alt="Resonant" className="h-20 mx-auto mb-4 animate-pulse hidden dark:block" />
+          <div className="w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
     );

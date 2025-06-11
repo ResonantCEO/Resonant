@@ -781,13 +781,22 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               
             </div>
 
-            {/* Action Buttons - Absolutely positioned */}
-            {!isOwn && (
-              <div className="absolute top-0 right-0">
-                {renderActionButtons()}
-              </div>
-            )}
+            
           </div>
+
+          {/* Add Friend Button - Positioned above social media buttons */}
+          {!isOwn && (
+            <div className="absolute flex items-center justify-center bottom-12 sm:bottom-16 left-0 right-0">
+              <Button 
+                onClick={handleSendFriendRequest}
+                disabled={sendFriendRequestMutation.isPending}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Add Friend
+              </Button>
+            </div>
+          )}
 
           {/* Social Media Buttons - Absolutely positioned */}
           <div className="absolute flex items-center justify-center space-x-2 bottom-2 sm:bottom-4 left-0 right-0">

@@ -2,9 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/sidebar";
 import FriendsTab from "@/components/friends-tab";
 import { useAuth } from "@/hooks/useAuth";
+import { useSidebar } from "@/hooks/useSidebar";
 
 export default function Friends() {
   const { user } = useAuth();
+  const { isCollapsed } = useSidebar();
 
   // Get user's active profile
   const { data: activeProfile, isLoading: profileLoading } = useQuery({
@@ -36,8 +38,8 @@ export default function Friends() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-0 pt-16 lg:pt-0">
-        <div className="max-w-4xl mx-auto p-6">
+      <div className={`flex-1 p-6 pt-16 lg:pt-6 transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'}`}>
+        <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
             {activeProfile && (
               <FriendsTab profile={activeProfile} isOwn={true} />

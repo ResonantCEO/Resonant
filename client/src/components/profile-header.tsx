@@ -543,7 +543,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           <div className={`absolute ${profile?.type === 'artist' ? 'left-32 sm:left-52 top-6 sm:top-2 right-4 sm:right-4' : 'left-32 sm:left-52 top-6 right-4 sm:right-4'}`}>
             <div className="min-w-0 flex-1">
               <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-neutral-600 mb-3 space-y-1 sm:space-y-0">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-neutral-600 mb-1 space-y-1 sm:space-y-0">
                 <span className="flex items-center text-sm">
                   <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   {friends.length} friends

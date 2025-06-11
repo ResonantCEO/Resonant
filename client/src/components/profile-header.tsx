@@ -716,7 +716,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               <TabsTrigger value="photos" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                 Photos
               </TabsTrigger>
-              {/* Community tab - only visible for artist profiles */}
+              {/* Community tab - only visible for artist profiles              */}
               {profile?.type === "artist" && (
                 <TabsTrigger value="community" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                   Community

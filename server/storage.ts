@@ -1,4 +1,3 @@
-
 import { eq, and, or, desc, asc, sql, like, ilike, ne, isNull, isNotNull } from "drizzle-orm";
 import { db } from "./db";
 import {
@@ -165,11 +164,11 @@ export class Storage {
       })
       .where(and(eq(profiles.id, profileId), eq(profiles.userId, userId)))
       .returning();
-    
+
     if (!profile) {
       throw new Error("Profile not found or cannot be restored");
     }
-    
+
     return profile;
   }
 
@@ -278,7 +277,7 @@ export class Storage {
 
     // Get like counts and viewer's like status for all posts
     const postIds = postsResult.map(p => p.id);
-    
+
     if (postIds.length === 0) return [];
 
     const likeCounts = await db
@@ -287,7 +286,7 @@ export class Storage {
         count: sql<number>`count(*)`.as('count'),
       })
       .from(postLikes)
-      .where(sql`${postLikes.postId} = ANY(${postIds})`)
+      .where(sql`${postLikes.postId} = ANY(${JSON.stringify(postIds)})`)
       .groupBy(postLikes.postId);
 
     const likeCountMap = new Map(likeCounts.map(lc => [lc.postId, lc.count]));
@@ -300,7 +299,7 @@ export class Storage {
         .from(postLikes)
         .where(
           and(
-            sql`${postLikes.postId} = ANY(${postIds})`,
+            sql`${postLikes.postId} = ANY(${JSON.stringify(postIds)})`,
             eq(postLikes.profileId, viewerProfileId)
           )
         );
@@ -316,7 +315,7 @@ export class Storage {
 
   async getFeedPosts(profileId: number): Promise<any[]> {
     // Get friends' profile IDs
-    const friendships = await db
+    const friendships2 = await db
       .select({
         friendId: sql<number>`CASE 
           WHEN ${friendships.requesterId} = ${profileId} THEN ${friendships.addresseeId}
@@ -334,7 +333,7 @@ export class Storage {
         )
       );
 
-    const friendIds = friendships.map(f => f.friendId);
+    const friendIds = friendships2.map(f => f.friendId);
     friendIds.push(profileId); // Include own posts
 
     if (friendIds.length === 0) return [];
@@ -355,7 +354,7 @@ export class Storage {
       })
       .from(posts)
       .innerJoin(profiles, eq(posts.profileId, profiles.id))
-      .where(sql`${posts.profileId} = ANY(${friendIds})`)
+      .where(sql`${posts.profileId} = ANY(${JSON.stringify(friendIds)})`)
       .orderBy(desc(posts.createdAt))
       .limit(50);
 
@@ -371,7 +370,7 @@ export class Storage {
         count: sql<number>`count(*)`.as('count'),
       })
       .from(postLikes)
-      .where(sql`${postLikes.postId} = ANY(${postIds})`)
+      .where(sql`${postLikes.postId} = ANY(${JSON.stringify(postIds)})`)
       .groupBy(postLikes.postId);
 
     const likeCountMap = new Map(likeCounts.map(lc => [lc.postId, lc.count]));
@@ -382,7 +381,7 @@ export class Storage {
       .from(postLikes)
       .where(
         and(
-          sql`${postLikes.postId} = ANY(${postIds})`,
+          sql`${postLikes.postId} = ANY(${JSON.stringify(postIds)})`,
           eq(postLikes.profileId, profileId)
         )
       );
@@ -397,20 +396,20 @@ export class Storage {
 
   async deletePost(postId: number): Promise<void> {
     console.log(`Storage.deletePost called with postId: ${postId}`);
-    
+
     try {
       // First delete all likes for this post
       console.log(`Deleting likes for post ${postId}`);
       await db.delete(postLikes).where(eq(postLikes.postId, postId));
-      
+
       // Then delete all comments for this post
       console.log(`Deleting comments for post ${postId}`);
       await db.delete(comments).where(eq(comments.postId, postId));
-      
+
       // Finally delete the post itself
       console.log(`Deleting post ${postId}`);
       const result = await db.delete(posts).where(eq(posts.id, postId));
-      
+
       console.log(`Post deletion result:`, result);
       console.log(`Storage.deletePost completed for postId: ${postId}`);
     } catch (error) {
@@ -441,7 +440,7 @@ export class Storage {
   // Comment operations
   async createComment(commentData: InsertComment): Promise<any> {
     const [comment] = await db.insert(comments).values(commentData).returning();
-    
+
     // Join with profile to get comment with profile info
     const [commentWithProfile] = await db
       .select({
@@ -636,7 +635,7 @@ export class Storage {
       .select()
       .from(profiles)
       .where(eq(profiles.id, profileId));
-    
+
     if (profile?.userId === userId) {
       return true;
     }
@@ -826,7 +825,7 @@ export class Storage {
         .where(eq(bookingRequests.venueProfileId, profileId))
         .orderBy(desc(bookingRequests.requestedAt));
     }
-    
+
     return [];
   }
 

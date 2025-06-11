@@ -13,10 +13,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Always call useAuth first
-  const { user } = useAuth();
-  
-  // Initialize theme state
+  // Initialize theme state first (before any conditional logic)
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('app-theme');
     return saved as Theme || "light";
@@ -24,6 +21,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
   const [hasInitialized, setHasInitialized] = useState(false);
+  
+  // Always call useAuth after state initialization
+  const { user } = useAuth();
 
   // Handle user theme initialization only once
   useEffect(() => {

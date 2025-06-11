@@ -107,7 +107,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   });
 
   const { data: friends = [] } = useQuery<any[]>({
-    queryKey: [`/api/profiles/${profile.id}/friends`],
+    queryKey: [`/api/profiles/${profile?.id}/friends`],
     enabled: !!profile?.id,
   });
 

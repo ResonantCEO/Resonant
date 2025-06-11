@@ -321,7 +321,7 @@ export default function Discover() {
                     {/* Enhanced Header with Featured styling */}
                     <div className="h-48 bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-16 h-16 rounded-xl bg-white shadow-xl overflow-hidden">
+                            <div className="w-24 h-24 rounded-xl bg-white shadow-xl overflow-hidden">
                               {item.profileImageUrl ? (
                                 <img 
                                   src={item.profileImageUrl} 
@@ -329,7 +329,7 @@ export default function Discover() {
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-3xl">
+                                <div className="w-full h-full flex items-center justify-center text-4xl">
                                   {getTypeIcon(item.type)}
                                 </div>
                               )}
@@ -467,7 +467,7 @@ export default function Discover() {
                         {/* Enhanced Header with Featured styling */}
                         <div className="h-48 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-16 h-16 rounded-xl bg-white shadow-xl overflow-hidden">
+                            <div className="w-24 h-24 rounded-xl bg-white shadow-xl overflow-hidden">
                               {item.profileImageUrl ? (
                                 <img 
                                   src={item.profileImageUrl} 
@@ -475,7 +475,7 @@ export default function Discover() {
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-3xl">
+                                <div className="w-full h-full flex items-center justify-center text-4xl">
                                   {getTypeIcon(item.type)}
                                 </div>
                               )}
@@ -613,7 +613,7 @@ export default function Discover() {
                         {/* Enhanced Header with Featured styling */}
                         <div className="h-48 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-16 h-16 rounded-xl bg-white shadow-xl overflow-hidden">
+                            <div className="w-24 h-24 rounded-xl bg-white shadow-xl overflow-hidden">
                               {item.profileImageUrl ? (
                                 <img 
                                   src={item.profileImageUrl} 
@@ -621,7 +621,7 @@ export default function Discover() {
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-3xl">
+                                <div className="w-full h-full flex items-center justify-center text-4xl">
                                   {getTypeIcon(item.type)}
                                 </div>
                               )}
@@ -752,7 +752,7 @@ export default function Discover() {
                                 📍 {item.location}
                               </p>
                             )}```text
-                            {item.genre && (
+                            {item.genre && (```text
                               <p className="text-xs text-purple-600 font-medium mt-1">
                                 🎵 {item.genre}
                               </p>

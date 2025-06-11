@@ -32,30 +32,33 @@ function LoadingScreen() {
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  // Show loading screen during authentication check
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  // If not authenticated, show auth page for all routes
+  if (!isAuthenticated) {
+    return (
+      <Switch>
+        <Route path="/" component={AuthPage} />
+        <Route path="/*" component={AuthPage} />
+      </Switch>
+    );
+  }
+
+  // If authenticated, show main app routes
   return (
     <Switch>
-      {isLoading ? (
-        <Route>
-          <LoadingScreen />
-        </Route>
-      ) : !isAuthenticated ? (
-        <>
-          <Route path="/" component={AuthPage} />
-          <Route path="/*" component={AuthPage} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Profile} />
-          <Route path="/home" component={Home} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/profile" component={Profile} />
-          <Route path="/profile/:id" component={Profile} />
-          <Route path="/settings" component={Settings} />
-          <Route path="/discover" component={Discover} />
-          <Route path="/friends" component={Friends} />
-          <Route path="/*" component={NotFound} />
-        </>
-      )}
+      <Route path="/" component={Profile} />
+      <Route path="/home" component={Home} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/profile/:id" component={Profile} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/discover" component={Discover} />
+      <Route path="/friends" component={Friends} />
+      <Route path="/*" component={NotFound} />
     </Switch>
   );
 }

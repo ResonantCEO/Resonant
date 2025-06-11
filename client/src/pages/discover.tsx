@@ -666,7 +666,7 @@ export default function Discover() {
             {/* Results Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredData.map((item) => (
-                  <div key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 overflow-hidden rounded-lg">
+                  <div key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 overflow-hidden rounded-lg" style={{backgroundColor: 'transparent'}}>
                       <div className="relative">
                         {/* Cover Image */}
                         <div className="aspect-video bg-gradient-to-br from-purple-400 via-pink-400 to-red-400 relative overflow-hidden">

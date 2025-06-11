@@ -779,18 +779,39 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.get('/api/profiles/search', isAuthenticated, async (req, res) => {
+  app.get('/api/profiles/search', async (req, res) => {
     try {
       const query = req.query.q as string;
-      if (!query) {
+      const type = req.query.type as string;
+      const location = req.query.location as string;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      if (!query && !type && !location) {
         return res.json([]);
       }
 
-      const profiles = await storage.searchProfiles(query);
+      const profiles = await storage.searchProfiles(query, type, location, limit, offset);
       res.json(profiles);
     } catch (error) {
       console.error("Error searching profiles:", error);
       res.status(500).json({ message: "Failed to search profiles" });
+    }
+  });
+
+  app.get('/api/discover', async (req, res) => {
+    try {
+      const type = req.query.type as string;
+      const location = req.query.location as string;
+      const genre = req.query.genre as string;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const profiles = await storage.discoverProfiles(type, location, genre, limit, offset);
+      res.json(profiles);
+    } catch (error) {
+      console.error("Error fetching discover profiles:", error);
+      res.status(500).json({ message: "Failed to fetch discover profiles" });
     }
   });
 

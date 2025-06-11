@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { Search, Filter, MapPin, Calendar, Users, Star, Bookmark, MessageSquare, Plus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import Sidebar from "@/components/sidebar";
 interface DiscoverItem {
   id: number;
   name: string;
-  type: "artist" | "venue" | "event";
+  type: "artist" | "venue" | "audience" | "event";
   profileImageUrl?: string;
   location?: string;
   genre?: string[];
@@ -33,58 +34,66 @@ export default function Discover() {
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Mock data - replace with actual API call
-  const mockData: DiscoverItem[] = [
-    {
-      id: 1,
-      name: "The Electric Collective",
-      type: "artist",
-      profileImageUrl: "/uploads/artist-1.jpg",
-      location: "Los Angeles, CA",
-      genre: ["Electronic", "House"],
-      rating: 4.8,
-      availability: "available",
-      description: "High-energy electronic duo specializing in festival performances",
-      tags: ["Festival Ready", "Lighting Rig", "International Tours"]
+  // Fetch discover data from API
+  const { data: discoverData = [], isLoading, refetch } = useQuery({
+    queryKey: ['discover', searchQuery, selectedType, selectedLocation, selectedGenre],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      
+      if (searchQuery) {
+        params.append('q', searchQuery);
+      }
+      if (selectedType !== 'all') {
+        params.append('type', selectedType);
+      }
+      if (selectedLocation !== 'all-locations') {
+        params.append('location', selectedLocation);
+      }
+      if (selectedGenre !== 'all-genres') {
+        params.append('genre', selectedGenre);
+      }
+      
+      const endpoint = searchQuery ? '/api/profiles/search' : '/api/discover';
+      const response = await fetch(`${endpoint}?${params}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch discover data');
+      }
+      
+      return response.json();
     },
-    {
-      id: 2,
-      name: "Harmony Hall",
-      type: "venue",
-      profileImageUrl: "/uploads/venue-1.jpg",
-      location: "Nashville, TN",
-      capacity: 1200,
-      rating: 4.6,
-      availability: "limited",
-      description: "Historic concert hall with premium acoustics",
-      tags: ["Premium Audio", "Historic", "Parking Available"]
-    },
-    {
-      id: 3,
-      name: "Summer Music Festival 2025",
-      type: "event",
-      profileImageUrl: "/uploads/event-1.jpg",
-      location: "Austin, TX",
-      eventDate: "2025-07-15",
-      genre: ["Rock", "Indie", "Folk"],
-      description: "3-day outdoor festival seeking booking partnerships",
-      tags: ["Multi-Day", "Outdoor", "Food Vendors"]
-    }
-  ];
-
-  const filteredData = mockData.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = selectedType === "all" || item.type === selectedType;
-    const matchesLocation = selectedLocation === "all-locations" || !selectedLocation || item.location?.includes(selectedLocation);
-    const matchesGenre = selectedGenre === "all-genres" || !selectedGenre || item.genre?.includes(selectedGenre);
-
-    return matchesSearch && matchesType && matchesLocation && matchesGenre;
+    staleTime: 30000, // 30 seconds
   });
+
+  // Transform API data to match interface
+  const filteredData: DiscoverItem[] = discoverData.map((profile: any) => ({
+    id: profile.id,
+    name: profile.name,
+    type: profile.type as "artist" | "venue" | "audience",
+    profileImageUrl: profile.profileImageUrl,
+    location: profile.location,
+    description: profile.bio,
+    // Add default values for missing fields
+    genre: [], // Will be added when genre support is implemented
+    rating: undefined,
+    availability: "available" as const,
+    tags: [],
+  }));
+
+  // Debounced search effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      refetch();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, selectedType, selectedLocation, selectedGenre, refetch]);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "artist": return "🎤";
       case "venue": return "🏛️";
+      case "audience": return "👤";
       case "event": return "🎪";
       default: return "📋";
     }
@@ -163,7 +172,7 @@ export default function Discover() {
                           <SelectItem value="all">All Types</SelectItem>
                           <SelectItem value="artist">Artists</SelectItem>
                           <SelectItem value="venue">Venues</SelectItem>
-                          <SelectItem value="event">Events</SelectItem>
+                          <SelectItem value="audience">Audience Members</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -551,15 +560,15 @@ export default function Discover() {
               </div>
             )}
 
-            {/* Featured Events */}
-            {filteredData.filter(item => item.type === "event").length > 0 && (
+            {/* Featured Audience Members */}
+            {filteredData.filter(item => item.type === "audience").length > 0 && (
               <div className="mb-8">
                 <h3 className="text-lg font-semibold text-neutral-800 mb-4 flex items-center">
-                  <span className="w-2 h-2 rounded-full bg-purple-500 mr-3"></span>
-                  Featured Events
+                  <span className="w-2 h-2 rounded-full bg-orange-500 mr-3"></span>
+                  Featured Audience Members
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {filteredData.filter(item => item.type === "event").slice(0, 3).map((item) => (
+                  {filteredData.filter(item => item.type === "audience").slice(0, 3).map((item) => (
                     <Card 
                       key={item.id} 
                       className="group hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden"
@@ -568,7 +577,7 @@ export default function Discover() {
                     >
                       <CardContent className="p-0">
                         {/* Enhanced Header with Featured styling */}
-                        <div className="h-48 bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
+                        <div className="h-48 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
                           <div className="absolute inset-0 flex items-center justify-center">
                             <div className="w-16 h-16 rounded-xl bg-white shadow-xl flex items-center justify-center text-3xl">
                               {getTypeIcon(item.type)}
@@ -579,9 +588,6 @@ export default function Discover() {
                           {hoveredItem === item.id && (
                             <div className="absolute top-4 right-4 flex gap-2">
                               <Button size="sm" variant="secondary" className="h-8 w-8 p-0 shadow-lg">
-                                <Bookmark className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0 shadow-lg">
                                 <MessageSquare className="h-4 w-4" />
                               </Button>
                             </div>
@@ -589,7 +595,7 @@ export default function Discover() {
 
                           {/* Featured Badge - more prominent */}
                           <div className="absolute top-4 left-4">
-                            <Badge className="bg-gradient-to-r from-purple-500 to-violet-500 text-white font-semibold px-3 py-1 shadow-lg">
+                            <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold px-3 py-1 shadow-lg">
                               ⭐ Featured
                             </Badge>
                           </div>
@@ -600,61 +606,21 @@ export default function Discover() {
                               {item.type}
                             </Badge>
                           </div>
-
-                          {/* Availability Badge */}
-                          {item.availability && (
-                            <div className="absolute bottom-4 left-4">
-                              <Badge className={`${getAvailabilityColor(item.availability)} font-medium px-3 py-1 shadow-lg`}>
-                                {item.availability}
-                              </Badge>
-                            </div>
-                          )}
-
-                          {/* Rating Badge */}
-                          {item.rating && (
-                            <div className="absolute bottom-4 right-4">
-                              <div className="flex items-center gap-1 bg-white/95 backdrop-blur-sm rounded-lg px-3 py-1 shadow-lg">
-                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                <span className="text-sm font-bold text-neutral-800">{item.rating}</span>
-                              </div>
-                            </div>
-                          )}
                         </div>
 
                         {/* Enhanced Content */}
                         <div className="p-5">
                           <div className="mb-4">
-                            <h3 className="font-bold text-lg text-neutral-900 group-hover:text-purple-600 transition-colors mb-2">
+                            <h3 className="font-bold text-lg text-neutral-900 group-hover:text-orange-600 transition-colors mb-2">
                               {item.name}
                             </h3>
 
-                            {/* Location/Date and Capacity */}
+                            {/* Location */}
                             <div className="space-y-2">
-                              {item.type === "event" && item.eventDate ? (
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4 text-purple-500" />
-                                  <span className="text-sm font-medium text-neutral-700">
-                                    {new Date(item.eventDate).toLocaleDateString('en-US', { 
-                                      weekday: 'short', 
-                                      year: 'numeric', 
-                                      month: 'short', 
-                                      day: 'numeric' 
-                                    })}
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="h-4 w-4 text-purple-500" />
-                                  <span className="text-sm font-medium text-neutral-700">{item.location}</span>
-                                </div>
-                              )}
-
-                              {item.capacity && (
-                                <div className="flex items-center gap-2">
-                                  <Users className="h-4 w-4 text-violet-500" />
-                                  <span className="text-sm font-medium text-neutral-700">{item.capacity.toLocaleString()} capacity</span>
-                                </div>
-                              )}
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-orange-500" />
+                                <span className="text-sm font-medium text-neutral-700">{item.location}</span>
+                              </div>
                             </div>
                           </div>
 
@@ -663,17 +629,11 @@ export default function Discover() {
                             {item.description}
                           </p>
 
-                          {/* Tags */}
-                          <div className="flex flex-wrap gap-2 mb-5">
-                            {item.tags?.slice(0, 2).map((tag, index) => (
-                              <Badge key={index} variant="outline" className="text-xs font-medium px-2 py-1 border-purple-300 bg-purple-500 text-white">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-
                           {/* Action Button */}
-                          <Button className="w-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-bold shadow-lg border-0">
+                          <Button 
+                            className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold shadow-lg border-0"
+                            onClick={() => window.location.href = `/profile/${item.id}`}
+                          >
                             <span className="drop-shadow-sm">View Profile</span>
                           </Button>
                         </div>
@@ -689,7 +649,7 @@ export default function Discover() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-neutral-900">
-                All Results ({filteredData.length})
+                {isLoading ? "Loading..." : `All Results (${filteredData.length})`}
               </h2>
               <Select defaultValue="relevance">
                 <SelectTrigger className="w-48">
@@ -770,7 +730,10 @@ export default function Discover() {
                           </div>
 
                           {/* Action Button */}
-                          <Button className="w-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-bold shadow-lg border-0 text-sm sm:text-base py-2 sm:py-2.5">
+                          <Button 
+                            className="w-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-bold shadow-lg border-0 text-sm sm:text-base py-2 sm:py-2.5"
+                            onClick={() => window.location.href = `/profile/${item.id}`}
+                          >
                             <span className="drop-shadow-sm">View Profile</span>
                           </Button>
                         </div>

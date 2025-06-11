@@ -239,8 +239,7 @@ export default function Discover() {
                         Apply
                       </Button>
                     </div>
-                  </div>
-                </PopoverContent>
+                  </PopoverContent>
               </Popover>
 
               {/* Quick Sort */}
@@ -320,20 +319,18 @@ export default function Discover() {
                   <CardContent className="p-0">
                     {/* Enhanced Header with Featured styling */}
                     <div className="h-48 bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-24 h-24 rounded-xl bg-white shadow-xl overflow-hidden">
-                              {item.profileImageUrl ? (
-                                <img 
-                                  src={item.profileImageUrl} 
-                                  alt={item.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-4xl">
-                                  {getTypeIcon(item.type)}
-                                </div>
-                              )}
-                            </div>
+                      <div className="absolute inset-0">
+                            {item.profileImageUrl ? (
+                              <img 
+                                src={item.profileImageUrl} 
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-6xl bg-white">
+                                {getTypeIcon(item.type)}
+                              </div>
+                            )}
                           </div>
 
                       {/* Quick Actions - appear on hover */}
@@ -466,20 +463,18 @@ export default function Discover() {
                       <CardContent className="p-0">
                         {/* Enhanced Header with Featured styling */}
                         <div className="h-48 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-24 h-24 rounded-xl bg-white shadow-xl overflow-hidden">
-                              {item.profileImageUrl ? (
-                                <img 
-                                  src={item.profileImageUrl} 
-                                  alt={item.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-4xl">
-                                  {getTypeIcon(item.type)}
-                                </div>
-                              )}
-                            </div>
+                          <div className="absolute inset-0">
+                            {item.profileImageUrl ? (
+                              <img 
+                                src={item.profileImageUrl} 
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-6xl bg-white">
+                                {getTypeIcon(item.type)}
+                              </div>
+                            )}
                           </div>
 
                           {/* Quick Actions - appear on hover */}
@@ -612,20 +607,18 @@ export default function Discover() {
                       <CardContent className="p-0">
                         {/* Enhanced Header with Featured styling */}
                         <div className="h-48 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-24 h-24 rounded-xl bg-white shadow-xl overflow-hidden">
-                              {item.profileImageUrl ? (
-                                <img 
-                                  src={item.profileImageUrl} 
-                                  alt={item.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-4xl">
-                                  {getTypeIcon(item.type)}
-                                </div>
-                              )}
-                            </div>
+                          <div className="absolute inset-0">
+                            {item.profileImageUrl ? (
+                              <img 
+                                src={item.profileImageUrl} 
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-6xl bg-white">
+                                {getTypeIcon(item.type)}
+                              </div>
+                            )}
                           </div>
 
                           {/* Quick Actions - appear on hover */}

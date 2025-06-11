@@ -388,22 +388,26 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     }
   };
 
-  const handlePositionMode = () => {
+  const handlePositionMode = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering cover photo upload
     if (profile?.coverImageUrl) {
-      setIsPositioningMode(true);
-      // Initialize position from profile data or default to center
-      setCoverPhotoPosition({
-        x: profile.coverPositionX || 50,
-        y: profile.coverPositionY || 50
-      });
+      if (isPositioningMode) {
+        // Save and exit positioning mode
+        updateCoverPositionMutation.mutate(coverPhotoPosition);
+      } else {
+        // Enter positioning mode
+        setIsPositioningMode(true);
+        // Initialize position from profile data or default to center
+        setCoverPhotoPosition({
+          x: profile.coverPositionX || 50,
+          y: profile.coverPositionY || 50
+        });
+      }
     }
   };
 
-  const handleSavePosition = () => {
-    updateCoverPositionMutation.mutate(coverPhotoPosition);
-  };
-
-  const handleCancelPosition = () => {
+  const handleCancelPosition = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering cover photo upload
     setIsPositioningMode(false);
     setCoverPhotoPosition({
       x: profile.coverPositionX || 50,
@@ -561,40 +565,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               </div>
             )}
 
-            {/* Positioning mode overlay */}
+            {/* Positioning mode indicator */}
             {isPositioningMode && (
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-20">
-                <div className="bg-white rounded-lg p-4 m-4 shadow-lg max-w-sm w-full pointer-events-none">
-                  <h3 className="text-lg font-semibold mb-4 text-center">Adjust Cover Photo Position</h3>
-                  
-                  <div className="text-center mb-4">
-                    <p className="text-sm text-gray-600 mb-2">
-                      Drag the photo to reposition it
-                    </p>
-                    <div className="text-xs text-gray-500">
-                      Position: {Math.round(coverPhotoPosition.x)}%, {Math.round(coverPhotoPosition.y)}%
-                    </div>
-                  </div>
-                  
-                  <div className="flex space-x-2 mt-6 pointer-events-auto">
-                    <Button
-                      onClick={handleSavePosition}
-                      disabled={updateCoverPositionMutation.isPending}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      <Check className="w-4 h-4 mr-2" />
-                      {updateCoverPositionMutation.isPending ? "Saving..." : "Save"}
-                    </Button>
-                    <Button
-                      onClick={handleCancelPosition}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      <X className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
+              <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white px-3 py-2 rounded-lg text-sm z-20 pointer-events-none">
+                Drag to reposition • {Math.round(coverPhotoPosition.x)}%, {Math.round(coverPhotoPosition.y)}%
               </div>
             )}
 
@@ -611,25 +585,54 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             )}
 
             {/* Cover photo management buttons */}
-            {isOwn && profile?.coverImageUrl && !isPositioningMode && (
+            {isOwn && profile?.coverImageUrl && (
               <div className="absolute top-2 right-2 flex space-x-2 z-10">
                 <Button
                   onClick={handlePositionMode}
                   size="sm"
                   variant="secondary"
-                  className="bg-white/80 hover:bg-white/90 text-gray-800"
+                  className={`${
+                    isPositioningMode 
+                      ? 'bg-green-500/90 hover:bg-green-600/90 text-white' 
+                      : 'bg-white/80 hover:bg-white/90 text-gray-800'
+                  }`}
+                  disabled={updateCoverPositionMutation.isPending}
                 >
-                  <Move className="w-4 h-4 mr-1" />
-                  Position
+                  {isPositioningMode ? (
+                    <>
+                      <Check className="w-4 h-4 mr-1" />
+                      {updateCoverPositionMutation.isPending ? "Saving..." : "Lock"}
+                    </>
+                  ) : (
+                    <>
+                      <Move className="w-4 h-4 mr-1" />
+                      Position
+                    </>
+                  )}
                 </Button>
-                <Button
-                  onClick={handleRemoveCoverPhoto}
-                  size="sm"
-                  variant="destructive"
-                  className="bg-red-500/80 hover:bg-red-500/90"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+                {isPositioningMode && (
+                  <Button
+                    onClick={handleCancelPosition}
+                    size="sm"
+                    variant="outline"
+                    className="bg-white/80 hover:bg-white/90 text-gray-800"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+                {!isPositioningMode && (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveCoverPhoto();
+                    }}
+                    size="sm"
+                    variant="destructive"
+                    className="bg-red-500/80 hover:bg-red-500/90"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             )}
 

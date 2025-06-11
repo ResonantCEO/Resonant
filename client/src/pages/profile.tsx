@@ -448,7 +448,7 @@ export default function Profile() {
 
           {/* Tab Content */}
           {/* Posts Tab - only for non-artist profiles */}
-          {activeTab === "posts" && profile.type !== "artist" && (
+          {activeTab === "posts" && profile?.type !== "artist" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column - Bio and Friends Widget */}
               <div className="lg:col-span-1 space-y-6">
@@ -482,7 +482,7 @@ export default function Profile() {
           )}
 
           {/* Friends Tab - only for non-artist profiles */}
-          {activeTab === "friends" && profile.type !== "artist" && (
+          {activeTab === "friends" && profile?.type !== "artist" && (
             <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
               <FriendsTab profile={profile} isOwn={isOwn} />
             </div>
@@ -499,14 +499,14 @@ export default function Profile() {
           )}
 
           {/* EPK Tab - only for artist profiles */}
-          {activeTab === "epk" && profile.type === "artist" && (
+          {activeTab === "epk" && profile?.type === "artist" && (
             <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
               <EPKTab profile={profile} isOwn={isOwn} />
             </div>
           )}
 
           {/* Community Tab - only for artist profiles */}
-          {activeTab === "community" && profile.type === "artist" && (
+          {activeTab === "community" && profile?.type === "artist" && (
             <div className="space-y-6">
               {/* Posts Section */}
               <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
@@ -676,7 +676,7 @@ export default function Profile() {
           )}
 
           {/* Stats Tab - only for artist profiles */}
-          {activeTab === "stats" && profile.type === "artist" && (
+          {activeTab === "stats" && profile?.type === "artist" && (
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-neutral-200 dark:border-gray-700 p-6">
               <StatsTab profile={profile} isOwn={isOwn} />
             </div>

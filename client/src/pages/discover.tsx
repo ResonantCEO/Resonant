@@ -116,17 +116,6 @@ export default function Discover() {
     }
   };
 
-  const getProfileTypeColor = (type: string) => {
-    switch (type) {
-      case "artist":
-        return "bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800";
-      case "venue":
-        return "bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700";
-      default:
-        return "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800";
-    }
-  };
-
   return (
     <div className="min-h-screen flex bg-neutral-50">
       <Sidebar />
@@ -250,7 +239,8 @@ export default function Discover() {
                         Apply
                       </Button>
                     </div>
-                  </PopoverContent>
+                  </div>
+                </PopoverContent>
               </Popover>
 
               {/* Quick Sort */}
@@ -649,10 +639,9 @@ export default function Discover() {
                           </div>
 
                           {/* Type Badge */}
-                           {/* Profile Type Badge - Top Left */}
-                          <div className="absolute top-3 left-3 z-10">
-                            <Badge className={`${getProfileTypeColor(item.type)} text-white text-sm font-bold px-4 py-2 shadow-lg border-2 border-white/20 backdrop-blur-sm`}>
-                              {item.type === 'artist' ? '🎵 Artist' : item.type === 'venue' ? '🏛️ Venue' : '👤 Audience'}
+                          <div className="absolute top-4 right-1/2 transform translate-x-1/2">
+                            <Badge variant="secondary" className="capitalize font-medium px-3 py-1 bg-white/90 backdrop-blur-sm">
+                              {item.type}
                             </Badge>
                           </div>
                         </div>
@@ -730,10 +719,10 @@ export default function Discover() {
                           )}
                           <div className="absolute inset-0 bg-black bg-opacity-20"></div>
 
-                           {/* Profile Type Badge - Top Left */}
-                          <div className="absolute top-3 left-3 z-10">
-                            <Badge className={`${getProfileTypeColor(item.type)} text-white text-sm font-bold px-4 py-2 shadow-lg border-2 border-white/20 backdrop-blur-sm`}>
-                              {item.type === 'artist' ? '🎵 Artist' : item.type === 'venue' ? '🏛️ Venue' : '👤 Audience'}
+                          {/* Type Badge */}
+                          <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
+                            <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-xs sm:text-sm">
+                              {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
                             </Badge>
                           </div>
 

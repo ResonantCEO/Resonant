@@ -452,7 +452,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
         </div>
 
-        
+
 
         {/* Profile Info */}
         <div className="p-4 sm:p-6 pt-6 pb-20 relative">
@@ -549,6 +549,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Content Tabs */}
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6">
 
               {/* Social Media Buttons - Consistent positioning for all profile types */}
               <div className="flex items-center space-x-2 absolute bottom-6 left-0 right-0 justify-center">
@@ -666,6 +670,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </div>
           </div>
         </div>
+      </div>
 
       {/* Content Tabs */}
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6">

@@ -69,7 +69,11 @@ const getNotificationColor = (type: string) => {
   }
 };
 
-export default function NotificationsPanel() {
+interface NotificationsPanelProps {
+  showAsCard?: boolean;
+}
+
+export default function NotificationsPanel({ showAsCard = true }: NotificationsPanelProps) {
   const [showAll, setShowAll] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -128,69 +132,86 @@ export default function NotificationsPanel() {
 
   const displayedNotifications = showAll ? notifications : notifications.slice(0, 5);
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Notifications
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
+  const loadingContent = (
+    <div className="space-y-3">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="animate-pulse">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    );
+        </div>
+      ))}
+    </div>
+  );
+
+  if (isLoading) {
+    if (showAsCard) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Notifications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingContent}
+          </CardContent>
+        </Card>
+      );
+    }
+    return loadingContent;
   }
 
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
+  const headerContent = (
+    <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-2">
+        {showAsCard && <Bell className="h-5 w-5" />}
+        {showAsCard && (
+          <h2 className="text-xl font-semibold">
             Notifications
             {unreadCount > 0 && (
               <Badge variant="destructive" className="ml-2">
                 {unreadCount}
               </Badge>
             )}
-          </CardTitle>
-          {unreadCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => markAllAsReadMutation.mutate()}
-              disabled={markAllAsReadMutation.isPending}
-            >
-              <CheckCheck className="h-4 w-4" />
-            </Button>
-          )}
+          </h2>
+        )}
+        {!showAsCard && unreadCount > 0 && (
+          <Badge variant="destructive" className="ml-2">
+            {unreadCount} unread
+          </Badge>
+        )}
+      </div>
+      {unreadCount > 0 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => markAllAsReadMutation.mutate()}
+          disabled={markAllAsReadMutation.isPending}
+        >
+          <CheckCheck className="h-4 w-4" />
+          {!showAsCard && <span className="ml-2">Mark all read</span>}
+        </Button>
+      )}
+    </div>
+  );
+
+  const mainContent = (
+        <>
+      {notifications.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>No notifications yet</p>
         </div>
-      </CardHeader>
-      <CardContent>
-        {notifications.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No notifications yet</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <ScrollArea className="h-96">
-              {displayedNotifications.map((notification: Notification) => {
+      ) : (
+        <div className="space-y-3">
+          <ScrollArea className={showAsCard ? "h-96" : "h-[calc(100vh-300px)]"}>
+            {displayedNotifications.map((notification: Notification) => {
                 const Icon = getNotificationIcon(notification.type);
                 const iconColor = getNotificationColor(notification.type);
                 
@@ -260,20 +281,39 @@ export default function NotificationsPanel() {
                   </div>
                 );
               })}
-            </ScrollArea>
-            
-            {notifications.length > 5 && (
-              <Button
-                variant="ghost"
-                className="w-full"
-                onClick={() => setShowAll(!showAll)}
-              >
-                {showAll ? 'Show Less' : `Show All (${notifications.length})`}
-              </Button>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          </ScrollArea>
+          
+          {notifications.length > 5 && (
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => setShowAll(!showAll)}
+            >
+              {showAll ? 'Show Less' : `Show All (${notifications.length})`}
+            </Button>
+          )}
+        </div>
+      )}
+    </>
+  );
+
+  if (showAsCard) {
+    return (
+      <Card>
+        <CardHeader>
+          {headerContent}
+        </CardHeader>
+        <CardContent>
+          {mainContent}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6">
+      {headerContent}
+      {mainContent}
+    </div>
   );
 }

@@ -327,6 +327,31 @@ export default function Sidebar() {
           <li>
             <Button
               variant="ghost"
+              className={`${isCollapsed ? 'w-full justify-center p-2 relative' : 'w-full justify-start'} ${
+                isActivePath("/notifications") 
+                  ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
+                  : "text-neutral-600 hover:bg-neutral-100"
+              }`}
+              onClick={() => setLocation("/notifications")}
+            >
+              <Bell className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
+              {!isCollapsed && "Notifications"}
+              {!isCollapsed && unreadNotificationCount > 0 && (
+                <Badge className="ml-auto bg-red-500 text-white text-xs">
+                  {unreadNotificationCount}
+                </Badge>
+              )}
+              {isCollapsed && unreadNotificationCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                  {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                </span>
+              )}
+            </Button>
+          </li>
+
+          <li>
+            <Button
+              variant="ghost"
               className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
                 isActivePath("/settings") 
                   ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 

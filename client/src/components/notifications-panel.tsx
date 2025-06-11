@@ -1,128 +1,61 @@
-
-import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  Bell, 
-  Check, 
-  CheckCheck, 
-  Trash2, 
-  UserPlus, 
-  Heart, 
-  MessageCircle, 
-  Users,
-  AlertCircle
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Bell, Check, Trash2, Heart, UserMinus, ExternalLink } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-
-interface Notification {
-  id: number;
-  type: string;
-  title: string;
-  message: string;
-  data?: any;
-  read: boolean;
-  createdAt: string;
-  sender?: {
-    id: number;
-    firstName: string;
-    lastName: string;
-    profileImageUrl?: string;
-  };
-}
-
-const getNotificationIcon = (type: string) => {
-  switch (type) {
-    case "friend_request":
-    case "friend_accepted":
-      return UserPlus;
-    case "post_like":
-      return Heart;
-    case "post_comment":
-      return MessageCircle;
-    case "profile_invite":
-      return Users;
-    default:
-      return Bell;
-  }
-};
-
-const getNotificationColor = (type: string) => {
-  switch (type) {
-    case "friend_request":
-    case "friend_accepted":
-      return "text-blue-500";
-    case "post_like":
-      return "text-red-500";
-    case "post_comment":
-      return "text-green-500";
-    case "profile_invite":
-      return "text-purple-500";
-    default:
-      return "text-gray-500";
-  }
-};
+import { useToast } from "@/hooks/use-toast";
 
 interface NotificationsPanelProps {
   showAsCard?: boolean;
 }
 
+async function apiRequest(method: string, url: string, body?: any) {
+  const response = await fetch(url, {
+    method,
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: "Request failed" }));
+    throw new Error(error.message || `Request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export default function NotificationsPanel({ showAsCard = true }: NotificationsPanelProps) {
-  const [showAll, setShowAll] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch notifications
   const { data: notifications = [], isLoading } = useQuery({
-    queryKey: ['/api/notifications'],
-    refetchInterval: 30000, // Refetch every 30 seconds
+    queryKey: ["/api/notifications"],
+    queryFn: () => apiRequest("GET", "/api/notifications"),
   });
 
-  const { data: unreadCount = 0 } = useQuery({
-    queryKey: ['/api/notifications/unread-count'],
-    refetchInterval: 10000, // Refetch every 10 seconds
-  });
-
+  // Mark as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: number) => {
-      const response = await fetch(`/api/notifications/${notificationId}/read`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to mark notification as read');
-      }
-      return response.json();
+      return await apiRequest("POST", `/api/notifications/${notificationId}/read`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
     },
   });
 
+  // Mark all as read mutation
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/notifications/mark-all-read', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to mark all notifications as read');
-      }
-      return response.json();
+      return await apiRequest("POST", "/api/notifications/mark-all-read");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       toast({
         title: "Success",
         description: "All notifications marked as read",
@@ -130,22 +63,73 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     },
   });
 
+  // Delete notification mutation
   const deleteNotificationMutation = useMutation({
     mutationFn: async (notificationId: number) => {
-      const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete notification');
-      }
-      return response.json();
+      return await apiRequest("DELETE", `/api/notifications/${notificationId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      toast({
+        title: "Success",
+        description: "Notification deleted",
+      });
+    },
+  });
+
+  // Accept friend request mutation
+  const acceptFriendRequestMutation = useMutation({
+    mutationFn: async (senderId: number) => {
+      // First get the friend request
+      const friendRequests = await apiRequest("GET", "/api/friend-requests");
+      const request = friendRequests.find((req: any) => req.profile.userId === senderId);
+      if (!request) throw new Error("Friend request not found");
+
+      return await apiRequest("POST", `/api/friend-requests/${request.friendship.id}/accept`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
+      toast({
+        title: "Friend Request Accepted",
+        description: "You are now friends!",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to accept friend request",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Reject friend request mutation
+  const rejectFriendRequestMutation = useMutation({
+    mutationFn: async (senderId: number) => {
+      // First get the friend request
+      const friendRequests = await apiRequest("GET", "/api/friend-requests");
+      const request = friendRequests.find((req: any) => req.profile.userId === senderId);
+      if (!request) throw new Error("Friend request not found");
+
+      return await apiRequest("POST", `/api/friend-requests/${request.friendship.id}/reject`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
+      toast({
+        title: "Friend Request Declined",
+        description: "Friend request has been declined",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to decline friend request",
+        variant: "destructive",
+      });
     },
   });
 
@@ -157,190 +141,248 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     deleteNotificationMutation.mutate(notificationId);
   };
 
-  const displayedNotifications = showAll ? notifications : notifications.slice(0, 5);
+  const handleMarkAllAsRead = () => {
+    markAllAsReadMutation.mutate();
+  };
 
-  const loadingContent = (
-    <div className="space-y-3">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="animate-pulse">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-            <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+  const handleAcceptFriendRequest = (senderId: number) => {
+    acceptFriendRequestMutation.mutate(senderId);
+  };
+
+  const handleRejectFriendRequest = (senderId: number) => {
+    rejectFriendRequestMutation.mutate(senderId);
+  };
+
+  const handleViewProfile = async (senderId: number) => {
+    try {
+      // Get the sender's active profile
+      const profile = await apiRequest("GET", `/api/users/${senderId}/profiles`);
+      if (profile) {
+        window.location.href = `/profile/${profile.id}`;
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Could not find user profile",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "friend_request":
+        return "👤";
+      case "friend_accepted":
+        return "✅";
+      case "post_like":
+        return "❤️";
+      case "post_comment":
+        return "💬";
+      case "booking_request":
+        return "📅";
+      case "booking_response":
+        return "🎵";
+      case "profile_invite":
+        return "📧";
+      case "profile_deleted":
+        return "🗑️";
+      default:
+        return "🔔";
+    }
+  };
+
+  const NotificationItem = ({ notification }: { notification: any }) => (
+    <div
+      className={`p-4 border rounded-lg transition-colors ${
+        notification.read 
+          ? "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700" 
+          : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
+      }`}
+    >
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0">
+          {notification.sender?.profileImageUrl ? (
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={notification.sender.profileImageUrl} />
+              <AvatarFallback>
+                {notification.sender.firstName?.[0]}{notification.sender.lastName?.[0]}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-lg">
+              {getNotificationIcon(notification.type)}
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+              {notification.title}
+            </h4>
+            {!notification.read && (
+              <Badge variant="secondary" className="ml-2">
+                New
+              </Badge>
+            )}
+          </div>
+
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            {notification.message}
+          </p>
+
+          {/* Friend Request Actions */}
+          {notification.type === "friend_request" && notification.sender && (
+            <div className="flex space-x-2 mt-3">
+              <Button
+                size="sm"
+                onClick={() => handleAcceptFriendRequest(notification.sender.id)}
+                disabled={acceptFriendRequestMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Heart className="w-3 h-3 mr-1" />
+                Accept
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleRejectFriendRequest(notification.sender.id)}
+                disabled={rejectFriendRequestMutation.isPending}
+              >
+                <UserMinus className="w-3 h-3 mr-1" />
+                Decline
+              </Button>
+            </div>
+          )}
+
+          {/* Booking Request Actions */}
+          {notification.type === "booking_request" && notification.sender && (
+            <div className="mt-3">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleViewProfile(notification.sender.id)}
+                className="flex items-center"
+              >
+                <ExternalLink className="w-3 h-3 mr-1" />
+                View Artist Profile
+              </Button>
+            </div>
+          )}
+
+          {/* Booking Response Actions */}
+          {notification.type === "booking_response" && notification.sender && (
+            <div className="mt-3">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleViewProfile(notification.sender.id)}
+                className="flex items-center"
+              >
+                <ExternalLink className="w-3 h-3 mr-1" />
+                View Venue Profile
+              </Button>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+            </span>
+
+            <div className="flex space-x-2">
+              {!notification.read && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleMarkAsRead(notification.id)}
+                  disabled={markAsReadMutation.isPending}
+                >
+                  <Check className="w-3 h-3" />
+                </Button>
+              )}
+
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleDelete(notification.id)}
+                disabled={deleteNotificationMutation.isPending}
+              >
+                <Trash2 className="w-3 h-3" />
+              </Button>
             </div>
           </div>
         </div>
-      ))}
+      </div>
     </div>
   );
 
   if (isLoading) {
-    if (showAsCard) {
-      return (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              Notifications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loadingContent}
-          </CardContent>
-        </Card>
-      );
-    }
-    return loadingContent;
-  }
-
-  const headerContent = (
-    <div className="flex items-center justify-between mb-6">
-      <div className="flex items-center gap-2">
-        {showAsCard && <Bell className="h-5 w-5" />}
-        {showAsCard && (
-          <h2 className="text-xl font-semibold">
-            Notifications
-            {unreadCount > 0 && (
-              <Badge variant="destructive" className="ml-2">
-                {unreadCount}
-              </Badge>
-            )}
-          </h2>
-        )}
-        {!showAsCard && unreadCount > 0 && (
-          <Badge variant="destructive" className="ml-2">
-            {unreadCount} unread
-          </Badge>
-        )}
-      </div>
-      {unreadCount > 0 && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => markAllAsReadMutation.mutate()}
-          disabled={markAllAsReadMutation.isPending}
-        >
-          <CheckCheck className="h-4 w-4" />
-          {!showAsCard && <span className="ml-2">Mark all read</span>}
-        </Button>
-      )}
-    </div>
-  );
-
-  const mainContent = (
-        <>
-      {notifications.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>No notifications yet</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <ScrollArea className={showAsCard ? "h-96" : "h-[calc(100vh-300px)]"}>
-            {displayedNotifications.map((notification: Notification) => {
-                const Icon = getNotificationIcon(notification.type);
-                const iconColor = getNotificationColor(notification.type);
-                
-                return (
-                  <div
-                    key={notification.id}
-                    className={`flex items-start space-x-3 p-3 rounded-lg border transition-colors ${
-                      notification.read 
-                        ? 'bg-gray-50 border-gray-200' 
-                        : 'bg-blue-50 border-blue-200'
-                    }`}
-                  >
-                    <div className="flex-shrink-0">
-                      {notification.sender ? (
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage 
-                            src={notification.sender.profileImageUrl} 
-                            alt={`${notification.sender.firstName} ${notification.sender.lastName}`} 
-                          />
-                          <AvatarFallback>
-                            {notification.sender.firstName[0]}{notification.sender.lastName[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                      ) : (
-                        <div className={`w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center ${iconColor}`}>
-                          <Icon className="h-5 w-5" />
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className={`text-sm font-medium ${notification.read ? 'text-gray-700' : 'text-gray-900'}`}>
-                            {notification.title}
-                          </p>
-                          <p className={`text-sm ${notification.read ? 'text-gray-500' : 'text-gray-600'}`}>
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                          </p>
-                        </div>
-                        
-                        <div className="flex items-center space-x-1 ml-2">
-                          {!notification.read && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleMarkAsRead(notification.id)}
-                              disabled={markAsReadMutation.isPending}
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(notification.id)}
-                            disabled={deleteNotificationMutation.isPending}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-          </ScrollArea>
-          
-          {notifications.length > 5 && (
-            <Button
-              variant="ghost"
-              className="w-full"
-              onClick={() => setShowAll(!showAll)}
-            >
-              {showAll ? 'Show Less' : `Show All (${notifications.length})`}
-            </Button>
-          )}
-        </div>
-      )}
-    </>
-  );
-
-  if (showAsCard) {
     return (
-      <Card>
-        <CardHeader>
-          {headerContent}
-        </CardHeader>
-        <CardContent>
-          {mainContent}
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="animate-pulse">
+            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          </div>
+        ))}
+      </div>
     );
   }
 
-  return (
-    <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-6">
-      {headerContent}
-      {mainContent}
+  const content = (
+    <div className="space-y-4">
+      {notifications.length > 0 && (
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Notifications ({notifications.filter((n: any) => !n.read).length} unread)
+          </h3>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleMarkAllAsRead}
+            disabled={markAllAsReadMutation.isPending || notifications.every((n: any) => n.read)}
+          >
+            Mark all as read
+          </Button>
+        </div>
+      )}
+
+      {notifications.length === 0 ? (
+        <div className="text-center py-8">
+          <Bell className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            No notifications
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400">
+            You're all caught up! Check back later for new updates.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {notifications.map((notification: any) => (
+            <NotificationItem key={notification.id} notification={notification} />
+          ))}
+        </div>
+      )}
     </div>
+  );
+
+  if (!showAsCard) {
+    return content;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Bell className="w-5 h-5 mr-2" />
+          Notifications
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {content}
+      </CardContent>
+    </Card>
   );
 }

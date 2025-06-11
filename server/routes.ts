@@ -862,6 +862,25 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Get user's profiles by user ID (for navigation from notifications)
+  app.get('/api/users/:userId/profiles', async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const profiles = await storage.getProfilesByUserId(userId);
+
+      if (!profiles || profiles.length === 0) {
+        return res.status(404).json({ message: "No profiles found for this user" });
+      }
+
+      // Return the active profile or the first profile
+      const activeProfile = profiles.find(p => p.isActive) || profiles[0];
+      res.json(activeProfile);
+    } catch (error) {
+      console.error("Error fetching user profiles:", error);
+      res.status(500).json({ message: "Failed to fetch user profiles" });
+    }
+  });
+
   // Friend routes
   app.get('/api/friends', isAuthenticated, async (req: any, res) => {
     try {

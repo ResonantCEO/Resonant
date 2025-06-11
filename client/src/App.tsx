@@ -34,8 +34,8 @@ function Router() {
 
   console.log("Router state:", { isLoading, isAuthenticated, hasUser: !!user });
 
-  // Show loading screen during authentication check
-  if (isLoading) {
+  // Show loading screen during authentication check OR during auth state transitions
+  if (isLoading || (isAuthenticated === undefined)) {
     console.log("Showing loading screen");
     return <LoadingScreen />;
   }
@@ -63,7 +63,7 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/discover" component={Discover} />
       <Route path="/friends" component={Friends} />
-      <Route path="/*" component={NotFound} />
+      <Route path="/*" component={LoadingScreen} />
     </Switch>
   );
 }

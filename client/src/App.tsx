@@ -43,12 +43,7 @@ function Router() {
   // If not authenticated after loading is complete, show auth page
   if (!isAuthenticated && !isLoading) {
     console.log("Not authenticated, showing auth page");
-    return (
-      <Switch>
-        <Route path="/" component={AuthPage} />
-        <Route path="/*" component={AuthPage} />
-      </Switch>
-    );
+    return <AuthPage />;
   }
 
   // If authenticated and not loading, show main app routes

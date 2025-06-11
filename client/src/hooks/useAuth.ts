@@ -26,7 +26,7 @@ interface User {
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const { data: user, isLoading } = useQuery<User>({
+  const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ["/api/user"],
     retry: false,
   });
@@ -35,9 +35,12 @@ export function useAuth() {
     queryClient.setQueryData(["/api/user"], updatedUser);
   };
 
+  // Force loading state until we have a definitive result (success or error)
+  const authLoading = isLoading || (user === undefined && !isError);
+
   return {
     user,
-    isLoading,
+    isLoading: authLoading,
     isAuthenticated: !!user,
     updateUser,
   };

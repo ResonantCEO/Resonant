@@ -346,28 +346,7 @@ export default function Discover() {
                         </div>
                       )}
 
-                      {/* Featured Badge - more prominent */}
-                      <div className="absolute top-4 left-4">
-                        <Badge className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold px-3 py-1 shadow-lg">
-                          ⭐ Featured
-                        </Badge>
-                      </div>
-
-                      {/* Type Badge */}
-                      <div className="absolute top-4 right-1/2 transform translate-x-1/2">
-                            <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-sm">
-                              {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-                            </Badge>
-                          </div>
-
-                      {/* Availability Badge */}
-                      {item.availability && (
-                        <div className="absolute bottom-4 left-4">
-                          <Badge className={`${getAvailabilityColor(item.availability)} font-medium px-3 py-1 shadow-lg`}>
-                            {item.availability}
-                          </Badge>
-                        </div>
-                      )}
+                      
 
                       {/* Rating Badge */}
                       {item.rating && (
@@ -383,9 +362,14 @@ export default function Discover() {
                     {/* Enhanced Content */}
                     <div className="p-5">
                       <div className="mb-4">
-                        <h3 className="font-bold text-lg text-neutral-900 group-hover:text-indigo-600 transition-colors mb-2">
-                          {item.name}
-                        </h3>
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-bold text-lg text-neutral-900 group-hover:text-indigo-600 transition-colors">
+                            {item.name}
+                          </h3>
+                          <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-sm">
+                            {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                          </Badge>
+                        </div>
 
                         {/* Location/Date and Capacity */}
                         <div className="space-y-2">
@@ -490,28 +474,7 @@ export default function Discover() {
                             </div>
                           )}
 
-                          {/* Featured Badge - more prominent */}
-                          <div className="absolute top-4 left-4">
-                            <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold px-3 py-1 shadow-lg">
-                              ⭐ Featured
-                            </Badge>
-                          </div>
-
-                          {/* Type Badge */}
-                          <div className="absolute top-4 right-1/2 transform translate-x-1/2">
-                            <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-sm">
-                              {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-                            </Badge>
-                          </div>
-
-                          {/* Availability Badge */}
-                          {item.availability && (
-                            <div className="absolute bottom-4 left-4">
-                              <Badge className={`${getAvailabilityColor(item.availability)} font-medium px-3 py-1 shadow-lg`}>
-                                {item.availability}
-                              </Badge>
-                            </div>
-                          )}
+                          
 
                           {/* Rating Badge */}
                           {item.rating && (
@@ -527,9 +490,14 @@ export default function Discover() {
                         {/* Enhanced Content */}
                         <div className="p-5">
                           <div className="mb-4">
-                            <h3 className="font-bold text-lg text-neutral-900 group-hover:text-green-600 transition-colors mb-2">
-                              {item.name}
-                            </h3>
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="font-bold text-lg text-neutral-900 group-hover:text-green-600 transition-colors">
+                                {item.name}
+                              </h3>
+                              <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-sm">
+                                {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                              </Badge>
+                            </div>
 
                             {/* Location/Date and Capacity */}
                             <div className="space-y-2">
@@ -631,27 +599,20 @@ export default function Discover() {
                             </div>
                           )}
 
-                          {/* Featured Badge - more prominent */}
-                          <div className="absolute top-4 left-4">
-                            <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold px-3 py-1 shadow-lg">
-                              ⭐ Featured
-                            </Badge>
-                          </div>
-
-                          {/* Type Badge */}
-                          <div className="absolute top-4 right-1/2 transform translate-x-1/2">
-                            <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-sm">
-                              {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-                            </Badge>
-                          </div>
+                          
                         </div>
 
                         {/* Enhanced Content */}
                         <div className="p-5">
                           <div className="mb-4">
-                            <h3 className="font-bold text-lg text-neutral-900 group-hover:text-orange-600 transition-colors mb-2">
-                              {item.name}
-                            </h3>
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="font-bold text-lg text-neutral-900 group-hover:text-orange-600 transition-colors">
+                                {item.name}
+                              </h3>
+                              <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-sm">
+                                {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                              </Badge>
+                            </div>
 
                             {/* Location */}
                             <div className="space-y-2">
@@ -719,28 +680,21 @@ export default function Discover() {
                           )}
                           <div className="absolute inset-0 bg-black bg-opacity-20"></div>
 
-                          {/* Type Badge */}
-                          <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
-                            <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-xs sm:text-sm">
-                              {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-                            </Badge>
-                          </div>
-
-                          {/* Availability Badge */}
-                          <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
-                            <Badge className={`${getAvailabilityColor(item.availability)} font-bold border-0 shadow-lg text-xs sm:text-sm`}>
-                              {item.availability}
-                            </Badge>
-                          </div>
+                          
                         </div>
 
                         {/* Content */}
                         <div className="p-3 sm:p-4 md:p-6">
                           {/* Header with Name and Location */}
                           <div className="mb-3 sm:mb-4">
-                            <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors line-clamp-1">
-                              {item.name}
-                            </h3>
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="text-base font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">
+                                {item.name}
+                              </h3>
+                              <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-xs sm:text-sm">
+                                {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                              </Badge>
+                            </div>
                             {item.location && (
                               <p className="text-xs text-gray-500 flex items-center">
                                 📍 {item.location}

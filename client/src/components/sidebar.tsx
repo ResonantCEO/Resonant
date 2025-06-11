@@ -64,10 +64,12 @@ export default function Sidebar() {
     queryKey: ["/api/friend-requests"],
   });
 
-  const { data: unreadNotificationCount = 0 } = useQuery({
+  const { data: unreadNotificationCountData = { count: 0 } } = useQuery({
     queryKey: ['/api/notifications/unread-count'],
     refetchInterval: 10000, // Refetch every 10 seconds
   });
+
+  const unreadNotificationCount = Number(unreadNotificationCountData?.count || 0);
 
   const activateProfileMutation = useMutation({
     mutationFn: async (profileId: number) => {
@@ -330,8 +332,8 @@ export default function Sidebar() {
               <Bell className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
               {!isCollapsed && "Notifications"}
               {!isCollapsed && unreadNotificationCount > 0 && (
-                <Badge className="ml-auto bg-red-500 text-white text-xs">
-                  {unreadNotificationCount}
+                <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
+                  {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
                 </Badge>
               )}
               {isCollapsed && unreadNotificationCount > 0 && (

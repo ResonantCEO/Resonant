@@ -666,8 +666,7 @@ export default function Discover() {
             {/* Results Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredData.map((item) => (
-                  <Card key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 overflow-hidden">
-                    <CardContent className="p-0">
+                  <div key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 overflow-hidden rounded-lg">
                       <div className="relative">
                         {/* Cover Image */}
                         <div className="aspect-video bg-gradient-to-br from-purple-400 via-pink-400 to-red-400 relative overflow-hidden">
@@ -681,7 +680,7 @@ export default function Discover() {
                         </div>
 
                         {/* Content */}
-                        <div className="p-3 sm:p-4 md:p-6 bg-[#2a2e35] text-white">
+                        <div className="p-3 sm:p-4 md:p-6 text-white" style={{backgroundColor: '#2a2e35'}}>
                           {/* Header with Name and Location */}
                           <div className="mb-3 sm:mb-4">
                             <div className="flex items-center justify-between mb-2">
@@ -727,8 +726,7 @@ export default function Discover() {
                           </Button>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                  </div>
                 ))}
             </div>
 

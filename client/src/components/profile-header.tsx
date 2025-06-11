@@ -547,7 +547,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 )}
               </div>
             </div>
-          </div></div>
+          </div>
+        </div>
 
               {/* Social Media Buttons - Consistent positioning for all profile types */}
               <div className="flex items-center space-x-2 absolute bottom-6 left-0 right-0 justify-center">

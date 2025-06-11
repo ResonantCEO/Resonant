@@ -830,7 +830,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.get('/api/discover', async (req, res) => {
+  app.get('/api/discover', isAuthenticated, async (req: any, res) => {
     try {
       const type = req.query.type as string;
       const location = req.query.location as string;
@@ -838,7 +838,11 @@ export function registerRoutes(app: Express): Server {
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
 
-      const profiles = await storage.discoverProfiles(type, location, genre, limit, offset);
+      // Get the user's active profile to exclude it from results
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      const excludeProfileId = activeProfile?.id;
+
+      const profiles = await storage.discoverProfiles(type, location, genre, limit, offset, excludeProfileId);
       res.json(profiles);
     } catch (error) {
       console.error("Error fetching discover profiles:", error);

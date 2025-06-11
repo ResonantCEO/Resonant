@@ -218,7 +218,7 @@ export class Storage {
       .offset(offset);
   }
 
-  async discoverProfiles(type?: string, location?: string, genre?: string, limit = 20, offset = 0): Promise<Profile[]> {
+  async discoverProfiles(type?: string, location?: string, genre?: string, limit: number = 20, offset: number = 0, excludeProfileId?: number): Promise<Profile[]> {
     let whereConditions: any[] = [isNull(profiles.deletedAt)];
 
     if (type && ['artist', 'venue', 'audience'].includes(type)) {
@@ -236,6 +236,10 @@ export class Storage {
           ilike(profiles.bio, `%${genre}%`)
         )
       );
+    }
+
+    if (excludeProfileId) {
+      whereConditions.push(ne(profiles.id, excludeProfileId));
     }
 
     return await db

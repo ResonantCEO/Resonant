@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Sidebar from "@/components/sidebar";
+import { useSidebar } from "@/hooks/useSidebar";
 
 interface DiscoverItem {
   id: number;
@@ -33,6 +34,7 @@ export default function Discover() {
   const [selectedGenre, setSelectedGenre] = useState("all-genres");
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const { isCollapsed } = useSidebar();
 
   // Fetch discover data from API
   const { data: discoverData = [], isLoading, refetch } = useQuery({
@@ -119,8 +121,8 @@ export default function Discover() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-0 pt-16 lg:pt-0">
+      {/* Main Content - Responsive to sidebar state */}
+      <div className={`flex-1 pt-16 lg:pt-0 transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'}`}>
         <div className="max-w-7xl mx-auto p-6">
 
           {/* Header */}

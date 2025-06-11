@@ -1396,10 +1396,18 @@ export function registerRoutes(app: Express): Server {
       const { limit = 20, offset = 0 } = req.query;
       const { notificationService } = await import('./notifications');
 
+      // Get active profile to filter notifications
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
       const notifications = await notificationService.getUserNotifications(
         req.user.id,
         parseInt(limit),
-        parseInt(offset)
+        parseInt(offset),
+        activeProfile.id,
+        activeProfile.type
       );
 
       res.json(notifications);
@@ -1412,7 +1420,14 @@ export function registerRoutes(app: Express): Server {
   app.get('/api/notifications/unread-count', isAuthenticated, async (req: any, res) => {
     try {
       const { notificationService } = await import('./notifications');
-      const count = await notificationService.getUnreadCount(req.user.id);
+      
+      // Get active profile to filter notifications
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.json({ count: 0 });
+      }
+
+      const count = await notificationService.getUnreadCount(req.user.id, activeProfile.id, activeProfile.type);
       res.json({ count });
     } catch (error) {
       console.error("Error fetching unread count:", error);

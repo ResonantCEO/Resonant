@@ -47,8 +47,16 @@ export class NotificationService {
     return notification;
   }
 
-  // Get notifications for a user
-  async getUserNotifications(userId: number, limit = 20, offset = 0): Promise<any[]> {
+  // Get notifications for a user filtered by active profile
+  async getUserNotifications(userId: number, limit = 20, offset = 0, activeProfileId?: number, activeProfileType?: string): Promise<any[]> {
+    let whereConditions = [eq(notifications.recipientId, userId)];
+
+    // Filter notifications based on active profile type
+    if (activeProfileType && activeProfileId) {
+      const relevantTypes = this.getRelevantNotificationTypes(activeProfileType);
+      whereConditions.push(inArray(notifications.type, relevantTypes));
+    }
+
     const userNotifications = await db
       .select({
         id: notifications.id,
@@ -67,7 +75,7 @@ export class NotificationService {
       })
       .from(notifications)
       .leftJoin(users, eq(notifications.senderId, users.id))
-      .where(eq(notifications.recipientId, userId))
+      .where(and(...whereConditions))
       .orderBy(desc(notifications.createdAt))
       .limit(limit)
       .offset(offset);
@@ -94,15 +102,23 @@ export class NotificationService {
       .where(eq(notifications.recipientId, userId));
   }
 
-  // Get unread notification count
-  async getUnreadCount(userId: number): Promise<number> {
+  // Get unread notification count filtered by active profile
+  async getUnreadCount(userId: number, activeProfileId?: number, activeProfileType?: string): Promise<number> {
+    let whereConditions = [
+      eq(notifications.recipientId, userId),
+      eq(notifications.read, false)
+    ];
+
+    // Filter notifications based on active profile type
+    if (activeProfileType && activeProfileId) {
+      const relevantTypes = this.getRelevantNotificationTypes(activeProfileType);
+      whereConditions.push(inArray(notifications.type, relevantTypes));
+    }
+
     const result = await db
       .select({ count: sql<number>`count(*)` })
       .from(notifications)
-      .where(and(
-        eq(notifications.recipientId, userId),
-        eq(notifications.read, false)
-      ));
+      .where(and(...whereConditions));
 
     return result[0].count;
   }
@@ -217,6 +233,22 @@ export class NotificationService {
 
     } catch (error) {
       console.error("Failed to send email notification:", error);
+    }
+  }
+
+  // Get relevant notification types based on profile type
+  private getRelevantNotificationTypes(profileType: string): string[] {
+    const commonTypes = ['friend_request', 'friend_accepted', 'profile_invite', 'profile_deleted'];
+    
+    switch (profileType) {
+      case 'artist':
+        return [...commonTypes, 'booking_response', 'post_like', 'post_comment'];
+      case 'venue':
+        return [...commonTypes, 'booking_request', 'post_like', 'post_comment'];
+      case 'audience':
+        return [...commonTypes, 'post_like', 'post_comment'];
+      default:
+        return commonTypes;
     }
   }
 

@@ -684,7 +684,11 @@ export default function Discover() {
                         </div>
 
                         {/* Content */}
-                        <div className="p-3 sm:p-4 md:p-6">
+                        <div className={`p-3 sm:p-4 md:p-6 ${
+                          item.type === 'artist' ? 'bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50' :
+                          item.type === 'venue' ? 'bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50' :
+                          'bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50'
+                        }`}>
                           {/* Header with Name and Location */}
                           <div className="mb-3 sm:mb-4">
                             <div className="flex items-center justify-between mb-2">

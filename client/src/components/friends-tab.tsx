@@ -149,16 +149,19 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
     }
   };
 
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "artist": return "🎤";
+      case "venue": return "🏛️";
+      case "audience": return "👤";
+      default: return "📋";
+    }
+  };
+
   const getProfileTypeBadge = (type: string) => {
-    const colors = {
-      artist: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-      venue: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-      audience: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-    };
-    
     return (
-      <Badge className={`${colors[type as keyof typeof colors]} text-xs`}>
-        {getProfileTypeIcon(type)}
+      <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-xs">
+        {getTypeIcon(type)}
         <span className="ml-1 capitalize">{type}</span>
       </Badge>
     );

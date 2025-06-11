@@ -168,11 +168,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   const getProfileTypeColor = (type: string) => {
     switch (type) {
       case "artist":
-        return "bg-artist-green";
+        return "bg-white text-purple-600 font-bold border-0 shadow-lg";
       case "venue":
-        return "bg-venue-red";
+        return "bg-white text-purple-600 font-bold border-0 shadow-lg";
       default:
-        return "bg-fb-blue";
+        return "bg-white text-purple-600 font-bold border-0 shadow-lg";
     }
   };
 
@@ -183,7 +183,16 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       case "venue":
         return "Venue";
       default:
-        return "Audience Member";
+        return "Audience";
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "artist": return "🎤";
+      case "venue": return "🏛️";
+      case "audience": return "👤";
+      default: return "📋";
     }
   };
 
@@ -662,8 +671,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   </Button>
                 )}
               </div>
-              <Badge className={`${getProfileTypeColor(profile?.type || 'audience')} text-white text-xs sm:text-sm`}>
-                {profile?.type === 'artist' ? 'Artist' : profile?.type === 'venue' ? 'Venue' : 'Audience'}
+              <Badge className={`${getProfileTypeColor(profile?.type || 'audience')} text-xs sm:text-sm`}>
+                {getTypeIcon(profile?.type || 'audience')} {getProfileTypeName(profile?.type || 'audience')}
               </Badge>
             </div>
           </div>

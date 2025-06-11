@@ -60,6 +60,15 @@ const ROLE_COLORS = {
   member: "bg-gray-100 text-black border-gray-300",
 };
 
+const getTypeIcon = (type: string) => {
+  switch (type) {
+    case "artist": return "🎤";
+    case "venue": return "🏛️";
+    case "audience": return "👤";
+    default: return "📋";
+  }
+};
+
 const PERMISSIONS = [
   { value: "manage_profile", label: "Manage Profile" },
   { value: "manage_posts", label: "Manage Posts" },

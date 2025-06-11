@@ -42,6 +42,17 @@ const TYPE_ICONS = {
   audience: User,
 };
 
+function getTypeIcon(type: string) {
+  switch (type) {
+    case "artist":
+      return <Music className="h-3 w-3 mr-1" />;
+    case "venue":
+      return <MapPin className="h-3 w-3 mr-1" />;
+    default:
+      return <User className="h-3 w-3 mr-1" />;
+  }
+}
+
 export default function SharedProfilesWidget() {
   const { data: memberships = [], isLoading } = useQuery({
     queryKey: ['/api/user/memberships'],
@@ -109,7 +120,7 @@ export default function SharedProfilesWidget() {
           {sharedProfiles.map((membership: ProfileMembership) => {
             const RoleIcon = ROLE_ICONS[membership.membership.role as keyof typeof ROLE_ICONS] || User;
             const TypeIcon = TYPE_ICONS[membership.profile.type as keyof typeof TYPE_ICONS] || User;
-            
+
             return (
               <Link 
                 key={membership.membership.id} 
@@ -157,7 +168,7 @@ export default function SharedProfilesWidget() {
             );
           })}
         </div>
-        
+
         <div className="mt-4 pt-4 border-t">
           <Button variant="outline" className="w-full" asChild>
             <Link href="/discover">

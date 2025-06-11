@@ -114,6 +114,17 @@ export default function Sidebar() {
     }
   };
 
+    const getTypeIcon = (type: string) => {
+        switch (type) {
+            case "artist":
+                return <BarChart3 className="w-3 h-3 mr-1" />;
+            case "venue":
+                return <Home className="w-3 h-3 mr-1" />;
+            default:
+                return <Users className="w-3 h-3 mr-1" />;
+        }
+    };
+
   const getDisplayName = (profile: any) => {
     if (profile.type === 'audience' && user) {
       return `${user.firstName || ''} ${user.lastName || ''}`.trim() || profile.name;
@@ -207,7 +218,7 @@ export default function Sidebar() {
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-neutral-900">{getDisplayName(profile)}</span>
                         <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
-                          {getProfileTypeName(profile.type)}
+                          {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
                         </Badge>
                       </div>
                       <div className="flex items-center space-x-2">

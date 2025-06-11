@@ -40,8 +40,8 @@ function Router() {
     return <LoadingScreen />;
   }
 
-  // If not authenticated after loading, show auth page
-  if (!isAuthenticated) {
+  // If not authenticated after loading is complete, show auth page
+  if (!isAuthenticated && !isLoading) {
     console.log("Not authenticated, showing auth page");
     return (
       <Switch>

@@ -744,7 +744,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 {profile?.type === "audience" && (profile?.hometown || profile?.location) && (
                   <span className="flex items-center text-sm">
                     <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    <span className="truncate">{profile?.hometown || profile?.location || "Location not specified"}</span>
+                    <span className="truncate">{profile?.hometown || profile?.location}</span>
                   </span>
                 )}
                 {profile?.location && profile?.type !== "audience" && (
@@ -769,15 +769,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 </div>
               )}
 
-              {/* Hometown for Audience profiles */}
-              {profile?.type === "audience" && (profile?.hometown || profile?.location) && (
-                <div className="space-y-1 text-neutral-600 mb-2">
-                  <span className="flex items-center text-sm">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    <span className="truncate">{profile?.hometown || profile?.location}</span>
-                  </span>
-                </div>
-              )}
+              
             </div>
 
             {/* Action Buttons - Absolutely positioned */}

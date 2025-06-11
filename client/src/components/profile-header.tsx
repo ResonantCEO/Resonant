@@ -744,7 +744,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 {profile?.type === "audience" && profile?.hometown && (
                   <span className="flex items-center text-sm">
                     <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    <span className="truncate">{profile?.hometown}</span>
+                    <span className="truncate">{profile.hometown}</span>
                   </span>
                 )}
                 {profile?.location && profile?.type !== "audience" && (

@@ -47,7 +47,7 @@ export default function Discover() {
     queryKey: ['discover', searchQuery, selectedType, selectedLocation, selectedGenre],
     queryFn: async () => {
       const params = new URLSearchParams();
-      
+
       if (searchQuery) {
         params.append('q', searchQuery);
       }
@@ -60,14 +60,14 @@ export default function Discover() {
       if (selectedGenre !== 'all-genres') {
         params.append('genre', selectedGenre);
       }
-      
+
       const endpoint = searchQuery ? '/api/profiles/search' : '/api/discover';
       const response = await fetch(`${endpoint}?${params}`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch discover data');
       }
-      
+
       return response.json();
     },
     staleTime: 30000, // 30 seconds
@@ -321,10 +321,20 @@ export default function Discover() {
                     {/* Enhanced Header with Featured styling */}
                     <div className="h-48 bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-16 h-16 rounded-xl bg-white shadow-xl flex items-center justify-center text-3xl">
-                          {getTypeIcon(item.type)}
-                        </div>
-                      </div>
+                        <div className="w-16 h-16 rounded-xl bg-white shadow-xl overflow-hidden">
+                              {item.profileImageUrl ? (
+                                <img 
+                                  src={item.profileImageUrl} 
+                                  alt={item.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-3xl">
+                                  {getTypeIcon(item.type)}
+                                </div>
+                              )}
+                            </div>
+                          </div>
 
                       {/* Quick Actions - appear on hover */}
                       {hoveredItem === item.id && (
@@ -457,8 +467,18 @@ export default function Discover() {
                         {/* Enhanced Header with Featured styling */}
                         <div className="h-48 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-16 h-16 rounded-xl bg-white shadow-xl flex items-center justify-center text-3xl">
-                              {getTypeIcon(item.type)}
+                            <div className="w-16 h-16 rounded-xl bg-white shadow-xl overflow-hidden">
+                              {item.profileImageUrl ? (
+                                <img 
+                                  src={item.profileImageUrl} 
+                                  alt={item.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-3xl">
+                                  {getTypeIcon(item.type)}
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -593,8 +613,18 @@ export default function Discover() {
                         {/* Enhanced Header with Featured styling */}
                         <div className="h-48 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 rounded-t-lg relative overflow-hidden border-b border-neutral-100">
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-16 h-16 rounded-xl bg-white shadow-xl flex items-center justify-center text-3xl">
-                              {getTypeIcon(item.type)}
+                            <div className="w-16 h-16 rounded-xl bg-white shadow-xl overflow-hidden">
+                              {item.profileImageUrl ? (
+                                <img 
+                                  src={item.profileImageUrl} 
+                                  alt={item.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-3xl">
+                                  {getTypeIcon(item.type)}
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -721,7 +751,7 @@ export default function Discover() {
                               <p className="text-xs text-gray-500 flex items-center">
                                 📍 {item.location}
                               </p>
-                            )}
+                            )}```text
                             {item.genre && (
                               <p className="text-xs text-purple-600 font-medium mt-1">
                                 🎵 {item.genre}

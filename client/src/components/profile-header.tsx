@@ -452,7 +452,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
         </div>
 
-        
+
 
         {/* Profile Info */}
         <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 pb-16 pl-32 sm:pl-52' : 'pt-6 pb-16'} relative min-h-[168px] sm:min-h-[192px]`}>
@@ -558,7 +558,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
               {/* Genre and Hometown for Artist profiles */}
               {profile?.type === "artist" && (
-                <div className="space-y-0.5 text-neutral-600 mb-2">
+                <div className="space-y-1 text-neutral-600 mb-2">
                   <span className="flex items-center text-sm">
                     <Music className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     <span className="truncate">{profile?.genre || "Genre not specified"}</span>

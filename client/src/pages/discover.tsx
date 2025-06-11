@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import { Search, Filter, MapPin, Calendar, Users, Star, Bookmark, MessageSquare, Plus, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,11 @@ export default function Discover() {
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { isCollapsed } = useSidebar();
+  const [, setLocation] = useLocation();
+
+  const handleViewProfile = (profileId: number) => {
+    setLocation(`/profile/${profileId}`);
+  };
 
   // Fetch discover data from API
   const { data: discoverData = [], isLoading, refetch } = useQuery({
@@ -418,7 +424,10 @@ export default function Discover() {
                       </div>
 
                       {/* Action Button */}
-                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold shadow-lg border-0">
+                      <Button 
+                        className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold shadow-lg border-0"
+                        onClick={() => handleViewProfile(item.id)}
+                      >
                         <span className="drop-shadow-sm">View Profile</span>
                       </Button>
                     </div>
@@ -551,7 +560,10 @@ export default function Discover() {
                           </div>
 
                           {/* Action Button */}
-                          <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold shadow-lg border-0">
+                          <Button 
+                            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold shadow-lg border-0"
+                            onClick={() => handleViewProfile(item.id)}
+                          >
                             <span className="drop-shadow-sm">View Profile</span>
                           </Button>
                         </div>
@@ -634,7 +646,7 @@ export default function Discover() {
                           {/* Action Button */}
                           <Button 
                             className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold shadow-lg border-0"
-                            onClick={() => window.location.href = `/profile/${item.id}`}
+                            onClick={() => handleViewProfile(item.id)}
                           >
                             <span className="drop-shadow-sm">View Profile</span>
                           </Button>
@@ -734,7 +746,7 @@ export default function Discover() {
                           {/* Action Button */}
                           <Button 
                             className="w-full bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white font-bold shadow-lg border-0 text-sm sm:text-base py-2 sm:py-2.5"
-                            onClick={() => window.location.href = `/profile/${item.id}`}
+                            onClick={() => handleViewProfile(item.id)}
                           >
                             <span className="drop-shadow-sm">View Profile</span>
                           </Button>

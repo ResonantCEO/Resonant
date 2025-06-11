@@ -66,6 +66,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   const { user } = useAuth();
   const [showBookingDialog, setShowBookingDialog] = useState(false);
 
+  // Don't render if profile is not loaded
+  if (!profile) {
+    return null;
+  }
+
   // Get viewer's active profile to check their type
   const { data: viewerProfile, isLoading: viewerProfileLoading } = useQuery({
     queryKey: ["/api/profiles/active"],
@@ -375,7 +380,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   return (
     <>
       {/* Profile Header */}
-      <div className={`bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden ${profile.type === 'artist' ? 'h-[275px] sm:h-[375px]' : 'min-h-[300px] sm:min-h-[340px]'}`}>
+      <div className={`bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden ${profile?.type === 'artist' ? 'h-[275px] sm:h-[375px]' : 'min-h-[300px] sm:min-h-[340px]'}`}></div>
         {/* Cover Photo */}
         <div className="h-32 sm:h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
           {/* Clickable cover photo area */}

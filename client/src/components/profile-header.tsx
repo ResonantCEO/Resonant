@@ -477,7 +477,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
           {/* Artist Profile Picture - Overlapping cover photo */}
           {profile?.type === 'artist' && (
-            <div className="absolute left-4 sm:left-6 top-8 sm:top-16 z-10"></div>
+            <div className="absolute left-4 sm:left-6 top-8 sm:top-16 z-10">
               <div className="relative">
                 <Avatar 
                   className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}

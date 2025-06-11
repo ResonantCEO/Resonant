@@ -355,10 +355,10 @@ export default function Discover() {
 
                       {/* Type Badge */}
                       <div className="absolute top-4 right-1/2 transform translate-x-1/2">
-                        <Badge variant="secondary" className="capitalize font-medium px-3 py-1 bg-white/90 backdrop-blur-sm">
-                          {item.type}
-                        </Badge>
-                      </div>
+                            <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-sm">
+                              {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                            </Badge>
+                          </div>
 
                       {/* Availability Badge */}
                       {item.availability && (
@@ -499,8 +499,8 @@ export default function Discover() {
 
                           {/* Type Badge */}
                           <div className="absolute top-4 right-1/2 transform translate-x-1/2">
-                            <Badge variant="secondary" className="capitalize font-medium px-3 py-1 bg-white/90 backdrop-blur-sm">
-                              {item.type}
+                            <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-sm">
+                              {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
                             </Badge>
                           </div>
 
@@ -640,8 +640,8 @@ export default function Discover() {
 
                           {/* Type Badge */}
                           <div className="absolute top-4 right-1/2 transform translate-x-1/2">
-                            <Badge variant="secondary" className="capitalize font-medium px-3 py-1 bg-white/90 backdrop-blur-sm">
-                              {item.type}
+                            <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-sm">
+                              {getTypeIcon(item.type)} {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
                             </Badge>
                           </div>
                         </div>
@@ -748,8 +748,7 @@ export default function Discover() {
                             )}
                             {item.genre && (
                               <p className="text-xs text-purple-600 font-medium mt-1">
-                                🎵 {item.genre}
-                              </p>
+                                🎵 {item.genre}                              </p>
                             )}
                           </div>
 

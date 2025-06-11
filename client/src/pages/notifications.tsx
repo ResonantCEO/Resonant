@@ -26,6 +26,7 @@ export default function NotificationsPage() {
           <NotificationsPanel showAsCard={false} />
         </div>
       </div>
+      </div>
     </div>
   );
 }

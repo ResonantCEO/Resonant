@@ -620,19 +620,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     <X className="w-4 h-4" />
                   </Button>
                 )}
-                {!isPositioningMode && (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveCoverPhoto();
-                    }}
-                    size="sm"
-                    variant="destructive"
-                    className="bg-red-500/80 hover:bg-red-500/90"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                )}
               </div>
             )}
 

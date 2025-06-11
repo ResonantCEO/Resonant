@@ -115,7 +115,7 @@ export default function Profile() {
     );
   }
 
-  const isOwn = activeProfile?.id === profile.id;
+  const isOwn = activeProfile?.id === profile?.id;
   const isSharedProfile = profile?.type === "artist" || profile?.type === "venue";
 
   // For shared profiles, always show management if user owns the profile

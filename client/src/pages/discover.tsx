@@ -666,7 +666,7 @@ export default function Discover() {
             {/* Results Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredData.map((item) => (
-                  <Card key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 overflow-hidden">
+                  <Card key={item.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 overflow-hidden">
                     <CardContent className="p-0">
                       <div className="relative">
                         {/* Cover Image */}

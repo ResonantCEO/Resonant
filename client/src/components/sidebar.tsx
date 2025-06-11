@@ -219,9 +219,16 @@ export default function Sidebar() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-neutral-900">{getDisplayName(profile)}</span>
-                        <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
-                          {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
+                            {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
+                          </Badge>
+                          {unreadNotificationCount > 0 && (
+                            <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
+                              {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         {getVisibilityIcon(profile.visibility)}

@@ -293,7 +293,10 @@ export default function Sidebar() {
                   ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
                   : "text-neutral-600 hover:bg-neutral-100"
               }`}
-              onClick={() => setLocation("/discover")}
+              onClick={() => {
+                console.log("Discover button clicked");
+                setLocation("/discover");
+              }}
             >
               <Search className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
               {!isCollapsed && "Discover"}

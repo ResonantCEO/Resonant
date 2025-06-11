@@ -56,6 +56,8 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/profile" component={Profile} />
       <Route path="/profile/:id" component={Profile} />
+      <Route path="/friends" component={Friends} />
+      <Route path="/discover" component={Discover} />
       <Route path="/settings" component={Settings} />
       <Route path="/notifications" component={NotificationsPage} />
       <Route path="/*" component={Profile} />

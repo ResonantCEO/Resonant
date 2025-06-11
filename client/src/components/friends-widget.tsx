@@ -17,6 +17,16 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
 
   const { data: friends = [], isLoading: friendsLoading } = useQuery({
     queryKey: profileId ? [`/api/profiles/${profileId}/friends`] : ["/api/friends"],
+    select: (data) => {
+      // Extract friend data from the API response structure
+      if (!data || !Array.isArray(data)) return [];
+      return data.map((item: any) => {
+        if (item.friend) {
+          return item.friend;
+        }
+        return item;
+      });
+    }
   });
 
   const { data: friendRequests = [] } = useQuery({

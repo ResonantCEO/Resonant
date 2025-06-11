@@ -314,14 +314,14 @@ export default function Sidebar() {
             >
               <Users className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
               {!isCollapsed && "Friends"}
-              {!isCollapsed && friendRequests.length > 0 && (
-                <Badge className="ml-auto bg-blue-600 text-white text-xs">
+              {!isCollapsed && friendRequests && friendRequests.length > 0 && (
+                <Badge className="ml-auto bg-red-500 text-white text-xs">
                   {friendRequests.length}
                 </Badge>
               )}
-              {isCollapsed && friendRequests.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
-                  {friendRequests.length}
+              {isCollapsed && friendRequests && friendRequests.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
+                  {friendRequests.length > 99 ? '99+' : friendRequests.length}
                 </span>
               )}
             </Button>

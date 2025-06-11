@@ -37,6 +37,16 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
   const { data: friends, isLoading: friendsLoading } = useQuery({
     queryKey: [`/api/profiles/${profile?.id}/friends`],
     enabled: !!profile?.id,
+    select: (data) => {
+      // Extract friend data from the API response structure
+      if (!data || !Array.isArray(data)) return [];
+      return data.map((item: any) => {
+        if (item.friend) {
+          return item.friend;
+        }
+        return item;
+      });
+    }
   });
 
   // Fetch friend requests (for own profiles)

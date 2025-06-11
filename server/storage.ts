@@ -524,17 +524,20 @@ export class Storage {
   }
 
   async getFriends(profileId: number): Promise<any[]> {
-    return await db
+    const result = await db
       .select({
-        id: friendships.id,
-        status: friendships.status,
-        createdAt: friendships.createdAt,
-        friend: {
-          id: profiles.id,
-          name: profiles.name,
-          profileImageUrl: profiles.profileImageUrl,
-          type: profiles.type,
-        },
+        friendshipId: friendships.id,
+        friendshipStatus: friendships.status,
+        friendshipCreatedAt: friendships.createdAt,
+        friendId: sql<number>`CASE 
+          WHEN ${friendships.requesterId} = ${profileId} THEN ${friendships.addresseeId}
+          ELSE ${friendships.requesterId}
+        END`.as('friendId'),
+        friendName: profiles.name,
+        friendProfileImageUrl: profiles.profileImageUrl,
+        friendType: profiles.type,
+        friendBio: profiles.bio,
+        friendLocation: profiles.location,
       })
       .from(friendships)
       .innerJoin(
@@ -554,6 +557,21 @@ export class Storage {
         )
       )
       .orderBy(desc(friendships.createdAt));
+
+    // Transform the result to match the expected structure
+    return result.map(row => ({
+      id: row.friendId,
+      name: row.friendName,
+      profileImageUrl: row.friendProfileImageUrl,
+      type: row.friendType,
+      bio: row.friendBio,
+      location: row.friendLocation,
+      friendship: {
+        id: row.friendshipId,
+        status: row.friendshipStatus,
+        createdAt: row.friendshipCreatedAt,
+      }
+    }));
   }
 
   async acceptFriendRequest(friendshipId: number): Promise<Friendship> {

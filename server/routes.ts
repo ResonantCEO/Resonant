@@ -897,6 +897,17 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  app.get('/api/profiles/:id/friends', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const friends = await storage.getFriends(profileId);
+      res.json(friends);
+    } catch (error) {
+      console.error("Error fetching profile friends:", error);
+      res.status(500).json({ message: "Failed to fetch profile friends" });
+    }
+  });
+
   app.get('/api/friend-requests', isAuthenticated, async (req: any, res) => {
     try {
       const activeProfile = await storage.getActiveProfile(req.user.id);

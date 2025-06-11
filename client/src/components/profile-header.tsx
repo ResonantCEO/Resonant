@@ -813,20 +813,45 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
           </div>
 
-          {/* Add Friend Button - Aligned vertically with share button, horizontally centered with profile picture */}
+          {/* Friend Button - Aligned vertically with share button, horizontally centered with profile picture */}
           {!isOwn && (
             <div className="absolute left-4 sm:left-6 bottom-2 sm:bottom-4 z-10 flex justify-center w-24 sm:w-40">
-              <Button 
-                onClick={handleSendFriendRequest}
-                disabled={sendFriendRequestMutation.isPending}
-                variant="outline"
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold"
-              >
-                <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Add Friend</span>
-                <span className="sm:hidden">Add</span>
-              </Button>
+              {friendshipStatus?.status === 'accepted' ? (
+                <Button 
+                  onClick={() => unfriendMutation.mutate()}
+                  disabled={unfriendMutation.isPending}
+                  variant="outline"
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-bold"
+                >
+                  <UserMinus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Unfriend</span>
+                  <span className="sm:hidden">Remove</span>
+                </Button>
+              ) : friendshipStatus?.status === 'pending' ? (
+                <Button 
+                  disabled
+                  variant="outline"
+                  size="sm"
+                  className="bg-gray-400 text-white border-gray-400 font-bold cursor-not-allowed"
+                >
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Pending</span>
+                  <span className="sm:hidden">Pending</span>
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => sendFriendRequestMutation.mutate()}
+                  disabled={sendFriendRequestMutation.isPending}
+                  variant="outline"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold"
+                >
+                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Add Friend</span>
+                  <span className="sm:hidden">Add</span>
+                </Button>
+              )}
             </div>
           )}
 

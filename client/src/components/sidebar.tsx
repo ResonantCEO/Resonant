@@ -342,7 +342,7 @@ export default function Sidebar() {
                 </Badge>
               )}
               {isCollapsed && unreadNotificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
                   {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
                 </span>
               )}

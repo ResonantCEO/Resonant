@@ -32,25 +32,28 @@ function LoadingScreen() {
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  // Show loading screen during authentication check
   if (isLoading) {
     return <LoadingScreen />;
   }
 
+  // If not authenticated, show auth page
   if (!isAuthenticated) {
     return (
       <Switch>
         <Route path="/" component={AuthPage} />
-        <Route component={AuthPage} />
+        <Route component={() => <AuthPage />} />
       </Switch>
     );
   }
 
+  // If authenticated, show main app routes
   return (
     <Switch>
-      <Route path="/" component={Profile} />
+      <Route path="/" exact component={Profile} />
       <Route path="/home" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
-      <Route path="/profile" component={Profile} />
+      <Route path="/profile" exact component={Profile} />
       <Route path="/profile/:id" component={Profile} />
       <Route path="/settings" component={Settings} />
       <Route path="/discover" component={Discover} />

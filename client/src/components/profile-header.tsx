@@ -103,7 +103,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   // Always call all hooks at the top level - move all useQuery and useMutation calls here
   const { data: friendshipStatus } = useQuery({
     queryKey: [`/api/friendship-status/${profile?.id}`],
-    enabled: !!isOwn && !!profile?.id,
+    enabled: !isOwn && !!profile?.id,
   });
 
   const { data: friends = [] } = useQuery<any[]>({

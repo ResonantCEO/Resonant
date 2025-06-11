@@ -505,9 +505,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </div>
           </div>
 
-          {/* Profile Picture - Absolutely positioned for all profile types */}
-          {profile?.type === 'artist' ? (
-            // Artist profile picture - keep existing positioning
+          {/* Artist Profile Picture - Original positioning (DO NOT MODIFY) */}
+          {profile?.type === 'artist' && (
             <div className="absolute left-4 sm:left-6 top-20 sm:top-40 z-10">
               <div className="relative">
                 <Avatar 
@@ -536,8 +535,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 )}
               </div>
             </div>
-          ) : (
-            // Non-artist profile picture - absolutely positioned like artist
+          )}
+
+          {/* Venue and Audience Profile Pictures - Separate logic */}
+          {profile?.type !== 'artist' && (
             <div className="absolute left-4 sm:left-6 top-20 sm:top-16 z-10">
               <div className="relative">
                 <Avatar 

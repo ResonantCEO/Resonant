@@ -71,6 +71,9 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [isPositioningMode, setIsPositioningMode] = useState(false);
   const [coverPhotoPosition, setCoverPhotoPosition] = useState({ x: 50, y: 50 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const coverContainerRef = useRef<HTMLDivElement>(null);
 
   // Don't render if profile is not loaded
   if (!profile) {
@@ -408,6 +411,72 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     });
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!isPositioningMode) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !isPositioningMode || !coverContainerRef.current) return;
+    
+    const container = coverContainerRef.current;
+    const rect = container.getBoundingClientRect();
+    
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+    
+    // Convert pixel movement to percentage
+    const percentX = (deltaX / rect.width) * 100;
+    const percentY = (deltaY / rect.height) * 100;
+    
+    const newX = Math.max(0, Math.min(100, coverPhotoPosition.x - percentX));
+    const newY = Math.max(0, Math.min(100, coverPhotoPosition.y - percentY));
+    
+    setCoverPhotoPosition({ x: newX, y: newY });
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!isPositioningMode) return;
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({ x: touch.clientX, y: touch.clientY });
+    e.preventDefault();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !isPositioningMode || !coverContainerRef.current) return;
+    
+    const touch = e.touches[0];
+    const container = coverContainerRef.current;
+    const rect = container.getBoundingClientRect();
+    
+    const deltaX = touch.clientX - dragStart.x;
+    const deltaY = touch.clientY - dragStart.y;
+    
+    // Convert pixel movement to percentage
+    const percentX = (deltaX / rect.width) * 100;
+    const percentY = (deltaY / rect.height) * 100;
+    
+    const newX = Math.max(0, Math.min(100, coverPhotoPosition.x - percentX));
+    const newY = Math.max(0, Math.min(100, coverPhotoPosition.y - percentY));
+    
+    setCoverPhotoPosition({ x: newX, y: newY });
+    setDragStart({ x: touch.clientX, y: touch.clientY });
+    
+    e.preventDefault();
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   const renderActionButtons = () => {
     if (isOwn) {
       return null;
@@ -433,11 +502,29 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       {/* Profile Header */}
       <div className={`bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden min-h-[300px] sm:min-h-[340px]`}>
         {/* Cover Photo */}
-        <div className="h-32 sm:h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700">
+        <div 
+          ref={coverContainerRef}
+          className="h-32 sm:h-48 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700"
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           {/* Clickable cover photo area */}
           <div 
-            className={`absolute inset-0 ${isOwn && !isPositioningMode ? 'cursor-pointer' : ''}`}
+            className={`absolute inset-0 ${
+              isOwn && !isPositioningMode 
+                ? 'cursor-pointer' 
+                : isPositioningMode 
+                  ? isDragging 
+                    ? 'cursor-grabbing' 
+                    : 'cursor-grab'
+                  : ''
+            }`}
             onClick={isOwn && !isPositioningMode ? handleCoverPhotoClick : undefined}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
           >
             {/* Cover photo image - only show if coverImageUrl exists */}
             {profile?.coverImageUrl && (
@@ -477,40 +564,19 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             {/* Positioning mode overlay */}
             {isPositioningMode && (
               <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-20">
-                <div className="bg-white rounded-lg p-4 m-4 shadow-lg max-w-sm w-full">
+                <div className="bg-white rounded-lg p-4 m-4 shadow-lg max-w-sm w-full pointer-events-none">
                   <h3 className="text-lg font-semibold mb-4 text-center">Adjust Cover Photo Position</h3>
                   
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">
-                        Horizontal Position: {coverPhotoPosition.x}%
-                      </label>
-                      <Slider
-                        value={[coverPhotoPosition.x]}
-                        onValueChange={(value) => setCoverPhotoPosition(prev => ({ ...prev, x: value[0] }))}
-                        max={100}
-                        min={0}
-                        step={1}
-                        className="w-full"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 mb-2 block">
-                        Vertical Position: {coverPhotoPosition.y}%
-                      </label>
-                      <Slider
-                        value={[coverPhotoPosition.y]}
-                        onValueChange={(value) => setCoverPhotoPosition(prev => ({ ...prev, y: value[0] }))}
-                        max={100}
-                        min={0}
-                        step={1}
-                        className="w-full"
-                      />
+                  <div className="text-center mb-4">
+                    <p className="text-sm text-gray-600 mb-2">
+                      Drag the photo to reposition it
+                    </p>
+                    <div className="text-xs text-gray-500">
+                      Position: {Math.round(coverPhotoPosition.x)}%, {Math.round(coverPhotoPosition.y)}%
                     </div>
                   </div>
                   
-                  <div className="flex space-x-2 mt-6">
+                  <div className="flex space-x-2 mt-6 pointer-events-auto">
                     <Button
                       onClick={handleSavePosition}
                       disabled={updateCoverPositionMutation.isPending}

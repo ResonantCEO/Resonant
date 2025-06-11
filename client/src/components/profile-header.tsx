@@ -780,7 +780,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             )}
           </div>
 
-          {/* Social Media Buttons - Absolutely positioned */}
+          {/* Social Media Buttons and Share Button - Absolutely positioned */}
           <div className="absolute flex items-center justify-center space-x-2 bottom-2 sm:bottom-4 left-0 right-0">
             {/* Facebook */}
             {(isOwn || profile?.facebookUrl) && (
@@ -846,37 +846,29 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 <Twitter className="w-4 h-4" />
               </Button>
             )}
+
+            {/* Share Button */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300 rounded-full"
+            >
+              <Share className="w-4 h-4" />
+            </Button>
           </div>
 
           {/* Button Stack - Absolutely positioned for venue profiles */}
-          {profile?.type === 'venue' && (
+          {profile?.type === 'venue' && !isOwn && (
             <div className="absolute right-2 sm:right-4 bottom-16 sm:bottom-16 flex flex-col space-y-2">
               {/* Booking Button */}
-              {!isOwn && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]"
-                  onClick={handleBookingRequest}
-                >
-                  <Book className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Book</span>
-                </Button>
-              )}
-              {/* Share Button */}
-              <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
-                <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Share</span>
-              </Button>
-            </div>
-          )}
-
-          {/* Share Button - Absolutely positioned for non-venue profiles */}
-          {profile?.type !== 'venue' && (
-            <div className={`absolute right-2 sm:right-4 ${profile?.type === 'artist' ? 'bottom-16 sm:bottom-16' : 'bottom-16 sm:bottom-16'}`}>
-              <Button variant="outline" size="sm" className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]">
-                <Share className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Share</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]"
+                onClick={handleBookingRequest}
+              >
+                <Book className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Book</span>
               </Button>
             </div>
           )}

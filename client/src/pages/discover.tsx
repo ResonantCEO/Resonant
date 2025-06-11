@@ -250,8 +250,7 @@ export default function Discover() {
                         Apply
                       </Button>
                     </div>
-                  </div>
-                </PopoverContent>
+                  </PopoverContent>
               </Popover>
 
               {/* Quick Sort */}

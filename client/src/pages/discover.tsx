@@ -684,7 +684,7 @@ export default function Discover() {
                         </div>
 
                         {/* Content */}
-                        <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 text-white"></div>
+                        <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 text-white">
                           {/* Header with Name and Location */}
                           <div className="mb-3 sm:mb-4">
                             <div className="flex items-center justify-between mb-2">
@@ -702,7 +702,8 @@ export default function Discover() {
                             )}
                             {item.genre && (
                               <p className="text-xs text-orange-400 font-medium mt-1">
-                                🎵 {item.genre}                              </p>
+                                🎵 {item.genre}
+                              </p>
                             )}
                           </div>
 

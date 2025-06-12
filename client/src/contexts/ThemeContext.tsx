@@ -1,87 +1,93 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { queryClient } from '@/lib/queryClient';
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+type Theme = 'dark' | 'light' | 'system';
 
-type Theme = "light" | "dark" | "system";
+type ThemeProviderProps = {
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+  storageKey?: string;
+};
 
-interface ThemeContextType {
+type ThemeProviderState = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  resolvedTheme: "light" | "dark";
-}
+};
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const initialState: ThemeProviderState = {
+  theme: 'system',
+  setTheme: () => null,
+};
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Initialize theme state first (before any conditional logic)
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+
+export function ThemeProvider({
+  children,
+  defaultTheme = 'system',
+  storageKey = 'vite-ui-theme',
+  ...props
+}: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('app-theme');
-    return saved as Theme || "light";
+    return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
   });
-  
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
-  const [hasInitialized, setHasInitialized] = useState(false);
-  
-  // Always call useAuth after state initialization
-  const { user } = useAuth();
 
-  // Handle user theme initialization only once
-  useEffect(() => {
-    if (!hasInitialized && user?.theme) {
-      setTheme(user.theme as Theme);
-      localStorage.setItem('app-theme', user.theme);
-      setHasInitialized(true);
-    }
-  }, [user?.theme, hasInitialized]);
-
-  // Handle theme changes and system theme detection
   useEffect(() => {
     const root = window.document.documentElement;
-    
-    const updateTheme = (newTheme: "light" | "dark") => {
-      root.classList.remove("light", "dark");
-      root.classList.add(newTheme);
-      setResolvedTheme(newTheme);
-    };
 
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-      updateTheme(systemTheme);
-      
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const handleChange = (e: MediaQueryListEvent) => {
-        updateTheme(e.matches ? "dark" : "light");
-      };
-      
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
-    } else {
-      updateTheme(theme);
+    root.classList.remove('light', 'dark');
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+        .matches
+        ? 'dark'
+        : 'light';
+
+      root.classList.add(systemTheme);
+      return;
     }
-  }, [theme]);
 
-  const handleSetTheme = (newTheme: Theme) => {
-    setTheme(newTheme);
-    localStorage.setItem('app-theme', newTheme);
-  };
+    root.classList.add(theme);
+  }, [theme]);
 
   const value = {
     theme,
-    setTheme: handleSetTheme,
-    resolvedTheme,
+    setTheme: async (theme: Theme) => {
+      localStorage.setItem(storageKey, theme);
+      setTheme(theme);
+
+      // Update user preferences in the database if authenticated
+      try {
+        const response = await fetch('/api/user/preferences', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ theme }),
+        });
+
+        if (response.ok) {
+          // Invalidate user query to refresh data
+          queryClient.invalidateQueries({ queryKey: ['user'] });
+        }
+      } catch (error) {
+        console.error('Failed to update theme preference:', error);
+      }
+    },
   };
 
   return (
-    <ThemeContext.Provider value={value}>
+    <ThemeProviderContext.Provider {...props} value={value}>
       {children}
-    </ThemeContext.Provider>
+    </ThemeProviderContext.Provider>
   );
 }
 
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider");
+export const useTheme = () => {
+  const context = useContext(ThemeProviderContext);
+
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
   }
+
   return context;
-}
+};

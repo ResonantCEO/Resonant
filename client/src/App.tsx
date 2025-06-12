@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Router, Route } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -73,24 +72,28 @@ class ErrorBoundary extends React.Component<
 function AppRouter() {
   const { user, isLoading, isAuthenticated } = useAuth();
 
-  console.log("Router state:", { isLoading, isAuthenticated, hasUser: !!user });
-
+  // Main routing logic
   if (isLoading) {
     console.log("Showing loading screen");
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-neutral-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <img src="/resonant-logo.png" alt="Resonant" className="h-20 mx-auto mb-4 animate-pulse block dark:hidden" />
+          <img src="/resonant-logo-white.png" alt="Resonant" className="h-20 mx-auto mb-4 animate-pulse hidden dark:block" />
+          <div className="w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
     );
   }
 
-  if (!isAuthenticated) {
+  console.log("Router state:", { isLoading, isAuthenticated, hasUser: !!user });
+
+  if (!user) {
     console.log("Not authenticated, showing auth page");
     return <AuthPage />;
   }
+
+  console.log("User authenticated, showing main app");
 
   return (
     <Router>

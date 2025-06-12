@@ -3,125 +3,125 @@ import React from "react";
 import { Router, Route } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { useAuth } from "@/hooks/useAuth";
-import { SidebarProvider } from "@/hooks/useSidebar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { SidebarProvider } from "@/hooks/useSidebar";
 import { ThemeSync } from "@/components/ThemeSync";
-
+import { useAuth } from "@/hooks/useAuth";
 import AuthPage from "@/pages/auth-page";
-import Dashboard from "@/pages/dashboard";
-import Profile from "@/pages/profile";
-import Settings from "@/pages/settings";
-import Discover from "@/pages/discover";
-import Friends from "@/pages/friends";
-import Notifications from "@/pages/notifications";
-import NotFound from "@/pages/not-found";
+import HomePage from "@/pages/home";
+import ProfilePage from "@/pages/profile";
+import DiscoverPage from "@/pages/discover";
+import FriendsPage from "@/pages/friends";
+import NotificationsPage from "@/pages/notifications";
+import SettingsPage from "@/pages/settings";
+import DashboardPage from "@/pages/dashboard";
+import Sidebar from "@/components/sidebar";
+import BottomNav from "@/components/bottom-nav";
 
-// Create a single QueryClient instance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
       retry: 1,
-      refetchOnWindowFocus: false,
     },
   },
 });
 
-// Error Boundary Component
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean; error?: Error }
+  { hasError: boolean }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
+  static getDerivedStateFromError() {
+    return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error boundary caught an error:", error, errorInfo);
+    console.error('Error boundary caught an error:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
-      return (
-        <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
-          <div className="text-center p-8">
-            <h2 className="text-2xl font-bold mb-4">Something went wrong</h2>
-            <p className="text-muted-foreground mb-4">
-              The application encountered an error. Please refresh the page.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
-            >
-              Refresh Page
-            </button>
-          </div>
-        </div>
-      );
+      return <div className="p-4 text-center">Something went wrong. Please refresh the page.</div>;
     }
 
     return this.props.children;
   }
 }
 
-// App Router Component
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center">
+      <div className="text-center">
+        <img src="/resonant-logo.png" alt="Resonant" className="h-16 mx-auto mb-4 block dark:hidden" />
+        <img src="/resonant-logo-white.png" alt="Resonant" className="h-16 mx-auto mb-4 hidden dark:block" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-neutral-600 dark:text-neutral-400">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
 function AppRouter() {
   const { user, isLoading, isAuthenticated } = useAuth();
 
-  // Main routing logic
+  console.log("Router state:", { 
+    isLoading, 
+    isAuthenticated, 
+    hasUser: !!user 
+  });
+
   if (isLoading) {
     console.log("Showing loading screen");
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-neutral-900">
-        <div className="text-center">
-          <img src="/resonant-logo.png" alt="Resonant" className="h-20 mx-auto mb-4 animate-pulse block dark:hidden" />
-          <img src="/resonant-logo-white.png" alt="Resonant" className="h-20 mx-auto mb-4 animate-pulse hidden dark:block" />
-          <div className="w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
-  console.log("Router state:", { isLoading, isAuthenticated, hasUser: !!user });
-
-  if (!user) {
+  if (!isAuthenticated) {
     console.log("Not authenticated, showing auth page");
     return <AuthPage />;
   }
 
-  console.log("User authenticated, showing main app");
-
+  console.log("Authenticated, showing main app");
   return (
-    <Router>
-      <Route path="/" component={Profile} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/profile/:id?" component={Profile} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/discover" component={Discover} />
-      <Route path="/friends" component={Friends} />
-      <Route path="/notifications" component={Notifications} />
-      <Route component={NotFound} />
-    </Router>
+    <div className="flex h-screen bg-neutral-50 dark:bg-neutral-900">
+      <Sidebar />
+      <main className="flex-1 lg:pl-80 pb-16 lg:pb-0">
+        <Router>
+          <Route path="/" component={HomePage} />
+          <Route path="/profile" component={ProfilePage} />
+          <Route path="/discover" component={DiscoverPage} />
+          <Route path="/friends" component={FriendsPage} />
+          <Route path="/notifications" component={NotificationsPage} />
+          <Route path="/settings" component={SettingsPage} />
+          <Route path="/dashboard" component={DashboardPage} />
+          <Route>
+            <div className="p-4 text-center">
+              <h1 className="text-2xl font-bold">Page Not Found</h1>
+              <p>The page you're looking for doesn't exist.</p>
+            </div>
+          </Route>
+        </Router>
+      </main>
+      <BottomNav />
+    </div>
   );
 }
 
-// Main App Component
 function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <SidebarProvider>
-          <ThemeProvider>
+        <ThemeProvider>
+          <SidebarProvider>
             <ThemeSync />
             <AppRouter />
             <Toaster />
-          </ThemeProvider>
-        </SidebarProvider>
+          </SidebarProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

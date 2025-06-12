@@ -1,5 +1,5 @@
-
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 
 interface User {
   id: number;
@@ -27,11 +27,45 @@ interface User {
 
 export function useAuth() {
   const queryClient = useQueryClient();
+  const [loadingStartTime, setLoadingStartTime] = useState<number>(() => Date.now());
+  const [showLoading, setShowLoading] = useState(true);
+  const [hasReceivedData, setHasReceivedData] = useState(false);
   
   const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ["/api/user"],
     retry: false,
   });
+
+  // Track when we receive data (success or error)
+  useEffect(() => {
+    if ((user !== undefined || isError) && !hasReceivedData) {
+      setHasReceivedData(true);
+    }
+  }, [user, isError, hasReceivedData]);
+
+  // Handle minimum 2-second loading period
+  useEffect(() => {
+    if (hasReceivedData) {
+      const elapsed = Date.now() - loadingStartTime;
+      const remainingTime = Math.max(0, 2000 - elapsed);
+      
+      const timer = setTimeout(() => {
+        setShowLoading(false);
+      }, remainingTime);
+
+      return () => clearTimeout(timer);
+    }
+  }, [hasReceivedData, loadingStartTime]);
+
+  // Reset loading state when authentication changes (logout/login cycles)
+  useEffect(() => {
+    if (isLoading && hasReceivedData) {
+      // New auth cycle started, reset everything
+      setLoadingStartTime(Date.now());
+      setShowLoading(true);
+      setHasReceivedData(false);
+    }
+  }, [isLoading, hasReceivedData]);
 
   const updateUser = (updatedUser: User) => {
     queryClient.setQueryData(["/api/user"], updatedUser);
@@ -39,8 +73,8 @@ export function useAuth() {
 
   return {
     user,
-    isLoading,
-    isAuthenticated: !!user && !isError,
+    isLoading: showLoading,
+    isAuthenticated: !!user,
     updateUser,
   };
 }

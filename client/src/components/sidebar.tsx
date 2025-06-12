@@ -54,19 +54,23 @@ export default function Sidebar() {
 
   const { data: profiles = [] } = useQuery({
     queryKey: ["/api/profiles"],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   const { data: friendRequests = [] } = useQuery({
     queryKey: ["/api/friend-requests"],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   const { data: unreadNotificationCountData = { count: 0 } } = useQuery({
     queryKey: ['/api/notifications/unread-count'],
     refetchInterval: 10000, // Refetch every 10 seconds
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   const unreadNotificationCount = Number(unreadNotificationCountData?.count || 0);

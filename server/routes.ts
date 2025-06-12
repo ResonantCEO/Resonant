@@ -868,7 +868,6 @@ export function registerRoutes(app: Express): Server {
 
   // Get user's profiles by user ID (for navigation from notifications)
   app.get('/api/users/:userId/profiles', async (req, res) => {
-```text
     try {
       const userId = parseInt(req.params.userId);
       const profiles = await storage.getProfilesByUserId(userId);

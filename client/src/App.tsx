@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Router, Route } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -72,6 +73,22 @@ class ErrorBoundary extends React.Component<
   }
 }
 
+// Create a simple SidebarProvider since we need it
+const SidebarContext = React.createContext<{
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
+} | null>(null);
+
+function SidebarProvider({ children }: { children: React.ReactNode }) {
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+
+  return (
+    <SidebarContext.Provider value={{ isCollapsed, setIsCollapsed }}>
+      {children}
+    </SidebarContext.Provider>
+  );
+}
+
 // App Router Component
 function AppRouter() {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -122,11 +139,13 @@ export default function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <ThemeSync />
-          <AppRouter />
-          <Toaster />
-        </ThemeProvider>
+        <SidebarProvider>
+          <ThemeProvider>
+            <ThemeSync />
+            <AppRouter />
+            <Toaster />
+          </ThemeProvider>
+        </SidebarProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

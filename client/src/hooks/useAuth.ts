@@ -27,52 +27,19 @@ interface User {
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const [loadingStartTime, setLoadingStartTime] = useState<number>(() => Date.now());
-  const [showLoading, setShowLoading] = useState(true);
-  const [hasReceivedData, setHasReceivedData] = useState(false);
+  const [hasInitialLoad, setHasInitialLoad] = useState(false);
   
   const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ["/api/user"],
     retry: false,
   });
 
-  // Track when we receive data (success or error)
+  // Track initial load completion
   useEffect(() => {
-    if ((user !== undefined || isError) && !hasReceivedData) {
-      setHasReceivedData(true);
+    if (!isLoading && !hasInitialLoad) {
+      setHasInitialLoad(true);
     }
-  }, [user, isError, hasReceivedData]);
-
-  // Handle minimum loading period, but allow immediate authentication for login
-  useEffect(() => {
-    if (hasReceivedData) {
-      // If user is authenticated, skip the loading delay for immediate redirect
-      if (user) {
-        setShowLoading(false);
-        return;
-      }
-      
-      // For unauthenticated state, maintain the 2-second minimum
-      const elapsed = Date.now() - loadingStartTime;
-      const remainingTime = Math.max(0, 2000 - elapsed);
-      
-      const timer = setTimeout(() => {
-        setShowLoading(false);
-      }, remainingTime);
-
-      return () => clearTimeout(timer);
-    }
-  }, [hasReceivedData, loadingStartTime, user]);
-
-  // Reset loading state when authentication changes (logout/login cycles)
-  useEffect(() => {
-    if (isLoading && hasReceivedData) {
-      // New auth cycle started, reset everything
-      setLoadingStartTime(Date.now());
-      setShowLoading(true);
-      setHasReceivedData(false);
-    }
-  }, [isLoading, hasReceivedData]);
+  }, [isLoading, hasInitialLoad]);
 
   const updateUser = (updatedUser: User) => {
     queryClient.setQueryData(["/api/user"], updatedUser);
@@ -80,7 +47,7 @@ export function useAuth() {
 
   return {
     user,
-    isLoading: showLoading,
+    isLoading: !hasInitialLoad,
     isAuthenticated: !!user,
     updateUser,
   };

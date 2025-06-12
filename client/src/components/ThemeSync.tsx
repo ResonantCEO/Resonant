@@ -1,16 +1,27 @@
+
 import { useEffect } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useAuth } from '@/hooks/useAuth';
 
 export function ThemeSync() {
-  const { user, isAuthenticated } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
 
   useEffect(() => {
-    if (isAuthenticated && user?.theme && user.theme !== theme) {
-      setTheme(user.theme as 'dark' | 'light' | 'system');
+    try {
+      const root = window.document.documentElement;
+      
+      // Remove all theme classes first
+      root.classList.remove('light', 'dark');
+      
+      // Apply the current theme
+      if (theme === 'dark') {
+        root.classList.add('dark');
+      } else {
+        root.classList.add('light');
+      }
+    } catch (error) {
+      console.error('Error applying theme:', error);
     }
-  }, [user?.theme, theme, setTheme, isAuthenticated]);
+  }, [theme]);
 
   return null;
 }

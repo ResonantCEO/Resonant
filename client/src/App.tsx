@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Router, Route } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";

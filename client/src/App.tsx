@@ -89,14 +89,9 @@ function App() {
   if (!isAuthenticated) {
     console.log("Not authenticated, showing auth page");
     return (
-      <ErrorBoundary>
-        <ThemeProvider>
-          <Suspense fallback={<LoadingScreen />}>
-            <AuthPage />
-          </Suspense>
-          <Toaster />
-        </ThemeProvider>
-      </ErrorBoundary>
+      <Suspense fallback={<LoadingScreen />}>
+        <AuthPage />
+      </Suspense>
     );
   }
 
@@ -141,10 +136,13 @@ function App() {
 
 export default function AppWithProviders() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+        <Toaster />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

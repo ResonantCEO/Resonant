@@ -15,7 +15,7 @@ import {
 import CreateProfileModal from "./create-profile-modal";
 import SharedProfilesWidget from "./shared-profiles-widget";
 import { useState } from "react";
-import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell, Menu, ChevronLeft, ChevronRight, Shield } from "lucide-react";
+import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell, Menu, ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -54,26 +54,20 @@ export default function Sidebar() {
 
   const { data: profiles = [] } = useQuery({
     queryKey: ["/api/profiles"],
-    enabled: !!user, // Only fetch when user is authenticated
   });
 
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
-    enabled: !!user, // Only fetch when user is authenticated
   });
 
   const { data: friendRequests = [] } = useQuery({
     queryKey: ["/api/friend-requests"],
-    enabled: !!user, // Only fetch when user is authenticated
   });
 
-  const { data: unreadNotificationCountData = { count: 0 } } = useQuery({
+  const { data: unreadNotificationCount = 0 } = useQuery({
     queryKey: ['/api/notifications/unread-count'],
     refetchInterval: 10000, // Refetch every 10 seconds
-    enabled: !!user, // Only fetch when user is authenticated
   });
-
-  const unreadNotificationCount = Number(unreadNotificationCountData?.count || 0);
 
   const activateProfileMutation = useMutation({
     mutationFn: async (profileId: number) => {
@@ -223,16 +217,9 @@ export default function Sidebar() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-neutral-900">{getDisplayName(profile)}</span>
-                        <div className="flex items-center gap-2">
-                          <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
-                            {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
-                          </Badge>
-                          {unreadNotificationCount > 0 && (
-                            <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                              {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
-                            </Badge>
-                          )}
-                        </div>
+                        <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
+                          {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
+                        </Badge>
                       </div>
                       <div className="flex items-center space-x-2">
                         {getVisibilityIcon(profile.visibility)}
@@ -343,8 +330,8 @@ export default function Sidebar() {
               <Bell className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
               {!isCollapsed && "Notifications"}
               {!isCollapsed && unreadNotificationCount > 0 && (
-                <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                  {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                <Badge className="ml-auto bg-red-500 text-white text-xs">
+                  {unreadNotificationCount}
                 </Badge>
               )}
               {isCollapsed && unreadNotificationCount > 0 && (
@@ -369,22 +356,6 @@ export default function Sidebar() {
               {!isCollapsed && "Settings"}
             </Button>
           </li>
-           {user?.email?.includes('admin') || user?.id === 1 || user?.email?.toLowerCase() === 'josgood09@gmail.com' ? (
-            <li>
-              <Button
-                variant="ghost"
-                className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
-                  isActivePath("/admin") 
-                    ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
-                    : "text-neutral-600 hover:bg-neutral-100"
-                }`}
-                onClick={() => setLocation("/admin")}
-              >
-                <Shield className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
-                {!isCollapsed && "Admin"}
-              </Button>
-            </li>
-          ) : null}
         </ul>
 
 

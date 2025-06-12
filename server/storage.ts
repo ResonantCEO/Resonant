@@ -1,4 +1,4 @@
-import { eq, and, or, desc, asc, sql, like, ilike, ne, isNull, isNotNull, lte, inArray } from "drizzle-orm";
+import { eq, and, or, desc, asc, sql, like, ilike, ne, isNull, isNotNull } from "drizzle-orm";
 import { db } from "./db";
 import {
   users,
@@ -176,149 +176,16 @@ export class Storage {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const expiredProfiles = await db.select({ id: profiles.id })
-      .from(profiles)
+    const result = await db
+      .delete(profiles)
       .where(
         and(
           isNotNull(profiles.deletedAt),
-          lte(profiles.deletedAt, thirtyDaysAgo)
+          sql`${profiles.deletedAt} < ${thirtyDaysAgo}`
         )
       );
 
-    if (expiredProfiles.length === 0) {
-      return 0;
-    }
-
-    const expiredProfileIds = expiredProfiles.map(p => p.id);
-
-    // Delete related data first
-    await db.delete(posts).where(inArray(posts.profileId, expiredProfileIds));
-
-    // Delete the profiles
-    await db.delete(profiles).where(inArray(profiles.id, expiredProfileIds));
-
-    return expiredProfiles.length;
-  }
-
-  // Admin methods
-  async getAdminStats() {
-    const [totalUsersResult, totalProfilesResult, totalPostsResult, activeUsersResult] = await Promise.all([
-      db.select({ count: sql<number>`count(*)` }).from(users),
-      db.select({ count: sql<number>`count(*)` }).from(profiles).where(isNull(profiles.deletedAt)),
-      db.select({ count: sql<number>`count(*)` }).from(posts),
-      db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.showOnlineStatus, true))
-    ]);
-
-    return {
-      totalUsers: totalUsersResult[0]?.count || 0,
-      totalProfiles: totalProfilesResult[0]?.count || 0,
-      totalPosts: totalPostsResult[0]?.count || 0,
-      activeUsers: activeUsersResult[0]?.count || 0,
-      reportedContent: 0 // Placeholder for future implementation
-    };
-  }
-
-  async getAllUsersForAdmin() {
-    const result = await db.select({
-      id: users.id,
-      email: users.email,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      createdAt: users.createdAt,
-      isActive: users.showOnlineStatus,
-      profileCount: sql<number>`(
-        SELECT COUNT(*) FROM ${profiles} 
-        WHERE ${profiles.userId} = ${users.id} 
-        AND ${profiles.deletedAt} IS NULL
-      )`
-    })
-    .from(users)
-    .orderBy(desc(users.createdAt));
-
-    return result;
-  }
-
-  async getAllProfilesForAdmin() {
-    const result = await db.select({
-      id: profiles.id,
-      name: profiles.name,
-      type: profiles.type,
-      userId: profiles.userId,
-      userEmail: users.email,
-      createdAt: profiles.createdAt,
-      isActive: profiles.isActive,
-      postCount: sql<number>`(
-        SELECT COUNT(*) FROM ${posts} 
-        WHERE ${posts.profileId} = ${profiles.id}
-      )`
-    })
-    .from(profiles)
-    .leftJoin(users, eq(profiles.userId, users.id))
-    .where(isNull(profiles.deletedAt))
-    .orderBy(desc(profiles.createdAt));
-
-    return result;
-  }
-
-  async getAllPostsForAdmin() {
-    const result = await db.select({
-      id: posts.id,
-      content: posts.content,
-      profileId: posts.profileId,
-      profileName: profiles.name,
-      userEmail: users.email,
-      createdAt: posts.createdAt,
-      likesCount: sql<number>`(
-        SELECT COUNT(*) FROM ${postLikes} 
-        WHERE ${postLikes.postId} = ${posts.id}
-      )`,
-      commentsCount: sql<number>`(
-        SELECT COUNT(*) FROM ${comments} 
-        WHERE ${comments.postId} = ${posts.id}
-      )`
-    })
-    .from(posts)
-    .leftJoin(profiles, eq(posts.profileId, profiles.id))
-    .leftJoin(users, eq(profiles.userId, users.id))
-    .orderBy(desc(posts.createdAt));
-
-    return result;
-  }
-
-  async deleteUserAsAdmin(userId: number) {
-    // Delete user's posts first
-    const userProfiles = await db.select({ id: profiles.id })
-      .from(profiles)
-      .where(eq(profiles.userId, userId));
-
-    const profileIds = userProfiles.map(p => p.id);
-
-    if (profileIds.length > 0) {
-      await db.delete(posts).where(inArray(posts.profileId, profileIds));
-    }
-
-    // Delete user's profiles
-    await db.delete(profiles).where(eq(profiles.userId, userId));
-
-    // Delete user
-    await db.delete(users).where(eq(users.id, userId));
-  }
-
-  async deleteProfileAsAdmin(profileId: number) {
-    // Delete profile's posts first
-    await db.delete(posts).where(eq(posts.profileId, profileId));
-
-    // Delete profile
-    await db.delete(profiles).where(eq(profiles.id, profileId));
-  }
-
-  async deletePostAsAdmin(postId: number) {
-    // Delete post likes and comments first
-    await db.delete(postLikes).where(eq(postLikes.postId, postId));
-    await db.delete(comments).where(eq(comments.postId, postId));
-
-    // Delete post
-    await db.delete(posts).where(eq(posts.id, postId));
+    return result.length || 0;
   }
 
   // Search and discover operations
@@ -423,7 +290,7 @@ export class Storage {
         count: sql<number>`count(*)`.as('count'),
       })
       .from(postLikes)
-      .where(inArray(postLikes.postId, postIds))
+      .where(sql`${postLikes.postId} = ANY(${JSON.stringify(postIds)})`)
       .groupBy(postLikes.postId);
 
     const likeCountMap = new Map(likeCounts.map(lc => [lc.postId, lc.count]));
@@ -436,7 +303,7 @@ export class Storage {
         .from(postLikes)
         .where(
           and(
-            inArray(postLikes.postId, postIds),
+            sql`${postLikes.postId} = ANY(${sql.raw(`ARRAY[${postIds.join(',')}]`)})`,
             eq(postLikes.profileId, viewerProfileId)
           )
         );
@@ -491,7 +358,7 @@ export class Storage {
       })
       .from(posts)
       .innerJoin(profiles, eq(posts.profileId, profiles.id))
-      .where(inArray(posts.profileId, friendIds))
+      .where(sql`${posts.profileId} = ANY(${sql.raw(`ARRAY[${friendIds.join(',')}]`)})`)
       .orderBy(desc(posts.createdAt))
       .limit(50);
 
@@ -507,7 +374,7 @@ export class Storage {
         count: sql<number>`count(*)`.as('count'),
       })
       .from(postLikes)
-      .where(inArray(postLikes.postId, postIds))
+      .where(sql`${postLikes.postId} = ANY(${sql.raw(`ARRAY[${postIds.join(',')}]`)})`)
       .groupBy(postLikes.postId);
 
     const likeCountMap = new Map(likeCounts.map(lc => [lc.postId, lc.count]));
@@ -518,7 +385,7 @@ export class Storage {
       .from(postLikes)
       .where(
         and(
-          inArray(postLikes.postId, postIds),
+          sql`${postLikes.postId} = ANY(${sql.raw(`ARRAY[${postIds.join(',')}]`)})`,
           eq(postLikes.profileId, profileId)
         )
       );

@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -12,74 +13,62 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [isSystemPreference, setIsSystemPreference] = useState(true);
-  const [mounted, setMounted] = useState(false);
-
+  // Initialize theme state first (before any conditional logic)
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem('app-theme');
+    return saved as Theme || "light";
+  });
+  
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  const [hasInitialized, setHasInitialized] = useState(false);
+  
+  // Always call useAuth after state initialization
   const { user } = useAuth();
 
-  const shouldUseSystemPreference = !user?.theme || user.theme === 'system';
-
-  // Update theme state when user or system preference changes
+  // Handle user theme initialization only once
   useEffect(() => {
-    const updateTheme = () => {
-      if (shouldUseSystemPreference) {
-        const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        setTheme(systemPreference);
-        setIsSystemPreference(true);
-      } else {
-        setTheme(user.theme as 'light' | 'dark');
-        setIsSystemPreference(false);
-      }
+    if (!hasInitialized && user?.theme) {
+      setTheme(user.theme as Theme);
+      localStorage.setItem('app-theme', user.theme);
+      setHasInitialized(true);
+    }
+  }, [user?.theme, hasInitialized]);
+
+  // Handle theme changes and system theme detection
+  useEffect(() => {
+    const root = window.document.documentElement;
+    
+    const updateTheme = (newTheme: "light" | "dark") => {
+      root.classList.remove("light", "dark");
+      root.classList.add(newTheme);
+      setResolvedTheme(newTheme);
     };
 
-    updateTheme();
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      if (shouldUseSystemPreference) {
-        updateTheme();
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [user?.theme, shouldUseSystemPreference]);
-
-  // Apply theme to document
-  useEffect(() => {
-    setMounted(true);
-
-    const root = document.documentElement;
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-
-    // Update meta theme-color
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', theme === 'dark' ? '#1f2937' : '#f9fafb');
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      updateTheme(systemTheme);
+      
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = (e: MediaQueryListEvent) => {
+        updateTheme(e.matches ? "dark" : "light");
+      };
+      
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    } else {
+      updateTheme(theme);
     }
   }, [theme]);
 
-  // Prevent flash of unstyled content
-  if (!mounted) {
-    return null;
-  }
+  const handleSetTheme = (newTheme: Theme) => {
+    setTheme(newTheme);
+    localStorage.setItem('app-theme', newTheme);
+  };
 
   const value = {
     theme,
-    isSystemPreference,
-    setTheme: (newTheme: 'light' | 'dark' | 'system') => {
-      if (newTheme === 'system') {
-        setIsSystemPreference(true);
-        const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        setTheme(systemPreference);
-      } else {
-        setIsSystemPreference(false);
-        setTheme(newTheme);
-      }
-    },
+    setTheme: handleSetTheme,
+    resolvedTheme,
   };
 
   return (

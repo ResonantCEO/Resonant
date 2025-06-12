@@ -80,20 +80,7 @@ export class NotificationService {
       .limit(limit)
       .offset(offset);
 
-    // Additional filtering for profile-specific notifications
-    const filteredNotifications = userNotifications.filter(notification => {
-      // For booking requests, only show them when venue profile is active
-      if (notification.type === 'booking_request' && activeProfileType !== 'venue') {
-        return false;
-      }
-      // For booking responses, only show them when artist profile is active
-      if (notification.type === 'booking_response' && activeProfileType !== 'artist') {
-        return false;
-      }
-      return true;
-    });
-
-    return filteredNotifications;
+    return userNotifications;
   }
 
   // Mark notification as read
@@ -128,28 +115,12 @@ export class NotificationService {
       whereConditions.push(inArray(notifications.type, relevantTypes));
     }
 
-    const allNotifications = await db
-      .select({
-        id: notifications.id,
-        type: notifications.type,
-      })
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
       .from(notifications)
       .where(and(...whereConditions));
 
-    // Additional filtering for profile-specific notifications
-    const filteredNotifications = allNotifications.filter(notification => {
-      // For booking requests, only count them when venue profile is active
-      if (notification.type === 'booking_request' && activeProfileType !== 'venue') {
-        return false;
-      }
-      // For booking responses, only count them when artist profile is active
-      if (notification.type === 'booking_response' && activeProfileType !== 'artist') {
-        return false;
-      }
-      return true;
-    });
-
-    return filteredNotifications.length;
+    return result[0].count;
   }
 
   // Delete notification
@@ -271,9 +242,9 @@ export class NotificationService {
     
     switch (profileType) {
       case 'artist':
-        return [...commonTypes, 'booking_request', 'booking_response', 'post_like', 'post_comment'];
+        return [...commonTypes, 'booking_response', 'post_like', 'post_comment'];
       case 'venue':
-        return [...commonTypes, 'booking_request', 'booking_response', 'post_like', 'post_comment'];
+        return [...commonTypes, 'booking_request', 'post_like', 'post_comment'];
       case 'audience':
         return [...commonTypes, 'post_like', 'post_comment'];
       default:

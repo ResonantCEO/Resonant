@@ -17,7 +17,7 @@ export default function AuthPage() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+
   // Login form state
   const [loginForm, setLoginForm] = useState({
     email: "",
@@ -33,44 +33,48 @@ export default function AuthPage() {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: typeof loginForm) => {
-      const response = await apiRequest("POST", "/api/login", credentials);
-      return response.json();
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await apiRequest("POST", "/api/login", data);
+      return response;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/user"], data);
       toast({
-        title: "Welcome back!",
-        description: "You've successfully logged in.",
+        title: "Success",
+        description: "Logged in successfully",
       });
-      // Let App.tsx handle the redirect automatically
+      setIsAuthenticated(true);
+      // Force a page reload to ensure proper app initialization
+      window.location.href = "/";
     },
     onError: (error: any) => {
       toast({
-        title: "Login Failed",
-        description: error.message || "Invalid username or password",
+        title: "Error",
+        description: error.message || "Login failed",
         variant: "destructive",
       });
     },
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (userData: typeof registerForm) => {
-      const response = await apiRequest("POST", "/api/register", userData);
-      return response.json();
+    mutationFn: async (data: { email: string; password: string; firstName: string; lastName: string }) => {
+      const response = await apiRequest("POST", "/api/register", data);
+      return response;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/user"], data);
       toast({
-        title: "Welcome to Resonant!",
-        description: "Your account has been created successfully.",
+        title: "Success",
+        description: "Account created successfully",
       });
-      // Let App.tsx handle the redirect automatically
+      setIsAuthenticated(true);
+      // Force a page reload to ensure proper app initialization
+      window.location.href = "/";
     },
     onError: (error: any) => {
       toast({
-        title: "Registration Failed",
-        description: error.message || "Failed to create account",
+        title: "Error",
+        description: error.message || "Registration failed",
         variant: "destructive",
       });
     },
@@ -102,7 +106,7 @@ export default function AuthPage() {
     registerMutation.mutate(registerForm);
   };
 
-  
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex">
@@ -248,7 +252,7 @@ export default function AuthPage() {
             Connect as an audience member, showcase as an artist, or promote as a venue. 
             One account, multiple identities.
           </p>
-          
+
           <div className="space-y-6">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
@@ -259,7 +263,7 @@ export default function AuthPage() {
                 <p className="text-blue-200 text-sm">Discover music and connect with friends</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
                 <Music className="w-6 h-6" />
@@ -269,7 +273,7 @@ export default function AuthPage() {
                 <p className="text-blue-200 text-sm">Showcase your music and connect with fans</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
                 <Building className="w-6 h-6" />

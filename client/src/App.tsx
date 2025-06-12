@@ -97,7 +97,8 @@ function AppRouter() {
 
   return (
     <Router>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={Profile} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/profile/:id?" component={Profile} />
       <Route path="/settings" component={Settings} />
       <Route path="/discover" component={Discover} />

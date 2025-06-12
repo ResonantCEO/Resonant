@@ -45,9 +45,10 @@ export function useAuth() {
         throw error;
       }
     },
+    enabled: true, // Only run this query when explicitly enabled
     retry: false, // Completely disable retries for auth
     refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: Infinity, // Never consider this data stale
     refetchInterval: false,
     suspense: false,
     refetchOnMount: false, // Don't refetch on mount if we already have data

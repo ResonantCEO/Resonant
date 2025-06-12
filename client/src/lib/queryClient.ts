@@ -62,18 +62,12 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
       refetchOnWindowFocus: false,
-      retry: (failureCount, error) => {
-        // Don't retry on authentication errors
-        if (error instanceof Error && error.message.includes('401')) {
-          return false;
-        }
-        // Only retry once for other errors
-        return failureCount < 1;
-      },
-      retryDelay: 1000,
+      retry: false, // Completely disable all retries
       suspense: false, // Disable suspense to prevent suspension errors
       refetchOnMount: false, // Don't automatically refetch on mount
       refetchOnReconnect: false, // Don't refetch on reconnect
+      refetchIntervalInBackground: false, // Don't refetch in background
+      refetchInterval: false, // Disable all interval refetching
     },
     mutations: {
       retry: false, // Don't retry mutations by default

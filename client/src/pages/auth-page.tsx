@@ -128,7 +128,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex">
       {/* Left Column - Auth Forms */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8"></div>
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <img src="/resonant-logo-login-new.png" alt="Resonant" className="h-20 mx-auto mb-4" />

@@ -1433,6 +1433,105 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Admin routes
+  const requireAdmin = async (req: any, res: any, next: any) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Check if user is admin (you can implement your own admin check logic)
+    // For now, checking if user ID is 1 or if email contains 'admin'
+    const user = await storage.getUser(req.user.id);
+    if (!user || (user.id !== 1 && !user.email.includes('admin'))) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+
+    next();
+  };
+
+  // Admin dashboard stats
+  app.get('/api/admin/stats', requireAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin stats:", error);
+      res.status(500).json({ message: "Failed to fetch admin stats" });
+    }
+  });
+
+  // Admin user management
+  app.get('/api/admin/users', requireAdmin, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsersForAdmin();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users for admin:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.delete('/api/admin/users/:userId', requireAdmin, async (req: any, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      // Prevent admin from deleting themselves
+      if (userId === req.user.id) {
+        return res.status(400).json({ message: "Cannot delete your own account" });
+      }
+
+      await storage.deleteUserAsAdmin(userId);
+      res.json({ success: true, message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Admin profile management
+  app.get('/api/admin/profiles', requireAdmin, async (req: any, res) => {
+    try {
+      const profiles = await storage.getAllProfilesForAdmin();
+      res.json(profiles);
+    } catch (error) {
+      console.error("Error fetching profiles for admin:", error);
+      res.status(500).json({ message: "Failed to fetch profiles" });
+    }
+  });
+
+  app.delete('/api/admin/profiles/:profileId', requireAdmin, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.profileId);
+      await storage.deleteProfileAsAdmin(profileId);
+      res.json({ success: true, message: "Profile deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting profile:", error);
+      res.status(500).json({ message: "Failed to delete profile" });
+    }
+  });
+
+  // Admin post management
+  app.get('/api/admin/posts', requireAdmin, async (req: any, res) => {
+    try {
+      const posts = await storage.getAllPostsForAdmin();
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching posts for admin:", error);
+      res.status(500).json({ message: "Failed to fetch posts" });
+    }
+  });
+
+  app.delete('/api/admin/posts/:postId', requireAdmin, async (req: any, res) => {
+    try {
+      const postId = parseInt(req.params.postId);
+      await storage.deletePostAsAdmin(postId);
+      res.json({ success: true, message: "Post deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      res.status(500).json({ message: "Failed to delete post" });
+    }
+  });
+
   // Notification routes
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {

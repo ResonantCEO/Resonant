@@ -17,6 +17,7 @@ import Dashboard from "@/pages/dashboard";
 import Friends from "@/pages/friends";
 import NotFound from "@/pages/not-found";
 import NotificationsPage from "./pages/notifications";
+import { lazy } from "react";
 
 function LoadingScreen() {
   return (
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/friends" component={Friends} />
       <Route path="/discover" component={Discover} />
       <Route path="/settings" component={Settings} />
+      <Route path="/admin" component={lazy(() => import("./pages/admin"))} />
       <Route path="/notifications" component={NotificationsPage} />
       <Route path="/*" component={Profile} />
     </Switch>

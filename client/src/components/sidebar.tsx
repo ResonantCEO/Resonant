@@ -15,7 +15,7 @@ import {
 import CreateProfileModal from "./create-profile-modal";
 import SharedProfilesWidget from "./shared-profiles-widget";
 import { useState } from "react";
-import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell, Menu, ChevronLeft, ChevronRight } from "lucide-react";
+import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell, Menu, ChevronLeft, ChevronRight, Shield } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -365,6 +365,22 @@ export default function Sidebar() {
               {!isCollapsed && "Settings"}
             </Button>
           </li>
+           {user?.email?.includes('admin') || user?.id === 1 ? (
+            <li>
+              <Button
+                variant="ghost"
+                className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
+                  isActivePath("/admin") 
+                    ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
+                    : "text-neutral-600 hover:bg-neutral-100"
+                }`}
+                onClick={() => setLocation("/admin")}
+              >
+                <Shield className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
+                {!isCollapsed && "Admin"}
+              </Button>
+            </li>
+          ) : null}
         </ul>
 
 

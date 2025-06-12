@@ -543,13 +543,13 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/profile/background-image', isAuthenticated, upload.single('background'), async (req: any, res) => {
     try {
       const userId = req.user.id;
-      
+
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
       console.log("Uploading profile background image for user:", userId);
-      
+
       // Get the active profile
       const activeProfile = await storage.getActiveProfile(userId);
       if (!activeProfile) {
@@ -557,7 +557,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       const backgroundImageUrl = `/uploads/${req.file.filename}`;
-      
+
       // Update the profile's background image
       const updatedProfile = await storage.updateProfile(activeProfile.id, { 
         backgroundImageUrl,
@@ -642,7 +642,7 @@ export function registerRoutes(app: Express): Server {
       if (profileData.type === 'audience') {
         const existingProfiles = await storage.getProfilesByUserId(userId);
         const existingAudienceProfile = existingProfiles.find(p => p.type === 'audience' && !p.deletedAt);
-        
+
         if (existingAudienceProfile) {
           return res.status(400).json({ 
             message: "You can only have one audience profile. Use your existing audience profile instead." 
@@ -868,6 +868,7 @@ export function registerRoutes(app: Express): Server {
 
   // Get user's profiles by user ID (for navigation from notifications)
   app.get('/api/users/:userId/profiles', async (req, res) => {
+```text
     try {
       const userId = parseInt(req.params.userId);
       const profiles = await storage.getProfilesByUserId(userId);
@@ -996,7 +997,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const friendshipId = parseInt(req.params.id);
       const activeProfile = await storage.getActiveProfile(req.user.id);
-      
+
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
@@ -1463,7 +1464,7 @@ export function registerRoutes(app: Express): Server {
   app.get('/api/notifications/unread-count', isAuthenticated, async (req: any, res) => {
     try {
       const { notificationService } = await import('./notifications');
-      
+
       // Get active profile to filter notifications
       const activeProfile = await storage.getActiveProfile(req.user.id);
       if (!activeProfile) {

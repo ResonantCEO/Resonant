@@ -82,6 +82,10 @@ export class NotificationService {
 
     // Additional filtering for profile-specific notifications
     const filteredNotifications = userNotifications.filter(notification => {
+      // Friend-related notifications should always be visible regardless of active profile
+      if (['friend_request', 'friend_accepted'].includes(notification.type)) {
+        return true;
+      }
       // For booking requests, only show them when venue profile is active
       if (notification.type === 'booking_request' && activeProfileType !== 'venue') {
         return false;
@@ -138,6 +142,10 @@ export class NotificationService {
 
     // Additional filtering for profile-specific notifications
     const filteredNotifications = allNotifications.filter(notification => {
+      // Friend-related notifications should always be counted regardless of active profile
+      if (['friend_request', 'friend_accepted'].includes(notification.type)) {
+        return true;
+      }
       // For booking requests, only count them when venue profile is active
       if (notification.type === 'booking_request' && activeProfileType !== 'venue') {
         return false;

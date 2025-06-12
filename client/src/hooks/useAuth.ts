@@ -36,7 +36,7 @@ export function useAuth() {
         return response;
       } catch (error: any) {
         // If we get a 401, return null instead of throwing
-        if (error.status === 401) {
+        if (error.message?.includes('401')) {
           return null;
         }
         throw error;

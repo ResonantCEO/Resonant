@@ -4,7 +4,7 @@ import { Router, Route } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/hooks/useAuth";
-import { useSidebar } from "@/hooks/useSidebar";
+import { useSidebar, SidebarProvider } from "@/hooks/useSidebar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ThemeSync } from "@/components/ThemeSync";
 
@@ -73,21 +73,7 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Create a simple SidebarProvider since we need it
-const SidebarContext = React.createContext<{
-  isCollapsed: boolean;
-  setIsCollapsed: (collapsed: boolean) => void;
-} | null>(null);
 
-function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [isCollapsed, setIsCollapsed] = React.useState(false);
-
-  return (
-    <SidebarContext.Provider value={{ isCollapsed, setIsCollapsed }}>
-      {children}
-    </SidebarContext.Provider>
-  );
-}
 
 // App Router Component
 function AppRouter() {

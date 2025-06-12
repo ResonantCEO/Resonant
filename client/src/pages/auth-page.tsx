@@ -39,12 +39,12 @@ export default function AuthPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      setIsAuthenticated(true);
       toast({
         title: "Welcome back!",
         description: "You've successfully logged in.",
       });
-      // Don't redirect automatically - let user stay on welcome screen
+      // Redirect immediately to profile
+      setLocation("/profile");
     },
     onError: (error: any) => {
       toast({
@@ -62,12 +62,12 @@ export default function AuthPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      setIsAuthenticated(true);
       toast({
         title: "Welcome to Resonant!",
         description: "Your account has been created successfully.",
       });
-      // Don't redirect automatically - let user stay on welcome screen
+      // Redirect immediately to profile
+      setLocation("/profile");
     },
     onError: (error: any) => {
       toast({
@@ -104,26 +104,7 @@ export default function AuthPage() {
     registerMutation.mutate(registerForm);
   };
 
-  // Show welcome screen after successful authentication
-  if (isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-8">
-          <img src="/resonant-logo-login-new.png" alt="Resonant" className="h-20 mx-auto mb-6" />
-          <div className="bg-green-100 border border-green-200 rounded-lg p-6 mb-6">
-            <h2 className="text-2xl font-bold text-green-800 mb-2">Welcome back!</h2>
-            <p className="text-green-700">You've successfully logged in.</p>
-          </div>
-          <Button 
-            onClick={() => setLocation("/")}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-0"
-          >
-            Continue to App
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex">

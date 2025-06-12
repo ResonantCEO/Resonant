@@ -1,5 +1,6 @@
 
 
+
 import React from "react";
 import { Router, Route } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -70,23 +71,14 @@ function LoadingScreen() {
 function AppContent() {
   const { user, isLoading, isAuthenticated } = useAuth();
 
-  console.log("Router state:", { 
-    isLoading, 
-    isAuthenticated, 
-    hasUser: !!user 
-  });
-
   if (isLoading) {
-    console.log("Showing loading screen");
     return <LoadingScreen />;
   }
 
   if (!isAuthenticated) {
-    console.log("Not authenticated, showing auth page");
     return <AuthPage />;
   }
 
-  console.log("Authenticated, showing main app");
   return (
     <div className="flex h-screen bg-neutral-50 dark:bg-neutral-900">
       <Sidebar />
@@ -129,4 +121,5 @@ function App() {
 }
 
 export default App;
+
 

@@ -1,5 +1,5 @@
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
 
 interface User {
   id: number;
@@ -27,19 +27,11 @@ interface User {
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const [hasInitialLoad, setHasInitialLoad] = useState(false);
   
   const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ["/api/user"],
     retry: false,
   });
-
-  // Track initial load completion
-  useEffect(() => {
-    if (!isLoading && !hasInitialLoad) {
-      setHasInitialLoad(true);
-    }
-  }, [isLoading, hasInitialLoad]);
 
   const updateUser = (updatedUser: User) => {
     queryClient.setQueryData(["/api/user"], updatedUser);
@@ -47,8 +39,8 @@ export function useAuth() {
 
   return {
     user,
-    isLoading: !hasInitialLoad,
-    isAuthenticated: !!user,
+    isLoading,
+    isAuthenticated: !!user && !isError,
     updateUser,
   };
 }

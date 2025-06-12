@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppearanceProvider } from "@/contexts/AppearanceContext";
 import { SidebarProvider } from "@/hooks/useSidebar";
+import { ThemeSync } from "@/components/ThemeSync";
 
 // Pages
 import LandingPage from "@/pages/landing";
@@ -99,6 +100,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
+        <ThemeSync />
         <AppearanceProvider>
           <SidebarProvider>
             <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">

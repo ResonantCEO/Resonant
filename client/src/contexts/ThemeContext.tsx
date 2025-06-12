@@ -20,19 +20,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   });
   
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
-  const [hasInitialized, setHasInitialized] = useState(false);
-  
-  // Always call useAuth after state initialization
-  const { user } = useAuth();
-
-  // Handle user theme initialization only once
-  useEffect(() => {
-    if (!hasInitialized && user?.theme) {
-      setTheme(user.theme as Theme);
-      localStorage.setItem('app-theme', user.theme);
-      setHasInitialized(true);
-    }
-  }, [user?.theme, hasInitialized]);
 
   // Handle theme changes and system theme detection
   useEffect(() => {

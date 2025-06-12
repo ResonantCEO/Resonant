@@ -1440,9 +1440,10 @@ export function registerRoutes(app: Express): Server {
     }
 
     // Check if user is admin (you can implement your own admin check logic)
-    // For now, checking if user ID is 1 or if email contains 'admin'
+    // For now, checking if user ID is 1 or if email contains 'admin' or specific admin emails
     const user = await storage.getUser(req.user.id);
-    if (!user || (user.id !== 1 && !user.email.includes('admin'))) {
+    const adminEmails = ['josgood09@gmail.com'];
+    if (!user || (user.id !== 1 && !user.email.includes('admin') && !adminEmails.includes(user.email.toLowerCase()))) {
       return res.status(403).json({ message: "Admin access required" });
     }
 

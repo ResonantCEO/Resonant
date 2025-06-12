@@ -365,7 +365,7 @@ export default function Sidebar() {
               {!isCollapsed && "Settings"}
             </Button>
           </li>
-           {user?.email?.includes('admin') || user?.id === 1 ? (
+           {user?.email?.includes('admin') || user?.id === 1 || user?.email?.toLowerCase() === 'josgood09@gmail.com' ? (
             <li>
               <Button
                 variant="ghost"

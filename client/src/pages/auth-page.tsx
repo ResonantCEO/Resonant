@@ -43,8 +43,7 @@ export default function AuthPage() {
         title: "Welcome back!",
         description: "You've successfully logged in.",
       });
-      // Redirect immediately to profile
-      setLocation("/profile");
+      // Let App.tsx handle the redirect automatically
     },
     onError: (error: any) => {
       toast({
@@ -66,8 +65,7 @@ export default function AuthPage() {
         title: "Welcome to Resonant!",
         description: "Your account has been created successfully.",
       });
-      // Redirect immediately to profile
-      setLocation("/profile");
+      // Let App.tsx handle the redirect automatically
     },
     onError: (error: any) => {
       toast({

@@ -43,9 +43,16 @@ export function useAuth() {
     }
   }, [user, isError, hasReceivedData]);
 
-  // Handle minimum 2-second loading period
+  // Handle minimum loading period, but allow immediate authentication for login
   useEffect(() => {
     if (hasReceivedData) {
+      // If user is authenticated, skip the loading delay for immediate redirect
+      if (user) {
+        setShowLoading(false);
+        return;
+      }
+      
+      // For unauthenticated state, maintain the 2-second minimum
       const elapsed = Date.now() - loadingStartTime;
       const remainingTime = Math.max(0, 2000 - elapsed);
       
@@ -55,7 +62,7 @@ export function useAuth() {
 
       return () => clearTimeout(timer);
     }
-  }, [hasReceivedData, loadingStartTime]);
+  }, [hasReceivedData, loadingStartTime, user]);
 
   // Reset loading state when authentication changes (logout/login cycles)
   useEffect(() => {

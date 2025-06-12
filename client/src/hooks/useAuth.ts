@@ -1,17 +1,54 @@
+
 import { useQuery } from "@tanstack/react-query";
-import { getQueryFn } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
+
+export interface User {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  profileImageUrl?: string;
+  coverImageUrl?: string;
+  backgroundImageUrl?: string;
+  showOnlineStatus: boolean;
+  allowFriendRequests: boolean;
+  showActivityStatus: boolean;
+  emailNotifications: boolean;
+  notifyFriendRequests: boolean;
+  notifyMessages: boolean;
+  notifyPostLikes: boolean;
+  notifyComments: boolean;
+  theme: string;
+  language: string;
+  compactMode: boolean;
+  autoplayVideos: boolean;
+  profileBackground: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery({
+  const { data: user, isLoading, error } = useQuery<User>({
     queryKey: ["/api/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
+    queryFn: async () => {
+      try {
+        const response = await apiRequest("GET", "/api/user");
+        return response;
+      } catch (error: any) {
+        // If we get a 401, return null instead of throwing
+        if (error.status === 401) {
+          return null;
+        }
+        throw error;
+      }
+    },
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchInterval: false, // Explicitly disable interval refetching
-    enabled: true, // Only fetch once
+    refetchInterval: false,
+    enabled: true,
   });
 
   return {

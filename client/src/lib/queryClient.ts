@@ -7,22 +7,28 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-export async function apiRequest(
-  method: string,
+export async function apiRequest<T>(
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
   url: string,
   data?: unknown | undefined,
-): Promise<Response> {
+): Promise<T> {
   const isFormData = data instanceof FormData;
 
-  const res = await fetch(url, {
+  const options: RequestInit = {
     method,
     headers: data && !isFormData ? { "Content-Type": "application/json" } : {},
     body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
     credentials: "include",
-  });
+  };
 
-  await throwIfResNotOk(res);
-  return res;
+  try {
+    const response = await fetch(url, options);
+    await throwIfResNotOk(response);
+    return response.json();
+  } catch (error) {
+    console.error(`API request failed: ${method} ${url}`, error);
+    throw error;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -72,34 +78,3 @@ export const queryClient = new QueryClient({
     },
   },
 });
-
-export async function apiRequest<T>(
-  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH",
-  url: string,
-  body?: any
-): Promise<T> {
-  const options: RequestInit = {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  };
-
-  if (body) {
-    options.body = JSON.stringify(body);
-  }
-
-  try {
-    const response = await fetch(url, options);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error(`API request failed: ${method} ${url}`, error);
-    throw error;
-  }
-}

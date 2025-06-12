@@ -45,18 +45,13 @@ export function useAuth() {
         throw error;
       }
     },
-    retry: (failureCount, error) => {
-      // Don't retry on 401 errors (unauthenticated)
-      if (error instanceof Error && error.message.includes('401')) {
-        return false;
-      }
-      return failureCount < 2;
-    },
-    retryDelay: 1000,
+    retry: false, // Completely disable retries for auth
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchInterval: false,
     suspense: false,
+    refetchOnMount: false, // Don't refetch on mount if we already have data
+    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
   return {

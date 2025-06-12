@@ -67,11 +67,13 @@ export const queryClient = new QueryClient({
         if (error instanceof Error && error.message.includes('401')) {
           return false;
         }
-        // Retry up to 3 times for other errors
-        return failureCount < 3;
+        // Only retry once for other errors
+        return failureCount < 1;
       },
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: 1000,
       suspense: false, // Disable suspense to prevent suspension errors
+      refetchOnMount: false, // Don't automatically refetch on mount
+      refetchOnReconnect: false, // Don't refetch on reconnect
     },
     mutations: {
       retry: false, // Don't retry mutations by default

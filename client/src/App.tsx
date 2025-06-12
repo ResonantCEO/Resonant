@@ -1,34 +1,41 @@
-import React, { Suspense } from "react";
+import React from "react";
+import { Router, Route } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Route, Switch, Router } from "wouter";
-import { queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/useAuth";
 import { Toaster } from "@/components/ui/toaster";
+import { useAuth } from "@/hooks/useAuth";
+import { useSidebar } from "@/hooks/useSidebar";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { AppearanceProvider } from "@/contexts/AppearanceContext";
-import { SidebarProvider } from "@/hooks/useSidebar";
 import { ThemeSync } from "@/components/ThemeSync";
 
 // Pages
-import LandingPage from "@/pages/landing";
 import AuthPage from "@/pages/auth-page";
-import ProfilePage from "@/pages/profile";
-import DiscoverPage from "@/pages/discover";
-import FriendsPage from "@/pages/friends";
-import SettingsPage from "@/pages/settings";
-import DashboardPage from "@/pages/dashboard";
-import NotificationsPage from "@/pages/notifications";
-import AdminPage from "@/pages/admin";
+import Profile from "@/pages/profile";
+import Settings from "@/pages/settings";
+import Friends from "@/pages/friends";
+import Dashboard from "@/pages/dashboard";
+import Discover from "@/pages/discover";
+import Admin from "@/pages/admin";
+import Notifications from "@/pages/notifications";
 import NotFound from "@/pages/not-found";
 
 // Components
 import Sidebar from "@/components/sidebar";
 import BottomNav from "@/components/bottom-nav";
 
+// Create query client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean }
+  { hasError: boolean; error?: Error }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
@@ -36,7 +43,7 @@ class ErrorBoundary extends React.Component<
   }
 
   static getDerivedStateFromError(error: Error) {
-    return { hasError: true };
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
@@ -46,17 +53,15 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100 dark:from-neutral-900 dark:to-neutral-800">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">
-            <h2 className="text-xl font-semibold mb-4 text-red-600 dark:text-red-400">Something went wrong</h2>
-            <button
-              onClick={() => {
-                this.setState({ hasError: false });
-                window.location.reload();
-              }}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            <h1 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h1>
+            <p className="text-gray-600 mb-4">Please refresh the page to try again</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
             >
-              Reload Page
+              Refresh Page
             </button>
           </div>
         </div>
@@ -67,84 +72,62 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Loading component
-const LoadingScreen = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-800">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p className="text-neutral-600 dark:text-neutral-400">Loading...</p>
-    </div>
-  </div>
-);
-
-function App() {
-  const { isLoading, isAuthenticated, user } = useAuth();
+// App Router Component
+function AppRouter() {
+  const { user, isLoading, isAuthenticated } = useAuth();
+  const { isCollapsed } = useSidebar();
 
   console.log("Router state:", { isLoading, isAuthenticated, hasUser: !!user });
 
   if (isLoading) {
     console.log("Showing loading screen");
-    return <LoadingScreen />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     console.log("Not authenticated, showing auth page");
-    return (
-      <Suspense fallback={<LoadingScreen />}>
-        <AuthPage />
-      </Suspense>
-    );
+    return <AuthPage />;
   }
 
   console.log("Authenticated, showing main routes");
   return (
-    <ErrorBoundary>
-      <ThemeProvider>
-        <ThemeSync />
-        <AppearanceProvider>
-          <SidebarProvider>
-            <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
-              <Suspense fallback={<LoadingScreen />}>
-                <Sidebar />
-              </Suspense>
-              <div className="lg:pl-80">
-                <Router>
-                  <Suspense fallback={<LoadingScreen />}>
-                    <Switch>
-                      <Route path="/" component={LandingPage} />
-                      <Route path="/profile/:id?" component={ProfilePage} />
-                      <Route path="/discover" component={DiscoverPage} />
-                      <Route path="/friends" component={FriendsPage} />
-                      <Route path="/settings" component={SettingsPage} />
-                      <Route path="/dashboard" component={DashboardPage} />
-                      <Route path="/notifications" component={NotificationsPage} />
-                      <Route path="/admin" component={AdminPage} />
-                      <Route component={NotFound} />
-                    </Switch>
-                  </Suspense>
-                </Router>
-              </div>
-              <Suspense fallback={null}>
-                <BottomNav />
-              </Suspense>
-            </div>
-            <Toaster />
-          </SidebarProvider>
-        </AppearanceProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-neutral-900 dark:to-neutral-800">
+      <Sidebar />
+      <main className={`transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pb-16 lg:pb-0`}>
+        <Router>
+          <Route path="/" component={Profile} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/settings" component={Settings} />
+          <Route path="/friends" component={Friends} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/discover" component={Discover} />
+          <Route path="/admin" component={Admin} />
+          <Route path="/notifications" component={Notifications} />
+          <Route component={NotFound} />
+        </Router>
+      </main>
+      <BottomNav />
+    </div>
   );
 }
 
-export default function AppWithProviders() {
+export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <App />
-        </QueryClientProvider>
-        <Toaster />
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <ThemeSync />
+          <AppRouter />
+          <Toaster />
+        </ThemeProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }

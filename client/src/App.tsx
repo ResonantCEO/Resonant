@@ -1,4 +1,5 @@
 
+
 import React from "react";
 import { Router, Route } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -66,7 +67,7 @@ function LoadingScreen() {
   );
 }
 
-function AppRouter() {
+function AppContent() {
   const { user, isLoading, isAuthenticated } = useAuth();
 
   console.log("Router state:", { 
@@ -118,7 +119,7 @@ function App() {
         <ThemeProvider>
           <SidebarProvider>
             <ThemeSync />
-            <AppRouter />
+            <AppContent />
             <Toaster />
           </SidebarProvider>
         </ThemeProvider>
@@ -128,3 +129,4 @@ function App() {
 }
 
 export default App;
+

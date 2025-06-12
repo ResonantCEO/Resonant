@@ -410,3 +410,4 @@ export default function Sidebar() {
     </div>
   );
 }
+```Adding the admin dashboard link to the sidebar, conditional on user admin status.

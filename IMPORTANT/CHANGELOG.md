@@ -1,6 +1,95 @@
 # Resonant Changelog
 
-## Version 0.4.0 - Platform Stability & Core System Improvements (Latest)
+## Version 0.4.1 - Notification System & Profile-Specific Data Fixes (Latest)
+
+### Critical Bug Fixes & System Improvements
+
+#### 🔔 Notification System Profile Isolation
+- **Profile-Specific Notifications**: Fixed critical issue where notifications were appearing across different profile types inappropriately
+- **Friend Request Isolation**: Resolved friend requests for venue accounts appearing on audience member notification pages
+- **Booking Request Segregation**: Fixed booking requests showing on incorrect profile types, ensuring venue-specific notifications only appear for venue profiles
+- **Notification Context Validation**: Implemented proper profile context checking to ensure notifications are only displayed to relevant profile types
+- **Cross-Profile Notification Prevention**: Added validation to prevent notification bleed between audience, artist, and venue profiles
+
+#### 🗄️ Database Query Optimization & Error Resolution
+- **Malformed Array Literal Fix**: Resolved "malformed array literal" error in PostgreSQL queries affecting profile post retrieval
+- **Array Parameter Handling**: Fixed database array parameter processing that was causing 500 errors in profile post endpoints
+- **Query Syntax Correction**: Corrected malformed code blocks and syntax errors in route handlers that were causing application crashes
+- **Profile Posts Retrieval**: Fixed `/api/profiles/:id/posts` endpoint returning proper data without database errors
+- **Database Connection Stability**: Enhanced database query reliability with proper error handling and parameter validation
+
+#### 🔧 Route Handler Stabilization
+- **Syntax Error Resolution**: Fixed JavaScript/TypeScript syntax errors in `server/routes.ts` that were causing parsing failures
+- **Code Block Formatting**: Removed malformed markdown code blocks that were breaking route handler execution
+- **Error Recovery**: Implemented proper error handling for failed database operations with graceful degradation
+- **API Endpoint Reliability**: Enhanced stability of all profile-related API endpoints with consistent response formatting
+- **Request Validation**: Added proper input validation to prevent malformed requests from causing system crashes
+
+#### 👥 Profile Management Enhancements
+- **Member Management Visibility**: Fixed profile management interface text visibility with proper contrast adjustments
+- **Role Badge Styling**: Enhanced role badge readability with improved color schemes and text contrast
+- **Management Interface Polish**: Improved "Current Members" heading visibility and "Invite Member" button styling
+- **Profile Context Awareness**: Enhanced profile type detection for proper member vs staff terminology in management interfaces
+- **Permission-Based Access**: Reinforced role-based access control for profile management features
+
+### Technical Infrastructure Improvements
+
+#### 🛡️ Data Integrity & Validation
+- **Profile Type Validation**: Enhanced profile type checking to ensure notifications are contextually appropriate
+- **Friend Request Filtering**: Implemented proper filtering of friend requests based on active profile type
+- **Booking Context Validation**: Added validation to ensure booking-related notifications only appear for relevant profiles
+- **Cross-Profile Data Isolation**: Strengthened data separation between different profile types for better user experience
+- **Notification Relevance Checking**: Added server-side validation to ensure notification relevance before delivery
+
+#### 🔍 Query Performance & Reliability
+- **PostgreSQL Array Handling**: Fixed array literal processing for improved database query execution
+- **Parameter Sanitization**: Enhanced SQL parameter handling to prevent malformed query errors
+- **Connection Pool Optimization**: Improved database connection management for sustained performance
+- **Error Logging Enhancement**: Added comprehensive error logging for better debugging and monitoring
+- **Response Time Optimization**: Maintained sub-second response times while fixing critical bugs
+
+#### 🎨 User Interface Refinements
+- **Text Contrast Improvements**: Enhanced readability across management interfaces with proper color contrast
+- **Button Styling Consistency**: Unified button styling with improved hover states and accessibility
+- **Badge Component Enhancement**: Improved role badge visibility with optimized color schemes
+- **Loading State Management**: Enhanced loading states during profile switching and data retrieval
+- **Error Feedback Improvement**: Better user feedback for error states with clear messaging
+
+### User Experience Enhancements
+
+#### 🎯 Profile-Specific Experience
+- **Contextual Notifications**: Users now see only notifications relevant to their active profile type
+- **Appropriate Friend Requests**: Friend requests properly filtered based on profile compatibility
+- **Venue-Specific Features**: Booking requests and venue features only appear for venue profiles
+- **Artist-Specific Content**: Artist features and notifications properly isolated to artist profiles
+- **Audience Experience**: Clean audience profile experience without irrelevant professional features
+
+#### 📱 Interface Polish & Accessibility
+- **Improved Readability**: Enhanced text visibility across dark and light themes
+- **Better Button Contrast**: Improved button visibility with proper color schemes
+- **Consistent Navigation**: Maintained smooth navigation between profile types
+- **Error Recovery**: Better error handling with user-friendly feedback messages
+- **Performance Stability**: Maintained fast loading times while fixing critical issues
+
+### Security & Data Management
+
+#### 🔐 Enhanced Data Protection
+- **Profile Data Isolation**: Strengthened separation of data between different profile types
+- **Notification Privacy**: Ensured notifications are only delivered to appropriate profile contexts
+- **Access Control Validation**: Enhanced permission checking for profile-specific features
+- **Cross-Profile Security**: Prevented unauthorized access to inappropriate profile data
+- **Data Consistency**: Improved data integrity across profile type switches
+
+#### 📊 Performance Monitoring
+- **Error Rate Reduction**: Significantly reduced 500 errors from malformed database queries
+- **Response Time Consistency**: Maintained fast API response times while fixing critical bugs
+- **Database Query Optimization**: Improved query performance with proper parameter handling
+- **Memory Usage Optimization**: Enhanced memory management during profile operations
+- **System Stability**: Improved overall platform stability with comprehensive bug fixes
+
+---
+
+## Version 0.4.0 - Platform Stability & Core System Improvements
 
 ### Major Platform Enhancements
 

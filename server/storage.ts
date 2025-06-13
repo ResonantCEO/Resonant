@@ -587,13 +587,10 @@ export class Storage {
     return friendship;
   }
 
-  async rejectFriendRequest(friendshipId: number): Promise<Friendship> {
-    const [friendship] = await db
-      .update(friendships)
-      .set({ status: 'rejected' })
-      .where(eq(friendships.id, friendshipId))
-      .returning();
-    return friendship;
+  async rejectFriendRequest(friendshipId: number): Promise<void> {
+    await db
+      .delete(friendships)
+      .where(eq(friendships.id, friendshipId));
   }
 
   async getFriendshipStatus(profileId1: number, profileId2: number): Promise<Friendship | null> {

@@ -867,7 +867,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Get user's profiles by user ID (for navigation from notifications)
-  app.get('/api/users/:userId/profiles', async (req, res) => {
+  app.get('/api/users/:userId/profiles', async (req, res) => {Adding cache-busting headers to the notifications API endpoints and unread count endpoint to prevent the browser from using cached data.```text
     try {
       const userId = parseInt(req.params.userId);
       const profiles = await storage.getProfilesByUserId(userId);
@@ -963,7 +963,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/friend-requests/:id/accept', isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.id);
-      
+
       // Check if the friendship exists and user has permission
       const existingFriendship = await storage.getFriendshipById(friendshipId);
       if (!existingFriendship) {
@@ -1001,7 +1001,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/friend-requests/:id/reject', isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.id);
-      
+
       // Check if the friendship exists and user has permission
       const existingFriendship = await storage.getFriendshipById(friendshipId);
       if (!existingFriendship) {
@@ -1479,6 +1479,11 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
+      // Add no-cache headers to ensure fresh data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+
       const notifications = await notificationService.getUserNotifications(
         req.user.id,
         parseInt(limit),
@@ -1503,6 +1508,11 @@ export function registerRoutes(app: Express): Server {
       if (!activeProfile) {
         return res.json({ count: 0 });
       }
+
+      // Add no-cache headers to ensure fresh data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
 
       const count = await notificationService.getUnreadCount(req.user.id, activeProfile.id, activeProfile.type);
       res.json({ count });

@@ -286,7 +286,7 @@ export class NotificationService {
   // Get relevant notification types based on profile type
   private getRelevantNotificationTypes(profileType: string): string[] {
     const commonTypes = ['friend_request', 'friend_accepted', 'profile_invite', 'profile_deleted'];
-    
+
     switch (profileType) {
       case 'artist':
         return [...commonTypes, 'booking_request', 'booking_response', 'post_like', 'post_comment'];

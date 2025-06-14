@@ -9,6 +9,7 @@ import {
 } from "@shared/schema";
 import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { emailService } from "./email";
+import { friendships } from "@shared/schema";
 
 export interface NotificationData {
   recipientId: number;
@@ -81,7 +82,6 @@ export class NotificationService {
       .offset(offset);
 
     // Check if friendships exist in the database
-    const { friendships } = await import('@shared/schema');
     const hasFriendships = await db.select({ count: sql`count(*)` }).from(friendships);
     const friendshipsExist = hasFriendships[0]?.count > 0;
 
@@ -101,8 +101,23 @@ export class NotificationService {
       }
       return true;
     });
+    
+    // Check if friend requests exist in the database
+    const friendRequestsExist = await db.select({ count: sql`count(*)` }).from(friendships).where(
+        and(
+            eq(friendships.requesterId, userId),
+            eq(friendships.status, "pending")
+        )
+    );
+    
+    const finalFilteredNotifications = filteredNotifications.filter(notification => {
+        if (notification.type === 'friend_request') {
+          return friendRequestsExist[0]?.count > 0;
+        }
+        return true;
+    });
 
-    return filteredNotifications;
+    return finalFilteredNotifications;
   }
 
   // Mark notification as read
@@ -146,7 +161,6 @@ export class NotificationService {
       .where(and(...whereConditions));
 
     // Check if friendships exist in the database
-    const { friendships } = await import('@shared/schema');
     const hasFriendships = await db.select({ count: sql`count(*)` }).from(friendships);
     const friendshipsExist = hasFriendships[0]?.count > 0;
 
@@ -166,8 +180,15 @@ export class NotificationService {
       }
       return true;
     });
+    
+    const finalFilteredNotifications = filteredNotifications.filter(notification => {
+        if (notification.type === 'friend_request') {
+          return friendshipsExist;
+        }
+        return true;
+    });
 
-    return filteredNotifications.length;
+    return finalFilteredNotifications.length;
   }
 
   // Delete notification

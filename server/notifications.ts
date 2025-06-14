@@ -80,11 +80,16 @@ export class NotificationService {
       .limit(limit)
       .offset(offset);
 
+    // Check if friendships exist in the database
+    const { friendships } = await import('@shared/schema');
+    const hasFriendships = await db.select({ count: sql`count(*)` }).from(friendships);
+    const friendshipsExist = hasFriendships[0]?.count > 0;
+
     // Additional filtering for profile-specific notifications
     const filteredNotifications = userNotifications.filter(notification => {
-      // Friend-related notifications should always be visible regardless of active profile
+      // Friend-related notifications should only be visible if friendships exist in database
       if (['friend_request', 'friend_accepted'].includes(notification.type)) {
-        return true;
+        return friendshipsExist;
       }
       // For booking requests, only show them when venue profile is active
       if (notification.type === 'booking_request' && activeProfileType !== 'venue') {
@@ -140,11 +145,16 @@ export class NotificationService {
       .from(notifications)
       .where(and(...whereConditions));
 
+    // Check if friendships exist in the database
+    const { friendships } = await import('@shared/schema');
+    const hasFriendships = await db.select({ count: sql`count(*)` }).from(friendships);
+    const friendshipsExist = hasFriendships[0]?.count > 0;
+
     // Additional filtering for profile-specific notifications
     const filteredNotifications = allNotifications.filter(notification => {
-      // Friend-related notifications should always be counted regardless of active profile
+      // Friend-related notifications should only be counted if friendships exist in database
       if (['friend_request', 'friend_accepted'].includes(notification.type)) {
-        return true;
+        return friendshipsExist;
       }
       // For booking requests, only count them when venue profile is active
       if (notification.type === 'booking_request' && activeProfileType !== 'venue') {

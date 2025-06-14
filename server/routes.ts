@@ -963,6 +963,23 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/friend-requests/:id/accept', isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.id);
+      
+      // Check if the friendship exists and user has permission
+      const existingFriendship = await storage.getFriendshipById(friendshipId);
+      if (!existingFriendship) {
+        return res.status(404).json({ message: "Friend request not found" });
+      }
+
+      // Check if the current user is the addressee (can accept the request)
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile || existingFriendship.addresseeId !== activeProfile.id) {
+        return res.status(403).json({ message: "You can only accept friend requests sent to you" });
+      }
+
+      if (existingFriendship.status !== 'pending') {
+        return res.status(400).json({ message: "Friend request has already been processed" });
+      }
+
       const friendship = await storage.acceptFriendRequest(friendshipId);
 
       // Send notification to the requester
@@ -984,6 +1001,23 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/friend-requests/:id/reject', isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.id);
+      
+      // Check if the friendship exists and user has permission
+      const existingFriendship = await storage.getFriendshipById(friendshipId);
+      if (!existingFriendship) {
+        return res.status(404).json({ message: "Friend request not found" });
+      }
+
+      // Check if the current user is the addressee (can reject the request)
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile || existingFriendship.addresseeId !== activeProfile.id) {
+        return res.status(403).json({ message: "You can only reject friend requests sent to you" });
+      }
+
+      if (existingFriendship.status !== 'pending') {
+        return res.status(400).json({ message: "Friend request has already been processed" });
+      }
+
       const friendship = await storage.rejectFriendRequest(friendshipId);
       res.json(friendship);
     } catch (error) {

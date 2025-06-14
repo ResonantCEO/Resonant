@@ -102,20 +102,29 @@ export class NotificationService {
       return true;
     });
     
-    // Check if friend requests exist in the database
-    const friendRequestsExist = await db.select({ count: sql`count(*)` }).from(friendships).where(
-        and(
-            eq(friendships.requesterId, userId),
-            eq(friendships.status, "pending")
-        )
-    );
+    // For friend request notifications, check if the specific notification has a corresponding pending friendship
+    const finalFilteredNotifications = [];
     
-    const finalFilteredNotifications = filteredNotifications.filter(notification => {
-        if (notification.type === 'friend_request') {
-          return friendRequestsExist[0]?.count > 0;
+    for (const notification of filteredNotifications) {
+      if (notification.type === 'friend_request') {
+        // Check if this specific friend request still exists and is pending
+        const senderId = notification.sender?.id;
+        if (senderId) {
+          const pendingRequest = await db.select({ count: sql`count(*)` }).from(friendships).where(
+            and(
+              eq(friendships.requesterId, senderId),
+              eq(friendships.status, "pending")
+            )
+          );
+          
+          if (pendingRequest[0]?.count > 0) {
+            finalFilteredNotifications.push(notification);
+          }
         }
-        return true;
-    });
+      } else {
+        finalFilteredNotifications.push(notification);
+      }
+    }
 
     return finalFilteredNotifications;
   }
@@ -181,12 +190,34 @@ export class NotificationService {
       return true;
     });
     
-    const finalFilteredNotifications = filteredNotifications.filter(notification => {
-        if (notification.type === 'friend_request') {
-          return friendshipsExist;
+    // For friend request notifications, check if they have corresponding pending friendships
+    const finalFilteredNotifications = [];
+    
+    for (const notification of filteredNotifications) {
+      if (notification.type === 'friend_request') {
+        // We need to get the senderId from the notification data
+        // Since we only have basic notification info here, we'll do a more targeted check
+        const friendRequestNotificationDetails = await db.select({
+          senderId: notifications.senderId
+        }).from(notifications).where(eq(notifications.id, notification.id));
+        
+        const senderId = friendRequestNotificationDetails[0]?.senderId;
+        if (senderId) {
+          const pendingRequest = await db.select({ count: sql`count(*)` }).from(friendships).where(
+            and(
+              eq(friendships.requesterId, senderId),
+              eq(friendships.status, "pending")
+            )
+          );
+          
+          if (pendingRequest[0]?.count > 0) {
+            finalFilteredNotifications.push(notification);
+          }
         }
-        return true;
-    });
+      } else {
+        finalFilteredNotifications.push(notification);
+      }
+    }
 
     return finalFilteredNotifications.length;
   }

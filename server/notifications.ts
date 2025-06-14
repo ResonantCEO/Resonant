@@ -3,6 +3,7 @@ import {
   notifications, 
   userNotificationSettings, 
   users,
+  profiles,
   type InsertNotification,
   type InsertUserNotificationSettings,
   type Notification

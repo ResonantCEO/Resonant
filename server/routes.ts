@@ -867,7 +867,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Get user's profiles by user ID (for navigation from notifications)
-  app.get('/api/users/:userId/profiles', async (req, res) => {Adding cache-busting headers to the notifications API endpoints and unread count endpoint to prevent the browser from using cached data.```text
+  app.get('/api/users/:userId/profiles', async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
       const profiles = await storage.getProfilesByUserId(userId);
@@ -963,7 +963,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/friend-requests/:id/accept', isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.id);
-
+      
       // Check if the friendship exists and user has permission
       const existingFriendship = await storage.getFriendshipById(friendshipId);
       if (!existingFriendship) {
@@ -1001,7 +1001,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/friend-requests/:id/reject', isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.id);
-
+      
       // Check if the friendship exists and user has permission
       const existingFriendship = await storage.getFriendshipById(friendshipId);
       if (!existingFriendship) {

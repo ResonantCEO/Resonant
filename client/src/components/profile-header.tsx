@@ -119,9 +119,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   };
 
   // Always call all hooks at the top level - move all useQuery and useMutation calls here
-  const { data: friendshipStatus } = useQuery({
+  const { data: friendshipStatus, refetch: refetchFriendshipStatus } = useQuery({
     queryKey: [`/api/friendship-status/${profile?.id}`],
     enabled: !isOwn && !!profile?.id,
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache the result
   });
 
   const { data: friends = [] } = useQuery<any[]>({
@@ -135,8 +137,9 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         addresseeId: profile.id,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile.id}`] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile.id}`] });
+      await refetchFriendshipStatus();
       toast({
         title: "Friend Request Sent",
         description: "Your friend request has been sent successfully.",
@@ -156,10 +159,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       if (!friendshipStatus) throw new Error("No friendship found");
       return await apiRequest("DELETE", `/api/friendships/${friendshipStatus.id}`);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile.id}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/friends`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}/friends`] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile.id}`] });
+      await queryClient.invalidateQueries({ queryKey: [`/api/friends`] });
+      await queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}/friends`] });
+      await refetchFriendshipStatus();
       toast({
         title: "Unfriended",
         description: "You are no longer friends with this user.",

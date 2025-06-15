@@ -31,10 +31,12 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch notifications
+  // Fetch notifications with real-time polling
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["/api/notifications"],
     queryFn: () => apiRequest("GET", "/api/notifications"),
+    refetchInterval: 3000, // Poll every 3 seconds
+    refetchIntervalInBackground: true,
   });
 
   // Mark as read mutation

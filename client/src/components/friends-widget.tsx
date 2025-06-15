@@ -31,6 +31,8 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
 
   const { data: friendRequests = [] } = useQuery({
     queryKey: ["/api/friend-requests"],
+    refetchInterval: 3000, // Poll every 3 seconds
+    refetchIntervalInBackground: true,
   });
 
   const acceptFriendRequestMutation = useMutation({

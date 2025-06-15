@@ -161,6 +161,29 @@ export default function Profile() {
     } : {}
   }
 
+  const sendFriendRequestMutation = useMutation({
+    mutationFn: async (profileId: number) => {
+      return await apiRequest("POST", "/api/friend-requests", { addresseeId: profileId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile?.id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
+      toast({
+        title: "Friend Request Sent",
+        description: "Your friend request has been sent successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send friend request",
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <div className="min-h-screen flex">
       <Sidebar />

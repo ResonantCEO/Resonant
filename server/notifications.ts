@@ -82,16 +82,8 @@ export class NotificationService {
       .limit(limit)
       .offset(offset);
 
-    // Check if friendships exist in the database
-    const hasFriendships = await db.select({ count: sql`count(*)` }).from(friendships);
-    const friendshipsExist = hasFriendships[0]?.count > 0;
-
-    // Additional filtering for profile-specific notifications
+    // Simple filtering for profile-specific notifications
     const filteredNotifications = userNotifications.filter(notification => {
-      // Friend-related notifications should only be visible if friendships exist in database
-      if (['friend_request', 'friend_accepted'].includes(notification.type)) {
-        return friendshipsExist;
-      }
       // For booking requests, only show them when venue profile is active
       if (notification.type === 'booking_request' && activeProfileType !== 'venue') {
         return false;
@@ -102,43 +94,8 @@ export class NotificationService {
       }
       return true;
     });
-    
-    // For friend request notifications, check if the specific notification has a corresponding pending friendship
-    const finalFilteredNotifications = [];
-    
-    for (const notification of filteredNotifications) {
-      if (notification.type === 'friend_request') {
-        // Check if this specific friend request still exists and is pending between sender and recipient
-        const senderId = notification.sender?.id;
-        if (senderId) {
-          // We need to get the recipient's active profile to check the specific friendship
-          const recipientProfile = await db.select().from(profiles).where(
-            and(
-              eq(profiles.userId, userId),
-              eq(profiles.isActive, true)
-            )
-          );
-          
-          if (recipientProfile[0]) {
-            const pendingRequest = await db.select({ count: sql`count(*)` }).from(friendships).where(
-              and(
-                eq(friendships.requesterId, senderId),
-                eq(friendships.addresseeId, recipientProfile[0].id),
-                eq(friendships.status, "pending")
-              )
-            );
-            
-            if (pendingRequest[0]?.count > 0) {
-              finalFilteredNotifications.push(notification);
-            }
-          }
-        }
-      } else {
-        finalFilteredNotifications.push(notification);
-      }
-    }
 
-    return finalFilteredNotifications;
+    return filteredNotifications;
   }
 
   // Mark notification as read
@@ -181,16 +138,8 @@ export class NotificationService {
       .from(notifications)
       .where(and(...whereConditions));
 
-    // Check if friendships exist in the database
-    const hasFriendships = await db.select({ count: sql`count(*)` }).from(friendships);
-    const friendshipsExist = hasFriendships[0]?.count > 0;
-
-    // Additional filtering for profile-specific notifications
+    // Simple filtering for profile-specific notifications
     const filteredNotifications = allNotifications.filter(notification => {
-      // Friend-related notifications should only be counted if friendships exist in database
-      if (['friend_request', 'friend_accepted'].includes(notification.type)) {
-        return friendshipsExist;
-      }
       // For booking requests, only count them when venue profile is active
       if (notification.type === 'booking_request' && activeProfileType !== 'venue') {
         return false;
@@ -201,48 +150,8 @@ export class NotificationService {
       }
       return true;
     });
-    
-    // For friend request notifications, check if they have corresponding pending friendships
-    const finalFilteredNotifications = [];
-    
-    for (const notification of filteredNotifications) {
-      if (notification.type === 'friend_request') {
-        // We need to get the senderId from the notification data
-        // Since we only have basic notification info here, we'll do a more targeted check
-        const friendRequestNotificationDetails = await db.select({
-          senderId: notifications.senderId
-        }).from(notifications).where(eq(notifications.id, notification.id));
-        
-        const senderId = friendRequestNotificationDetails[0]?.senderId;
-        if (senderId) {
-          // Get the recipient's active profile to check the specific friendship
-          const recipientProfile = await db.select().from(profiles).where(
-            and(
-              eq(profiles.userId, userId),
-              eq(profiles.isActive, true)
-            )
-          );
-          
-          if (recipientProfile[0]) {
-            const pendingRequest = await db.select({ count: sql`count(*)` }).from(friendships).where(
-              and(
-                eq(friendships.requesterId, senderId),
-                eq(friendships.addresseeId, recipientProfile[0].id),
-                eq(friendships.status, "pending")
-              )
-            );
-            
-            if (pendingRequest[0]?.count > 0) {
-              finalFilteredNotifications.push(notification);
-            }
-          }
-        }
-      } else {
-        finalFilteredNotifications.push(notification);
-      }
-    }
 
-    return finalFilteredNotifications.length;
+    return filteredNotifications.length;
   }
 
   // Delete notification

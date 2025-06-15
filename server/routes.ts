@@ -951,6 +951,7 @@ export function registerRoutes(app: Express): Server {
       if (targetProfile?.userId) {
         const senderUser = await storage.getUser(req.user.id);
         const senderName = `${senderUser?.firstName} ${senderUser?.lastName}`;
+        console.log(`Creating friend request notification for user ${targetProfile.userId} from ${senderName}`);
         await notificationService.notifyFriendRequest(targetProfile.userId, req.user.id, senderName, friendship.id);
       }
 

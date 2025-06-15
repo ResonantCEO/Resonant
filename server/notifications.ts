@@ -138,6 +138,7 @@ export class NotificationService {
       .select({
         id: notifications.id,
         type: notifications.type,
+        data: notifications.data,
       })
       .from(notifications)
       .where(and(...whereConditions));

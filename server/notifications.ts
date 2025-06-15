@@ -53,12 +53,6 @@ export class NotificationService {
   async getUserNotifications(userId: number, limit = 20, offset = 0, activeProfileId?: number, activeProfileType?: string): Promise<any[]> {
     let whereConditions = [eq(notifications.recipientId, userId)];
 
-    // Filter notifications based on active profile type
-    if (activeProfileType && activeProfileId) {
-      const relevantTypes = this.getRelevantNotificationTypes(activeProfileType);
-      whereConditions.push(inArray(notifications.type, relevantTypes));
-    }
-
     const userNotifications = await db
       .select({
         id: notifications.id,
@@ -82,20 +76,40 @@ export class NotificationService {
       .limit(limit)
       .offset(offset);
 
-    // Simple filtering for profile-specific notifications
+    // Strict filtering for profile-specific notifications
     const filteredNotifications = userNotifications.filter(notification => {
-      // For booking requests, only show them when venue profile is active
-      if (notification.type === 'booking_request' && activeProfileType !== 'venue') {
-        return false;
+      // For booking requests, ONLY show them when venue profile is active
+      if (notification.type === 'booking_request') {
+        return activeProfileType === 'venue';
       }
-      // For booking responses, only show them when artist profile is active
-      if (notification.type === 'booking_response' && activeProfileType !== 'artist') {
-        return false;
+      
+      // For booking responses, ONLY show them when artist profile is active
+      if (notification.type === 'booking_response') {
+        return activeProfileType === 'artist';
       }
+      
       // For friend requests, only show them for the specific target profile
-      if (notification.type === 'friend_request' && notification.data?.targetProfileId && notification.data.targetProfileId !== activeProfileId) {
+      if (notification.type === 'friend_request') {
+        const data = notification.data as any;
+        if (data?.targetProfileId) {
+          return data.targetProfileId === activeProfileId;
+        }
+        // If no targetProfileId, don't show it to avoid confusion
         return false;
       }
+      
+      // For friend accepted notifications, show to all profile types
+      if (notification.type === 'friend_accepted') {
+        return true;
+      }
+      
+      // For post-related notifications, show based on profile type
+      if (notification.type === 'post_like' || notification.type === 'post_comment') {
+        // Only show post notifications for artist and venue profiles (not audience)
+        return activeProfileType === 'artist' || activeProfileType === 'venue';
+      }
+      
+      // For other notification types, show to all profiles
       return true;
     });
 
@@ -128,12 +142,6 @@ export class NotificationService {
       eq(notifications.read, false)
     ];
 
-    // Filter notifications based on active profile type
-    if (activeProfileType && activeProfileId) {
-      const relevantTypes = this.getRelevantNotificationTypes(activeProfileType);
-      whereConditions.push(inArray(notifications.type, relevantTypes));
-    }
-
     const allNotifications = await db
       .select({
         id: notifications.id,
@@ -143,24 +151,40 @@ export class NotificationService {
       .from(notifications)
       .where(and(...whereConditions));
 
-    // Simple filtering for profile-specific notifications
+    // Apply the same strict filtering as getUserNotifications
     const filteredNotifications = allNotifications.filter(notification => {
-      // For booking requests, only count them when venue profile is active
-      if (notification.type === 'booking_request' && activeProfileType !== 'venue') {
-        return false;
+      // For booking requests, ONLY count them when venue profile is active
+      if (notification.type === 'booking_request') {
+        return activeProfileType === 'venue';
       }
-      // For booking responses, only count them when artist profile is active
-      if (notification.type === 'booking_response' && activeProfileType !== 'artist') {
-        return false;
+      
+      // For booking responses, ONLY count them when artist profile is active
+      if (notification.type === 'booking_response') {
+        return activeProfileType === 'artist';
       }
+      
       // For friend requests, only count them for the specific target profile
       if (notification.type === 'friend_request') {
-        // Get the notification data to check target profile
         const data = notification.data as any;
-        if (data?.targetProfileId && data.targetProfileId !== activeProfileId) {
-          return false;
+        if (data?.targetProfileId) {
+          return data.targetProfileId === activeProfileId;
         }
+        // If no targetProfileId, don't count it
+        return false;
       }
+      
+      // For friend accepted notifications, count for all profile types
+      if (notification.type === 'friend_accepted') {
+        return true;
+      }
+      
+      // For post-related notifications, count based on profile type
+      if (notification.type === 'post_like' || notification.type === 'post_comment') {
+        // Only count post notifications for artist and venue profiles (not audience)
+        return activeProfileType === 'artist' || activeProfileType === 'venue';
+      }
+      
+      // For other notification types, count for all profiles
       return true;
     });
 

@@ -140,36 +140,35 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {friendRequests.map((request: any) => (
-              <div key={request.id} className="flex items-center space-x-3">
-                <Avatar className="w-12 h-12">
-                  <AvatarImage src={request.requester.profileImageUrl || ""} />
-                  <AvatarFallback>
-                    {request.requester.name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+            <div key={request.id} className="flex items-center space-x-3">
+              <Avatar className="w-12 h-12">
+                <AvatarImage src={request.profileImageUrl || ""} />
+                <AvatarFallback>
+                  {request.name ? request.name.slice(0, 2).toUpperCase() : "??"}
+                </AvatarFallback>
+              </Avatar>
                 <div className="flex-1">
-                  <p className="font-medium text-neutral-900">{request.requester.name}</p>
-                  <p className="text-sm text-neutral-600">Wants to be friends</p>
-                  <div className="flex space-x-2 mt-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleAcceptRequest(request.friendship.id)}
-                      disabled={acceptFriendRequestMutation.isPending}
-                      className="bg-blue-500 hover:bg-blue-600 text-white"
-                    >
-                      Accept
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleRejectRequest(request.friendship.id)}
-                      disabled={rejectFriendRequestMutation.isPending}
-                    >
-                      Decline
-                    </Button>
-                  </div>
-                </div>
+                <h4 className="font-medium">{request.name || "Unknown User"}</h4>
+                <p className="text-sm text-muted-foreground">Friend request</p>
               </div>
+              <div className="flex space-x-2">
+                <Button
+                  size="sm"
+                  onClick={() => handleAcceptRequest(request.friendship?.id)}
+                  disabled={isAccepting || !request.friendship?.id}
+                >
+                  {isAccepting ? "..." : "Accept"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleRejectRequest(request.friendship?.id)}
+                  disabled={isRejecting || !request.friendship?.id}
+                >
+                  {isRejecting ? "..." : "Decline"}
+                </Button>
+              </div>
+            </div>
             ))}
           </CardContent>
         </Card>

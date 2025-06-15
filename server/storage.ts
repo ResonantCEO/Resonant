@@ -290,7 +290,7 @@ export class Storage {
         count: sql<number>`count(*)`.as('count'),
       })
       .from(postLikes)
-      .where(sql`${postLikes.postId} = ANY(${postIds})`)
+      .where(sql`${postLikes.postId} = ANY(ARRAY[${postIds.join(',')}])`)
       .groupBy(postLikes.postId);
 
     const likeCountMap = new Map(likeCounts.map(lc => [lc.postId, lc.count]));
@@ -303,7 +303,7 @@ export class Storage {
         .from(postLikes)
         .where(
           and(
-            sql`${postLikes.postId} = ANY(${postIds})`,
+            sql`${postLikes.postId} = ANY(ARRAY[${postIds.join(',')}])`,
             eq(postLikes.profileId, viewerProfileId)
           )
         );
@@ -358,7 +358,7 @@ export class Storage {
       })
       .from(posts)
       .innerJoin(profiles, eq(posts.profileId, profiles.id))
-      .where(sql`${posts.profileId} = ANY(${friendIds})`)
+      .where(sql`${posts.profileId} = ANY(ARRAY[${friendIds.join(',')}])`)
       .orderBy(desc(posts.createdAt))
       .limit(50);
 
@@ -374,7 +374,7 @@ export class Storage {
         count: sql<number>`count(*)`.as('count'),
       })
       .from(postLikes)
-      .where(sql`${postLikes.postId} = ANY(${postIds})`)
+      .where(sql`${postLikes.postId} = ANY(ARRAY[${postIds.join(',')}])`)
       .groupBy(postLikes.postId);
 
     const likeCountMap = new Map(likeCounts.map(lc => [lc.postId, lc.count]));
@@ -385,7 +385,7 @@ export class Storage {
       .from(postLikes)
       .where(
         and(
-          sql`${postLikes.postId} = ANY(${postIds})`,
+          sql`${postLikes.postId} = ANY(ARRAY[${postIds.join(',')}])`,
           eq(postLikes.profileId, profileId)
         )
       );

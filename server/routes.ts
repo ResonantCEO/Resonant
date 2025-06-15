@@ -920,6 +920,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       const requests = await storage.getFriendRequests(activeProfile.id);
+      console.log(`Found ${requests.length} pending friend requests for profile ${activeProfile.id}`);
       res.json(requests);
     } catch (error) {
       console.error("Error fetching friend requests:", error);

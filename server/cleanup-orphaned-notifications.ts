@@ -41,6 +41,55 @@ async function cleanupOrphanedNotifications() {
       console.log('Some pending friend requests still exist. Keeping valid notifications.');
     }
 
+    // Clean up friend request notifications that don't have corresponding pending friendships
+    const pendingFriendships = await db
+      .select()
+      .from(friendships)
+      .where(eq(friendships.status, 'pending'));
+
+    if (pendingFriendships.length === 0) {
+      console.log('No pending friendships found. Cleaning up all friend_request notifications...');
+      
+      const result = await db
+        .delete(notifications)
+        .where(eq(notifications.type, 'friend_request'));
+
+      console.log('Cleaned up all friend_request notifications');
+    } else {
+      console.log(`Found ${pendingFriendships.length} pending friendships. Checking for orphaned friend_request notifications...`);
+      
+      // Get all friend request notifications
+      const friendRequestNotifications = await db
+        .select()
+        .from(notifications)
+        .where(eq(notifications.type, 'friend_request'));
+
+      // Check each notification to see if it has a corresponding pending friendship
+      const validNotificationIds = new Set();
+      
+      for (const notification of friendRequestNotifications) {
+        const data = notification.data as any;
+        if (data && data.friendshipId) {
+          const correspondingFriendship = pendingFriendships.find(f => f.id === data.friendshipId);
+          if (correspondingFriendship) {
+            validNotificationIds.add(notification.id);
+          }
+        }
+      }
+
+      // Delete notifications that don't have corresponding pending friendships
+      const orphanedNotifications = friendRequestNotifications.filter(n => !validNotificationIds.has(n.id));
+      
+      if (orphanedNotifications.length > 0) {
+        const orphanedIds = orphanedNotifications.map(n => n.id);
+        await db
+          .delete(notifications)
+          .where(inArray(notifications.id, orphanedIds));
+        
+        console.log(`Deleted ${orphanedNotifications.length} orphaned friend request notifications`);
+      }
+    }
+
     // Also clean up any friend_accepted notifications if no friendships exist
     const acceptedFriendships = await db
       .select()

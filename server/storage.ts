@@ -502,7 +502,7 @@ export class Storage {
   }
 
   async getFriendRequests(profileId: number): Promise<any[]> {
-    return await db
+    const results = await db
       .select({
         id: friendships.id,
         status: friendships.status,
@@ -525,6 +525,18 @@ export class Storage {
         )
       )
       .orderBy(desc(friendships.createdAt));
+
+    // Return results with proper friendship object structure
+    return results.map(result => ({
+      ...result.requester,
+      friendship: {
+        id: result.id,
+        status: result.status,
+        createdAt: result.createdAt,
+        requesterId: result.requesterId,
+        addresseeId: result.addresseeId
+      }
+    }));
   }
 
   async getFriends(profileId: number): Promise<any[]> {

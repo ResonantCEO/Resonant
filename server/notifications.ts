@@ -375,14 +375,14 @@ export class NotificationService {
   }
 
   // Helper methods for common notification types
-  async notifyFriendRequest(recipientId: number, senderId: number, senderName: string): Promise<void> {
+  async notifyFriendRequest(recipientId: number, senderId: number, senderName: string, friendshipId?: number): Promise<void> {
     await this.createNotification({
       recipientId,
       senderId,
       type: "friend_request",
       title: "New Friend Request",
       message: `${senderName} sent you a friend request`,
-      data: { senderId },
+      data: { senderId, friendshipId },
     });
   }
 

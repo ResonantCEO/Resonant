@@ -524,19 +524,48 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       return null;
     }
 
-    // TODO: Implement friendship status checking
-    return (
-      <div className="flex space-x-3">
-        <Button 
-          onClick={handleSendFriendRequest}
-          disabled={sendFriendRequestMutation.isPending}
-          className="bg-blue-500 hover:bg-blue-600 text-white"
-        >
-          <UserPlus className="w-4 h-4 mr-2" />
-          Add Friend
-        </Button>
-      </div>
-    );
+    if (friendshipStatus?.status === 'accepted') {
+      return (
+        <div className="flex space-x-3">
+          <Button 
+            onClick={() => unfriendMutation.mutate()}
+            disabled={unfriendMutation.isPending}
+            variant="outline"
+            className="bg-red-600 hover:bg-red-700 text-white border-red-600"
+          >
+            <UserMinus className="w-4 h-4 mr-2" />
+            Unfriend
+          </Button>
+        </div>
+      );
+    } else if (friendshipStatus?.status === 'pending') {
+      return (
+        <div className="flex space-x-3">
+          <Button 
+            disabled
+            variant="outline"
+            className="bg-gray-400 text-white border-gray-400 cursor-not-allowed"
+          >
+            <Clock className="w-4 h-4 mr-2" />
+            Pending
+          </Button>
+        </div>
+      );
+    } else {
+      // No friendship exists or was rejected - show Add Friend
+      return (
+        <div className="flex space-x-3">
+          <Button 
+            onClick={handleSendFriendRequest}
+            disabled={sendFriendRequestMutation.isPending}
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            <UserPlus className="w-4 h-4 mr-2" />
+            Add Friend
+          </Button>
+        </div>
+      );
+    }
   };
 
   return (

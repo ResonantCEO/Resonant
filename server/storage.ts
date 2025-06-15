@@ -596,6 +596,20 @@ export class Storage {
       .set({ status: 'accepted' })
       .where(eq(friendships.id, friendshipId))
       .returning();
+
+    // Clean up any friend request notifications for this friendship
+    if (friendship) {
+      const { notificationService } = await import('./notifications');
+      await db
+        .delete(notifications)
+        .where(
+          and(
+            eq(notifications.type, 'friend_request'),
+            sql`${notifications.data}->>'senderId' = ${friendship.requesterId.toString()}`
+          )
+        );
+    }
+
     return friendship;
   }
 
@@ -605,6 +619,20 @@ export class Storage {
       .set({ status: 'rejected' })
       .where(eq(friendships.id, friendshipId))
       .returning();
+
+    // Clean up any friend request notifications for this friendship
+    if (friendship) {
+      const { notificationService } = await import('./notifications');
+      await db
+        .delete(notifications)
+        .where(
+          and(
+            eq(notifications.type, 'friend_request'),
+            sql`${notifications.data}->>'senderId' = ${friendship.requesterId.toString()}`
+          )
+        );
+    }
+
     return friendship;
   }
 

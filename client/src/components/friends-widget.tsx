@@ -147,10 +147,10 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
               <Avatar className="w-12 h-12">
                 <AvatarImage src={request.profileImageUrl || ""} />
                 <AvatarFallback>
-                  {request.name ? request.name.slice(0, 2).toUpperCase() : "??"}
+                  {(request.profile?.name || request.name || "U")[0]}
                 </AvatarFallback>
               </Avatar>
-                <div className="flex-1">
+              <div className="flex-1">
                 <h4 className="font-medium">{request.name || "Unknown User"}</h4>
                 <p className="text-sm text-muted-foreground">Friend request</p>
               </div>

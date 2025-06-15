@@ -37,6 +37,9 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     queryFn: () => apiRequest("GET", "/api/notifications"),
     refetchInterval: 3000, // Poll every 3 seconds
     refetchIntervalInBackground: true,
+    refetchOnMount: true, // Always fetch fresh data when component mounts
+    refetchOnWindowFocus: true, // Refresh when window gains focus
+    staleTime: 0, // Always consider data stale to ensure fresh fetches
   });
 
   // Mark as read mutation

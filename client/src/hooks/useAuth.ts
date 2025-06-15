@@ -30,7 +30,7 @@ export function useAuth() {
   const [loadingStartTime, setLoadingStartTime] = useState<number>(() => Date.now());
   const [showLoading, setShowLoading] = useState(true);
   const [hasReceivedData, setHasReceivedData] = useState(false);
-  
+
   const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ["/api/user"],
     retry: false,
@@ -48,7 +48,7 @@ export function useAuth() {
     if (hasReceivedData) {
       const elapsed = Date.now() - loadingStartTime;
       const remainingTime = Math.max(0, 2000 - elapsed);
-      
+
       const timer = setTimeout(() => {
         setShowLoading(false);
       }, remainingTime);

@@ -81,6 +81,29 @@ export default function Profile() {
     queryKey: ["/api/user"],
   });
 
+  const sendFriendRequestMutation = useMutation({
+    mutationFn: async (profileId: number) => {
+      return await apiRequest("POST", "/api/friend-requests", { addresseeId: profileId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile?.id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
+      toast({
+        title: "Friend Request Sent",
+        description: "Your friend request has been sent successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send friend request",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Update active tab when profile changes
   React.useEffect(() => {
     if (profile) {
@@ -160,29 +183,6 @@ export default function Profile() {
       height: '100vh',
     } : {}
   }
-
-  const sendFriendRequestMutation = useMutation({
-    mutationFn: async (profileId: number) => {
-      return await apiRequest("POST", "/api/friend-requests", { addresseeId: profileId });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile?.id}`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
-      toast({
-        title: "Friend Request Sent",
-        description: "Your friend request has been sent successfully",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send friend request",
-        variant: "destructive",
-      });
-    },
-  });
 
   return (
     <div className="min-h-screen flex">

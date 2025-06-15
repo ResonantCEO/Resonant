@@ -92,6 +92,10 @@ export class NotificationService {
       if (notification.type === 'booking_response' && activeProfileType !== 'artist') {
         return false;
       }
+      // For friend requests, only show them for the specific target profile
+      if (notification.type === 'friend_request' && notification.data?.targetProfileId && notification.data.targetProfileId !== activeProfileId) {
+        return false;
+      }
       return true;
     });
 
@@ -147,6 +151,14 @@ export class NotificationService {
       // For booking responses, only count them when artist profile is active
       if (notification.type === 'booking_response' && activeProfileType !== 'artist') {
         return false;
+      }
+      // For friend requests, only count them for the specific target profile
+      if (notification.type === 'friend_request') {
+        // Get the notification data to check target profile
+        const data = notification.data as any;
+        if (data?.targetProfileId && data.targetProfileId !== activeProfileId) {
+          return false;
+        }
       }
       return true;
     });
@@ -284,14 +296,14 @@ export class NotificationService {
   }
 
   // Helper methods for common notification types
-  async notifyFriendRequest(recipientId: number, senderId: number, senderName: string, friendshipId?: number): Promise<void> {
+  async notifyFriendRequest(recipientId: number, senderId: number, senderName: string, friendshipId?: number, targetProfileId?: number): Promise<void> {
     await this.createNotification({
       recipientId,
       senderId,
       type: "friend_request",
       title: "New Friend Request",
       message: `${senderName} sent you a friend request`,
-      data: { senderId, friendshipId },
+      data: { senderId, friendshipId, targetProfileId },
     });
   }
 

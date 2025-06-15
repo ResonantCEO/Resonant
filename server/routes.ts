@@ -945,14 +945,14 @@ export function registerRoutes(app: Express): Server {
 
       const friendship = await storage.sendFriendRequest(activeProfile.id, addresseeId);
 
-      // Send notification
+      // Send notification - only to the specific target profile, not all profiles
       const { notificationService } = await import('./notifications');
       const targetProfile = await storage.getProfile(addresseeId);
       if (targetProfile?.userId) {
         const senderUser = await storage.getUser(req.user.id);
         const senderName = `${senderUser?.firstName} ${senderUser?.lastName}`;
-        console.log(`Creating friend request notification for user ${targetProfile.userId} from ${senderName}`);
-        await notificationService.notifyFriendRequest(targetProfile.userId, req.user.id, senderName, friendship.id);
+        console.log(`Creating friend request notification for user ${targetProfile.userId} from ${senderName} for profile ${targetProfile.id}`);
+        await notificationService.notifyFriendRequest(targetProfile.userId, req.user.id, senderName, friendship.id, targetProfile.id);
       }
 
       res.json(friendship);

@@ -76,6 +76,9 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
     },
   });
 
+  const isAccepting = acceptFriendRequestMutation.isPending;
+  const isRejecting = rejectFriendRequestMutation.isPending;
+
   const handleAcceptRequest = (friendshipId: number) => {
     acceptFriendRequestMutation.mutate(friendshipId);
   };
@@ -140,7 +143,7 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {friendRequests.map((request: any) => (
-            <div key={request.id} className="flex items-center space-x-3">
+            <div key={request.id || request.friendship?.id} className="flex items-center space-x-3">
               <Avatar className="w-12 h-12">
                 <AvatarImage src={request.profileImageUrl || ""} />
                 <AvatarFallback>

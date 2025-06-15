@@ -304,7 +304,7 @@ export class NotificationService {
       type: "friend_request",
       title: "New Friend Request",
       message: `${senderName} sent you a friend request`,
-      data: { senderId, friendshipId, targetProfileId },
+      data: { senderId, friendshipId, targetProfileId, senderProfileName: senderName },
     });
   }
 

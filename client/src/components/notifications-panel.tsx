@@ -104,13 +104,8 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   // Accept friend request mutation
   const acceptFriendRequestMutation = useMutation({
-    mutationFn: async (senderId: number) => {
-      // First get the friend request
-      const friendRequests = await apiRequest("GET", "/api/friend-requests");
-      const request = friendRequests.find((req: any) => req.profile.userId === senderId);
-      if (!request) throw new Error("Friend request not found");
-
-      return await apiRequest("POST", `/api/friend-requests/${request.friendship.id}/accept`);
+    mutationFn: async (friendshipId: number) => {
+      return await apiRequest("POST", `/api/friend-requests/${friendshipId}/accept`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
@@ -134,13 +129,8 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   // Reject friend request mutation
   const rejectFriendRequestMutation = useMutation({
-    mutationFn: async (senderId: number) => {
-      // First get the friend request
-      const friendRequests = await apiRequest("GET", "/api/friend-requests");
-      const request = friendRequests.find((req: any) => req.profile.userId === senderId);
-      if (!request) throw new Error("Friend request not found");
-
-      return await apiRequest("POST", `/api/friend-requests/${request.friendship.id}/reject`);
+    mutationFn: async (friendshipId: number) => {
+      return await apiRequest("POST", `/api/friend-requests/${friendshipId}/reject`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
@@ -173,12 +163,12 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     markAllAsReadMutation.mutate();
   };
 
-  const handleAcceptFriendRequest = (senderId: number) => {
-    acceptFriendRequestMutation.mutate(senderId);
+  const handleAcceptFriendRequest = (friendshipId: number) => {
+    acceptFriendRequestMutation.mutate(friendshipId);
   };
 
-  const handleRejectFriendRequest = (senderId: number) => {
-    rejectFriendRequestMutation.mutate(senderId);
+  const handleRejectFriendRequest = (friendshipId: number) => {
+    rejectFriendRequestMutation.mutate(friendshipId);
   };
 
   const handleViewProfile = async (senderId: number) => {
@@ -277,7 +267,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
             <div className="flex space-x-2 mt-3">
               <Button
                 size="sm"
-                onClick={() => handleAcceptFriendRequest(notification.sender.id)}
+                onClick={() => handleAcceptFriendRequest(notification.data?.friendshipId)}
                 disabled={acceptFriendRequestMutation.isPending}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
@@ -287,7 +277,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleRejectFriendRequest(notification.sender.id)}
+                onClick={() => handleRejectFriendRequest(notification.data?.friendshipId)}
                 disabled={rejectFriendRequestMutation.isPending}
               >
                 <UserMinus className="w-3 h-3 mr-1" />

@@ -1,6 +1,79 @@
 # Resonant Changelog
 
-## Version 0.4.1 - Notification System & Profile-Specific Data Fixes (Latest)
+## Version 0.4.2 - Enhanced Notification System & Profile-Based Filtering (Latest)
+
+### Advanced Notification System Improvements
+
+#### 🔔 Profile-Specific Notification Isolation Enhancements
+- **Enhanced Friend Request Filtering**: Implemented precise targetProfileId-based filtering ensuring friend requests only appear for their intended recipient profiles
+- **Real-time Notification Count Updates**: Added comprehensive profile-specific notification count API with live polling every 5 seconds for immediate updates
+- **Cross-Profile Notification Prevention**: Strengthened isolation between audience, artist, and venue profiles with strict validation logic
+- **Notification Context Validation**: Enhanced server-side filtering that validates notification relevance before delivery to specific profile types
+- **Profile Count Synchronization**: Implemented `/api/notifications/counts-by-profile` endpoint providing real-time notification counts for all user profiles
+
+#### 🛠️ Backend Notification Processing Optimization
+- **Advanced Filtering Logic**: Enhanced `getUnreadCount` and `getUserNotifications` methods with sophisticated profile-type aware filtering
+- **Target Profile Validation**: Improved friend request notifications to include `targetProfileId` for precise delivery targeting
+- **Notification Type Segregation**: Reinforced separation of booking requests (venue-only), booking responses (artist-only), and friend requests (profile-specific)
+- **Database Query Enhancement**: Optimized notification retrieval queries with proper profile context filtering
+- **Cache Management**: Improved React Query cache invalidation for immediate notification count updates
+
+#### 📱 Frontend Notification Interface Improvements
+- **Real-time Badge Updates**: Enhanced sidebar profile switching with immediate notification count updates reflecting current profile context
+- **Profile-Aware Notification Panel**: Updated notifications panel to show only relevant notifications based on active profile type
+- **Live Count Polling**: Implemented 5-second polling intervals for notification counts ensuring fresh data across profile switches
+- **Enhanced Error Handling**: Improved notification fetching with comprehensive error recovery and retry logic
+- **Visual Feedback System**: Added detailed console logging for debugging notification filtering and count calculations
+
+#### 🔧 Notification API Architecture Enhancement
+- **Profile Count Endpoint**: New `/api/notifications/counts-by-profile` endpoint returning notification counts for all user profiles
+- **Enhanced Response Headers**: Added no-cache headers to notification endpoints ensuring fresh data retrieval
+- **Improved Data Structure**: Optimized notification count response format with string-keyed profile IDs for consistency
+- **Real-time Synchronization**: Enhanced notification mutations to invalidate all relevant query caches for immediate UI updates
+- **Cross-Component Integration**: Unified notification state management across sidebar, notifications panel, and profile interfaces
+
+### Technical Infrastructure Improvements
+
+#### 🏗️ Notification Filtering Architecture
+- **Profile Type Detection**: Enhanced profile type checking logic for accurate notification categorization
+- **Target Profile Matching**: Implemented precise profile ID matching for friend request delivery
+- **Notification Relevance Engine**: Built sophisticated relevance checking system ensuring notifications reach appropriate profile contexts
+- **Cross-Profile Data Protection**: Strengthened data separation preventing notification bleed between profile types
+- **Permission-Based Filtering**: Enhanced role-based notification filtering with proper access control validation
+
+#### 🔍 Real-time Data Management
+- **Live Polling System**: Implemented 5-second interval polling for notification counts with background refresh capability
+- **Cache Optimization**: Enhanced React Query cache management with strategic invalidation for immediate updates
+- **Response Time Optimization**: Maintained sub-second notification API response times during filtering enhancements
+- **Memory Management**: Optimized notification data processing for sustained performance during real-time updates
+- **Error Recovery**: Improved error handling with graceful degradation and automatic retry mechanisms
+
+#### 🎯 User Experience Enhancements
+- **Contextual Notification Display**: Users now see precisely targeted notifications based on their active profile type
+- **Immediate Profile Switching**: Notification counts update instantly when switching between audience, artist, and venue profiles
+- **Relevant Content Filtering**: Friend requests, booking notifications, and content interactions properly isolated to appropriate profiles
+- **Professional Interface**: Clean notification management with proper categorization and visual hierarchy
+- **Performance Consistency**: Maintained fast notification loading times while implementing advanced filtering logic
+
+### Security & Data Integrity
+
+#### 🛡️ Enhanced Notification Security
+- **Profile Access Validation**: Strengthened permission checking ensuring notifications only reach authorized profile contexts
+- **Target Profile Verification**: Enhanced friend request security with precise recipient profile validation
+- **Cross-Profile Protection**: Improved data isolation preventing unauthorized access to inappropriate profile notifications
+- **API Security Enhancement**: Reinforced notification endpoint security with comprehensive access control validation
+- **Data Consistency**: Enhanced notification data integrity across profile switches and real-time updates
+
+#### 📊 Performance & Reliability Monitoring
+- **Notification Processing Speed**: Optimized notification filtering algorithms maintaining fast response times
+- **Real-time Update Efficiency**: Enhanced polling system efficiency with minimal resource overhead
+- **Database Query Performance**: Improved notification query execution with proper indexing and optimization
+- **System Stability**: Maintained platform stability while implementing comprehensive notification filtering
+- **Error Rate Reduction**: Significantly improved notification system reliability with enhanced error handling
+
+---
+
+## Version 0.4.1 - Notification System & Profile-Specific Data Fixes
 
 ### Critical Bug Fixes & System Improvements
 

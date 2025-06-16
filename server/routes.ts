@@ -1524,6 +1524,30 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Get notification counts for all profiles
+  app.get('/api/notifications/counts-by-profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const { notificationService } = await import('./notifications');
+      const userProfiles = await storage.getProfilesByUserId(req.user.id);
+      
+      const counts = {};
+      for (const profile of userProfiles) {
+        const count = await notificationService.getUnreadCount(req.user.id, profile.id, profile.type);
+        counts[profile.id] = count;
+      }
+
+      // Add no-cache headers to ensure fresh data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+
+      res.json(counts);
+    } catch (error) {
+      console.error("Error fetching profile notification counts:", error);
+      res.status(500).json({ message: "Failed to fetch profile notification counts" });
+    }
+  });
+
   app.post('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
     try {
       const notificationId = parseInt(req.params.id);

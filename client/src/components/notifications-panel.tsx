@@ -50,6 +50,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
     },
   });
 
@@ -61,6 +62,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
       toast({
         title: "Success",
         description: "All notifications marked as read",
@@ -76,6 +78,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
       toast({
         title: "Success",
         description: "Notification deleted",
@@ -97,6 +100,8 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
       toast({
         title: "Friend Request Accepted",
         description: "You are now friends!",
@@ -124,6 +129,8 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
       toast({
         title: "Friend Request Declined",
         description: "Friend request has been declined",

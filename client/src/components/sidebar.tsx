@@ -140,6 +140,13 @@ export default function Sidebar() {
     }
   };
 
+    // Placeholder function for getting profile-specific notification count
+    // In a real implementation, this would fetch the count from the API
+    const getProfileNotificationCount = (profile: any) => {
+        // Replace this with actual logic to fetch profile-specific notification count
+        return unreadNotificationCount; // Returning the global count for now
+    };
+
 
 
   return (
@@ -223,9 +230,9 @@ export default function Sidebar() {
                           <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
                             {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
                           </Badge>
-                          {unreadNotificationCount > 0 && (
+                          {getProfileNotificationCount(profile) > 0 && (
                             <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                              {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                              {getProfileNotificationCount(profile) > 99 ? "99+" : getProfileNotificationCount(profile)}
                             </Badge>
                           )}
                         </div>

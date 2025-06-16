@@ -1,122 +1,9 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/sidebar";
 import FriendsTab from "@/components/friends-tab";
+import FriendsWidget from "@/components/friends-widget";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-
-// Friend Requests Section Component
-function FriendRequestsSection({ profileId }: { profileId: number }) {
-  const { toast } = useToast();
-
-  const { data: friendRequests = [] } = useQuery({
-    queryKey: [`/api/profiles/${profileId}/friend-requests`],
-    enabled: !!profileId,
-  });
-
-  const acceptFriendRequestMutation = useMutation({
-    mutationFn: async (friendshipId: number) => {
-      return await apiRequest("POST", `/api/friendships/${friendshipId}/accept`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}/friends`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}/friend-requests`] });
-      toast({
-        title: "Friend Request Accepted",
-        description: "You are now friends!",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to accept friend request",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const rejectFriendRequestMutation = useMutation({
-    mutationFn: async (friendshipId: number) => {
-      return await apiRequest("POST", `/api/friendships/${friendshipId}/reject`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}/friend-requests`] });
-      toast({
-        title: "Friend Request Rejected",
-        description: "The friend request has been declined.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to reject friend request",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleAcceptRequest = (friendshipId: number) => {
-    acceptFriendRequestMutation.mutate(friendshipId);
-  };
-
-  const handleRejectRequest = (friendshipId: number) => {
-    rejectFriendRequestMutation.mutate(friendshipId);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Friend Requests */}
-      <Card className="bg-white dark:bg-gray-900 border border-neutral-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-lg text-white">Friend Requests</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {friendRequests.length === 0 ? (
-            <p className="text-center text-neutral-400 py-4">No pending requests.</p>
-          ) : (
-            friendRequests.map((request: any) => (
-              <div key={request.friendship?.id} className="flex items-center space-x-3">
-                <Avatar className="w-12 h-12">
-                  <AvatarImage src={request.profile?.profileImageUrl || ""} />
-                  <AvatarFallback className="text-black">
-                    {(request.profile?.name || "U")[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h4 className="font-medium text-white">{request.profile?.name || "Unknown User"}</h4>
-                  <p className="text-sm text-neutral-400">Friend request</p>
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                    onClick={() => handleAcceptRequest(request.friendship?.id)}
-                    disabled={acceptFriendRequestMutation.isPending || !request.friendship?.id}
-                  >
-                    {acceptFriendRequestMutation.isPending ? "..." : "Accept"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-white border-white hover:bg-white hover:text-black"
-                    onClick={() => handleRejectRequest(request.friendship?.id)}
-                    disabled={rejectFriendRequestMutation.isPending || !request.friendship?.id}
-                  >
-                    {rejectFriendRequestMutation.isPending ? "..." : "Decline"}
-                  </Button>
-                </div>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
 
 export default function Friends() {
   const { user } = useAuth();
@@ -155,10 +42,10 @@ export default function Friends() {
       <div className={`flex-1 p-6 pt-16 lg:pt-6 transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'}`}>
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Left Sidebar - Friend Requests */}
+            {/* Left Sidebar - Friend Requests Widget */}
             <div className="lg:col-span-1">
               {activeProfile && (
-                <FriendRequestsSection profileId={activeProfile.id} />
+                <FriendsWidget profileId={activeProfile.id} />
               )}
             </div>
             

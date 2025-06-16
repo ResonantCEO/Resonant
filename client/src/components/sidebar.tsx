@@ -155,9 +155,9 @@ export default function Sidebar() {
 
     // Get profile-specific notification count
     const getProfileNotificationCount = (profile: any) => {
-      // Handle both object and direct property access
       const counts = profileNotificationCounts || {};
-      const count = counts[profile.id?.toString()] || counts[profile.id] || 0;
+      // The API returns string keys, so convert profile.id to string
+      const count = counts[profile.id.toString()] || 0;
       console.log(`Getting notification count for profile ${profile.id} (${profile.name}):`, count, 'from data:', profileNotificationCounts);
       return Number(count);
   };

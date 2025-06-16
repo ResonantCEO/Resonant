@@ -285,20 +285,17 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Friends
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+    <div className="space-y-6 p-6">
+      {/* Search and Stats */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center space-x-4">
+          <p className="text-gray-600 dark:text-gray-400">
             {friends?.length || 0} connections
           </p>
         </div>
         
         {/* Search */}
-        <div className="relative w-64">
+        <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
             placeholder="Search friends..."

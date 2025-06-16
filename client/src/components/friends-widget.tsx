@@ -97,18 +97,18 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Friends Widget */}
-      <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
-        <CardHeader>
+      <Card className="bg-white dark:bg-gray-900 border border-neutral-200 dark:border-gray-700 shadow-sm">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Friends</CardTitle>
-            <Button variant="link" size="sm" className="text-blue-500 p-0">
+            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Friends</CardTitle>
+            <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 p-0 h-auto font-medium">
               See all
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           {friends.length === 0 ? (
             <p className="text-center text-neutral-600 py-4">No friends yet.</p>
           ) : (
@@ -137,11 +137,14 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
 
       {/* Friend Requests (only show if user has pending requests) */}
       {friendRequests.length > 0 && (
-        <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
-          <CardHeader>
-            <CardTitle className="text-lg">Friend Requests</CardTitle>
+        <Card className="bg-white dark:bg-gray-900 border border-orange-200 dark:border-orange-800 shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold text-orange-700 dark:text-orange-300 flex items-center">
+              <div className="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse"></div>
+              Friend Requests
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-0">
             {friendRequests.map((request: any) => (
             <div key={request.id || request.friendship?.id} className="flex items-center space-x-3">
               <Avatar className="w-12 h-12">

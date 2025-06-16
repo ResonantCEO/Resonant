@@ -64,13 +64,24 @@ export default function Sidebar() {
     queryKey: ["/api/friend-requests"],
   });
 
-  // Fetch unread notification count
-  const { data: unreadNotificationCountData = { count: 0 } } = useQuery({
-    queryKey: ['/api/notifications/unread-count'],
-    refetchInterval: 10000, // Refetch every 10 seconds
-  });
+  // Get notification count for active profile from the profile counts data
+  const getActiveProfileNotificationCount = () => {
+    if (!activeProfile || !profileNotificationCounts) return 0;
+    const counts = profileNotificationCounts || {};
+    const stringKey = String(activeProfile.id);
+    const numberKey = Number(activeProfile.id);
+    
+    let count = 0;
+    if (counts.hasOwnProperty(stringKey)) {
+      count = counts[stringKey];
+    } else if (counts.hasOwnProperty(numberKey)) {
+      count = counts[numberKey];
+    }
+    
+    return Number(count) || 0;
+  };
 
-  const unreadNotificationCount = Number(unreadNotificationCountData?.count || 0);
+  const unreadNotificationCount = getActiveProfileNotificationCount();
 
   // Fetch profile-specific notification counts
   const { data: profileNotificationCounts = {}, error: profileCountsError } = useQuery({

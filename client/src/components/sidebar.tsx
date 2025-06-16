@@ -77,10 +77,17 @@ export default function Sidebar() {
     queryKey: ["/api/notifications/counts-by-profile"],
     queryFn: async () => {
       try {
+        console.log("Fetching profile notification counts...");
         const response = await apiRequest("GET", "/api/notifications/counts-by-profile");
-        console.log("Profile notification counts API response:", response);
-        console.log("Response type:", typeof response, "Keys:", Object.keys(response || {}));
-        return response || {};
+        console.log("Raw API response:", response);
+        console.log("Response type:", typeof response);
+        console.log("Response keys:", Object.keys(response || {}));
+        console.log("Response values:", Object.values(response || {}));
+        
+        // Ensure we return an object even if response is null/undefined
+        const counts = response && typeof response === 'object' ? response : {};
+        console.log("Final counts being returned:", counts);
+        return counts;
       } catch (error) {
         console.error("Error fetching profile notification counts:", error);
         return {};
@@ -90,6 +97,8 @@ export default function Sidebar() {
     enabled: !!user && profiles.length > 0,
     retry: 3,
     retryDelay: 1000,
+    staleTime: 0, // Always refetch
+    cacheTime: 0, // Don't cache
   });
 
   // Log any errors
@@ -169,13 +178,23 @@ export default function Sidebar() {
     // Get profile-specific notification count
     const getProfileNotificationCount = (profile: any) => {
       const counts = profileNotificationCounts || {};
+      console.log(`Getting notification count for profile ${profile.id} (${profile.name})`);
+      console.log("Available counts data:", counts);
+      console.log("Counts data type:", typeof counts);
+      console.log("Available keys:", Object.keys(counts));
+      
       // Check both string and number keys since the API might return either
       const stringKey = profile.id.toString();
       const numberKey = profile.id;
+      
+      console.log(`Looking for keys: "${stringKey}" (string) or ${numberKey} (number)`);
+      console.log(`Value for string key "${stringKey}":`, counts[stringKey]);
+      console.log(`Value for number key ${numberKey}:`, counts[numberKey]);
+      
       const count = counts[stringKey] !== undefined ? counts[stringKey] : 
                    counts[numberKey] !== undefined ? counts[numberKey] : 0;
       
-      console.log(`Getting notification count for profile ${profile.id} (${profile.name}):`, count, 'from data:', counts);
+      console.log(`Final count for profile ${profile.id} (${profile.name}):`, count);
       return Number(count);
   };
 

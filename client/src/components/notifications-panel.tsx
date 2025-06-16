@@ -237,12 +237,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                 {getNotificationIcon(notification.type)}
               </div>
             );
-          })()
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-lg">
-              {getNotificationIcon(notification.type)}
-            </div>
-          )}
+          })()}
         </div>
 
         <div className="flex-1 min-w-0">

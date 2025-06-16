@@ -94,7 +94,12 @@ export class NotificationService {
         if (data?.targetProfileId) {
           return data.targetProfileId === activeProfileId;
         }
-        // If no targetProfileId, don't show it to avoid confusion
+        // Legacy support: if no targetProfileId but has friendshipId, check if this profile is the addressee
+        if (data?.friendshipId && activeProfileId) {
+          // We would need to query the friendship table here, but for now just return false
+          // This will be handled by the sync script above
+          return false;
+        }
         return false;
       }
       

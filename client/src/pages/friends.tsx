@@ -39,48 +39,19 @@ export default function Friends() {
       </div>
 
       {/* Main Content */}
-      <div className={`flex-1 p-4 pt-16 lg:pt-6 transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'}`}>
-        <div className="max-w-7xl mx-auto">
-          {/* Page Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Friends</h1>
-            <p className="text-gray-600 dark:text-gray-400">Manage your network and connections</p>
-          </div>
-
-          <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-            {/* Sidebar - Friend Requests & Quick Actions */}
-            <div className="xl:col-span-1 space-y-6">
+      <div className={`flex-1 p-6 pt-16 lg:pt-6 transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'}`}>
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Left Sidebar - Friend Requests Widget */}
+            <div className="lg:col-span-1">
               {activeProfile && (
                 <FriendsWidget profileId={activeProfile.id} />
               )}
-              
-              {/* Quick Stats Card */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
-                <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-4">Network Stats</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-blue-700 dark:text-blue-300">Total Friends</span>
-                    <span className="font-medium text-blue-900 dark:text-blue-100">0</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-blue-700 dark:text-blue-300">Artists</span>
-                    <span className="font-medium text-blue-900 dark:text-blue-100">0</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-blue-700 dark:text-blue-300">Venues</span>
-                    <span className="font-medium text-blue-900 dark:text-blue-100">0</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-blue-700 dark:text-blue-300">Audience</span>
-                    <span className="font-medium text-blue-900 dark:text-blue-100">0</span>
-                  </div>
-                </div>
-              </div>
             </div>
             
             {/* Main Content - Friends List */}
-            <div className="xl:col-span-4">
-              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-neutral-200 dark:border-gray-700 overflow-hidden">
+            <div className="lg:col-span-3">
+              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
                 {activeProfile && (
                   <FriendsTab profile={activeProfile} isOwn={true} />
                 )}

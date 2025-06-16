@@ -311,9 +311,9 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
 
       {/* Friend Requests Section (for own profiles) */}
       {isOwn && friendRequests && friendRequests.length > 0 && (
-        <Card>
+        <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/20">
           <CardHeader>
-            <CardTitle className="flex items-center">
+            <CardTitle className="flex items-center text-blue-700 dark:text-blue-300">
               <UserPlus className="w-5 h-5 mr-2" />
               Friend Requests ({friendRequests.length})
             </CardTitle>
@@ -372,12 +372,19 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
                       }
                     </p>
                     {!searchQuery && (
-                      <p className="text-sm">
-                        {type === "all" 
-                          ? "Connect with other users to build your network"
-                          : `Connect with ${type} profiles to see them here`
-                        }
-                      </p>
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          {type === "all" 
+                            ? "Connect with other users to build your network"
+                            : `Connect with ${type} profiles to see them here`
+                          }
+                        </p>
+                        {isOwn && friendRequests && friendRequests.length > 0 && (
+                          <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                            You have {friendRequests.length} pending friend request{friendRequests.length !== 1 ? 's' : ''} above
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}

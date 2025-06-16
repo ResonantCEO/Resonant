@@ -75,13 +75,29 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     mutationFn: async (notificationId: number) => {
       return await apiRequest("DELETE", `/api/notifications/${notificationId}`);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+    onSuccess: (data, notificationId) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
+
+      // Find the deleted notification to check if it was a friend request
+      const deletedNotification = notifications?.find(n => n.id === notificationId);
+      if (deletedNotification?.type === 'friend_request') {
+        // Invalidate all friendship-related queries to refresh UI
+        queryClient.invalidateQueries({ queryKey: ['/api/friend-requests'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/friends'] });
+        // Invalidate friendship status queries for all profiles
+        queryClient.invalidateQueries({ 
+          predicate: (query) => {
+            return query.queryKey[0] === '/api/friendship-status';
+          }
+        });
+      }
+    },
+    onError: (error: any) => {
       toast({
-        title: "Success",
-        description: "Notification deleted",
+        title: "Error",
+        description: error.message || "Failed to delete notification",
+        variant: "destructive",
       });
     },
   });
@@ -220,7 +236,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                                   notification.data?.senderProfile?.profileImageUrl || 
                                   notification.sender?.profileImageUrl ||
                                   notification.data?.senderUser?.profileImageUrl;
-            
+
             const fallbackInitials = notification.data?.senderProfile?.name?.[0] || 
                                    (notification.sender?.firstName?.[0] || notification.data?.senderUser?.firstName?.[0]) + 
                                    (notification.sender?.lastName?.[0] || notification.data?.senderUser?.lastName?.[0] || '');

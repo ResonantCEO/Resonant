@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users } from "@shared/schema";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -1577,6 +1577,32 @@ export function registerRoutes(app: Express): Server {
     try {
       const notificationId = parseInt(req.params.id);
       const { notificationService } = await import('./notifications');
+
+      // Get the notification first to check if it's a friend request
+      const notification = await db
+        .select()
+        .from(notifications)
+        .where(and(
+          eq(notifications.id, notificationId),
+          eq(notifications.recipientId, req.user.id)
+        ));
+
+      if (notification.length > 0 && notification[0].type === 'friend_request') {
+        const data = notification[0].data as any;
+        const friendshipId = data?.friendshipId;
+
+        // If this is a friend request notification, also delete the pending friendship
+        if (friendshipId) {
+          await db
+            .delete(friendships)
+            .where(and(
+              eq(friendships.id, friendshipId),
+              eq(friendships.status, 'pending')
+            ));
+          
+          console.log(`Deleted pending friendship ${friendshipId} when deleting notification ${notificationId}`);
+        }
+      }
 
       await notificationService.deleteNotification(notificationId, req.user.id);
       res.json({ success: true });

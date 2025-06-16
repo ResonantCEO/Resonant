@@ -75,11 +75,13 @@ export default function Sidebar() {
   // Fetch profile-specific notification counts
   const { data: profileNotificationCounts = {} } = useQuery({
     queryKey: ["/api/notifications/counts-by-profile"],
-    queryFn: () => apiRequest("GET", "/api/notifications/counts-by-profile"),
-    refetchInterval: 5000,
-    onSuccess: (data) => {
-      console.log("Profile notification counts received:", data);
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/notifications/counts-by-profile");
+      console.log("Profile notification counts API response:", response);
+      return response;
     },
+    refetchInterval: 5000,
+    enabled: !!user && profiles.length > 0,
   });
 
   const activateProfileMutation = useMutation({
@@ -153,9 +155,11 @@ export default function Sidebar() {
 
     // Get profile-specific notification count
     const getProfileNotificationCount = (profile: any) => {
-      const count = profileNotificationCounts[profile.id] || 0;
+      // Handle both object and direct property access
+      const counts = profileNotificationCounts || {};
+      const count = counts[profile.id?.toString()] || counts[profile.id] || 0;
       console.log(`Getting notification count for profile ${profile.id} (${profile.name}):`, count, 'from data:', profileNotificationCounts);
-      return count;
+      return Number(count);
   };
 
 

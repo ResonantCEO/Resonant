@@ -77,6 +77,9 @@ export default function Sidebar() {
     queryKey: ["/api/notifications/counts-by-profile"],
     queryFn: () => apiRequest("GET", "/api/notifications/counts-by-profile"),
     refetchInterval: 5000,
+    onSuccess: (data) => {
+      console.log("Profile notification counts received:", data);
+    },
   });
 
   const activateProfileMutation = useMutation({
@@ -148,11 +151,11 @@ export default function Sidebar() {
     }
   };
 
-    // Placeholder function for getting profile-specific notification count
-    // In a real implementation, this would fetch the count from the API
+    // Get profile-specific notification count
     const getProfileNotificationCount = (profile: any) => {
-      // Replace this with actual logic to fetch profile-specific notification count
-      return profileNotificationCounts[profile.id] || 0; // Returning the global count for now
+      const count = profileNotificationCounts[profile.id] || 0;
+      console.log(`Getting notification count for profile ${profile.id} (${profile.name}):`, count, 'from data:', profileNotificationCounts);
+      return count;
   };
 
 
@@ -238,11 +241,15 @@ export default function Sidebar() {
                           <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
                             {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
                           </Badge>
-                          {getProfileNotificationCount(profile) > 0 && (
-                            <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                              {getProfileNotificationCount(profile) > 99 ? "99+" : getProfileNotificationCount(profile)}
-                            </Badge>
-                          )}
+                          {(() => {
+                            const count = getProfileNotificationCount(profile);
+                            console.log(`Profile ${profile.id} (${profile.name}) notification count:`, count);
+                            return count > 0 ? (
+                              <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
+                                {count > 99 ? "99+" : count}
+                              </Badge>
+                            ) : null;
+                          })()}
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">

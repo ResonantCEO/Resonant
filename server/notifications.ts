@@ -324,6 +324,8 @@ export class NotificationService {
   async notifyFriendRequest(recipientId: number, senderId: number, senderName: string, friendshipId?: number, targetProfileId?: number, senderProfileId?: number): Promise<void> {
     // Get sender profile details if senderProfileId is provided
     let senderProfileData = null;
+    let primaryImageUrl = null;
+    
     if (senderProfileId) {
       const senderProfile = await db
         .select({
@@ -338,6 +340,7 @@ export class NotificationService {
       
       if (senderProfile.length > 0) {
         senderProfileData = senderProfile[0];
+        primaryImageUrl = senderProfileData.profileImageUrl;
       }
     }
 
@@ -354,6 +357,11 @@ export class NotificationService {
       .limit(1);
 
     const senderUserData = senderUser.length > 0 ? senderUser[0] : null;
+    
+    // Use profile image first, then fall back to user image
+    if (!primaryImageUrl && senderUserData?.profileImageUrl) {
+      primaryImageUrl = senderUserData.profileImageUrl;
+    }
 
     await this.createNotification({
       recipientId,
@@ -367,7 +375,8 @@ export class NotificationService {
         targetProfileId, 
         senderProfileName: senderName,
         senderProfile: senderProfileData,
-        senderUser: senderUserData
+        senderUser: senderUserData,
+        primaryImageUrl: primaryImageUrl // Store the primary image URL directly
       },
     });
   }

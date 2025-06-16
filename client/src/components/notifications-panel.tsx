@@ -214,10 +214,11 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     >
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
-          {/* Prioritize sender profile image, then sender user image, then fallback */}
-          {(notification.data?.senderProfile?.profileImageUrl || notification.data?.senderUser?.profileImageUrl || notification.sender?.profileImageUrl) ? (
+          {/* Use the primary image URL stored in notification data, or fall back to sender profile/user images */}
+          {(notification.data?.primaryImageUrl || notification.data?.senderProfile?.profileImageUrl || notification.data?.senderUser?.profileImageUrl || notification.sender?.profileImageUrl) ? (
             <Avatar className="w-10 h-10">
               <AvatarImage src={
+                notification.data?.primaryImageUrl ||
                 notification.data?.senderProfile?.profileImageUrl || 
                 notification.data?.senderUser?.profileImageUrl || 
                 notification.sender?.profileImageUrl

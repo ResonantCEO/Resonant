@@ -73,16 +73,29 @@ export default function Sidebar() {
   const unreadNotificationCount = Number(unreadNotificationCountData?.count || 0);
 
   // Fetch profile-specific notification counts
-  const { data: profileNotificationCounts = {} } = useQuery({
+  const { data: profileNotificationCounts = {}, error: profileCountsError } = useQuery({
     queryKey: ["/api/notifications/counts-by-profile"],
     queryFn: async () => {
-      const response = await apiRequest("GET", "/api/notifications/counts-by-profile");
-      console.log("Profile notification counts API response:", response);
-      return response;
+      try {
+        const response = await apiRequest("GET", "/api/notifications/counts-by-profile");
+        console.log("Profile notification counts API response:", response);
+        console.log("Response type:", typeof response, "Keys:", Object.keys(response || {}));
+        return response || {};
+      } catch (error) {
+        console.error("Error fetching profile notification counts:", error);
+        return {};
+      }
     },
     refetchInterval: 5000,
     enabled: !!user && profiles.length > 0,
+    retry: 3,
+    retryDelay: 1000,
   });
+
+  // Log any errors
+  if (profileCountsError) {
+    console.error("Profile notification counts query error:", profileCountsError);
+  }
 
   const activateProfileMutation = useMutation({
     mutationFn: async (profileId: number) => {
@@ -156,9 +169,13 @@ export default function Sidebar() {
     // Get profile-specific notification count
     const getProfileNotificationCount = (profile: any) => {
       const counts = profileNotificationCounts || {};
-      // The API returns string keys, so convert profile.id to string
-      const count = counts[profile.id.toString()] || counts[profile.id] || 0;
-      console.log(`Getting notification count for profile ${profile.id} (${profile.name}):`, count, 'from data:', profileNotificationCounts);
+      // Check both string and number keys since the API might return either
+      const stringKey = profile.id.toString();
+      const numberKey = profile.id;
+      const count = counts[stringKey] !== undefined ? counts[stringKey] : 
+                   counts[numberKey] !== undefined ? counts[numberKey] : 0;
+      
+      console.log(`Getting notification count for profile ${profile.id} (${profile.name}):`, count, 'from data:', counts);
       return Number(count);
   };
 

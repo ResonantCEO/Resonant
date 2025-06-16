@@ -1537,21 +1537,28 @@ export function registerRoutes(app: Express): Server {
       
       for (const profile of userProfiles) {
         const count = await notificationService.getUnreadCount(req.user.id, profile.id, profile.type);
-        counts[profile.id] = count;
+        // Ensure we're using string keys for consistency
+        counts[profile.id.toString()] = count;
         console.log(`Profile ${profile.id} (${profile.name}, ${profile.type}): ${count} unread notifications`);
       }
 
       console.log("Final counts object:", counts);
+      console.log("Counts object keys:", Object.keys(counts));
+      console.log("Counts object values:", Object.values(counts));
 
       // Add no-cache headers to ensure fresh data
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
+      res.set('Content-Type', 'application/json');
 
-      res.json(counts);
+      // Ensure we're sending a proper JSON response
+      const response = JSON.stringify(counts);
+      console.log("Sending response:", response);
+      res.send(response);
     } catch (error) {
       console.error("Error fetching profile notification counts:", error);
-      res.status(500).json({ message: "Failed to fetch profile notification counts" });
+      res.status(500).json({ message: "Failed to fetch profile notification counts", error: error.message });
     }
   });
 

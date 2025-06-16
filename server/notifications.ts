@@ -341,6 +341,20 @@ export class NotificationService {
       }
     }
 
+    // Also get the sender's user data for fallback
+    const senderUser = await db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+      })
+      .from(users)
+      .where(eq(users.id, senderId))
+      .limit(1);
+
+    const senderUserData = senderUser.length > 0 ? senderUser[0] : null;
+
     await this.createNotification({
       recipientId,
       senderId,
@@ -352,7 +366,8 @@ export class NotificationService {
         friendshipId, 
         targetProfileId, 
         senderProfileName: senderName,
-        senderProfile: senderProfileData
+        senderProfile: senderProfileData,
+        senderUser: senderUserData
       },
     });
   }

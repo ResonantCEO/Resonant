@@ -166,6 +166,7 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
                 <Button
                   size="sm"
                   variant="outline"
+                  className="text-white border-white hover:bg-white hover:text-black"
                   onClick={() => handleRejectRequest(request.friendship?.id)}
                   disabled={isRejecting || !request.friendship?.id}
                 >

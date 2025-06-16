@@ -241,28 +241,28 @@ export default function Sidebar() {
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-1">
                         <span className="font-medium text-neutral-900">{getDisplayName(profile)}</span>
-                        <div className="flex items-center gap-2">
-                          <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs shrink-0`}>
-                            {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
-                          </Badge>
-                          {(() => {
-                            const count = getProfileNotificationCount(profile);
-                            console.log(`Profile ${profile.id} (${profile.name}) notification count:`, count);
-                            return count > 0 ? (
-                              <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center shrink-0">
-                                {count > 99 ? "99+" : count}
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-gray-400 text-white text-xs min-w-[20px] h-5 flex items-center justify-center shrink-0">
-                                0
-                              </Badge>
-                            );
-                          })()}
-                        </div>
+                        <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs shrink-0`}>
+                          {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
+                        </Badge>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        {getVisibilityIcon(profile.visibility)}
-                        <span className="text-xs text-neutral-600 capitalize">{profile.visibility}</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          {getVisibilityIcon(profile.visibility)}
+                          <span className="text-xs text-neutral-600 capitalize">{profile.visibility}</span>
+                        </div>
+                        {(() => {
+                          const count = getProfileNotificationCount(profile);
+                          console.log(`Profile ${profile.id} (${profile.name}) notification count:`, count);
+                          return count > 0 ? (
+                            <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center shrink-0">
+                              {count > 99 ? "99+" : count}
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-gray-400 text-white text-xs min-w-[20px] h-5 flex items-center justify-center shrink-0">
+                              0
+                            </Badge>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>

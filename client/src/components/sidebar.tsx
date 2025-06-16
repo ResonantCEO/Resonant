@@ -242,18 +242,24 @@ export default function Sidebar() {
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-neutral-900">{getDisplayName(profile)}</span>
                         <div className="flex items-center gap-2">
-                          <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
-                            {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
-                          </Badge>
-                          {(() => {
-                            const count = getProfileNotificationCount(profile);
-                            console.log(`Profile ${profile.id} (${profile.name}) notification count:`, count);
-                            return count > 0 ? (
-                              <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                                {count > 99 ? "99+" : count}
-                              </Badge>
-                            ) : null;
-                          })()}
+                          <div className="flex items-center gap-1">
+                            <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs`}>
+                              {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
+                            </Badge>
+                            {(() => {
+                              const count = getProfileNotificationCount(profile);
+                              console.log(`Profile ${profile.id} (${profile.name}) notification count:`, count);
+                              return count > 0 ? (
+                                <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center ml-1">
+                                  {count > 99 ? "99+" : count}
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-gray-400 text-white text-xs min-w-[20px] h-5 flex items-center justify-center ml-1">
+                                  0
+                                </Badge>
+                              );
+                            })()}
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">

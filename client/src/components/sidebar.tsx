@@ -64,12 +64,20 @@ export default function Sidebar() {
     queryKey: ["/api/friend-requests"],
   });
 
+  // Fetch unread notification count
   const { data: unreadNotificationCountData = { count: 0 } } = useQuery({
     queryKey: ['/api/notifications/unread-count'],
     refetchInterval: 10000, // Refetch every 10 seconds
   });
 
   const unreadNotificationCount = Number(unreadNotificationCountData?.count || 0);
+
+  // Fetch profile-specific notification counts
+  const { data: profileNotificationCounts = {} } = useQuery({
+    queryKey: ["/api/notifications/counts-by-profile"],
+    queryFn: () => apiRequest("GET", "/api/notifications/counts-by-profile"),
+    refetchInterval: 5000,
+  });
 
   const activateProfileMutation = useMutation({
     mutationFn: async (profileId: number) => {
@@ -143,9 +151,9 @@ export default function Sidebar() {
     // Placeholder function for getting profile-specific notification count
     // In a real implementation, this would fetch the count from the API
     const getProfileNotificationCount = (profile: any) => {
-        // Replace this with actual logic to fetch profile-specific notification count
-        return unreadNotificationCount; // Returning the global count for now
-    };
+      // Replace this with actual logic to fetch profile-specific notification count
+      return profileNotificationCounts[profile.id] || 0; // Returning the global count for now
+  };
 
 
 

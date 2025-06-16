@@ -485,25 +485,8 @@ export default function Profile() {
                   </div>
                 )}
 
-                {/* Basic Friends Widget (without friend requests) */}
-                <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30 rounded-xl shadow-lg">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Friends</h3>
-                      <Button 
-                        variant="link" 
-                        size="sm" 
-                        className="text-blue-500 p-0"
-                        onClick={() => setActiveTab("friends")}
-                      >
-                        See all
-                      </Button>
-                    </div>
-                    <p className="text-center text-neutral-600 py-4">
-                      {isOwn ? "View your friends on the Friends tab" : "No friends to display"}
-                    </p>
-                  </div>
-                </div>
+                {/* Friends Widget */}
+                <FriendsWidget profileId={profileId} />
               </div>
 
               {/* Right Column - Posts Feed */}

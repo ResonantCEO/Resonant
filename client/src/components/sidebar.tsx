@@ -70,7 +70,7 @@ export default function Sidebar() {
     queryFn: async () => {
       try {
         console.log("Fetching profile notification counts...");
-        
+
         // Direct fetch to ensure we get the actual response
         const response = await fetch("/api/notifications/counts-by-profile", {
           method: "GET",
@@ -79,21 +79,21 @@ export default function Sidebar() {
             "Content-Type": "application/json",
           },
         });
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log("Raw API response:", data);
         console.log("Response type:", typeof data);
-        
+
         // Validate response structure
         if (!data || typeof data !== 'object') {
           console.warn("Invalid response structure, returning empty object");
           return {};
         }
-        
+
         console.log("Response keys:", Object.keys(data));
         console.log("Response values:", Object.values(data));
         console.log("Final counts being returned:", data);
@@ -124,14 +124,14 @@ export default function Sidebar() {
     const counts = profileNotificationCounts || {};
     const stringKey = String(activeProfile.id);
     const numberKey = Number(activeProfile.id);
-    
+
     let count = 0;
     if (counts.hasOwnProperty(stringKey)) {
       count = counts[stringKey];
     } else if (counts.hasOwnProperty(numberKey)) {
       count = counts[numberKey];
     }
-    
+
     return Number(count) || 0;
   };
 
@@ -212,23 +212,49 @@ export default function Sidebar() {
       console.log(`Getting notification count for profile ${profile.id} (${profile.name})`);
       console.log("Available counts data:", counts);
       console.log("Available keys:", Object.keys(counts));
-      
+
       // Try string key first, then number key
       const stringKey = String(profile.id);
       const numberKey = Number(profile.id);
-      
+
       let count = 0;
       if (counts.hasOwnProperty(stringKey)) {
         count = counts[stringKey];
       } else if (counts.hasOwnProperty(numberKey)) {
         count = counts[numberKey];
       }
-      
+
       const finalCount = Number(count) || 0;
       console.log(`Final count for profile ${profile.id} (${profile.name}):`, finalCount);
       return finalCount;
   };
 
+    const [isAccepting, setIsAccepting] = useState(false);
+    const [isRejecting, setIsRejecting] = useState(false);
+  
+    const handleAcceptRequest = async (friendshipId: string) => {
+      setIsAccepting(true);
+      try {
+        await apiRequest("POST", `/api/friend-requests/${friendshipId}/accept`);
+        queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
+      } catch (error) {
+        console.error("Error accepting friend request:", error);
+      } finally {
+        setIsAccepting(false);
+      }
+    };
+  
+    const handleRejectRequest = async (friendshipId: string) => {
+      setIsRejecting(true);
+      try {
+        await apiRequest("POST", `/api/friend-requests/${friendshipId}/reject`);
+        queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
+      } catch (error) {
+        console.error("Error rejecting friend request:", error);
+      } finally {
+        setIsRejecting(false);
+      }
+    };
 
 
   return (
@@ -353,7 +379,82 @@ export default function Sidebar() {
         )}
       </div>
 
+      {/* Friend Requests Section */}
+      {friendRequests.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-neutral-600 dark:text-neutral-400 mb-3 px-4">
+            Friend Requests ({friendRequests.length})
+          </h3>
+          <div className="space-y-2 px-4">
+            {friendRequests.slice(0, 3).map((request: any) => (
+              <div key={request.id || request.friendship?.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800">
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={request.profileImageUrl || ""} />
+                  <AvatarFallback>
+                    {(request.profile?.name || request.name || "U")[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-neutral-900 dark:text-white truncate">
+                    {request.name || "Unknown User"}
+                  </p>
+                  <div className="flex space-x-1 mt-1">
+                    <Button
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => handleAcceptRequest(request.friendship?.id)}
+                      disabled={isAccepting || !request.friendship?.id}
+                    >
+                      {isAccepting ? "..." : "✓"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => handleRejectRequest(request.friendship?.id)}
+                      disabled={isRejecting || !request.friendship?.id}
+                    >
+                      {isRejecting ? "..." : "✗"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {friendRequests.length > 3 && (
+              <Button
+                variant="link"
+                size="sm"
+                className="w-full text-blue-500 p-0 h-6"
+                onClick={() => setLocation("/friends")}
+              >
+                View all {friendRequests.length} requests
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
 
+      {/* Quick Friends Widget */}
+      {!friendRequests.length && (
+        <div className="mb-6 px-4">
+          <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-neutral-900 dark:text-white">Recent Activity</h3>
+              <Button 
+                variant="link" 
+                size="sm" 
+                className="text-blue-500 p-0 text-xs"
+                onClick={() => setLocation("/friends")}
+              >
+                View all
+              </Button>
+            </div>
+            <p className="text-xs text-neutral-600 dark:text-neutral-400 text-center py-2">
+              No recent friend activity
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Navigation Menu */}
       <nav className={`${isCollapsed ? 'p-2' : 'p-6'}`}>

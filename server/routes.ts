@@ -1532,10 +1532,16 @@ export function registerRoutes(app: Express): Server {
       const userProfiles = await storage.getProfilesByUserId(req.user.id);
       
       const counts = {};
+      
+      console.log(`Calculating notification counts for user ${req.user.id} with profiles:`, userProfiles.map(p => ({ id: p.id, name: p.name, type: p.type })));
+      
       for (const profile of userProfiles) {
         const count = await notificationService.getUnreadCount(req.user.id, profile.id, profile.type);
         counts[profile.id] = count;
+        console.log(`Profile ${profile.id} (${profile.name}, ${profile.type}): ${count} unread notifications`);
       }
+
+      console.log("Final counts object:", counts);
 
       // Add no-cache headers to ensure fresh data
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');

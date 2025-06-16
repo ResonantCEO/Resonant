@@ -64,25 +64,6 @@ export default function Sidebar() {
     queryKey: ["/api/friend-requests"],
   });
 
-  // Get notification count for active profile from the profile counts data
-  const getActiveProfileNotificationCount = () => {
-    if (!activeProfile || !profileNotificationCounts) return 0;
-    const counts = profileNotificationCounts || {};
-    const stringKey = String(activeProfile.id);
-    const numberKey = Number(activeProfile.id);
-    
-    let count = 0;
-    if (counts.hasOwnProperty(stringKey)) {
-      count = counts[stringKey];
-    } else if (counts.hasOwnProperty(numberKey)) {
-      count = counts[numberKey];
-    }
-    
-    return Number(count) || 0;
-  };
-
-  const unreadNotificationCount = getActiveProfileNotificationCount();
-
   // Fetch profile-specific notification counts
   const { data: profileNotificationCounts = {}, error: profileCountsError } = useQuery({
     queryKey: ["/api/notifications/counts-by-profile"],
@@ -136,6 +117,25 @@ export default function Sidebar() {
   if (profileCountsError) {
     console.error("Profile notification counts query error:", profileCountsError);
   }
+
+  // Get notification count for active profile from the profile counts data
+  const getActiveProfileNotificationCount = () => {
+    if (!activeProfile || !profileNotificationCounts) return 0;
+    const counts = profileNotificationCounts || {};
+    const stringKey = String(activeProfile.id);
+    const numberKey = Number(activeProfile.id);
+    
+    let count = 0;
+    if (counts.hasOwnProperty(stringKey)) {
+      count = counts[stringKey];
+    } else if (counts.hasOwnProperty(numberKey)) {
+      count = counts[numberKey];
+    }
+    
+    return Number(count) || 0;
+  };
+
+  const unreadNotificationCount = getActiveProfileNotificationCount();
 
   const activateProfileMutation = useMutation({
     mutationFn: async (profileId: number) => {

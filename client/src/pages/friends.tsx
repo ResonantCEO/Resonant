@@ -40,11 +40,23 @@ export default function Friends() {
 
       {/* Main Content */}
       <div className={`flex-1 p-6 pt-16 lg:pt-6 transition-all duration-300 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'}`}>
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-            {activeProfile && (
-              <FriendsTab profile={activeProfile} isOwn={true} />
-            )}
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Left Sidebar - Friend Requests Widget */}
+            <div className="lg:col-span-1">
+              {activeProfile && (
+                <FriendsWidget profileId={activeProfile.id} />
+              )}
+            </div>
+            
+            {/* Main Content - Friends List */}
+            <div className="lg:col-span-3">
+              <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
+                {activeProfile && (
+                  <FriendsTab profile={activeProfile} isOwn={true} />
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

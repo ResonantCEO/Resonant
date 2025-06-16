@@ -214,22 +214,30 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     >
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
-          {/* Use the primary image URL stored in notification data, or fall back to sender profile/user images */}
-          {(notification.data?.primaryImageUrl || notification.data?.senderProfile?.profileImageUrl || notification.data?.senderUser?.profileImageUrl || notification.sender?.profileImageUrl) ? (
-            <Avatar className="w-10 h-10">
-              <AvatarImage src={
-                notification.data?.primaryImageUrl ||
-                notification.data?.senderProfile?.profileImageUrl || 
-                notification.data?.senderUser?.profileImageUrl || 
-                notification.sender?.profileImageUrl
-              } />
-              <AvatarFallback>
-                {notification.data?.senderProfile?.name?.[0] || 
-                 notification.data?.senderUser?.firstName?.[0] || 
-                 notification.sender?.firstName?.[0]}
-                {notification.data?.senderUser?.lastName?.[0] || notification.sender?.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
+          {/* Determine the best profile image URL to use */}
+          {(() => {
+            const profileImageUrl = notification.data?.primaryImageUrl || 
+                                  notification.data?.senderProfile?.profileImageUrl || 
+                                  notification.sender?.profileImageUrl ||
+                                  notification.data?.senderUser?.profileImageUrl;
+            
+            const fallbackInitials = notification.data?.senderProfile?.name?.[0] || 
+                                   (notification.sender?.firstName?.[0] || notification.data?.senderUser?.firstName?.[0]) + 
+                                   (notification.sender?.lastName?.[0] || notification.data?.senderUser?.lastName?.[0] || '');
+
+            return profileImageUrl ? (
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={profileImageUrl} />
+                <AvatarFallback>
+                  {fallbackInitials}
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-lg">
+                {getNotificationIcon(notification.type)}
+              </div>
+            );
+          })()
           ) : (
             <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-lg">
               {getNotificationIcon(notification.type)}

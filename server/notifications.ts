@@ -340,6 +340,7 @@ export class NotificationService {
       
       if (senderProfile.length > 0) {
         senderProfileData = senderProfile[0];
+        // Profile image takes priority
         primaryImageUrl = senderProfileData.profileImageUrl;
       }
     }
@@ -358,10 +359,17 @@ export class NotificationService {
 
     const senderUserData = senderUser.length > 0 ? senderUser[0] : null;
     
-    // Use profile image first, then fall back to user image
+    // If no profile image, use user image as fallback
     if (!primaryImageUrl && senderUserData?.profileImageUrl) {
       primaryImageUrl = senderUserData.profileImageUrl;
     }
+
+    console.log(`Creating friend request notification:`, {
+      senderProfileId,
+      senderProfileImageUrl: senderProfileData?.profileImageUrl,
+      senderUserImageUrl: senderUserData?.profileImageUrl,
+      finalPrimaryImageUrl: primaryImageUrl
+    });
 
     await this.createNotification({
       recipientId,
@@ -376,7 +384,7 @@ export class NotificationService {
         senderProfileName: senderName,
         senderProfile: senderProfileData,
         senderUser: senderUserData,
-        primaryImageUrl: primaryImageUrl // Store the primary image URL directly
+        primaryImageUrl: primaryImageUrl
       },
     });
   }

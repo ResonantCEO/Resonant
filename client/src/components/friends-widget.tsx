@@ -157,6 +157,7 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
               <div className="flex space-x-2">
                 <Button
                   size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                   onClick={() => handleAcceptRequest(request.friendship?.id)}
                   disabled={isAccepting || !request.friendship?.id}
                 >

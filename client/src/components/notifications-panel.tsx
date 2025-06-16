@@ -214,11 +214,12 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     >
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
-          {notification.sender?.profileImageUrl ? (
+          {/* Use sender profile image if available, otherwise fall back to user image */}
+          {(notification.data?.senderProfile?.profileImageUrl || notification.sender?.profileImageUrl) ? (
             <Avatar className="w-10 h-10">
-              <AvatarImage src={notification.sender.profileImageUrl} />
+              <AvatarImage src={notification.data?.senderProfile?.profileImageUrl || notification.sender.profileImageUrl} />
               <AvatarFallback>
-                {notification.sender.firstName?.[0]}{notification.sender.lastName?.[0]}
+                {notification.data?.senderProfile?.name?.[0] || notification.sender.firstName?.[0]}{notification.sender.lastName?.[0]}
               </AvatarFallback>
             </Avatar>
           ) : (

@@ -952,7 +952,7 @@ export function registerRoutes(app: Express): Server {
         const senderProfile = activeProfile; // Use the sender's active profile
         const senderName = senderProfile.name; // Use profile name instead of user name
         console.log(`Creating friend request notification for user ${targetProfile.userId} from profile ${senderProfile.name} (ID: ${senderProfile.id}) to profile ${targetProfile.name} (ID: ${targetProfile.id})`);
-        await notificationService.notifyFriendRequest(targetProfile.userId, req.user.id, senderName, friendship.id, targetProfile.id);
+        await notificationService.notifyFriendRequest(targetProfile.userId, req.user.id, senderName, friendship.id, targetProfile.id, senderProfile.id);
       }
 
       res.json(friendship);

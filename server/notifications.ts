@@ -321,14 +321,39 @@ export class NotificationService {
   }
 
   // Helper methods for common notification types
-  async notifyFriendRequest(recipientId: number, senderId: number, senderName: string, friendshipId?: number, targetProfileId?: number): Promise<void> {
+  async notifyFriendRequest(recipientId: number, senderId: number, senderName: string, friendshipId?: number, targetProfileId?: number, senderProfileId?: number): Promise<void> {
+    // Get sender profile details if senderProfileId is provided
+    let senderProfileData = null;
+    if (senderProfileId) {
+      const senderProfile = await db
+        .select({
+          id: profiles.id,
+          name: profiles.name,
+          profileImageUrl: profiles.profileImageUrl,
+          type: profiles.type,
+        })
+        .from(profiles)
+        .where(eq(profiles.id, senderProfileId))
+        .limit(1);
+      
+      if (senderProfile.length > 0) {
+        senderProfileData = senderProfile[0];
+      }
+    }
+
     await this.createNotification({
       recipientId,
       senderId,
       type: "friend_request",
       title: "New Friend Request",
       message: `${senderName} sent you a friend request`,
-      data: { senderId, friendshipId, targetProfileId, senderProfileName: senderName },
+      data: { 
+        senderId, 
+        friendshipId, 
+        targetProfileId, 
+        senderProfileName: senderName,
+        senderProfile: senderProfileData
+      },
     });
   }
 

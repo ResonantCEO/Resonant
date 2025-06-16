@@ -1544,6 +1544,8 @@ export function registerRoutes(app: Express): Server {
 
       console.log("Final counts object:", counts);
       console.log("Counts object stringified:", JSON.stringify(counts));
+      console.log("Counts object type:", typeof counts);
+      console.log("Counts object constructor:", counts.constructor.name);
 
       // Add no-cache headers to ensure fresh data
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -1552,7 +1554,12 @@ export function registerRoutes(app: Express): Server {
       res.set('Content-Type', 'application/json');
 
       console.log("About to send response:", counts);
-      res.status(200).json(counts);
+      console.log("Response will be:", JSON.stringify(counts));
+      
+      // Explicitly return the JSON response
+      const response = res.status(200).json(counts);
+      console.log("Response sent successfully");
+      return response;
     } catch (error) {
       console.error("Error fetching profile notification counts:", error);
       res.status(500).json({ message: "Failed to fetch profile notification counts", error: error.message });

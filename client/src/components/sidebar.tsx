@@ -78,20 +78,34 @@ export default function Sidebar() {
     queryFn: async () => {
       try {
         console.log("Fetching profile notification counts...");
-        const response = await apiRequest("GET", "/api/notifications/counts-by-profile");
-        console.log("Raw API response:", response);
-        console.log("Response type:", typeof response);
+        
+        // Direct fetch to ensure we get the actual response
+        const response = await fetch("/api/notifications/counts-by-profile", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log("Raw API response:", data);
+        console.log("Response type:", typeof data);
         
         // Validate response structure
-        if (!response || typeof response !== 'object') {
+        if (!data || typeof data !== 'object') {
           console.warn("Invalid response structure, returning empty object");
           return {};
         }
         
-        console.log("Response keys:", Object.keys(response));
-        console.log("Response values:", Object.values(response));
-        console.log("Final counts being returned:", response);
-        return response;
+        console.log("Response keys:", Object.keys(data));
+        console.log("Response values:", Object.values(data));
+        console.log("Final counts being returned:", data);
+        return data;
       } catch (error) {
         console.error("Error fetching profile notification counts:", error);
         return {};
@@ -102,7 +116,7 @@ export default function Sidebar() {
     retry: 3,
     retryDelay: 1000,
     staleTime: 0,
-    gcTime: 0, // Updated from cacheTime (deprecated)
+    gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });

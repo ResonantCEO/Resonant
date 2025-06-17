@@ -253,23 +253,16 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-semibold text-white truncate">
-                    {profile.name || 'Unknown User'}
-                  </p>
-                  {profile.type && (
-                    <Badge className="bg-gray-700 text-gray-300 font-bold border-0 shadow-lg text-xs">
-                      {getTypeIcon(profile.type)}
-                      <span className="ml-1 capitalize">{profile.type}</span>
-                    </Badge>
-                  )}
-                </div>
-                {profile.bio && (
-                  <p className="text-xs text-gray-400 truncate">
-                    {profile.bio}
-                  </p>
+                <p className="text-sm font-semibold text-white truncate mb-1">
+                  {profile.name || 'Unknown User'}
+                </p>
+                {profile.type && (
+                  <Badge className="bg-purple-600 text-white font-bold border-0 shadow-lg text-xs mb-1">
+                    {getTypeIcon(profile.type)}
+                    <span className="ml-1 capitalize">{profile.type}</span>
+                  </Badge>
                 )}
-                <p className="text-xs text-blue-400 font-medium mt-1 flex items-center">
+                <p className="text-xs text-blue-400 font-medium flex items-center">
                   <Heart className="w-3 h-3 mr-1" />
                   Wants to connect
                 </p>

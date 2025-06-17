@@ -345,11 +345,7 @@ export default function Sidebar() {
                             <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center shrink-0">
                               {count > 99 ? "99+" : count}
                             </Badge>
-                          ) : (
-                            <Badge className="bg-gray-400 text-white text-xs min-w-[20px] h-5 flex items-center justify-center shrink-0">
-                              0
-                            </Badge>
-                          );
+                          ) : null;
                         })()}
                       </div>
                     </div>

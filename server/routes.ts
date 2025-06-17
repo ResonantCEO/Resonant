@@ -877,6 +877,7 @@ export function registerRoutes(app: Express): Server {
       res.json(profiles);
     } catch (error) {
       console.error("Error searching profiles:", error);
+```text
       res.status(500).json({ message: "Failed to search profiles" });
     }
   });
@@ -1740,6 +1741,8 @@ export function registerRoutes(app: Express): Server {
         const files = req.files as Express.Multer.File[];
         const albumId = req.body.albumId ? parseInt(req.body.albumId) : null;
 
+        console.log('Processing photo upload with albumId:', albumId, 'for profile:', profileId);
+
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
           const caption = req.body[`caption_${i}`] || '';
@@ -1753,6 +1756,8 @@ export function registerRoutes(app: Express): Server {
             tags,
           });
         }
+
+        console.log('Photo data to be created:', photoData);
 
         const photos = await storage.createProfilePhotos(photoData);
         res.json(photos);

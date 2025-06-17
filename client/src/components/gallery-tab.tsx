@@ -104,6 +104,10 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}/photos`] });
+      if (selectedAlbumId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/albums/${selectedAlbumId}/photos`] });
+      }
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}/albums`] });
       setShowUploadDialog(false);
       setUploadFiles([]);
       setUploadCaptions([]);
@@ -309,11 +313,13 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
 
   const handleUpload = () => {
     if (uploadFiles.length === 0) return;
+    const albumIdToUse = currentView === 'album' && selectedAlbumId ? selectedAlbumId : undefined;
+    console.log('Uploading photos with albumId:', albumIdToUse, 'currentView:', currentView, 'selectedAlbumId:', selectedAlbumId);
     uploadPhotosMutation.mutate({
       files: uploadFiles,
       captions: uploadCaptions,
       tags: uploadTags,
-      albumId: currentView === 'album' ? selectedAlbumId : undefined
+      albumId: albumIdToUse
     });
   };
 

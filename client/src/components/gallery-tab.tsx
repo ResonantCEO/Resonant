@@ -573,14 +573,70 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
       </div>
 
       {/* Album Description - Show when viewing a specific album */}
-      {currentView === 'album' && selectedAlbum && selectedAlbum.description && (
+      {currentView === 'album' && selectedAlbum && (selectedAlbum.description || isOwn) && (
         <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6 mb-6">
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">About this album</h3>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                {isOwn ? (
+                  <Input
+                    value={selectedAlbum.name}
+                    onChange={(e) => {
+                      // Update album name locally for immediate feedback
+                      const updatedAlbum = { ...selectedAlbum, name: e.target.value };
+                      // You might want to add debounced save here
+                    }}
+                    onBlur={(e) => {
+                      if (e.target.value !== selectedAlbum.name) {
+                        updateAlbumMutation.mutate({
+                          albumId: selectedAlbum.id,
+                          name: e.target.value,
+                          description: selectedAlbum.description || ''
+                        });
+                      }
+                    }}
+                    className="text-lg font-semibold bg-transparent border-none p-0 h-auto text-gray-900 dark:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 focus:bg-gray-100/50 dark:focus:bg-gray-800/50"
+                    placeholder="Album title..."
+                  />
+                ) : (
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{selectedAlbum.name}</h3>
+                )}
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Created {new Date(selectedAlbum.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
             <div className="prose prose-sm dark:prose-invert max-w-none">
-              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                {selectedAlbum.description}
-              </p>
+              {isOwn ? (
+                <Textarea
+                  value={selectedAlbum.description || ''}
+                  onChange={(e) => {
+                    // Update album description locally for immediate feedback
+                    const updatedAlbum = { ...selectedAlbum, description: e.target.value };
+                    // You might want to add debounced save here
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value !== (selectedAlbum.description || '')) {
+                      updateAlbumMutation.mutate({
+                        albumId: selectedAlbum.id,
+                        name: selectedAlbum.name,
+                        description: e.target.value
+                      });
+                    }
+                  }}
+                  placeholder="Add a description for this album..."
+                  className="min-h-[80px] bg-transparent border-none p-0 text-gray-700 dark:text-gray-300 resize-none hover:bg-gray-100/50 dark:hover:bg-gray-800/50 focus:bg-gray-100/50 dark:focus:bg-gray-800/50"
+                  rows={3}
+                />
+              ) : selectedAlbum.description ? (
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                  {selectedAlbum.description}
+                </p>
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 italic">No description available.</p>
+              )}
             </div>
           </div>
         </div>

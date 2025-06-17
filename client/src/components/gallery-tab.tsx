@@ -572,6 +572,20 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
         </div>
       </div>
 
+      {/* Album Description - Show when viewing a specific album */}
+      {currentView === 'album' && selectedAlbum && selectedAlbum.description && (
+        <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6 mb-6">
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">About this album</h3>
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                {selectedAlbum.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Albums Grid */}
       {currentView === 'albums' && (
         <>
@@ -685,7 +699,10 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                         </p>
                         {album.description && (
                           <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
-                            {album.description}
+                            {album.description.length > 100 
+                              ? `${album.description.substring(0, 100)}...` 
+                              : album.description
+                            }
                           </p>
                         )}
                       </div>

@@ -196,6 +196,8 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   invitations: many(profileInvitations),
   albums: many(albums),
   photos: many(photos),
+  artistBookingRequests: many(bookingRequests, { relationName: "artistProfile" }),
+  venueBookingRequests: many(bookingRequests, { relationName: "venueProfile" }),
 }));
 
 export const albumsRelations = relations(albums, ({ one, many }) => ({
@@ -218,6 +220,19 @@ export const photosRelations = relations(photos, ({ one }) => ({
   album: one(albums, {
     fields: [photos.albumId],
     references: [albums.id],
+  }),
+}));
+
+export const bookingRequestsRelations = relations(bookingRequests, ({ one }) => ({
+  artistProfile: one(profiles, {
+    fields: [bookingRequests.artistProfileId],
+    references: [profiles.id],
+    relationName: "artistProfile",
+  }),
+  venueProfile: one(profiles, {
+    fields: [bookingRequests.venueProfileId],
+    references: [profiles.id],
+    relationName: "venueProfile",
   }),
 }));
 

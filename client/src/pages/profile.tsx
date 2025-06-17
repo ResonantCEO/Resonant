@@ -475,22 +475,8 @@ export default function Profile() {
           {/* Tab Content */}
           {/* Posts Tab - only for non-artist profiles */}
           {activeTab === "posts" && profile?.type !== "artist" && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Bio Only */}
-              <div className="lg:col-span-1 space-y-6">
-                {/* Bio Section */}
-                {profile?.bio && (
-                  <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
-                    <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">About</h3>
-                    <p className="text-neutral-700 dark:text-gray-300 leading-relaxed">{profile.bio}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column - Posts Feed */}
-              <div className="lg:col-span-2">
-                <PostFeed profileId={profileId} showCreatePost={isOwn} />
-              </div>
+            <div className="w-full">
+              <PostFeed profileId={profileId} showCreatePost={isOwn} />
             </div>
           )}
 

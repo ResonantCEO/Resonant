@@ -14,6 +14,7 @@ import {
   bookingRequests,
   photos,
   albums,
+  photoComments,
   type User,
   type Profile,
   type Post,
@@ -1021,7 +1022,8 @@ export class Storage {
         .returning();
 
       return result[0];
-    } catch (error) {
+    } catch<previous_generation>```text
+ (error) {
       console.error("Error creating album:", error);
       throw error;
     }
@@ -1057,23 +1059,85 @@ export class Storage {
     }
   }
 
-  async deleteAlbum(albumId: number): Promise<void> {
-    try {
-      // First, remove album association from photos
-      await db
-        .update(photos)
-        .set({ albumId: null })
-        .where(eq(photos.albumId, albumId));
+  async deleteAlbum(albumId: number) {
+    return await db.delete(albums).where(eq(albums.id, albumId));
+  },
 
-      // Then delete the album
-      await db
-        .delete(albums)
-        .where(eq(albums.id, albumId));
-    } catch (error) {
-      console.error("Error deleting album:", error);
-      throw error;
+  // Photo comment methods
+  async getPhotoComments(photoId: number) {
+    return await db
+      .select({
+        id: photoComments.id,
+        content: photoComments.content,
+        createdAt: photoComments.createdAt,
+        updatedAt: photoComments.updatedAt,
+        profile: {
+          id: profiles.id,
+          name: profiles.name,
+          profileImageUrl: profiles.profileImageUrl,
+        },
+      })
+      .from(photoComments)
+      .innerJoin(profiles, eq(photoComments.profileId, profiles.id))
+      .where(eq(photoComments.photoId, photoId))
+      .orderBy(desc(photoComments.createdAt));
+  },
+
+  async createPhotoComment(commentData: any) {
+    const [comment] = await db.insert(photoComments).values(commentData).returning();
+
+    // Update comments count
+    await db
+      .update(photos)
+      .set({ 
+        commentsCount: sql`${photos.commentsCount} + 1` 
+      })
+      .where(eq(photos.id, commentData.photoId));
+
+    // Return comment with profile data
+    const [commentWithProfile] = await db
+      .select({
+        id: photoComments.id,
+        content: photoComments.content,
+        createdAt: photoComments.createdAt,
+        updatedAt: photoComments.updatedAt,
+        profile: {
+          id: profiles.id,
+          name: profiles.name,
+          profileImageUrl: profiles.profileImageUrl,
+        },
+      })
+      .from(photoComments)
+      .innerJoin(profiles, eq(photoComments.profileId, profiles.id))
+      .where(eq(photoComments.id, comment.id));
+
+    return commentWithProfile;
+  },
+
+  async deletePhotoComment(commentId: number, profileId: number) {
+    // Get the comment to find the photo ID
+    const [comment] = await db
+      .select()
+      .from(photoComments)
+      .where(and(eq(photoComments.id, commentId), eq(photoComments.profileId, profileId)));
+
+    if (!comment) {
+      throw new Error("Comment not found or unauthorized");
     }
-  }
+
+    // Delete the comment
+    await db.delete(photoComments).where(eq(photoComments.id, commentId));
+
+    // Update comments count
+    await db
+      .update(photos)
+      .set({ 
+        commentsCount: sql`${photos.commentsCount} - 1` 
+      })
+      .where(eq(photos.id, comment.photoId));
+
+    return true;
+  },
 
   async getAlbumPhotos(albumId: number): Promise<Photo[]> {
     try {

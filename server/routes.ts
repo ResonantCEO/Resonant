@@ -1982,6 +1982,62 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Photo comment routes
+  app.get('/api/photos/:id/comments', async (req, res) => {
+    try {
+      const photoId = parseInt(req.params.id);
+      const comments = await storage.getPhotoComments(photoId);
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching photo comments:", error);
+      res.status(500).json({ message: "Failed to fetch photo comments" });
+    }
+  });
+
+  app.post('/api/photos/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const photoId = parseInt(req.params.id);
+      const { content } = req.body;
+
+      if (!content || content.trim().length === 0) {
+        return res.status(400).json({ message: "Comment content is required" });
+      }
+
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const comment = await storage.createPhotoComment({
+        photoId,
+        profileId: activeProfile.id,
+        content: content.trim(),
+      });
+
+      res.json(comment);
+    } catch (error) {
+      console.error("Error creating photo comment:", error);
+      res.status(500).json({ message: "Failed to create photo comment" });
+    }
+  });
+
+  app.delete('/api/photo-comments/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      await storage.deletePhotoComment(commentId, activeProfile.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting photo comment:", error);
+      res.status(500).json({ message: "Failed to delete photo comment" });
+    }
+  });
+
   // Booking request routes
   app.post('/api/booking-requests', isAuthenticated, async (req: any, res) => {
     try {

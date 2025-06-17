@@ -177,7 +177,17 @@ export const photos = pgTable("photos", {
   imageUrl: varchar("image_url", { length: 500 }).notNull(),
   caption: text("caption"),
   tags: text("tags").array().default([]).notNull(),
+  commentsCount: integer("comments_count").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const photoComments = pgTable("photo_comments", {
+  id: serial("id").primaryKey(),
+  photoId: integer("photo_id").notNull().references(() => photos.id, { onDelete: "cascade" }),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Relations
@@ -212,7 +222,7 @@ export const albumsRelations = relations(albums, ({ one, many }) => ({
   }),
 }));
 
-export const photosRelations = relations(photos, ({ one }) => ({
+export const photosRelations = relations(photos, ({ one, many }) => ({
   profile: one(profiles, {
     fields: [photos.profileId],
     references: [profiles.id],
@@ -220,6 +230,18 @@ export const photosRelations = relations(photos, ({ one }) => ({
   album: one(albums, {
     fields: [photos.albumId],
     references: [albums.id],
+  }),
+  comments: many(photoComments),
+}));
+
+export const photoCommentsRelations = relations(photoComments, ({ one }) => ({
+  photo: one(photos, {
+    fields: [photoComments.photoId],
+    references: [photos.id],
+  }),
+  profile: one(profiles, {
+    fields: [photoComments.profileId],
+    references: [profiles.id],
   }),
 }));
 
@@ -474,6 +496,12 @@ export const insertUserNotificationSettingsSchema = createInsertSchema(userNotif
   updatedAt: true,
 });
 
+export const insertPhotoCommentSchema = createInsertSchema(photoComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const notificationTypeSchema = z.enum([
   "friend_request",
   "friend_accepted",
@@ -494,3 +522,5 @@ export type Album = InferSelectModel<typeof albums>;
 export type InsertAlbum = InferInsertModel<typeof albums>;
 export type Photo = InferSelectModel<typeof photos>;
 export type InsertPhoto = InferInsertModel<typeof photos>;
+export type PhotoComment = InferSelectModel<typeof photoComments>;
+export type InsertPhotoComment = InferInsertModel<typeof photoComments>;

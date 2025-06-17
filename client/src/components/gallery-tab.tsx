@@ -4,7 +4,7 @@ import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Search, Filter, Grid, List, FolderPlus, Folder, Plus, X, Check, Trash2, Download, Eye, MoreVertical, ArrowLeft, User, Image as ImageIcon, Wallpaper, Upload, UserPlus } from "lucide-react";
+import { Camera, Search, Filter, Grid, List, FolderPlus, Folder, Plus, X, Check, Trash2, Download, Eye, MoreVertical, ArrowLeft, User, Image as ImageIcon, Wallpaper, Upload, UserPlus, MessageCircle, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +23,7 @@ interface Photo {
   createdAt: string;
   profileId: number;
   albumId?: number;
+  commentsCount?: number;
 }
 
 interface Album {
@@ -33,6 +34,18 @@ interface Album {
   coverPhotoId?: number;
   createdAt: string;
   updatedAt: string;
+}
+
+interface PhotoComment {
+  id: number;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  profile: {
+    id: number;
+    name: string;
+    profileImageUrl?: string;
+  };
 }
 
 interface FriendTagSearchProps {
@@ -181,6 +194,9 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<number[]>([]);
   const [showAddToAlbumDialog, setShowAddToAlbumDialog] = useState(false);
   const [targetAlbumId, setTargetAlbumId] = useState<number | null>(null);
+  const [photoComments, setPhotoComments] = useState<PhotoComment[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch photos for this profile
@@ -205,6 +221,12 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
   const { data: friends = [] } = useQuery<any[]>({
     queryKey: [`/api/friends`],
     enabled: !!profile?.id,
+  });
+
+  // Fetch photo comments
+  const { data: commentsData = [], refetch: refetchComments } = useQuery<PhotoComment[]>({
+    queryKey: [`/api/photos/${selectedPhoto?.id}/comments`],
+    enabled: !!selectedPhoto?.id,
   });
 
   const isLoading = photosLoading || albumsLoading || albumPhotosLoading;
@@ -411,6 +433,59 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
     },
   });
 
+  // Create photo comment mutation
+  const createCommentMutation = useMutation({
+    mutationFn: async ({ photoId, content }: { photoId: number; content: string }) => {
+      const response = await fetch(`/api/photos/${photoId}/comments`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+      if (!response.ok) throw new Error('Failed to create comment');
+      return response.json();
+    },
+    onSuccess: () => {
+      refetchComments();
+      setNewComment('');
+      setIsSubmittingComment(false);
+    },
+    onError: (error: any) => {
+      setIsSubmittingComment(false);
+      toast({
+        title: "Comment failed",
+        description: error.message || "Failed to post comment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete photo comment mutation
+  const deleteCommentMutation = useMutation({
+    mutationFn: async (commentId: number) => {
+      const response = await fetch(`/api/photo-comments/${commentId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to delete comment');
+      return response.json();
+    },
+    onSuccess: () => {
+      refetchComments();
+      toast({
+        title: "Comment deleted",
+        description: "Your comment has been removed.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete failed",
+        description: error.message || "Failed to delete comment",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     const validFiles = files.filter(file => file.type.startsWith('image/'));
@@ -518,6 +593,21 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
       albumId: targetAlbumId,
       photoIds: selectedPhotoIds
     });
+  };
+
+  const handleSubmitComment = () => {
+    if (!selectedPhoto || !newComment.trim() || isSubmittingComment) return;
+    setIsSubmittingComment(true);
+    createCommentMutation.mutate({
+      photoId: selectedPhoto.id,
+      content: newComment.trim(),
+    });
+  };
+
+  const handleDeleteComment = (commentId: number) => {
+    if (confirm('Are you sure you want to delete this comment?')) {
+      deleteCommentMutation.mutate(commentId);
+    }
   };
 
   // Get current photos based on view
@@ -1101,36 +1191,131 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="flex flex-col space-y-6 max-h-[calc(90vh-10rem)] overflow-auto p-1">
-                <div className="relative rounded-xl overflow-hidden border border-white/20 dark:border-gray-700/20">
-                  <img
-                    src={selectedPhoto.imageUrl}
-                    alt={selectedPhoto.caption || 'Gallery photo'}
-                    className="w-full max-h-96 object-contain bg-black/10 dark:bg-white/5"
-                  />
+              <div className="flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-6 max-h-[calc(90vh-10rem)] overflow-auto p-1">
+                {/* Photo Section */}
+                <div className="lg:flex-1">
+                  <div className="relative rounded-xl overflow-hidden border border-white/20 dark:border-gray-700/20">
+                    <img
+                      src={selectedPhoto.imageUrl}
+                      alt={selectedPhoto.caption || 'Gallery photo'}
+                      className="w-full max-h-96 object-contain bg-black/10 dark:bg-white/5"
+                    />
+                  </div>
+
+                  <div className="mt-4 space-y-4 bg-white/10 dark:bg-gray-800/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-700/20">
+                    <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                      <span className="font-medium">Uploaded:</span>
+                      {new Date(selectedPhoto.createdAt).toLocaleDateString()}
+                    </p>
+
+                    {selectedPhoto.tags.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Tags:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedPhoto.tags.map(tag => (
+                            <span
+                              key={tag}
+                              className="text-sm bg-blue-500/20 border border-blue-400/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full backdrop-blur-sm"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-4 bg-white/10 dark:bg-gray-800/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-700/20">
-                  <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                    <span className="font-medium">Uploaded:</span>
-                    {new Date(selectedPhoto.createdAt).toLocaleDateString()}
-                  </p>
-
-                  {selectedPhoto.tags.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Tags:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedPhoto.tags.map(tag => (
-                          <span
-                            key={tag}
-                            className="text-sm bg-blue-500/20 border border-blue-400/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full backdrop-blur-sm"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
+                {/* Comments Section */}
+                <div className="lg:w-80 space-y-4">
+                  <div className="bg-white/10 dark:bg-gray-800/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-700/20">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MessageCircle className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        Comments ({commentsData.length})
+                      </h3>
                     </div>
-                  )}
+
+                    {/* Comment Input */}
+                    <div className="space-y-3 mb-4">
+                      <Textarea
+                        placeholder="Add a comment..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        className="min-h-[80px] bg-white/20 dark:bg-gray-800/20 border border-white/30 dark:border-gray-600/30 backdrop-blur-sm rounded-lg text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+                        rows={3}
+                      />
+                      <Button
+                        onClick={handleSubmitComment}
+                        disabled={!newComment.trim() || isSubmittingComment}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                      >
+                        {isSubmittingComment ? (
+                          'Posting...'
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4 mr-2" />
+                            Post Comment
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Comments List */}
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {commentsData.length === 0 ? (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                          No comments yet. Be the first to comment!
+                        </p>
+                      ) : (
+                        commentsData.map((comment) => (
+                          <div key={comment.id} className="bg-white/5 dark:bg-gray-800/20 rounded-lg p-3 border border-white/10 dark:border-gray-700/20">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-start gap-2 flex-1">
+                                {comment.profile.profileImageUrl ? (
+                                  <img
+                                    src={comment.profile.profileImageUrl}
+                                    alt={comment.profile.name}
+                                    className="w-6 h-6 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-6 h-6 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                                    <User className="w-3 h-3 text-gray-500 dark:text-gray-400" />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {comment.profile.name}
+                                  </p>
+                                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 break-words">
+                                    {comment.content}
+                                  </p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    {new Date(comment.createdAt).toLocaleDateString()} at{' '}
+                                    {new Date(comment.createdAt).toLocaleTimeString([], { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit' 
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                              {/* Delete button for own comments */}
+                              {isOwn && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteComment(comment.id)}
+                                  className="h-6 w-6 p-0 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </>

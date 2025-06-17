@@ -225,50 +225,59 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
   );
 
   const FriendRequestCard = ({ request }: { request: any }) => (
-    <Card>
+    <Card className="hover:shadow-lg transition-all duration-200 border border-gray-200 dark:border-gray-700">
       <CardContent className="p-4">
-        <div className="flex items-center space-x-3">
-          <Avatar className="w-12 h-12">
-            <AvatarImage src={request.profile.profileImageUrl} alt={request.profile.name} />
-            <AvatarFallback>{request.profile.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {request.profile.name}
+        <div className="flex flex-col space-y-3">
+          <div className="flex items-center space-x-3">
+            <Avatar className="w-14 h-14 ring-2 ring-blue-200 dark:ring-blue-800">
+              <AvatarImage src={request.profile.profileImageUrl} alt={request.profile.name} />
+              <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                {request.profile.name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                  {request.profile.name}
+                </p>
+                {getProfileTypeBadge(request.profile.type)}
+              </div>
+              {request.profile.bio && (
+                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                  {request.profile.bio}
+                </p>
+              )}
+              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
+                Wants to connect
               </p>
-              {getProfileTypeBadge(request.profile.type)}
             </div>
-            {request.profile.bio && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
-                {request.profile.bio}
-              </p>
-            )}
-            <div className="flex space-x-2 mt-3">
-              <Button
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  acceptFriendRequestMutation.mutate(request.friendship.id);
-                }}
-                disabled={acceptFriendRequestMutation.isPending}
-              >
-                <Heart className="w-3 h-3 mr-1" />
-                Accept
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  rejectFriendRequestMutation.mutate(request.friendship.id);
-                }}
-                disabled={rejectFriendRequestMutation.isPending}
-              >
-                <UserMinus className="w-3 h-3 mr-1" />
-                Decline
-              </Button>
-            </div>
+          </div>
+          <div className="flex space-x-2 w-full">
+            <Button
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                acceptFriendRequestMutation.mutate(request.friendship.id);
+              }}
+              disabled={acceptFriendRequestMutation.isPending}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Heart className="w-3 h-3 mr-1" />
+              {acceptFriendRequestMutation.isPending ? "Accepting..." : "Accept"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                rejectFriendRequestMutation.mutate(request.friendship.id);
+              }}
+              disabled={rejectFriendRequestMutation.isPending}
+              className="flex-1 border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+            >
+              <UserMinus className="w-3 h-3 mr-1" />
+              {rejectFriendRequestMutation.isPending ? "Declining..." : "Decline"}
+            </Button>
           </div>
         </div>
       </CardContent>
@@ -311,15 +320,20 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
 
       {/* Friend Requests Section (for own profiles) */}
       {isOwn && friendRequests && friendRequests.length > 0 && (
-        <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/20">
-          <CardHeader>
-            <CardTitle className="flex items-center text-blue-700 dark:text-blue-300">
-              <UserPlus className="w-5 h-5 mr-2" />
-              Friend Requests ({friendRequests.length})
+        <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-800">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <UserPlus className="w-5 h-5 mr-2" />
+                Friend Requests
+              </div>
+              <Badge className="bg-white text-blue-600 font-bold">
+                {friendRequests.length}
+              </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {friendRequests.map((request: any) => (
                 <FriendRequestCard key={request.friendship.id} request={request} />
               ))}
@@ -328,10 +342,32 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
         </Card>
       )}
 
+      {/* Empty Friend Requests State (for own profiles) */}
+      {isOwn && (!friendRequests || friendRequests.length === 0) && (
+        <Card className="border-dashed border-2 border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50">
+          <CardContent className="p-6 text-center">
+            <UserPlus className="w-8 h-8 mx-auto text-gray-400 mb-3" />
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              No pending friend requests
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500">
+              When someone sends you a friend request, it will appear here
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Friends List */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Network</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Your Network</span>
+            {friends && friends.length > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {friends.length} {friends.length === 1 ? 'friend' : 'friends'}
+              </Badge>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -396,29 +432,37 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
 
       {/* Sent Requests (for own profiles) */}
       {isOwn && sentRequests && sentRequests.length > 0 && (
-        <Card>
+        <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 dark:border-amber-800">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <MessageCircle className="w-5 h-5 mr-2" />
-              Pending Requests ({sentRequests.length})
+            <CardTitle className="flex items-center justify-between text-amber-700 dark:text-amber-300">
+              <div className="flex items-center">
+                <MessageCircle className="w-5 h-5 mr-2" />
+                Pending Requests
+              </div>
+              <Badge className="bg-amber-200 text-amber-800 dark:bg-amber-800 dark:text-amber-200">
+                {sentRequests.length}
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {sentRequests.map((request: any) => (
-                <Card key={request.friendship.id}>
+                <Card key={request.friendship.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-3">
-                      <Avatar className="w-10 h-10">
+                      <Avatar className="w-12 h-12 ring-2 ring-amber-200 dark:ring-amber-800">
                         <AvatarImage src={request.profile.profileImageUrl} alt={request.profile.name} />
-                        <AvatarFallback>{request.profile.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="bg-amber-100 text-amber-600 font-semibold">
+                          {request.profile.name.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                           {request.profile.name}
                         </p>
                         {getProfileTypeBadge(request.profile.type)}
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1 flex items-center">
+                          <MessageCircle className="w-3 h-3 mr-1" />
                           Request sent
                         </p>
                       </div>

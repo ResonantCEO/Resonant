@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships } from "@shared/schema";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -259,6 +259,23 @@ export function registerRoutes(app: Express): Server {
         // Also update the user's profile image URL so posts show the current image
         await storage.updateUser(userId, { profileImageUrl });
 
+        // Add photo to Profile Pictures album
+        const profilePicturesAlbum = await db
+          .select()
+          .from(albums)
+          .where(and(eq(albums.profileId, profileId), eq(albums.name, "Profile Pictures")))
+          .limit(1);
+
+        if (profilePicturesAlbum.length > 0) {
+          await db.insert(photos).values({
+            profileId,
+            albumId: profilePicturesAlbum[0].id,
+            imageUrl: profileImageUrl,
+            caption: "Profile picture"
+          });
+          console.log("Added photo to Profile Pictures album");
+        }
+
         console.log("Profile image updated successfully");
 
         res.json({ 
@@ -306,6 +323,23 @@ export function registerRoutes(app: Express): Server {
 
         // Update profile's cover image URL in database
         await storage.updateProfile(profileId, { coverImageUrl });
+
+        // Add photo to Cover Photos album
+        const coverPhotosAlbum = await db
+          .select()
+          .from(albums)
+          .where(and(eq(albums.profileId, profileId), eq(albums.name, "Cover Photos")))
+          .limit(1);
+
+        if (coverPhotosAlbum.length > 0) {
+          await db.insert(photos).values({
+            profileId,
+            albumId: coverPhotosAlbum[0].id,
+            imageUrl: coverImageUrl,
+            caption: "Cover photo"
+          });
+          console.log("Added photo to Cover Photos album");
+        }
 
         console.log("Profile cover image updated successfully");
 
@@ -563,6 +597,23 @@ export function registerRoutes(app: Express): Server {
         backgroundImageUrl,
         profileBackground: 'custom-photo'
       });
+
+      // Add photo to Background Pictures album
+      const backgroundPicturesAlbum = await db
+        .select()
+        .from(albums)
+        .where(and(eq(albums.profileId, activeProfile.id), eq(albums.name, "Background Pictures")))
+        .limit(1);
+
+      if (backgroundPicturesAlbum.length > 0) {
+        await db.insert(photos).values({
+          profileId: activeProfile.id,
+          albumId: backgroundPicturesAlbum[0].id,
+          imageUrl: backgroundImageUrl,
+          caption: "Background image"
+        });
+        console.log("Added photo to Background Pictures album");
+      }
 
       console.log("Profile background image uploaded successfully:", backgroundImageUrl);
 

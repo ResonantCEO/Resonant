@@ -124,6 +124,11 @@ export class NotificationService {
         return activeProfileType === 'artist' || activeProfileType === 'venue';
       }
       
+      // For photo comment notifications, show for all profile types
+      if (notification.type === 'photo_comment') {
+        return true;
+      }
+      
       // For other notification types, show to all profiles
       return true;
     });
@@ -222,6 +227,12 @@ export class NotificationService {
         const shouldInclude = activeProfileType === 'artist' || activeProfileType === 'venue';
         console.log(`Post notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} for ${activeProfileType} profile`);
         return shouldInclude;
+      }
+      
+      // For photo comment notifications, count for all profile types
+      if (notification.type === 'photo_comment') {
+        console.log(`Photo comment notification ${notification.id}: included for all profiles`);
+        return true;
       }
       
       // For other notification types, count for all profiles
@@ -524,6 +535,17 @@ export class NotificationService {
       title: `Booking Request ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}`,
       message: `${venueName} (${venueProfileName}) has ${statusText} your booking request`,
       data: { venueUserId, venueName, venueProfileName, status }
+    });
+  }
+
+  async notifyPhotoComment(recipientId: number, senderId: number, senderName: string, photoId: number): Promise<void> {
+    await this.createNotification({
+      recipientId,
+      senderId,
+      type: "photo_comment",
+      title: "New Photo Comment",
+      message: `${senderName} commented on your photo`,
+      data: { photoId, senderId },
     });
   }
 }

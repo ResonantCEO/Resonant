@@ -508,6 +508,7 @@ export const notificationTypeSchema = z.enum([
   "post_like",
   "comment",
   "post_comment",
+  "photo_comment",
   "message",
   "profile_invite",
   "profile_deleted",

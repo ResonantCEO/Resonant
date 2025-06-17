@@ -2014,6 +2014,18 @@ export function registerRoutes(app: Express): Server {
         content: content.trim(),
       });
 
+      // Send notification to photo owner
+      const { notificationService } = await import('./notifications');
+      const photo = await storage.getPhoto(photoId);
+      if (photo) {
+        const photoOwnerProfile = await storage.getProfile(photo.profileId);
+        if (photoOwnerProfile?.userId && photoOwnerProfile.userId !== req.user.id) {
+          const commenterUser = await storage.getUser(req.user.id);
+          const commenterName = `${commenterUser?.firstName} ${commenterUser?.lastName}`;
+          await notificationService.notifyPhotoComment(photoOwnerProfile.userId, req.user.id, commenterName, photoId);
+        }
+      }
+
       res.json(comment);
     } catch (error) {
       console.error("Error creating photo comment:", error);

@@ -1,18 +1,18 @@
 
 import { db } from "./db";
 import { profiles, albums, photos } from "@shared/schema";
-import { eq, and, isNotNull } from "drizzle-orm";
+import { eq, and, isNotNull, or } from "drizzle-orm";
 
 async function migrateExistingPhotos() {
   try {
     console.log("Migrating existing profile images to albums...");
     
-    // Get all profiles with images
+    // Get all profiles with ANY images (not requiring all three)
     const profilesWithImages = await db
       .select()
       .from(profiles)
       .where(
-        and(
+        or(
           isNotNull(profiles.profileImageUrl),
           isNotNull(profiles.coverImageUrl),
           isNotNull(profiles.backgroundImageUrl)

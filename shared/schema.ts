@@ -9,6 +9,8 @@ import {
   boolean,
   integer,
   real,
+  InferSelectModel,
+  InferInsertModel,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -425,3 +427,18 @@ export const bookingRequests = pgTable("booking_requests", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export type BookingRequest = InferSelectModel<typeof bookingRequests>;
+export type InsertBookingRequest = InferInsertModel<typeof bookingRequests>;
+
+export const photos = pgTable("photos", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").references(() => profiles.id).notNull(),
+  imageUrl: varchar("image_url", { length: 500 }).notNull(),
+  caption: text("caption"),
+  tags: text("tags").array().default([]).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type Photo = InferSelectModel<typeof photos>;
+export type InsertPhoto = InferInsertModel<typeof photos>;

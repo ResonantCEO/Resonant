@@ -12,6 +12,7 @@ import {
   notifications,
   userNotificationSettings,
   bookingRequests,
+  photos,
   type User,
   type Profile,
   type Post,
@@ -920,6 +921,36 @@ export class Storage {
       .from(bookingRequests)
       .where(eq(bookingRequests.id, requestId));
     return booking;
+  }
+
+  // Photo operations
+  async getProfilePhotos(profileId: number): Promise<any[]> {
+    return await db
+      .select()
+      .from(photos)
+      .where(eq(photos.profileId, profileId))
+      .orderBy(desc(photos.createdAt));
+  }
+
+  async createProfilePhotos(photoData: any[]): Promise<any[]> {
+    return await db
+      .insert(photos)
+      .values(photoData)
+      .returning();
+  }
+
+  async getPhoto(photoId: number): Promise<any> {
+    const [photo] = await db
+      .select()
+      .from(photos)
+      .where(eq(photos.id, photoId));
+    return photo;
+  }
+
+  async deletePhoto(photoId: number): Promise<void> {
+    await db
+      .delete(photos)
+      .where(eq(photos.id, photoId));
   }
 }
 

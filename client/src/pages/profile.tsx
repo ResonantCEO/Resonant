@@ -25,6 +25,7 @@ import FriendsWidget from "@/components/friends-widget";
 import EPKTab from "@/components/epk-tab";
 import FriendsTab from "@/components/friends-tab";
 import StatsTab from "@/components/stats-tab";
+import GalleryTab from "@/components/gallery-tab";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings, ChevronDown, UserPlus, Globe } from "lucide-react";
 
@@ -533,10 +534,7 @@ export default function Profile() {
           {/* Gallery Tab */}
           {activeTab === "photos" && (
             <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
-              <div className="text-center text-gray-500 dark:text-gray-400">
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Gallery</h3>
-                <p>Photo gallery coming soon...</p>
-              </div>
+              <GalleryTab profile={profile} isOwn={isOwn} />
             </div>
           )}
 

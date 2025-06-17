@@ -1654,6 +1654,86 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Gallery photo routes
+  app.get('/api/profiles/:id/photos', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const photos = await storage.getProfilePhotos(profileId);
+      res.json(photos);
+    } catch (error) {
+      console.error("Error fetching profile photos:", error);
+      res.status(500).json({ message: "Failed to fetch photos" });
+    }
+  });
+
+  app.post('/api/profiles/:id/photos', isAuthenticated, (req: any, res, next) => {
+    const profileId = parseInt(req.params.id);
+    
+    upload.array('photos', 10)(req, res, async (err) => {
+      try {
+        if (err) {
+          console.error("Multer error:", err);
+          return res.status(400).json({ message: err.message });
+        }
+
+        if (!req.files || req.files.length === 0) {
+          return res.status(400).json({ message: "No files uploaded" });
+        }
+
+        // Verify profile ownership
+        const profile = await storage.getProfile(profileId);
+        if (!profile || profile.userId !== req.user.id) {
+          return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        const photoData = [];
+        const files = req.files as Express.Multer.File[];
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const caption = req.body[`caption_${i}`] || '';
+          const tags = req.body[`tags_${i}`] ? JSON.parse(req.body[`tags_${i}`]) : [];
+          
+          photoData.push({
+            profileId,
+            imageUrl: `/uploads/${file.filename}`,
+            caption,
+            tags,
+          });
+        }
+
+        const photos = await storage.createProfilePhotos(photoData);
+        res.json(photos);
+      } catch (error) {
+        console.error("Error uploading photos:", error);
+        res.status(500).json({ message: "Failed to upload photos" });
+      }
+    });
+  });
+
+  app.delete('/api/photos/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const photoId = parseInt(req.params.id);
+      
+      // Verify photo ownership through profile ownership
+      const photo = await storage.getPhoto(photoId);
+      if (!photo) {
+        return res.status(404).json({ message: "Photo not found" });
+      }
+
+      const profile = await storage.getProfile(photo.profileId);
+      if (!profile || profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      await storage.deletePhoto(photoId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting photo:", error);
+      res.status(500).json({ message: "Failed to delete photo" });
+    }
+  });
+
   // Booking request routes
   app.post('/api/booking-requests', isAuthenticated, async (req: any, res) => {
     try {

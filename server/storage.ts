@@ -1061,7 +1061,7 @@ export class Storage {
 
   async deleteAlbum(albumId: number) {
     return await db.delete(albums).where(eq(albums.id, albumId));
-  },
+  }
 
   // Photo comment methods
   async getPhotoComments(photoId: number) {
@@ -1081,7 +1081,7 @@ export class Storage {
       .innerJoin(profiles, eq(photoComments.profileId, profiles.id))
       .where(eq(photoComments.photoId, photoId))
       .orderBy(desc(photoComments.createdAt));
-  },
+  }
 
   async createPhotoComment(commentData: any) {
     const [comment] = await db.insert(photoComments).values(commentData).returning();
@@ -1112,7 +1112,7 @@ export class Storage {
       .where(eq(photoComments.id, comment.id));
 
     return commentWithProfile;
-  },
+  }
 
   async deletePhotoComment(commentId: number, profileId: number) {
     // Get the comment to find the photo ID
@@ -1137,7 +1137,7 @@ export class Storage {
       .where(eq(photos.id, comment.photoId));
 
     return true;
-  },
+  }
 
   async getAlbumPhotos(albumId: number): Promise<Photo[]> {
     try {

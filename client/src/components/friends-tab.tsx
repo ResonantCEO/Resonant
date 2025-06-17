@@ -51,25 +51,25 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
 
   // Fetch friend requests (for own profiles)
   const { data: friendRequests, isLoading: requestsLoading } = useQuery({
-    queryKey: [`/api/profiles/${profile?.id}/friend-requests`],
+    queryKey: [`/api/friend-requests`],
     enabled: !!profile?.id && isOwn,
   });
 
   // Fetch sent friend requests (for own profiles)
   const { data: sentRequests, isLoading: sentLoading } = useQuery({
-    queryKey: [`/api/profiles/${profile?.id}/sent-requests`],
+    queryKey: [`/api/sent-requests`],
     enabled: !!profile?.id && isOwn,
   });
 
   // Send friend request mutation
   const sendFriendRequestMutation = useMutation({
     mutationFn: async (targetProfileId: number) => {
-      return await apiRequest("POST", `/api/profiles/${profile.id}/friend-requests`, {
+      return await apiRequest("POST", `/api/friend-requests`, {
         addresseeId: targetProfileId
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}/sent-requests`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/sent-requests`] });
       toast({
         title: "Friend Request Sent",
         description: "Your friend request has been sent successfully.",
@@ -87,11 +87,12 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
   // Accept friend request mutation
   const acceptFriendRequestMutation = useMutation({
     mutationFn: async (friendshipId: number) => {
-      return await apiRequest("POST", `/api/friendships/${friendshipId}/accept`);
+      return await apiRequest("POST", `/api/friend-requests/${friendshipId}/accept`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}/friends`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}/friend-requests`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/friend-requests`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/friends`] });
       toast({
         title: "Friend Request Accepted",
         description: "You are now friends!",
@@ -109,10 +110,10 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
   // Reject friend request mutation
   const rejectFriendRequestMutation = useMutation({
     mutationFn: async (friendshipId: number) => {
-      return await apiRequest("POST", `/api/friendships/${friendshipId}/reject`);
+      return await apiRequest("POST", `/api/friend-requests/${friendshipId}/reject`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}/friend-requests`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/friend-requests`] });
       toast({
         title: "Friend Request Rejected",
         description: "The friend request has been declined.",

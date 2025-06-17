@@ -227,42 +227,55 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
 
   const FriendRequestCard = ({ request }: { request: any }) => {
     // Handle cases where profile data might not be available
-    if (!request || !request.profile) {
+    if (!request) {
       console.warn('Invalid friend request data:', request);
       return null;
     }
 
-    const profile = request.profile;
+    // The profile data is directly on the request object, not nested under 'profile'
+    const profile = {
+      id: request.id,
+      name: request.name,
+      profileImageUrl: request.profileImageUrl,
+      type: request.type,
+      bio: request.bio
+    };
     
     return (
-      <Card className="hover:shadow-lg transition-all duration-200 border border-gray-200 dark:border-gray-700">
+      <Card className="hover:shadow-xl transition-all duration-300 border border-gray-700 bg-gray-800 hover:bg-gray-750">
         <CardContent className="p-4">
           <div className="flex flex-col space-y-3">
             <div className="flex items-center space-x-3">
-              <Avatar className="w-14 h-14 ring-2 ring-blue-200 dark:ring-blue-800">
+              <Avatar className="w-14 h-14 ring-2 ring-blue-500">
                 <AvatarImage src={profile.profileImageUrl} alt={profile.name || 'Unknown'} />
-                <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                <AvatarFallback className="bg-blue-600 text-white font-semibold">
                   {(profile.name || 'U').charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                  <p className="text-sm font-semibold text-white truncate">
                     {profile.name || 'Unknown User'}
                   </p>
-                  {profile.type && getProfileTypeBadge(profile.type)}
+                  {profile.type && (
+                    <Badge className="bg-gray-700 text-gray-300 font-bold border-0 shadow-lg text-xs">
+                      {getTypeIcon(profile.type)}
+                      <span className="ml-1 capitalize">{profile.type}</span>
+                    </Badge>
+                  )}
                 </div>
                 {profile.bio && (
-                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                  <p className="text-xs text-gray-400 truncate">
                     {profile.bio}
                   </p>
                 )}
-                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
+                <p className="text-xs text-blue-400 font-medium mt-1 flex items-center">
+                  <Heart className="w-3 h-3 mr-1" />
                   Wants to connect
                 </p>
               </div>
             </div>
-          <div className="flex space-x-2 w-full">
+            <div className="flex space-x-2 w-full">
               <Button
                 size="sm"
                 onClick={(e) => {
@@ -272,14 +285,13 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
                   }
                 }}
                 disabled={acceptFriendRequestMutation.isPending || !request.friendship?.id}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white border-0 shadow-lg"
               >
                 <Heart className="w-3 h-3 mr-1" />
                 {acceptFriendRequestMutation.isPending ? "Accepting..." : "Accept"}
               </Button>
               <Button
                 size="sm"
-                variant="outline"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (request.friendship?.id) {
@@ -287,7 +299,7 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
                   }
                 }}
                 disabled={rejectFriendRequestMutation.isPending || !request.friendship?.id}
-                className="flex-1 border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-300 border-0 shadow-lg"
               >
                 <UserMinus className="w-3 h-3 mr-1" />
                 {rejectFriendRequestMutation.isPending ? "Declining..." : "Decline"}
@@ -335,22 +347,22 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
 
       {/* Friend Requests Section (for own profiles) */}
       {isOwn && friendRequests && friendRequests.length > 0 && (
-        <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-800">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
+        <Card className="border-gray-800 bg-gray-900 shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg border-b border-gray-700">
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center">
                 <UserPlus className="w-5 h-5 mr-2" />
-                Friend Requests
+                <span className="text-lg font-semibold">Friend Requests</span>
               </div>
-              <Badge className="bg-white text-blue-600 font-bold">
+              <Badge className="bg-gray-800 text-white font-bold border border-gray-600 px-3 py-1 rounded-full">
                 {friendRequests.length}
               </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-6 bg-gray-900">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {friendRequests.map((request: any) => (
-                <FriendRequestCard key={request.friendship.id} request={request} />
+                <FriendRequestCard key={request.friendship?.id || request.id} request={request} />
               ))}
             </div>
           </CardContent>
@@ -359,13 +371,13 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
 
       {/* Empty Friend Requests State (for own profiles) */}
       {isOwn && (!friendRequests || friendRequests.length === 0) && (
-        <Card className="border-dashed border-2 border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50">
+        <Card className="border-dashed border-2 border-gray-600 bg-gray-900/50">
           <CardContent className="p-6 text-center">
-            <UserPlus className="w-8 h-8 mx-auto text-gray-400 mb-3" />
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <UserPlus className="w-8 h-8 mx-auto text-gray-500 mb-3" />
+            <p className="text-sm text-gray-400 mb-2">
               No pending friend requests
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-500">
+            <p className="text-xs text-gray-500">
               When someone sends you a friend request, it will appear here
             </p>
           </CardContent>

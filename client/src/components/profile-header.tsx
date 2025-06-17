@@ -1014,7 +1014,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 </TabsTrigger>
               )}
               <TabsTrigger value="photos" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
-                Photos
+                Gallery
               </TabsTrigger>
               {/* Community tab - only visible for artist profiles              */}
               {profile?.type === "artist" && (

@@ -845,8 +845,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (```text
-confirm(`Are you sure you want to delete "${album.name}"? This will also remove all photos in the album.`)) {
+                            if (confirm(`Are you sure you want to delete "${album.name}"? This will also remove all photos in the album.`)) {
                               deleteAlbumMutation.mutate(album.id);
                             }
                           }}

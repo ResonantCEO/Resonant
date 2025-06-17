@@ -202,7 +202,12 @@ export default function Sidebar() {
 
   const handleProfileSwitch = (profileId: number) => {
     if (profileId !== activeProfile?.id) {
-      activateProfileMutation.mutate(profileId);
+      activateProfileMutation.mutate(profileId, {
+        onSuccess: () => {
+          // Navigate to the profile page after successful profile switch
+          setLocation("/profile");
+        }
+      });
     }
   };
 

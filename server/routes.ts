@@ -991,7 +991,7 @@ export function registerRoutes(app: Express): Server {
       if (requesterProfile?.userId) {
         const accepterUser = await storage.getUser(req.user.id);
         const accepterName = `${accepterUser?.firstName} ${accepterUser?.lastName}`;
-        await notificationService.notifyFriendAccepted(requesterProfile.userId, req.user.id, accepterName, friendship.requesterId);
+        await notificationService.notifyFriendAccepted(requesterProfile.userId, req.user.id, accepterName);
       }
 
       res.json(friendship);

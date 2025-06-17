@@ -103,13 +103,8 @@ export class NotificationService {
         return false;
       }
       
-      // For friend accepted notifications, only show to the profile that made the original request
+      // For friend accepted notifications, show to all profile types
       if (notification.type === 'friend_accepted') {
-        const data = notification.data as any;
-        if (data?.senderProfileId) {
-          return data.senderProfileId === activeProfileId;
-        }
-        // Legacy support: if no senderProfileId, show to all profiles (but this shouldn't happen with new notifications)
         return true;
       }
       
@@ -193,16 +188,9 @@ export class NotificationService {
         return false;
       }
       
-      // For friend accepted notifications, only count for the profile that made the original request
+      // For friend accepted notifications, count for all profile types
       if (notification.type === 'friend_accepted') {
-        const data = notification.data as any;
-        if (data?.senderProfileId) {
-          const shouldInclude = data.senderProfileId === activeProfileId;
-          console.log(`Friend accepted notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} (sender profile: ${data.senderProfileId}, active: ${activeProfileId})`);
-          return shouldInclude;
-        }
-        // Legacy support: if no senderProfileId, count for all profiles
-        console.log(`Friend accepted notification ${notification.id}: included for all profiles (legacy)`);
+        console.log(`Friend accepted notification ${notification.id}: included for all profiles`);
         return true;
       }
       
@@ -421,14 +409,14 @@ export class NotificationService {
     });
   }
 
-  async notifyFriendAccepted(recipientId: number, senderId: number, senderName: string, senderProfileId?: number): Promise<void> {
+  async notifyFriendAccepted(recipientId: number, senderId: number, senderName: string): Promise<void> {
     await this.createNotification({
       recipientId,
       senderId,
       type: "friend_accepted",
       title: "Friend Request Accepted",
       message: `${senderName} accepted your friend request`,
-      data: { senderId, senderProfileId },
+      data: { senderId },
     });
   }
 

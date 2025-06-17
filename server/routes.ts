@@ -867,8 +867,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Get user's profiles by user ID (for navigation from notifications)
-  app.get('/api/users/:userId/profiles', async (req, res) => {
-    try {
+  app.get('/api/users/:userId/profiles', async (req, res) => {    try {
       const userId = parseInt(req.params.userId);
       const profiles = await storage.getProfilesByUserId(userId);
 
@@ -1559,7 +1558,7 @@ export function registerRoutes(app: Express): Server {
         ) - notificationCount; // Subtract general notifications to get only friend requests
 
         console.log(`Profile ${profile.id} (${profile.name}, ${profile.type}): ${notificationCount} notifications, ${friendRequestCount} friend requests`);
-        
+
         counts[profile.id] = {
           notifications: notificationCount,
           friendRequests: friendRequestCount,
@@ -1668,7 +1667,7 @@ export function registerRoutes(app: Express): Server {
 
   app.post('/api/profiles/:id/photos', isAuthenticated, (req: any, res, next) => {
     const profileId = parseInt(req.params.id);
-    
+
     upload.array('photos', 10)(req, res, async (err) => {
       try {
         if (err) {
@@ -1693,7 +1692,7 @@ export function registerRoutes(app: Express): Server {
           const file = files[i];
           const caption = req.body[`caption_${i}`] || '';
           const tags = req.body[`tags_${i}`] ? JSON.parse(req.body[`tags_${i}`]) : [];
-          
+
           photoData.push({
             profileId,
             imageUrl: `/uploads/${file.filename}`,
@@ -1714,7 +1713,7 @@ export function registerRoutes(app: Express): Server {
   app.delete('/api/photos/:id', isAuthenticated, async (req: any, res) => {
     try {
       const photoId = parseInt(req.params.id);
-      
+
       // Verify photo ownership through profile ownership
       const photo = await storage.getPhoto(photoId);
       if (!photo) {
@@ -1775,7 +1774,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const albumId = parseInt(req.params.id);
       const album = await storage.getAlbum(albumId);
-      
+
       if (!album) {
         return res.status(404).json({ message: "Album not found" });
       }
@@ -2017,6 +2016,278 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error updating notification settings:", error);
       res.status(500).json({ message: "Failed to update notification settings" });
+    }
+  });
+
+  // Update profile image
+  app.post("/api/profiles/:profileId/image", requireAuth, upload.single('profileImage'), async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.profileId);
+      const userId = req.session.userId!;
+
+      // Verify user has permission to update this profile
+      const hasPermission = await checkProfilePermission(userId, profileId, 'manage_profile');
+      if (!hasPermission) {
+        return res.status(403).json({ message: 'No permission to update this profile' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const imageUrl = `/uploads/${req.file.filename}`;
+
+      // Get the Profile Pictures album for this profile
+      const profilePicturesAlbum = await db
+        .select()
+        .from(albums)
+        .where(and(eq(albums.profileId, profileId), eq(albums.name, "Profile Pictures")))
+        .limit(1);
+
+      // Add photo to Profile Pictures album
+      if (profilePicturesAlbum.length > 0) {
+        await db.insert(photos).values({
+          profileId,
+          albumId: profilePicturesAlbum[0].id,
+          imageUrl,
+          caption: "Profile picture"
+        });
+      }
+
+      // Update profile with new image
+      const [updatedProfile] = await db
+        .update(profiles)
+        .set({ 
+          profileImageUrl: imageUrl,
+          updatedAt: new Date()
+        })
+        .where(eq(profiles.id, profileId))
+        .returning();
+
+      res.json(updatedProfile);
+    } catch (error: any) {
+      console.error('Error updating profile image:', error);
+      res.status(500).json({ message: error.message || 'Failed to update profile image' });
+    }
+  });
+
+  // Update profile background image
+  app.post("/api/profiles/:profileId/background", requireAuth, upload.single('backgroundImage'), async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.profileId);
+      const userId = req.session.userId!;
+
+      // Verify user has permission to update this profile
+      const hasPermission = await checkProfilePermission(userId, profileId, 'manage_profile');
+      if (!hasPermission) {
+        return res.status(403).json({ message: 'No permission to update this profile' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const imageUrl = `/uploads/${req.file.filename}`;
+
+      // Get the Background Pictures album for this profile
+      const backgroundPicturesAlbum = await db
+        .select()
+        .from(albums)
+        .where(and(eq(albums.profileId, profileId), eq(albums.name, "Background Pictures")))
+        .limit(1);
+
+      // Add photo to Background Pictures album
+      if (backgroundPicturesAlbum.length > 0) {
+        await db.insert(photos).values({
+          profileId,
+          albumId: backgroundPicturesAlbum[0].id,
+          imageUrl,
+          caption: "Background image"
+        });
+      }
+
+      // Update profile with new background image
+      const [updatedProfile] = await db
+        .update(profiles)
+        .set({ 
+          backgroundImageUrl: imageUrl,
+          updatedAt: new Date()
+        })
+        .where(eq(profiles.id, profileId))
+        .returning();
+
+      res.json(updatedProfile);
+    } catch (error: any) {
+      console.error('Error updating background image:', error);
+      res.status(500).json({ message: error.message || 'Failed to update background image' });
+    }
+  });
+
+  // Update profile cover image
+  app.post("/api/profiles/:profileId/cover", requireAuth, upload.single('coverImage'), async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.profileId);
+      const userId = req.session.userId!;
+
+      // Verify user has permission to update this profile
+      const hasPermission = await checkProfilePermission(userId, profileId, 'manage_profile');
+      if (!hasPermission) {
+        return res.status(403).json({ message: 'No permission to update this profile' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const imageUrl = `/uploads/${req.file.filename}`;
+
+      // Get the Cover Photos album for this profile
+      const coverPhotosAlbum = await db
+        .select()
+        .from(albums)
+        .where(and(eq(albums.profileId, profileId), eq(albums.name, "Cover Photos")))
+        .limit(1);
+
+      // Add photo to Cover Photos album
+      if (coverPhotosAlbum.length > 0) {
+        await db.insert(photos).values({
+          profileId,
+          albumId: coverPhotosAlbum[0].id,
+          imageUrl,
+          caption: "Cover photo"
+        });
+      }
+
+      // Update profile with new cover image
+      const [updatedProfile] = await db
+        .update(profiles)
+        .set({ 
+          coverImageUrl: imageUrl,
+          updatedAt: new Date()
+        })
+        .where(eq(profiles.id, profileId))
+        .returning();
+
+      res.json(updatedProfile);
+    } catch (error: any) {
+      console.error('Error updating cover image:', error);
+      res.status(500).json({ message: error.message || 'Failed to update cover image' });
+    }
+  });
+
+  // Upload photos
+  app.post("/api/profiles/:profileId/photos/upload", requireAuth, upload.array('photos', 10), async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.profileId);
+      const userId = req.session.userId!;
+
+      // Verify user has permission to upload to this profile
+      const hasPermission = await checkProfilePermission(userId, profileId, 'manage_posts');
+      if (!hasPermission) {
+        return res.status(403).json({ message: 'No permission to upload photos to this profile' });
+      }
+
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: 'No files uploaded' });
+      }
+
+      // Get default albums for this profile
+      const defaultAlbums = await db
+        .select()
+        .from(albums)
+        .where(eq(albums.profileId, profileId));
+
+      const profilePicturesAlbum = defaultAlbums.find(album => album.name === "Profile Pictures");
+      const coverPhotosAlbum = defaultAlbums.find(album => album.name === "Cover Photos");
+      const backgroundPicturesAlbum = defaultAlbums.find(album => album.name === "Background Pictures");
+
+      const photos = [];
+      for (const file of files) {
+        const caption = Array.isArray(req.body.caption) ? req.body.caption[files.indexOf(file)] : req.body.caption;
+        const tags = Array.isArray(req.body.tags) ? req.body.tags[files.indexOf(file)] : req.body.tags;
+        const photoType = Array.isArray(req.body.photoType) ? req.body.photoType[files.indexOf(file)] : req.body.photoType;
+
+        // Determine which album to assign based on photo type
+        let albumId = null;
+        if (photoType === 'profile' && profilePicturesAlbum) {
+          albumId = profilePicturesAlbum.id;
+        } else if (photoType === 'cover' && coverPhotosAlbum) {
+          albumId = coverPhotosAlbum.id;
+        } else if (photoType === 'background' && backgroundPicturesAlbum) {
+          albumId = backgroundPicturesAlbum.id;
+        }
+
+        const [photo] = await db.insert(photos).values({
+          profileId,
+          albumId,
+          imageUrl: `/uploads/${file.filename}`,
+          caption: caption || null,
+          tags: tags ? tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag) : []
+        }).returning();
+
+        photos.push(photo);
+      }
+
+      res.json(photos);
+    } catch (error: any) {
+      console.error('Error uploading photos:', error);
+      res.status(500).json({ message: error.message || 'Failed to upload photos' });
+    }
+  });
+
+  // Create new profile
+  app.post("/api/profiles", requireAuth, async (req, res) => {
+    try {
+      const data = insertProfileSchema.parse(req.body);
+      const userId = req.session.userId!;
+
+      // Set the userId and default to inactive initially
+      const profileData = {
+        ...data,
+        userId,
+        isActive: false
+      };
+
+      const [profile] = await db.insert(profiles).values(profileData).returning();
+
+      // If this is a shared profile (artist or venue), create owner membership
+      if (profile.type === 'artist' || profile.type === 'venue') {
+        await db.insert(profileMemberships).values({
+          profileId: profile.id,
+          userId,
+          role: 'owner',
+          permissions: ['manage_profile', 'manage_members', 'manage_posts', 'manage_events', 'manage_bookings', 'view_analytics', 'moderate_content'],
+          status: 'active'
+        });
+      }
+
+      // Create default albums for the new profile
+      const defaultAlbums = [
+        {
+          profileId: profile.id,
+          name: "Profile Pictures",
+          description: "Profile picture collection"
+        },
+        {
+          profileId: profile.id,
+          name: "Cover Photos",
+          description: "Cover photo collection"
+        },
+        {
+          profileId: profile.id,
+          name: "Background Pictures",
+          description: "Background image collection"
+        }
+      ];
+
+      await db.insert(albums).values(defaultAlbums);
+      console.log(`Created default albums for new profile: ${profile.name}`);
+
+      res.json(profile);
+    } catch (error: any) {
+      console.error('Error creating profile:', error);
+      res.status(400).json({ message: error.message || 'Failed to create profile' });
     }
   });
 

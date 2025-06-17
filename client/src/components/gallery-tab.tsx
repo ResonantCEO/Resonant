@@ -1,11 +1,10 @@
-
 import { useState, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Upload, X, Download, Trash2, Eye, Grid, List, Search, Filter, FolderPlus, Folder, ArrowLeft, Plus, Edit } from "lucide-react";
+import { Camera, Search, Filter, Grid, List, FolderPlus, Folder, Plus, X, Check, Trash2, Download, Eye, MoreVertical, ArrowLeft, User, Image as ImageIcon, Wallpaper } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -88,13 +87,13 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
         formData.append(`caption_${index}`, photosData.captions[index] || '');
         formData.append(`tags_${index}`, JSON.stringify(photosData.tags[index] || []));
       });
-      
+
       const response = await fetch(`/api/profiles/${profile.id}/photos`, {
         method: 'POST',
         credentials: 'include',
         body: formData,
       });
-      
+
       if (!response.ok) throw new Error('Failed to upload photos');
       return response.json();
     },
@@ -275,7 +274,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     const validFiles = files.filter(file => file.type.startsWith('image/'));
-    
+
     if (validFiles.length !== files.length) {
       toast({
         title: "Invalid files",
@@ -283,7 +282,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
         variant: "destructive",
       });
     }
-    
+
     setUploadFiles(validFiles);
     setUploadCaptions(new Array(validFiles.length).fill(''));
     setUploadTags(new Array(validFiles.length).fill([]));
@@ -592,14 +591,20 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                 const albumPhotoCount = photos.filter(p => p.albumId === album.id).length;
                 const coverPhoto = photos.find(p => p.id === album.coverPhotoId) || 
                                    photos.find(p => p.albumId === album.id);
-                
+
+                const isDefaultAlbum = ['Profile Pictures', 'Cover Photos', 'Background Pictures'].includes(album.name);
+
                 return (
                   <div
                     key={album.id}
-                    className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                    className={`group cursor-pointer rounded-lg shadow-sm hover:shadow-md transition-shadow ${
+                      isDefaultAlbum 
+                        ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' 
+                        : 'bg-white dark:bg-gray-800'
+                    }`}
                     onClick={() => handleSelectAlbum(album)}
                   >
-                    <div className="aspect-square bg-gray-100 dark:bg-gray-700 relative">
+                    <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-t-lg overflow-hidden relative">
                       {coverPhoto ? (
                         <img
                           src={coverPhoto.imageUrl}
@@ -608,40 +613,42 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Folder className="w-12 h-12 text-gray-400" />
+                          {isDefaultAlbum ? (
+                            album.name === 'Profile Pictures' ? (
+                              <User className="w-12 h-12 text-blue-400" />
+                            ) : album.name === 'Cover Photos' ? (
+                              <ImageIcon className="w-12 h-12 text-blue-400" />
+                            ) : (
+                              <Wallpaper className="w-12 h-12 text-blue-400" />
+                            )
+                          ) : (
+                            <Camera className="w-12 h-12 text-gray-400" />
+                          )}
                         </div>
                       )}
-                      <div className="absolute top-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
-                        {albumPhotoCount} {albumPhotoCount === 1 ? 'photo' : 'photos'}
-                      </div>
-                      {isOwn && (
-                        <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditAlbum(album);
-                            }}
-                            className="h-8 w-8 p-0 bg-black bg-opacity-75 hover:bg-opacity-100"
-                          >
-                            <Edit className="w-4 h-4 text-white" />
-                          </Button>
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200" />
+                      {isDefaultAlbum && (
+                        <div className="absolute top-2 right-2">
+                          <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                            Default
+                          </div>
                         </div>
                       )}
                     </div>
                     <div className="p-4">
-                      <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                      <h3 className={`font-medium text-sm mb-1 ${
+                        isDefaultAlbum ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
+                      }`}>
                         {album.name}
                       </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                        {albumPhotoCount} {albumPhotoCount === 1 ? 'photo' : 'photos'}
+                      </p>
                       {album.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                        <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
                           {album.description}
                         </p>
                       )}
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                        Created {new Date(album.createdAt).toLocaleDateString()}
-                      </p>
                     </div>
                   </div>
                 );
@@ -703,7 +710,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                       />
                     </div>
                   )}
-                  
+
                   <div 
                     className="cursor-pointer w-full h-full"
                     onClick={() => setSelectedPhoto(photo)}
@@ -717,7 +724,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                           : "w-16 h-16 object-cover rounded-lg"
                       }
                     />
-                    
+
                     {viewMode === 'grid' ? (
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
                         <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
@@ -794,19 +801,19 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                   </div>
                 </DialogTitle>
               </DialogHeader>
-              
+
               <div className="flex flex-col space-y-4 max-h-[calc(90vh-8rem)] overflow-auto">
                 <img
                   src={selectedPhoto.imageUrl}
                   alt={selectedPhoto.caption || 'Gallery photo'}
                   className="w-full max-h-96 object-contain rounded-lg"
                 />
-                
+
                 <div className="space-y-2">
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     Uploaded on {new Date(selectedPhoto.createdAt).toLocaleDateString()}
                   </p>
-                  
+
                   {selectedPhoto.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {selectedPhoto.tags.map(tag => (
@@ -832,7 +839,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
           <DialogHeader>
             <DialogTitle>Upload Photos</DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4 max-h-[calc(90vh-12rem)] overflow-auto">
             {uploadFiles.map((file, index) => (
               <div key={index} className="border rounded-lg p-4 space-y-3">
@@ -847,7 +854,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                       placeholder="Add a caption (optional)"
                       value={uploadCaptions[index] || ''}
                       onChange={(e) => handleCaptionChange(index, e.target.value)}
-                    />
+                                        />
                     <Input
                       placeholder="Add tags separated by commas (optional)"
                       value={uploadTags[index]?.join(', ') || ''}
@@ -872,7 +879,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
               </div>
             ))}
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
               Cancel

@@ -1542,15 +1542,29 @@ export function registerRoutes(app: Express): Server {
       console.log(`Calculating notification counts for user ${req.user.id} with profiles:`, userProfiles.map(p => ({ id: p.id, name: p.name, type: p.type })));
 
       for (const profile of userProfiles) {
-        const count = await notificationService.getUnreadCount(
+        // Get general notification count (excluding friend requests)
+        const notificationCount = await notificationService.getUnreadCount(
           req.user.id,
           profile.id,
           profile.type,
           true // Exclude friend requests from general notification counts
         );
 
-        console.log(`Profile ${profile.id} (${profile.name}, ${profile.type}): ${count} unread notifications`);
-        counts[profile.id] = count;
+        // Get friend request count specifically for this profile
+        const friendRequestCount = await notificationService.getUnreadCount(
+          req.user.id,
+          profile.id,
+          profile.type,
+          false // Include friend requests
+        ) - notificationCount; // Subtract general notifications to get only friend requests
+
+        console.log(`Profile ${profile.id} (${profile.name}, ${profile.type}): ${notificationCount} notifications, ${friendRequestCount} friend requests`);
+        
+        counts[profile.id] = {
+          notifications: notificationCount,
+          friendRequests: friendRequestCount,
+          total: notificationCount + friendRequestCount
+        };
       }
 
       console.log("Final counts object:", counts);

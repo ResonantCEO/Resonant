@@ -125,14 +125,21 @@ export default function Sidebar() {
     const stringKey = String(activeProfile.id);
     const numberKey = Number(activeProfile.id);
 
-    let count = 0;
+    let countData = null;
     if (counts.hasOwnProperty(stringKey)) {
-      count = counts[stringKey];
+      countData = counts[stringKey];
     } else if (counts.hasOwnProperty(numberKey)) {
-      count = counts[numberKey];
+      countData = counts[numberKey];
     }
 
-    return Number(count) || 0;
+    // Handle both old format (number) and new format (object)
+    if (typeof countData === 'number') {
+      return countData;
+    } else if (countData && typeof countData === 'object') {
+      return (countData.notifications || 0);
+    }
+
+    return 0;
   };
 
   const unreadNotificationCount = getActiveProfileNotificationCount();
@@ -425,16 +432,30 @@ export default function Sidebar() {
               >
                 <Users className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
                 {!isCollapsed && "Friends"}
-                {friendRequests.length > 0 && !isCollapsed && (
-                  <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                    {friendRequests.length > 99 ? '99+' : friendRequests.length}
-                  </Badge>
-                )}
-                {isCollapsed && friendRequests.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
-                    {friendRequests.length > 99 ? '99+' : friendRequests.length}
-                  </span>
-                )}
+                {(() => {
+                  const counts = profileNotificationCounts || {};
+                  const profileId = activeProfile?.id;
+                  const countData = profileId && (counts[String(profileId)] || counts[Number(profileId)]);
+                  const friendRequestCount = typeof countData === 'object' ? (countData.friendRequests || 0) : 0;
+                  
+                  return friendRequestCount > 0 && !isCollapsed && (
+                    <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
+                      {friendRequestCount > 99 ? '99+' : friendRequestCount}
+                    </Badge>
+                  );
+                })()}
+                {(() => {
+                  const counts = profileNotificationCounts || {};
+                  const profileId = activeProfile?.id;
+                  const countData = profileId && (counts[String(profileId)] || counts[Number(profileId)]);
+                  const friendRequestCount = typeof countData === 'object' ? (countData.friendRequests || 0) : 0;
+                  
+                  return isCollapsed && friendRequestCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
+                      {friendRequestCount > 99 ? '99+' : friendRequestCount}
+                    </span>
+                  );
+                })()}
               </Button>
           </li>
 

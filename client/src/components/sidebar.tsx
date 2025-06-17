@@ -229,14 +229,22 @@ export default function Sidebar() {
       const stringKey = String(profile.id);
       const numberKey = Number(profile.id);
 
-      let count = 0;
+      let countData = null;
       if (counts.hasOwnProperty(stringKey)) {
-        count = counts[stringKey];
+        countData = counts[stringKey];
       } else if (counts.hasOwnProperty(numberKey)) {
-        count = counts[numberKey];
+        countData = counts[numberKey];
       }
 
-      const finalCount = Number(count) || 0;
+      // Handle both old format (number) and new format (object)
+      let finalCount = 0;
+      if (typeof countData === 'number') {
+        finalCount = countData;
+      } else if (countData && typeof countData === 'object') {
+        // Use total count which includes both notifications and friend requests
+        finalCount = countData.total || 0;
+      }
+
       console.log(`Final count for profile ${profile.id} (${profile.name}):`, finalCount);
       return finalCount;
   };

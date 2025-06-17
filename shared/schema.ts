@@ -164,6 +164,31 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   comments: many(comments),
   memberships: many(profileMemberships),
   invitations: many(profileInvitations),
+  albums: many(albums),
+  photos: many(photos),
+}));
+
+export const albumsRelations = relations(albums, ({ one, many }) => ({
+  profile: one(profiles, {
+    fields: [albums.profileId],
+    references: [profiles.id],
+  }),
+  photos: many(photos),
+  coverPhoto: one(photos, {
+    fields: [albums.coverPhotoId],
+    references: [photos.id],
+  }),
+}));
+
+export const photosRelations = relations(photos, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [photos.profileId],
+    references: [profiles.id],
+  }),
+  album: one(albums, {
+    fields: [photos.albumId],
+    references: [albums.id],
+  }),
 }));
 
 export const profileMembershipsRelations = relations(profileMemberships, ({ one }) => ({
@@ -431,14 +456,27 @@ export const bookingRequests = pgTable("booking_requests", {
 export type BookingRequest = InferSelectModel<typeof bookingRequests>;
 export type InsertBookingRequest = InferInsertModel<typeof bookingRequests>;
 
+export const albums = pgTable("albums", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").references(() => profiles.id).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  coverPhotoId: integer("cover_photo_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const photos = pgTable("photos", {
   id: serial("id").primaryKey(),
   profileId: integer("profile_id").references(() => profiles.id).notNull(),
+  albumId: integer("album_id").references(() => albums.id),
   imageUrl: varchar("image_url", { length: 500 }).notNull(),
   caption: text("caption"),
   tags: text("tags").array().default([]).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export type Album = InferSelectModel<typeof albums>;
+export type InsertAlbum = InferInsertModel<typeof albums>;
 export type Photo = InferSelectModel<typeof photos>;
 export type InsertPhoto = InferInsertModel<typeof photos>;

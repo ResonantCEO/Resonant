@@ -1,4 +1,4 @@
-import { eq, and, or, desc, asc, sql, like, ilike, ne, isNull, isNotNull } from "drizzle-orm";
+import { eq, and, or, desc, asc, sql, like, ilike, ne, isNull, isNotNull, inArray } from "drizzle-orm";
 import { db } from "./db";
 import {
   users,
@@ -13,6 +13,7 @@ import {
   userNotificationSettings,
   bookingRequests,
   photos,
+  albums,
   type User,
   type Profile,
   type Post,
@@ -27,6 +28,8 @@ import {
   type InsertProfileInvitation,
   type InsertNotification,
   type InsertUserNotificationSettings,
+  type Photo,
+  type Album
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -924,33 +927,175 @@ export class Storage {
   }
 
   // Photo operations
-  async getProfilePhotos(profileId: number): Promise<any[]> {
-    return await db
-      .select()
-      .from(photos)
-      .where(eq(photos.profileId, profileId))
-      .orderBy(desc(photos.createdAt));
+  async getProfilePhotos(profileId: number): Promise<Photo[]> {
+    try {
+      const result = await db
+        .select()
+        .from(photos)
+        .where(eq(photos.profileId, profileId))
+        .orderBy(desc(photos.createdAt));
+
+      return result;
+    } catch (error) {
+      console.error("Error fetching profile photos:", error);
+      throw error;
+    }
   }
 
-  async createProfilePhotos(photoData: any[]): Promise<any[]> {
-    return await db
-      .insert(photos)
-      .values(photoData)
-      .returning();
+  async createProfilePhotos(photosData: Omit<Photo, 'id' | 'createdAt'>[]): Promise<Photo[]> {
+    try {
+      const result = await db
+        .insert(photos)
+        .values(photosData)
+        .returning();
+
+      return result;
+    } catch (error) {
+      console.error("Error creating photos:", error);
+      throw error;
+    }
   }
 
-  async getPhoto(photoId: number): Promise<any> {
-    const [photo] = await db
-      .select()
-      .from(photos)
-      .where(eq(photos.id, photoId));
-    return photo;
+  async getPhoto(photoId: number): Promise<Photo | null> {
+    try {
+      const result = await db
+        .select()
+        .from(photos)
+        .where(eq(photos.id, photoId))
+        .limit(1);
+
+      return result[0] || null;
+    } catch (error) {
+      console.error("Error fetching photo:", error);
+      throw error;
+    }
   }
 
   async deletePhoto(photoId: number): Promise<void> {
-    await db
-      .delete(photos)
-      .where(eq(photos.id, photoId));
+    try {
+      await db
+        .delete(photos)
+        .where(eq(photos.id, photoId));
+    } catch (error) {
+      console.error("Error deleting photo:", error);
+      throw error;
+    }
+  }
+
+  // Album methods
+  async getProfileAlbums(profileId: number): Promise<Album[]> {
+    try {
+      const result = await db
+        .select()
+        .from(albums)
+        .where(eq(albums.profileId, profileId))
+        .orderBy(desc(albums.createdAt));
+
+      return result;
+    } catch (error) {
+      console.error("Error fetching profile albums:", error);
+      throw error;
+    }
+  }
+
+  async createAlbum(albumData: Omit<Album, 'id' | 'createdAt' | 'updatedAt'>): Promise<Album> {
+    try {
+      const result = await db
+        .insert(albums)
+        .values(albumData)
+        .returning();
+
+      return result[0];
+    } catch (error) {
+      console.error("Error creating album:", error);
+      throw error;
+    }
+  }
+
+  async getAlbum(albumId: number): Promise<Album | null> {
+    try {
+      const result = await db
+        .select()
+        .from(albums)
+        .where(eq(albums.id, albumId))
+        .limit(1);
+
+      return result[0] || null;
+    } catch (error) {
+      console.error("Error fetching album:", error);
+      throw error;
+    }
+  <replit_final_file>
+  async updateAlbum(albumId: number, updates: Partial<Omit<Album, 'id' | 'profileId' | 'createdAt'>>): Promise<Album> {
+    try {
+      const result = await db
+        .update(albums)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(albums.id, albumId))
+        .returning();
+
+      return result[0];
+    } catch (error) {
+      console.error("Error updating album:", error);
+      throw error;
+    }
+  }
+
+  async deleteAlbum(albumId: number): Promise<void> {
+    try {
+      // First, remove album association from photos
+      await db
+        .update(photos)
+        .set({ albumId: null })
+        .where(eq(photos.albumId, albumId));
+
+      // Then delete the album
+      await db
+        .delete(albums)
+        .where(eq(albums.id, albumId));
+    } catch (error) {
+      console.error("Error deleting album:", error);
+      throw error;
+    }
+  }
+
+  async getAlbumPhotos(albumId: number): Promise<Photo[]> {
+    try {
+      const result = await db
+        .select()
+        .from(photos)
+        .where(eq(photos.albumId, albumId))
+        .orderBy(desc(photos.createdAt));
+
+      return result;
+    } catch (error) {
+      console.error("Error fetching album photos:", error);
+      throw error;
+    }
+  }
+
+  async addPhotosToAlbum(photoIds: number[], albumId: number): Promise<void> {
+    try {
+      await db
+        .update(photos)
+        .set({ albumId })
+        .where(inArray(photos.id, photoIds));
+    } catch (error) {
+      console.error("Error adding photos to album:", error);
+      throw error;
+    }
+  }
+
+  async removePhotosFromAlbum(photoIds: number[]): Promise<void> {
+    try {
+      await db
+        .update(photos)
+        .set({ albumId: null })
+        .where(inArray(photos.id, photoIds));
+    } catch (error) {
+      console.error("Error removing photos from album:", error);
+      throw error;
+    }
   }
 }
 

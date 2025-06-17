@@ -1734,6 +1734,170 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Album routes
+  app.get('/api/profiles/:id/albums', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const albums = await storage.getProfileAlbums(profileId);
+      res.json(albums);
+    } catch (error) {
+      console.error("Error fetching profile albums:", error);
+      res.status(500).json({ message: "Failed to fetch albums" });
+    }
+  });
+
+  app.post('/api/profiles/:id/albums', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const { name, description } = req.body;
+
+      // Verify profile ownership
+      const profile = await storage.getProfile(profileId);
+      if (!profile || profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const album = await storage.createAlbum({
+        profileId,
+        name,
+        description,
+        coverPhotoId: null,
+      });
+
+      res.json(album);
+    } catch (error) {
+      console.error("Error creating album:", error);
+      res.status(500).json({ message: "Failed to create album" });
+    }
+  });
+
+  app.get('/api/albums/:id', async (req, res) => {
+    try {
+      const albumId = parseInt(req.params.id);
+      const album = await storage.getAlbum(albumId);
+      
+      if (!album) {
+        return res.status(404).json({ message: "Album not found" });
+      }
+
+      res.json(album);
+    } catch (error) {
+      console.error("Error fetching album:", error);
+      res.status(500).json({ message: "Failed to fetch album" });
+    }
+  });
+
+  app.put('/api/albums/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const albumId = parseInt(req.params.id);
+      const { name, description, coverPhotoId } = req.body;
+
+      // Verify album ownership
+      const album = await storage.getAlbum(albumId);
+      if (!album) {
+        return res.status(404).json({ message: "Album not found" });
+      }
+
+      const profile = await storage.getProfile(album.profileId);
+      if (!profile || profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const updatedAlbum = await storage.updateAlbum(albumId, {
+        name,
+        description,
+        coverPhotoId,
+      });
+
+      res.json(updatedAlbum);
+    } catch (error) {
+      console.error("Error updating album:", error);
+      res.status(500).json({ message: "Failed to update album" });
+    }
+  });
+
+  app.delete('/api/albums/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const albumId = parseInt(req.params.id);
+
+      // Verify album ownership
+      const album = await storage.getAlbum(albumId);
+      if (!album) {
+        return res.status(404).json({ message: "Album not found" });
+      }
+
+      const profile = await storage.getProfile(album.profileId);
+      if (!profile || profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      await storage.deleteAlbum(albumId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting album:", error);
+      res.status(500).json({ message: "Failed to delete album" });
+    }
+  });
+
+  app.get('/api/albums/:id/photos', async (req, res) => {
+    try {
+      const albumId = parseInt(req.params.id);
+      const photos = await storage.getAlbumPhotos(albumId);
+      res.json(photos);
+    } catch (error) {
+      console.error("Error fetching album photos:", error);
+      res.status(500).json({ message: "Failed to fetch album photos" });
+    }
+  });
+
+  app.post('/api/albums/:id/photos', isAuthenticated, async (req: any, res) => {
+    try {
+      const albumId = parseInt(req.params.id);
+      const { photoIds } = req.body;
+
+      // Verify album ownership
+      const album = await storage.getAlbum(albumId);
+      if (!album) {
+        return res.status(404).json({ message: "Album not found" });
+      }
+
+      const profile = await storage.getProfile(album.profileId);
+      if (!profile || profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      await storage.addPhotosToAlbum(photoIds, albumId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error adding photos to album:", error);
+      res.status(500).json({ message: "Failed to add photos to album" });
+    }
+  });
+
+  app.delete('/api/albums/:id/photos', isAuthenticated, async (req: any, res) => {
+    try {
+      const albumId = parseInt(req.params.id);
+      const { photoIds } = req.body;
+
+      // Verify album ownership
+      const album = await storage.getAlbum(albumId);
+      if (!album) {
+        return res.status(404).json({ message: "Album not found" });
+      }
+
+      const profile = await storage.getProfile(album.profileId);
+      if (!profile || profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      await storage.removePhotosFromAlbum(photoIds);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing photos from album:", error);
+      res.status(500).json({ message: "Failed to remove photos from album" });
+    }
+  });
+
   // Booking request routes
   app.post('/api/booking-requests', isAuthenticated, async (req: any, res) => {
     try {

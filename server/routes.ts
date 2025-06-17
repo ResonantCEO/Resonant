@@ -1768,26 +1768,53 @@ export function registerRoutes(app: Express): Server {
     });
   });
 
-  app.delete('/api/photos/:id', isAuthenticated, async (req: any, res) => {
+  // Update photo
+  app.put("/api/photos/:photoId", requireAuth, async (req, res) => {
     try {
-      const photoId = parseInt(req.params.id);
+      const photoId = parseInt(req.params.photoId);
+      const { caption } = req.body;
 
-      // Verify photo ownership through profile ownership
       const photo = await storage.getPhoto(photoId);
+
       if (!photo) {
-        return res.status(404).json({ message: "Photo not found" });
+        return res.status(404).json({ error: "Photo not found" });
       }
 
+      // Check if user owns the photo's profile
       const profile = await storage.getProfile(photo.profileId);
-      if (!profile || profile.userId !== req.user.id) {
-        return res.status(403).json({ message: "Unauthorized" });
+      if (!profile || profile.userId !== req.user!.id) {
+        return res.status(403).json({ error: "Not authorized to update this photo" });
+      }
+
+      const updatedPhoto = await storage.updatePhoto(photoId, { caption });
+      res.json(updatedPhoto);
+    } catch (error) {
+      console.error("Error updating photo:", error);
+      res.status(500).json({ error: "Failed to update photo" });
+    }
+  });
+
+  // Delete photo
+  app.delete("/api/photos/:photoId", requireAuth, async (req, res) => {
+    try {
+      const photoId = parseInt(req.params.photoId);
+      const photo = await storage.getPhoto(photoId);
+
+      if (!photo) {
+        return res.status(404).json({ error: "Photo not found" });
+      }
+
+      // Check if user owns the photo's profile
+      const profile = await storage.getProfile(photo.profileId);
+      if (!profile || profile.userId !== req.user!.id) {
+        return res.status(403).json({ error: "Not authorized to delete this photo" });
       }
 
       await storage.deletePhoto(photoId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting photo:", error);
-      res.status(500).json({ message: "Failed to delete photo" });
+      res.status(500).json({ error: "Failed to delete photo" });
     }
   });
 

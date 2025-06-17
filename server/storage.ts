@@ -971,6 +971,21 @@ export class Storage {
     }
   }
 
+  async updatePhoto(photoId: number, updates: Partial<Omit<Photo, 'id' | 'profileId' | 'createdAt'>>): Promise<Photo> {
+    try {
+      const result = await db
+        .update(photos)
+        .set(updates)
+        .where(eq(photos.id, photoId))
+        .returning();
+
+      return result[0];
+    } catch (error) {
+      console.error("Error updating photo:", error);
+      throw error;
+    }
+  }
+
   async deletePhoto(photoId: number): Promise<void> {
     try {
       await db

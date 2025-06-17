@@ -476,7 +476,7 @@ export default function Profile() {
           {/* Posts Tab - only for non-artist profiles */}
           {activeTab === "posts" && profile?.type !== "artist" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Bio and Basic Friends Widget */}
+              {/* Left Column - Bio Only */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Bio Section */}
                 {profile?.bio && (
@@ -485,26 +485,6 @@ export default function Profile() {
                     <p className="text-neutral-700 dark:text-gray-300 leading-relaxed">{profile.bio}</p>
                   </div>
                 )}
-
-                {/* Basic Friends Widget (without friend requests) */}
-                <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30 rounded-xl shadow-lg">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">Friends</h3>
-                      <Button 
-                        variant="link" 
-                        size="sm" 
-                        className="text-blue-500 p-0"
-                        onClick={() => setActiveTab("friends")}
-                      >
-                        See all
-                      </Button>
-                    </div>
-                    <p className="text-center text-neutral-600 py-4">
-                      {isOwn ? "View your friends on the Friends tab" : "No friends to display"}
-                    </p>
-                  </div>
-                </div>
               </div>
 
               {/* Right Column - Posts Feed */}

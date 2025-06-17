@@ -4,7 +4,7 @@ import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Search, Filter, Grid, List, FolderPlus, Folder, Plus, X, Check, Trash2, Download, Eye, MoreVertical, ArrowLeft, User, Image as ImageIcon, Wallpaper } from "lucide-react";
+import { Camera, Search, Filter, Grid, List, FolderPlus, Folder, Plus, X, Check, Trash2, Download, Eye, MoreVertical, ArrowLeft, User, Image as ImageIcon, Wallpaper, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";

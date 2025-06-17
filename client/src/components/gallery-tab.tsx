@@ -1945,76 +1945,32 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                         <div className="flex items-center gap-2">
                           {isOwn && (
                             <Checkbox
-                              checked={selectedPhotoIds.includes(selectedPhoto.id)}
-                              onCheckedChange={() => togglePhotoSelection(selectedPhoto.id)}
+                              checked={selectedPhotoIds.includes(photo.id)}
+                              onCheckedChange={() => togglePhotoSelection(photo.id)}
                             />
                           )}
-                          
-                           {isOwn ? (
-                              <Input
-                                  placeholder="Add a caption"
-                                  value={selectedPhoto.caption || ''}
-                                  onChange={(e) => {
-                                      const newCaption = e.target.value;
-                                      setSelectedPhoto(prev => ({ ...prev, caption: newCaption }));
-                                  }}
-                                  onBlur={async (e) => {
-                                      const newCaption = e.target.value;
-                                      // Save the caption to the server
-                                      try {
-                                          const response = await fetch(`/api/photos/${selectedPhoto.id}`, {
-                                              method: 'PUT',
-                                              headers: {
-                                                  'Content-Type': 'application/json'
-                                              },
-                                              body: JSON.stringify({ caption: newCaption })
-                                          });
-                                          if (!response.ok) {
-                                              throw new Error('Failed to update caption');
-                                          }
-                                          // Invalidate the query to refetch the updated data
-                                          queryClient.invalidateQueries([`/api/profiles/${profile?.id}/photos`]);
-                                          toast({
-                                              title: "Caption updated",
-                                              description: "The photo caption has been updated.",
-                                          });
-                                      } catch (error: any) {
-                                          toast({
-                                              title: "Update failed",
-                                              description: error.message || "Failed to update caption",
-                                              variant: "destructive",
-                                          });
-                                      }
-                                  }}
-                                  className="mt-1 bg-transparent border-none p-0 h-auto text-gray-900 dark:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 focus:bg-gray-100/50 dark:focus:bg-gray-800/50"
-                              />
-                          ) : (
-                              <p className="font-medium text-gray-900 dark:text-white truncate">
-                                  {selectedPhoto.caption || new Date(selectedPhoto.createdAt).toLocaleDateString()}
-                              </p>
-                          )}
-                          
-                          
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Uploaded on {new Date(selectedPhoto.createdAt).toLocaleDateString()}
+                          <p className="font-medium text-gray-900 dark:text-white truncate">
+                            {photo.caption || new Date(photo.createdAt).toLocaleDateString()}
                           </p>
-                          
-                          {selectedPhoto.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {selectedPhoto.tags.slice(0, 3).map(tag => (
-                                <span
-                                  key={tag}
-                                  className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                              {selectedPhoto.tags.length > 3 && (
-                                <span className="text-xs text-gray-500">+{selectedPhoto.tags.length - 3}</span>
-                              )}
-                            </div>
-                          )}
                         </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Uploaded on {new Date(photo.createdAt).toLocaleDateString()}
+                        </p>
+                        {photo.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {photo.tags.slice(0, 3).map(tag => (
+                              <span
+                                key={tag}
+                                className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {photo.tags.length > 3 && (
+                              <span className="text-xs text-gray-500">+{photo.tags.length - 3}</span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -2027,17 +1983,63 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
 
       {/* Photo Detail Modal */}
       <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/20 dark:border-gray-700/30 shadow-lg rounded-lg">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-white/10 dark:bg-gray-900/10 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 shadow-2xl rounded-2xl">
           {selectedPhoto && (
             <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center justify-between">
-                  <span>{selectedPhoto.caption || new Date(selectedPhoto.createdAt).toLocaleDateString()}</span>
-                  <div className="flex items-center gap-2">
+              <DialogHeader className="border-b border-white/20 dark:border-gray-700/30 pb-4">
+                <DialogTitle className="flex items-center justify-between text-gray-900 dark:text-white">
+                  <div className="flex-1">
+                    {isOwn ? (
+                      <Input
+                        placeholder="Add a caption..."
+                        value={selectedPhoto.caption || ''}
+                        onChange={(e) => {
+                          setSelectedPhoto(prev => prev ? { ...prev, caption: e.target.value } : null);
+                        }}
+                        onBlur={async (e) => {
+                          const newCaption = e.target.value;
+                          try {
+                            const response = await fetch(`/api/photos/${selectedPhoto.id}`, {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json'
+                              },
+                              credentials: 'include',
+                              body: JSON.stringify({ caption: newCaption })
+                            });
+                            if (!response.ok) {
+                              throw new Error('Failed to update caption');
+                            }
+                            queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile?.id}/photos`] });
+                            if (selectedAlbumId) {
+                              queryClient.invalidateQueries({ queryKey: [`/api/albums/${selectedAlbumId}/photos`] });
+                            }
+                            toast({
+                              title: "Caption updated",
+                              description: "The photo caption has been updated.",
+                            });
+                          } catch (error: any) {
+                            toast({
+                              title: "Update failed",
+                              description: error.message || "Failed to update caption",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                        className="text-lg font-semibold bg-white/20 dark:bg-gray-800/20 border border-white/30 dark:border-gray-600/30 backdrop-blur-sm rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+                      />
+                    ) : (
+                      <span className="text-lg font-semibold">
+                        {selectedPhoto.caption || new Date(selectedPhoto.createdAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => window.open(selectedPhoto.imageUrl, '_blank')}
+                      className="bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm border border-white/30 dark:border-gray-600/30 hover:bg-white/30 dark:hover:bg-gray-700/30 text-gray-900 dark:text-white"
                     >
                       <Download className="w-4 h-4" />
                     </Button>
@@ -2047,6 +2049,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                         size="sm"
                         onClick={() => deletePhotoMutation.mutate(selectedPhoto.id)}
                         disabled={deletePhotoMutation.isPending}
+                        className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 hover:bg-red-500/30 text-red-700 dark:text-red-300"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -2055,28 +2058,34 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="flex flex-col space-y-4 max-h-[calc(90vh-8rem)] overflow-auto">
-                <img
-                  src={selectedPhoto.imageUrl}
-                  alt={selectedPhoto.caption || 'Gallery photo'}
-                  className="w-full max-h-96 object-contain rounded-lg"
-                />
+              <div className="flex flex-col space-y-6 max-h-[calc(90vh-10rem)] overflow-auto p-1">
+                <div className="relative rounded-xl overflow-hidden border border-white/20 dark:border-gray-700/20">
+                  <img
+                    src={selectedPhoto.imageUrl}
+                    alt={selectedPhoto.caption || 'Gallery photo'}
+                    className="w-full max-h-96 object-contain bg-black/10 dark:bg-white/5"
+                  />
+                </div>
 
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Uploaded on {new Date(selectedPhoto.createdAt).toLocaleDateString()}
+                <div className="space-y-4 bg-white/10 dark:bg-gray-800/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-700/20">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                    <span className="font-medium">Uploaded:</span>
+                    {new Date(selectedPhoto.createdAt).toLocaleDateString()}
                   </p>
 
                   {selectedPhoto.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {selectedPhoto.tags.map(tag => (
-                        <span
-                          key={tag}
-                          className="text-sm bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Tags:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedPhoto.tags.map(tag => (
+                          <span
+                            key={tag}
+                            className="text-sm bg-blue-500/20 border border-blue-400/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full backdrop-blur-sm"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

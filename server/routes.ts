@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships } from "@shared/schema";
 import { db } from "./db";
-import { eq, sql } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";

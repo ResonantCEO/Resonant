@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Check, Trash2, Heart, UserMinus, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Bell, Check, Trash2, Heart, UserMinus, ExternalLink, Reply, Send } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface NotificationsPanelProps {
   showAsCard?: boolean;
@@ -30,6 +32,8 @@ async function apiRequest(method: string, url: string, body?: any) {
 export default function NotificationsPanel({ showAsCard = true }: NotificationsPanelProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
 
   // Fetch notifications with real-time polling
   const { data: notifications = [], isLoading } = useQuery({
@@ -187,6 +191,28 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     },
   });
 
+  // Reply to photo comment mutation
+  const replyToCommentMutation = useMutation({
+    mutationFn: async ({ photoId, content }: { photoId: number; content: string }) => {
+      return await apiRequest("POST", `/api/photos/${photoId}/comments`, { content });
+    },
+    onSuccess: () => {
+      setReplyingTo(null);
+      setReplyText("");
+      toast({
+        title: "Reply sent",
+        description: "Your reply has been added to the photo",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reply",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleMarkAsRead = (notificationId: number) => {
     markAsReadMutation.mutate(notificationId);
   };
@@ -205,6 +231,26 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   const handleRejectFriendRequest = (friendshipId: number) => {
     rejectFriendRequestMutation.mutate(friendshipId);
+  };
+
+  const handleNotificationClick = (notification: any) => {
+    // Mark as read when clicked if not already read
+    if (!notification.read) {
+      handleMarkAsRead(notification.id);
+    }
+  };
+
+  const handleReplyToComment = (photoId: number) => {
+    if (replyText.trim()) {
+      replyToCommentMutation.mutate({ photoId, content: replyText.trim() });
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent, photoId: number) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleReplyToComment(photoId);
+    }
   };
 
   const handleViewProfile = async (senderId: number) => {
@@ -248,11 +294,12 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   const NotificationItem = ({ notification }: { notification: any }) => (
     <div
-      className={`p-4 border rounded-lg transition-colors ${
+      className={`p-4 border rounded-lg transition-colors cursor-pointer ${
         notification.read 
           ? "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700" 
           : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
       }`}
+      onClick={() => handleNotificationClick(notification)}
     >
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
@@ -300,22 +347,70 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
           {/* Photo comment specific content */}
           {notification.type === 'photo_comment' && notification.data && (
-            <div className="mt-2 flex items-start space-x-2">
-              {notification.data.photoUrl && (
-                <img
-                  src={notification.data.photoUrl}
-                  alt="Photo thumbnail"
-                  className="w-12 h-12 rounded object-cover flex-shrink-0"
-                />
-              )}
-              {notification.data.commentContent && (
-                <div className="flex-grow min-w-0">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Comment:</p>
-                  <p className="text-sm bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200 break-words">
-                    "{notification.data.commentContent}"
-                  </p>
-                </div>
-              )}
+            <div className="mt-2">
+              <div className="flex items-start space-x-2">
+                {notification.data.photoUrl && (
+                  <img
+                    src={notification.data.photoUrl}
+                    alt="Photo thumbnail"
+                    className="w-12 h-12 rounded object-cover flex-shrink-0"
+                  />
+                )}
+                {notification.data.commentContent && (
+                  <div className="flex-grow min-w-0">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Comment:</p>
+                    <p className="text-sm bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200 break-words">
+                      "{notification.data.commentContent}"
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Reply section */}
+              <div className="mt-3">
+                {replyingTo === notification.id ? (
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Write a reply..."
+                      className="flex-grow text-sm"
+                      onKeyPress={(e) => handleKeyPress(e, notification.data.photoId)}
+                      autoFocus
+                    />
+                    <Button
+                      size="sm"
+                      onClick={() => handleReplyToComment(notification.data.photoId)}
+                      disabled={!replyText.trim() || replyToCommentMutation.isPending}
+                    >
+                      <Send className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setReplyingTo(null);
+                        setReplyText("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setReplyingTo(notification.id);
+                    }}
+                    className="flex items-center"
+                  >
+                    <Reply className="w-3 h-3 mr-1" />
+                    Reply
+                  </Button>
+                )}
+              </div>
             </div>
           )}
 
@@ -324,7 +419,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
             <div className="flex space-x-2 mt-3">
               <Button
                 size="sm"
-                onClick={() => handleAcceptFriendRequest(notification.data?.friendshipId)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAcceptFriendRequest(notification.data?.friendshipId);
+                }}
                 disabled={acceptFriendRequestMutation.isPending || rejectFriendRequestMutation.isPending}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
@@ -334,7 +432,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleRejectFriendRequest(notification.data?.friendshipId)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRejectFriendRequest(notification.data?.friendshipId);
+                }}
                 disabled={acceptFriendRequestMutation.isPending || rejectFriendRequestMutation.isPending}
               >
                 <UserMinus className="w-3 h-3 mr-1" />
@@ -349,7 +450,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleViewProfile(notification.sender.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewProfile(notification.sender.id);
+                }}
                 className="flex items-center"
               >
                 <ExternalLink className="w-3 h-3 mr-1" />
@@ -364,7 +468,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleViewProfile(notification.sender.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewProfile(notification.sender.id);
+                }}
                 className="flex items-center"
               >
                 <ExternalLink className="w-3 h-3 mr-1" />
@@ -383,7 +490,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => handleMarkAsRead(notification.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMarkAsRead(notification.id);
+                  }}
                   disabled={markAsReadMutation.isPending}
                 >
                   <Check className="w-3 h-3" />
@@ -393,7 +503,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => handleDelete(notification.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(notification.id);
+                }}
                 disabled={deleteNotificationMutation.isPending}
               >
                 <Trash2 className="w-3 h-3" />

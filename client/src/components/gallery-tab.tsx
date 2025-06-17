@@ -627,13 +627,6 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200" />
-                      {isDefaultAlbum && (
-                        <div className="absolute top-2 right-2">
-                          <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                            Default
-                          </div>
-                        </div>
-                      )}
                     </div>
                     <div className="p-4">
                       <h3 className={`font-medium text-sm mb-1 ${

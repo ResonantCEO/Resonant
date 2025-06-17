@@ -62,6 +62,7 @@ export default function Sidebar() {
 
   const { data: friendRequests = [] } = useQuery({
     queryKey: ["/api/friend-requests"],
+    enabled: !!user,
   });
 
   // Fetch profile-specific notification counts
@@ -431,7 +432,7 @@ export default function Sidebar() {
           <li>
             <Button
                 variant="ghost"
-                className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
+                className={`${isCollapsed ? 'w-full justify-center p-2 relative' : 'w-full justify-start'} ${
                   isActivePath("/friends")
                     ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium"
                     : "text-neutral-600 hover:bg-neutral-100"
@@ -441,26 +442,22 @@ export default function Sidebar() {
                 <Users className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
                 {!isCollapsed && "Friends"}
                 {(() => {
-                  const counts = profileNotificationCounts || {};
-                  const profileId = activeProfile?.id;
-                  const countData = profileId && (counts[String(profileId)] || counts[Number(profileId)]);
-                  const friendRequestCount = typeof countData === 'object' ? (countData.friendRequests || 0) : 0;
+                  // Only show badge if there are actual friend requests in the friendRequests query
+                  const actualFriendRequestCount = friendRequests?.length || 0;
                   
-                  return friendRequestCount > 0 && !isCollapsed && (
+                  return actualFriendRequestCount > 0 && !isCollapsed && (
                     <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                      {friendRequestCount > 99 ? '99+' : friendRequestCount}
+                      {actualFriendRequestCount > 99 ? '99+' : actualFriendRequestCount}
                     </Badge>
                   );
                 })()}
                 {(() => {
-                  const counts = profileNotificationCounts || {};
-                  const profileId = activeProfile?.id;
-                  const countData = profileId && (counts[String(profileId)] || counts[Number(profileId)]);
-                  const friendRequestCount = typeof countData === 'object' ? (countData.friendRequests || 0) : 0;
+                  // Only show badge if there are actual friend requests in the friendRequests query
+                  const actualFriendRequestCount = friendRequests?.length || 0;
                   
-                  return isCollapsed && friendRequestCount > 0 && (
+                  return isCollapsed && actualFriendRequestCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
-                      {friendRequestCount > 99 ? '99+' : friendRequestCount}
+                      {actualFriendRequestCount > 99 ? '99+' : actualFriendRequestCount}
                     </span>
                   );
                 })()}

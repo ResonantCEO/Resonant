@@ -131,19 +131,19 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
   // Filter friends by type and search query
   const filterFriends = (friendsList: any[] | undefined, type?: string) => {
     if (!friendsList || !Array.isArray(friendsList)) return [];
-    
+
     let filtered = friendsList;
-    
+
     if (type && type !== "all") {
       filtered = filtered.filter(friend => friend.type === type);
     }
-    
+
     if (searchQuery) {
       filtered = filtered.filter(friend => 
         friend.name && friend.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
+
     return filtered;
   };
 
@@ -194,10 +194,10 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
             <AvatarFallback>{friend.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                {friend.name}
-              </p>
+            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              {friend.name}
+            </p>
+            <div className="mt-1">
               {getProfileTypeBadge(friend.type)}
             </div>
             {friend.bio && (
@@ -240,7 +240,7 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
       type: request.type,
       bio: request.bio
     };
-    
+
     return (
       <Card className="hover:shadow-xl transition-all duration-300 border border-gray-700 bg-gray-800 hover:bg-gray-750">
         <CardContent className="p-4">
@@ -325,7 +325,7 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
             {friends?.length || 0} connections
           </p>
         </div>
-        
+
         {/* Search */}
         <div className="relative w-64">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />

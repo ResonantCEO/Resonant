@@ -70,7 +70,7 @@ export default function Sidebar() {
     queryFn: async () => {
       try {
         console.log("Fetching profile notification counts...");
-        
+
         // Direct fetch to ensure we get the actual response
         const response = await fetch("/api/notifications/counts-by-profile", {
           method: "GET",
@@ -79,21 +79,21 @@ export default function Sidebar() {
             "Content-Type": "application/json",
           },
         });
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log("Raw API response:", data);
         console.log("Response type:", typeof data);
-        
+
         // Validate response structure
         if (!data || typeof data !== 'object') {
           console.warn("Invalid response structure, returning empty object");
           return {};
         }
-        
+
         console.log("Response keys:", Object.keys(data));
         console.log("Response values:", Object.values(data));
         console.log("Final counts being returned:", data);
@@ -124,14 +124,14 @@ export default function Sidebar() {
     const counts = profileNotificationCounts || {};
     const stringKey = String(activeProfile.id);
     const numberKey = Number(activeProfile.id);
-    
+
     let count = 0;
     if (counts.hasOwnProperty(stringKey)) {
       count = counts[stringKey];
     } else if (counts.hasOwnProperty(numberKey)) {
       count = counts[numberKey];
     }
-    
+
     return Number(count) || 0;
   };
 
@@ -217,18 +217,18 @@ export default function Sidebar() {
       console.log(`Getting notification count for profile ${profile.id} (${profile.name})`);
       console.log("Available counts data:", counts);
       console.log("Available keys:", Object.keys(counts));
-      
+
       // Try string key first, then number key
       const stringKey = String(profile.id);
       const numberKey = Number(profile.id);
-      
+
       let count = 0;
       if (counts.hasOwnProperty(stringKey)) {
         count = counts[stringKey];
       } else if (counts.hasOwnProperty(numberKey)) {
         count = counts[numberKey];
       }
-      
+
       const finalCount = Number(count) || 0;
       console.log(`Final count for profile ${profile.id} (${profile.name}):`, finalCount);
       return finalCount;
@@ -415,17 +415,27 @@ export default function Sidebar() {
           </li>
           <li>
             <Button
-              variant="ghost"
-              className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
-                isActivePath("/friends") 
-                  ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
-                  : "text-neutral-600 hover:bg-neutral-100"
-              }`}
-              onClick={() => setLocation("/friends")}
-            >
-              <Users className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
-              {!isCollapsed && "Friends"}
-            </Button>
+                variant="ghost"
+                className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
+                  isActivePath("/friends")
+                    ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium"
+                    : "text-neutral-600 hover:bg-neutral-100"
+                }`}
+                onClick={() => setLocation("/friends")}
+              >
+                <Users className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
+                {!isCollapsed && "Friends"}
+                {friendRequests.length > 0 && !isCollapsed && (
+                  <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
+                    {friendRequests.length > 99 ? '99+' : friendRequests.length}
+                  </Badge>
+                )}
+                {isCollapsed && friendRequests.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
+                    {friendRequests.length > 99 ? '99+' : friendRequests.length}
+                  </span>
+                )}
+              </Button>
           </li>
 
           <li>

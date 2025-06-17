@@ -225,65 +225,79 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
     </Card>
   );
 
-  const FriendRequestCard = ({ request }: { request: any }) => (
-    <Card className="hover:shadow-lg transition-all duration-200 border border-gray-200 dark:border-gray-700">
-      <CardContent className="p-4">
-        <div className="flex flex-col space-y-3">
-          <div className="flex items-center space-x-3">
-            <Avatar className="w-14 h-14 ring-2 ring-blue-200 dark:ring-blue-800">
-              <AvatarImage src={request.profile.profileImageUrl} alt={request.profile.name} />
-              <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
-                {request.profile.name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                  {request.profile.name}
+  const FriendRequestCard = ({ request }: { request: any }) => {
+    // Handle cases where profile data might not be available
+    if (!request || !request.profile) {
+      console.warn('Invalid friend request data:', request);
+      return null;
+    }
+
+    const profile = request.profile;
+    
+    return (
+      <Card className="hover:shadow-lg transition-all duration-200 border border-gray-200 dark:border-gray-700">
+        <CardContent className="p-4">
+          <div className="flex flex-col space-y-3">
+            <div className="flex items-center space-x-3">
+              <Avatar className="w-14 h-14 ring-2 ring-blue-200 dark:ring-blue-800">
+                <AvatarImage src={profile.profileImageUrl} alt={profile.name || 'Unknown'} />
+                <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                  {(profile.name || 'U').charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    {profile.name || 'Unknown User'}
+                  </p>
+                  {profile.type && getProfileTypeBadge(profile.type)}
+                </div>
+                {profile.bio && (
+                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                    {profile.bio}
+                  </p>
+                )}
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
+                  Wants to connect
                 </p>
-                {getProfileTypeBadge(request.profile.type)}
               </div>
-              {request.profile.bio && (
-                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                  {request.profile.bio}
-                </p>
-              )}
-              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
-                Wants to connect
-              </p>
+            </div>
+          <div className="flex space-x-2 w-full">
+              <Button
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (request.friendship?.id) {
+                    acceptFriendRequestMutation.mutate(request.friendship.id);
+                  }
+                }}
+                disabled={acceptFriendRequestMutation.isPending || !request.friendship?.id}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Heart className="w-3 h-3 mr-1" />
+                {acceptFriendRequestMutation.isPending ? "Accepting..." : "Accept"}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (request.friendship?.id) {
+                    rejectFriendRequestMutation.mutate(request.friendship.id);
+                  }
+                }}
+                disabled={rejectFriendRequestMutation.isPending || !request.friendship?.id}
+                className="flex-1 border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
+              >
+                <UserMinus className="w-3 h-3 mr-1" />
+                {rejectFriendRequestMutation.isPending ? "Declining..." : "Decline"}
+              </Button>
             </div>
           </div>
-          <div className="flex space-x-2 w-full">
-            <Button
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                acceptFriendRequestMutation.mutate(request.friendship.id);
-              }}
-              disabled={acceptFriendRequestMutation.isPending}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Heart className="w-3 h-3 mr-1" />
-              {acceptFriendRequestMutation.isPending ? "Accepting..." : "Accept"}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={(e) => {
-                e.stopPropagation();
-                rejectFriendRequestMutation.mutate(request.friendship.id);
-              }}
-              disabled={rejectFriendRequestMutation.isPending}
-              className="flex-1 border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800"
-            >
-              <UserMinus className="w-3 h-3 mr-1" />
-              {rejectFriendRequestMutation.isPending ? "Declining..." : "Decline"}
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   if (friendsLoading) {
     return (

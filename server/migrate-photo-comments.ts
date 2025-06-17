@@ -50,3 +50,49 @@ migratePhotoComments()
     console.error("Migration failed:", error);
     process.exit(1);
   });
+import { db } from "./db";
+import { sql } from "drizzle-orm";
+
+async function migratePhotoComments() {
+  try {
+    console.log("Adding comments_count column to photos table...");
+    
+    // Add comments_count column if it doesn't exist
+    await db.execute(sql`
+      ALTER TABLE photos 
+      ADD COLUMN IF NOT EXISTS comments_count INTEGER DEFAULT 0
+    `);
+    
+    console.log("Successfully added comments_count column to photos table");
+    
+    // Update existing photos to have correct comment counts
+    console.log("Updating comment counts for existing photos...");
+    
+    await db.execute(sql`
+      UPDATE photos 
+      SET comments_count = (
+        SELECT COUNT(*) 
+        FROM photo_comments 
+        WHERE photo_comments.photo_id = photos.id
+      )
+    `);
+    
+    console.log("Updated comment counts for existing photos");
+    console.log("Photo comments migration completed successfully!");
+    
+  } catch (error) {
+    console.error("Error in photo comments migration:", error);
+    throw error;
+  }
+}
+
+// Run the migration
+migratePhotoComments()
+  .then(() => {
+    console.log("Migration completed successfully");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Migration failed:", error);
+    process.exit(1);
+  });

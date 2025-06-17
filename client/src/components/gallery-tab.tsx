@@ -609,51 +609,86 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                 return (
                   <div
                     key={album.id}
-                    className={`group cursor-pointer rounded-lg shadow-sm hover:shadow-md transition-shadow ${
+                    className={`group rounded-lg shadow-sm hover:shadow-md transition-shadow relative ${
                       isDefaultAlbum 
                         ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' 
                         : 'bg-white dark:bg-gray-800'
                     }`}
-                    onClick={() => handleSelectAlbum(album)}
                   >
-                    <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-t-lg overflow-hidden relative">
-                      {coverPhoto ? (
-                        <img
-                          src={coverPhoto.imageUrl}
-                          alt={album.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          {isDefaultAlbum ? (
-                            album.name === 'Profile Pictures' ? (
-                              <User className="w-12 h-12 text-blue-400" />
-                            ) : album.name === 'Cover Photos' ? (
-                              <ImageIcon className="w-12 h-12 text-blue-400" />
+                    {/* Album management buttons for non-default albums */}
+                    {isOwn && !isDefaultAlbum && (
+                      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditAlbum(album);
+                          }}
+                          className="h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm(`Are you sure you want to delete "${album.name}"? This will also remove all photos in the album.`)) {
+                              deleteAlbumMutation.mutate(album.id);
+                            }
+                          }}
+                          disabled={deleteAlbumMutation.isPending}
+                          className="h-8 w-8 p-0 bg-red-500/90 hover:bg-red-600 shadow-sm"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+
+                    <div 
+                      className="cursor-pointer"
+                      onClick={() => handleSelectAlbum(album)}
+                    >
+                      <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-t-lg overflow-hidden relative">
+                        {coverPhoto ? (
+                          <img
+                            src={coverPhoto.imageUrl}
+                            alt={album.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            {isDefaultAlbum ? (
+                              album.name === 'Profile Pictures' ? (
+                                <User className="w-12 h-12 text-blue-400" />
+                              ) : album.name === 'Cover Photos' ? (
+                                <ImageIcon className="w-12 h-12 text-blue-400" />
+                              ) : (
+                                <Wallpaper className="w-12 h-12 text-blue-400" />
+                              )
                             ) : (
-                              <Wallpaper className="w-12 h-12 text-blue-400" />
-                            )
-                          ) : (
-                            <Camera className="w-12 h-12 text-gray-400" />
-                          )}
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200" />
-                    </div>
-                    <div className="p-4">
-                      <h3 className={`font-medium text-sm mb-1 ${
-                        isDefaultAlbum ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
-                      }`}>
-                        {album.name}
-                      </h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                        {albumPhotoCount} {albumPhotoCount === 1 ? 'photo' : 'photos'}
-                      </p>
-                      {album.description && (
-                        <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
-                          {album.description}
+                              <Camera className="w-12 h-12 text-gray-400" />
+                            )}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200" />
+                      </div>
+                      <div className="p-4">
+                        <h3 className={`font-medium text-sm mb-1 ${
+                          isDefaultAlbum ? 'text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-white'
+                        }`}>
+                          {album.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                          {albumPhotoCount} {albumPhotoCount === 1 ? 'photo' : 'photos'}
                         </p>
-                      )}
+                        {album.description && (
+                          <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
+                            {album.description}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -973,10 +1008,14 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
             <Button variant="outline" onClick={() => setShowEditAlbumDialog(false)}>
               Cancel
             </Button>
-            {editingAlbum && (
+            {editingAlbum && !['Profile Pictures', 'Cover Photos', 'Background Pictures'].includes(editingAlbum.name) && (
               <Button
                 variant="destructive"
-                onClick={() => deleteAlbumMutation.mutate(editingAlbum.id)}
+                onClick={() => {
+                  if (confirm(`Are you sure you want to delete "${editingAlbum.name}"? This will also remove all photos in the album.`)) {
+                    deleteAlbumMutation.mutate(editingAlbum.id);
+                  }
+                }}
                 disabled={deleteAlbumMutation.isPending}
               >
                 {deleteAlbumMutation.isPending ? 'Deleting...' : 'Delete Album'}

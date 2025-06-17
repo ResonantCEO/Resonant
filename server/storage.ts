@@ -1025,7 +1025,8 @@ export class Storage {
       console.error("Error fetching album:", error);
       throw error;
     }
-  <replit_final_file>
+  }
+
   async updateAlbum(albumId: number, updates: Partial<Omit<Album, 'id' | 'profileId' | 'createdAt'>>): Promise<Album> {
     try {
       const result = await db

@@ -1123,44 +1123,86 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                 <DialogTitle className="flex items-center justify-between text-gray-900 dark:text-white">
                   <div className="flex-1">
                     {isOwn ? (
-                      <Input
-                        placeholder="Add a caption..."
-                        value={selectedPhoto.caption || ''}
-                        onChange={(e) => {
-                          setSelectedPhoto(prev => prev ? { ...prev, caption: e.target.value } : null);
-                        }}
-                        onBlur={async (e) => {
-                          const newCaption = e.target.value;
-                          try {
-                            const response = await fetch(`/api/photos/${selectedPhoto.id}`, {
-                              method: 'PUT',
-                              headers: {
-                                'Content-Type': 'application/json'
-                              },
-                              credentials: 'include',
-                              body: JSON.stringify({ caption: newCaption })
-                            });
-                            if (!response.ok) {
-                              throw new Error('Failed to update caption');
-                            }
-                            queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile?.id}/photos`] });
-                            if (selectedAlbumId) {
-                              queryClient.invalidateQueries({ queryKey: [`/api/albums/${selectedAlbumId}/photos`] });
-                            }
-                            toast({
-                              title: "Caption updated",
-                              description: "The photo caption has been updated.",
-                            });
-                          } catch (error: any) {
-                            toast({
-                              title: "Update failed",
-                              description: error.message || "Failed to update caption",
-                              variant: "destructive",
-                            });
+                      <div 
+                        className="text-lg font-semibold cursor-pointer hover:bg-white/10 dark:hover:bg-gray-800/10 rounded-lg px-3 py-2 transition-colors"
+                        onClick={() => {
+                          // Focus the hidden input to start editing
+                          const input = document.getElementById('caption-edit-input') as HTMLInputElement;
+                          if (input) {
+                            input.style.display = 'block';
+                            input.focus();
+                            input.select();
+                          }
+                          // Hide the display text
+                          const display = document.getElementById('caption-display');
+                          if (display) {
+                            display.style.display = 'none';
                           }
                         }}
-                        className="text-lg font-semibold bg-white/20 dark:bg-gray-800/20 border border-white/30 dark:border-gray-600/30 backdrop-blur-sm rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
-                      />
+                      >
+                        <span id="caption-display" className="block">
+                          {selectedPhoto.caption || 'Click to add a caption...'}
+                        </span>
+                        <Input
+                          id="caption-edit-input"
+                          style={{ display: 'none' }}
+                          placeholder="Add a caption..."
+                          value={selectedPhoto.caption || ''}
+                          onChange={(e) => {
+                            setSelectedPhoto(prev => prev ? { ...prev, caption: e.target.value } : null);
+                          }}
+                          onBlur={async (e) => {
+                            const newCaption = e.target.value;
+                            try {
+                              const response = await fetch(`/api/photos/${selectedPhoto.id}`, {
+                                method: 'PUT',
+                                headers: {
+                                  'Content-Type': 'application/json'
+                                },
+                                credentials: 'include',
+                                body: JSON.stringify({ caption: newCaption })
+                              });
+                              if (!response.ok) {
+                                throw new Error('Failed to update caption');
+                              }
+                              queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile?.id}/photos`] });
+                              if (selectedAlbumId) {
+                                queryClient.invalidateQueries({ queryKey: [`/api/albums/${selectedAlbumId}/photos`] });
+                              }
+                              toast({
+                                title: "Caption updated",
+                                description: "The photo caption has been updated.",
+                              });
+                            } catch (error: any) {
+                              toast({
+                                title: "Update failed",
+                                description: error.message || "Failed to update caption",
+                                variant: "destructive",
+                              });
+                            }
+                            
+                            // Hide input and show display text
+                            e.target.style.display = 'none';
+                            const display = document.getElementById('caption-display');
+                            if (display) {
+                              display.style.display = 'block';
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Escape') {
+                              // Cancel editing
+                              e.currentTarget.style.display = 'none';
+                              const display = document.getElementById('caption-display');
+                              if (display) {
+                                display.style.display = 'block';
+                              }
+                              // Reset to original value
+                              setSelectedPhoto(prev => prev ? { ...prev, caption: selectedPhoto.caption } : null);
+                            }
+                          }}
+                          className="text-lg font-semibold bg-white/20 dark:bg-gray-800/20 border border-white/30 dark:border-gray-600/30 backdrop-blur-sm rounded-lg px-3 py-2 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+                        />
+                      </div>
                     ) : (
                       <span className="text-lg font-semibold">
                         {selectedPhoto.caption || new Date(selectedPhoto.createdAt).toLocaleDateString()}

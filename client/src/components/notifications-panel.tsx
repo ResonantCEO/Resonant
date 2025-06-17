@@ -104,20 +104,33 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   // Accept friend request mutation
   const acceptFriendRequestMutation = useMutation({
-    mutationFn: async (senderId: number) => {
-      // First get the friend request
-      const friendRequests = await apiRequest("GET", "/api/friend-requests");
-      const request = friendRequests.find((req: any) => req.profile.userId === senderId);
-      if (!request) throw new Error("Friend request not found");
-
-      return await apiRequest("POST", `/api/friend-requests/${request.friendship.id}/accept`);
+    mutationFn: async (friendshipId: number) => {
+      return await apiRequest("POST", `/api/friend-requests/${friendshipId}/accept`);
     },
-    onSuccess: () => {
+    onSuccess: (data, friendshipId) => {
+      // Find and remove the accepted notification from local state immediately
+      queryClient.setQueryData(["/api/notifications"], (oldData: any[]) => {
+        if (!oldData) return oldData;
+        return oldData.filter(notification => {
+          const notificationData = notification.data as any;
+          return !(notification.type === 'friend_request' && notificationData?.friendshipId === friendshipId);
+        });
+      });
+
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+      
+      // Invalidate friendship status queries for all profiles
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return query.queryKey[0] === '/api/friendship-status';
+        }
+      });
+
       toast({
         title: "Friend Request Accepted",
         description: "You are now friends!",
@@ -134,19 +147,32 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   // Reject friend request mutation
   const rejectFriendRequestMutation = useMutation({
-    mutationFn: async (senderId: number) => {
-      // First get the friend request
-      const friendRequests = await apiRequest("GET", "/api/friend-requests");
-      const request = friendRequests.find((req: any) => req.profile.userId === senderId);
-      if (!request) throw new Error("Friend request not found");
-
-      return await apiRequest("POST", `/api/friend-requests/${request.friendship.id}/reject`);
+    mutationFn: async (friendshipId: number) => {
+      return await apiRequest("POST", `/api/friend-requests/${friendshipId}/reject`);
     },
-    onSuccess: () => {
+    onSuccess: (data, friendshipId) => {
+      // Find and remove the rejected notification from local state immediately
+      queryClient.setQueryData(["/api/notifications"], (oldData: any[]) => {
+        if (!oldData) return oldData;
+        return oldData.filter(notification => {
+          const notificationData = notification.data as any;
+          return !(notification.type === 'friend_request' && notificationData?.friendshipId === friendshipId);
+        });
+      });
+
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+      
+      // Invalidate friendship status queries for all profiles
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return query.queryKey[0] === '/api/friendship-status';
+        }
+      });
+
       toast({
         title: "Friend Request Declined",
         description: "Friend request has been declined",
@@ -173,12 +199,12 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     markAllAsReadMutation.mutate();
   };
 
-  const handleAcceptFriendRequest = (senderId: number) => {
-    acceptFriendRequestMutation.mutate(senderId);
+  const handleAcceptFriendRequest = (friendshipId: number) => {
+    acceptFriendRequestMutation.mutate(friendshipId);
   };
 
-  const handleRejectFriendRequest = (senderId: number) => {
-    rejectFriendRequestMutation.mutate(senderId);
+  const handleRejectFriendRequest = (friendshipId: number) => {
+    rejectFriendRequestMutation.mutate(friendshipId);
   };
 
   const handleViewProfile = async (senderId: number) => {
@@ -273,25 +299,25 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
           </p>
 
           {/* Friend Request Actions */}
-          {notification.type === "friend_request" && notification.sender && (
+          {notification.type === "friend_request" && notification.sender && notification.data?.friendshipId && (
             <div className="flex space-x-2 mt-3">
               <Button
                 size="sm"
-                onClick={() => handleAcceptFriendRequest(notification.sender.id)}
-                disabled={acceptFriendRequestMutation.isPending}
+                onClick={() => handleAcceptFriendRequest(notification.data?.friendshipId)}
+                disabled={acceptFriendRequestMutation.isPending || rejectFriendRequestMutation.isPending}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Heart className="w-3 h-3 mr-1" />
-                Accept
+                {acceptFriendRequestMutation.isPending ? "Accepting..." : "Accept"}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => handleRejectFriendRequest(notification.sender.id)}
-                disabled={rejectFriendRequestMutation.isPending}
+                onClick={() => handleRejectFriendRequest(notification.data?.friendshipId)}
+                disabled={acceptFriendRequestMutation.isPending || rejectFriendRequestMutation.isPending}
               >
                 <UserMinus className="w-3 h-3 mr-1" />
-                Decline
+                {rejectFriendRequestMutation.isPending ? "Declining..." : "Decline"}
               </Button>
             </div>
           )}

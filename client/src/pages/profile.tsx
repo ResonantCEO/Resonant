@@ -66,8 +66,8 @@ export default function Profile() {
       // Invalidate relevant queries to refetch data
       queryClient.invalidateQueries(["/api/profiles/active"]);
       queryClient.invalidateQueries(["/api/profiles"]);
-      // Refresh the page to reflect the new active profile
-      window.location.reload();
+      // Navigate to profile page instead of reloading
+      setLocation("/profile");
     },
   });
 

@@ -150,6 +150,36 @@ export const comments = pgTable("comments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const bookingRequests = pgTable("booking_requests", {
+  id: serial("id").primaryKey(),
+  artistProfileId: integer("artist_profile_id").references(() => profiles.id).notNull(),
+  venueProfileId: integer("venue_profile_id").references(() => profiles.id).notNull(),
+  status: varchar("status", { length: 20 }).default("pending").notNull(), // pending, accepted, rejected
+  requestedAt: timestamp("requested_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const albums = pgTable("albums", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").references(() => profiles.id).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  coverPhotoId: integer("cover_photo_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const photos = pgTable("photos", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").references(() => profiles.id).notNull(),
+  albumId: integer("album_id").references(() => albums.id),
+  imageUrl: varchar("image_url", { length: 500 }).notNull(),
+  caption: text("caption"),
+  tags: text("tags").array().default([]).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 
 export const profilesRelations = relations(profiles, ({ one, many }) => ({
@@ -442,36 +472,6 @@ export const notificationTypeSchema = z.enum([
   "membership_updated",
   "system_announcement"
 ]);
-
-export const bookingRequests = pgTable("booking_requests", {
-  id: serial("id").primaryKey(),
-  artistProfileId: integer("artist_profile_id").references(() => profiles.id).notNull(),
-  venueProfileId: integer("venue_profile_id").references(() => profiles.id).notNull(),
-  status: varchar("status", { length: 20 }).default("pending").notNull(), // pending, accepted, rejected
-  requestedAt: timestamp("requested_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const albums = pgTable("albums", {
-  id: serial("id").primaryKey(),
-  profileId: integer("profile_id").references(() => profiles.id).notNull(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  coverPhotoId: integer("cover_photo_id"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const photos = pgTable("photos", {
-  id: serial("id").primaryKey(),
-  profileId: integer("profile_id").references(() => profiles.id).notNull(),
-  albumId: integer("album_id").references(() => albums.id),
-  imageUrl: varchar("image_url", { length: 500 }).notNull(),
-  caption: text("caption"),
-  tags: text("tags").array().default([]).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
 
 export type BookingRequest = InferSelectModel<typeof bookingRequests>;
 export type InsertBookingRequest = InferInsertModel<typeof bookingRequests>;

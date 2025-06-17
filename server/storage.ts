@@ -1022,8 +1022,7 @@ export class Storage {
         .returning();
 
       return result[0];
-    } catch<previous_generation>```text
- (error) {
+    } catch (error) {
       console.error("Error creating album:", error);
       throw error;
     }

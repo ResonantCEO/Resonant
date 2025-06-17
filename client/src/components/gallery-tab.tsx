@@ -1026,7 +1026,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
 
       {/* Photo Detail Modal */}
       <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 shadow-2xl rounded-2xl" hideOverlay={true}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-white/40 dark:border-gray-700/40 shadow-2xl rounded-2xl" hideOverlay={true}>
           {selectedPhoto && (
             <>
               <DialogHeader className="border-b border-white/20 dark:border-gray-700/30 pb-4">

@@ -260,9 +260,9 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
           {isOwn && (
             <Button
               onClick={() => fileInputRef.current?.click()}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
             >
-              <Upload className="w-4 h-4 mr-2" />
+              <Upload className="w-4 h-4 mr-2 font-bold" />
               Upload
             </Button>
           )}
@@ -287,9 +287,9 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
           {isOwn && photos.length === 0 && (
             <Button
               onClick={() => fileInputRef.current?.click()}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
             >
-              <Upload className="w-4 h-4 mr-2" />
+              <Upload className="w-4 h-4 mr-2 font-bold" />
               Upload Photos
             </Button>
           )}
@@ -469,7 +469,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
             <Button
               onClick={handleUpload}
               disabled={uploadPhotosMutation.isPending || uploadFiles.length === 0}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold"
             >
               {uploadPhotosMutation.isPending ? 'Uploading...' : `Upload ${uploadFiles.length} Photo${uploadFiles.length !== 1 ? 's' : ''}`}
             </Button>

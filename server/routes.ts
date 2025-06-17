@@ -877,7 +877,6 @@ export function registerRoutes(app: Express): Server {
       res.json(profiles);
     } catch (error) {
       console.error("Error searching profiles:", error);
-```text
       res.status(500).json({ message: "Failed to search profiles" });
     }
   });
@@ -919,7 +918,8 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Get user's profiles by user ID (for navigation from notifications)
-  app.get('/api/users/:userId/profiles', async (req, res) => {    try {
+  app.get('/api/users/:userId/profiles', async (req, res) => {
+    try {
       const userId = parseInt(req.params.userId);
       const profiles = await storage.getProfilesByUserId(userId);
 

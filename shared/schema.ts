@@ -401,9 +401,9 @@ export type Friendship = typeof friendships.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Comment = typeof comments.$inferSelect;
 export type PostLike = typeof postLikes.$inferSelect;
-export type InsertProfileMembership = z.infer<typeof profileMembershipSchema>;
+export type InsertProfileMembership = z.infer<typeof insertProfileMembershipSchema>;
 export type ProfileMembership = typeof profileMemberships.$inferSelect;
-export type InsertProfileInvitation = z.infer<typeof profileInvitationSchema>;
+export type InsertProfileInvitation = z.infer<typeof insertProfileInvitationSchema>;
 export type ProfileInvitation = typeof profileInvitations.$inferSelect;
 export type ProfileRole = z.infer<typeof profileRoleSchema>;
 export type ProfilePermission = z.infer<typeof profilePermissionSchema>;
@@ -453,9 +453,6 @@ export const bookingRequests = pgTable("booking_requests", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export type BookingRequest = InferSelectModel<typeof bookingRequests>;
-export type InsertBookingRequest = InferInsertModel<typeof bookingRequests>;
-
 export const albums = pgTable("albums", {
   id: serial("id").primaryKey(),
   profileId: integer("profile_id").references(() => profiles.id).notNull(),
@@ -476,6 +473,8 @@ export const photos = pgTable("photos", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export type BookingRequest = InferSelectModel<typeof bookingRequests>;
+export type InsertBookingRequest = InferInsertModel<typeof bookingRequests>;
 export type Album = InferSelectModel<typeof albums>;
 export type InsertAlbum = InferInsertModel<typeof albums>;
 export type Photo = InferSelectModel<typeof photos>;

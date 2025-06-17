@@ -1738,6 +1738,7 @@ export function registerRoutes(app: Express): Server {
 
         const photoData = [];
         const files = req.files as Express.Multer.File[];
+        const albumId = req.body.albumId ? parseInt(req.body.albumId) : null;
 
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
@@ -1746,6 +1747,7 @@ export function registerRoutes(app: Express): Server {
 
           photoData.push({
             profileId,
+            albumId,
             imageUrl: `/uploads/${file.filename}`,
             caption,
             tags,

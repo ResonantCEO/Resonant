@@ -80,13 +80,18 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
 
   // Upload photos mutation
   const uploadPhotosMutation = useMutation({
-    mutationFn: async (photosData: { files: File[]; captions: string[]; tags: string[] }) => {
+    mutationFn: async (photosData: { files: File[]; captions: string[]; tags: string[]; albumId?: number }) => {
       const formData = new FormData();
       photosData.files.forEach((file, index) => {
         formData.append('photos', file);
         formData.append(`caption_${index}`, photosData.captions[index] || '');
         formData.append(`tags_${index}`, JSON.stringify(photosData.tags[index] || []));
       });
+      
+      // Add album ID if we're in an album view
+      if (photosData.albumId) {
+        formData.append('albumId', photosData.albumId.toString());
+      }
 
       const response = await fetch(`/api/profiles/${profile.id}/photos`, {
         method: 'POST',
@@ -307,7 +312,8 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
     uploadPhotosMutation.mutate({
       files: uploadFiles,
       captions: uploadCaptions,
-      tags: uploadTags
+      tags: uploadTags,
+      albumId: currentView === 'album' ? selectedAlbumId : undefined
     });
   };
 

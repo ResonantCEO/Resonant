@@ -538,14 +538,19 @@ export class NotificationService {
     });
   }
 
-  async notifyPhotoComment(recipientId: number, senderId: number, senderName: string, photoId: number): Promise<void> {
+  async notifyPhotoComment(recipientId: number, senderId: number, senderName: string, photoId: number, commentContent?: string, photoUrl?: string): Promise<void> {
     await this.createNotification({
       recipientId,
       senderId,
       type: "photo_comment",
       title: "New Photo Comment",
       message: `${senderName} commented on your photo`,
-      data: { photoId, senderId },
+      data: { 
+        photoId, 
+        senderId, 
+        commentContent: commentContent || "",
+        photoUrl: photoUrl || ""
+      },
     });
   }
 }

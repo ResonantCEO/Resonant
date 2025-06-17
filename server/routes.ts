@@ -2022,7 +2022,14 @@ export function registerRoutes(app: Express): Server {
         if (photoOwnerProfile?.userId && photoOwnerProfile.userId !== req.user.id) {
           const commenterUser = await storage.getUser(req.user.id);
           const commenterName = `${commenterUser?.firstName} ${commenterUser?.lastName}`;
-          await notificationService.notifyPhotoComment(photoOwnerProfile.userId, req.user.id, commenterName, photoId);
+          await notificationService.notifyPhotoComment(
+            photoOwnerProfile.userId, 
+            req.user.id, 
+            commenterName, 
+            photoId, 
+            content.trim(),
+            photo.imageUrl
+          );
         }
       }
 

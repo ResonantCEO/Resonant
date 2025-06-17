@@ -123,7 +123,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
       queryClient.invalidateQueries({ queryKey: ["/api/friends"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
-      
+
       // Invalidate friendship status queries for all profiles
       queryClient.invalidateQueries({ 
         predicate: (query) => {
@@ -165,7 +165,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
       queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
-      
+
       // Invalidate friendship status queries for all profiles
       queryClient.invalidateQueries({ 
         predicate: (query) => {
@@ -297,6 +297,27 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             {notification.message}
           </p>
+
+          {/* Photo comment specific content */}
+          {notification.type === 'photo_comment' && notification.data && (
+            <div className="mt-2 flex items-start space-x-2">
+              {notification.data.photoUrl && (
+                <img
+                  src={notification.data.photoUrl}
+                  alt="Photo thumbnail"
+                  className="w-12 h-12 rounded object-cover flex-shrink-0"
+                />
+              )}
+              {notification.data.commentContent && (
+                <div className="flex-grow min-w-0">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Comment:</p>
+                  <p className="text-sm bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 text-gray-800 dark:text-gray-200 break-words">
+                    "{notification.data.commentContent}"
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Friend Request Actions */}
           {notification.type === "friend_request" && notification.sender && notification.data?.friendshipId && (

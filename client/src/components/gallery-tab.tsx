@@ -45,7 +45,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
   const [filterTag, setFilterTag] = useState<string>('');
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploadCaptions, setUploadCaptions] = useState<string[]>([]);
-  const [uploadTags, setUploadTags] = useState<string[]>([]);
+  const [uploadFriendTags, setUploadFriendTags] = useState<number[][]>([]);
   const [selectedAlbumId, setSelectedAlbumId] = useState<number | null>(null);
   const [currentView, setCurrentView] = useState<'albums' | 'photos' | 'album'>('albums');
   const [showCreateAlbumDialog, setShowCreateAlbumDialog] = useState(false);
@@ -76,16 +76,22 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
     enabled: !!selectedAlbumId && currentView === 'album',
   });
 
+  // Fetch friends for tagging
+  const { data: friends = [] } = useQuery<any[]>({
+    queryKey: [`/api/friends`],
+    enabled: !!profile?.id,
+  });
+
   const isLoading = photosLoading || albumsLoading || albumPhotosLoading;
 
   // Upload photos mutation
   const uploadPhotosMutation = useMutation({
-    mutationFn: async (photosData: { files: File[]; captions: string[]; tags: string[]; albumId?: number }) => {
+    mutationFn: async (photosData: { files: File[]; captions: string[]; friendTags: number[][]; albumId?: number }) => {
       const formData = new FormData();
       photosData.files.forEach((file, index) => {
         formData.append('photos', file);
         formData.append(`caption_${index}`, photosData.captions[index] || '');
-        formData.append(`tags_${index}`, JSON.stringify(photosData.tags[index] || []));
+        formData.append(`friendTags_${index}`, JSON.stringify(photosData.friendTags[index] || []));
       });
       
       // Add album ID if we're in an album view
@@ -111,7 +117,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
       setShowUploadDialog(false);
       setUploadFiles([]);
       setUploadCaptions([]);
-      setUploadTags([]);
+      setUploadFriendTags([]);
       toast({
         title: "Photos uploaded",
         description: "Your photos have been added to the gallery.",
@@ -294,7 +300,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
 
     setUploadFiles(validFiles);
     setUploadCaptions(new Array(validFiles.length).fill(''));
-    setUploadTags(new Array(validFiles.length).fill([]));
+    setUploadFriendTags(new Array(validFiles.length).fill([]));
     setShowUploadDialog(true);
   };
 
@@ -304,11 +310,21 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
     setUploadCaptions(newCaptions);
   };
 
-  const handleTagsChange = (index: number, tagsString: string) => {
-    const tags = tagsString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-    const newTags = [...uploadTags];
-    newTags[index] = tags;
-    setUploadTags(newTags);
+  const handleFriendTagsChange = (index: number, friendId: number, checked: boolean) => {
+    const newFriendTags = [...uploadFriendTags];
+    if (!newFriendTags[index]) {
+      newFriendTags[index] = [];
+    }
+    
+    if (checked) {
+      if (!newFriendTags[index].includes(friendId)) {
+        newFriendTags[index] = [...newFriendTags[index], friendId];
+      }
+    } else {
+      newFriendTags[index] = newFriendTags[index].filter(id => id !== friendId);
+    }
+    
+    setUploadFriendTags(newFriendTags);
   };
 
   const handleUpload = () => {
@@ -318,7 +334,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
     uploadPhotosMutation.mutate({
       files: uploadFiles,
       captions: uploadCaptions,
-      tags: uploadTags,
+      friendTags: uploadFriendTags,
       albumId: albumIdToUse
     });
   };
@@ -968,11 +984,43 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                       value={uploadCaptions[index] || ''}
                       onChange={(e) => handleCaptionChange(index, e.target.value)}
                                         />
-                    <Input
-                      placeholder="Add tags separated by commas (optional)"
-                      value={uploadTags[index]?.join(', ') || ''}
-                      onChange={(e) => handleTagsChange(index, e.target.value)}
-                    />
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Tag Friends (optional)
+                      </label>
+                      <div className="max-h-24 overflow-y-auto border rounded-md p-2 space-y-1">
+                        {friends.length > 0 ? (
+                          friends.map((friend) => (
+                            <div key={friend.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`friend-${friend.id}-${index}`}
+                                checked={uploadFriendTags[index]?.includes(friend.id) || false}
+                                onCheckedChange={(checked) => 
+                                  handleFriendTagsChange(index, friend.id, checked as boolean)
+                                }
+                              />
+                              <label
+                                htmlFor={`friend-${friend.id}-${index}`}
+                                className="text-sm cursor-pointer flex items-center space-x-2"
+                              >
+                                {friend.profileImageUrl && (
+                                  <img
+                                    src={friend.profileImageUrl}
+                                    alt={friend.name}
+                                    className="w-6 h-6 rounded-full object-cover"
+                                  />
+                                )}
+                                <span>{friend.name}</span>
+                              </label>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            No friends to tag
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <Button
                     variant="ghost"

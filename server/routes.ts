@@ -966,7 +966,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/friend-requests/:id/accept', isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.id);
-      
+
       // Check if the friendship exists and user has permission
       const existingFriendship = await storage.getFriendshipById(friendshipId);
       if (!existingFriendship) {
@@ -1004,7 +1004,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/friend-requests/:id/reject', isAuthenticated, async (req: any, res) => {
     try {
       const friendshipId = parseInt(req.params.id);
-      
+
       // Check if the friendship exists and user has permission
       const existingFriendship = await storage.getFriendshipById(friendshipId);
       if (!existingFriendship) {
@@ -1492,7 +1492,8 @@ export function registerRoutes(app: Express): Server {
         parseInt(limit),
         parseInt(offset),
         activeProfile.id,
-        activeProfile.type
+        activeProfile.type,
+        true // Exclude friend requests from notifications page
       );
 
       res.json(notifications);
@@ -1517,7 +1518,12 @@ export function registerRoutes(app: Express): Server {
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
 
-      const count = await notificationService.getUnreadCount(req.user.id, activeProfile.id, activeProfile.type);
+      const count = await notificationService.getUnreadCount(
+        req.user.id,
+        activeProfile.id,
+        activeProfile.type,
+        true // Exclude friend requests from notifications page count
+      );
       res.json({ count });
     } catch (error) {
       console.error("Error fetching unread count:", error);
@@ -1530,16 +1536,21 @@ export function registerRoutes(app: Express): Server {
     try {
       const { notificationService } = await import('./notifications');
       const userProfiles = await storage.getProfilesByUserId(req.user.id);
-      
+
       const counts = {};
-      
+
       console.log(`Calculating notification counts for user ${req.user.id} with profiles:`, userProfiles.map(p => ({ id: p.id, name: p.name, type: p.type })));
-      
+
       for (const profile of userProfiles) {
-        const count = await notificationService.getUnreadCount(req.user.id, profile.id, profile.type);
-        // Use string keys for consistency
-        counts[profile.id.toString()] = count;
+        const count = await notificationService.getUnreadCount(
+          req.user.id,
+          profile.id,
+          profile.type,
+          true // Exclude friend requests from general notification counts
+        );
+
         console.log(`Profile ${profile.id} (${profile.name}, ${profile.type}): ${count} unread notifications`);
+        counts[profile.id] = count;
       }
 
       console.log("Final counts object:", counts);
@@ -1555,7 +1566,7 @@ export function registerRoutes(app: Express): Server {
 
       console.log("About to send response:", counts);
       console.log("Response will be:", JSON.stringify(counts));
-      
+
       // Explicitly return the JSON response
       const response = res.status(200).json(counts);
       console.log("Response sent successfully");
@@ -1616,7 +1627,7 @@ export function registerRoutes(app: Express): Server {
               eq(friendships.id, friendshipId),
               eq(friendships.status, 'pending')
             ));
-          
+
           console.log(`Deleted pending friendship ${friendshipId} when deleting notification ${notificationId}`);
         }
       }
@@ -1659,9 +1670,8 @@ export function registerRoutes(app: Express): Server {
         const artistUser = await storage.getUser(req.user.id);
         const artistName = `${artistUser?.firstName} ${artistUser?.lastName}`;
         await notificationService.notifyBookingRequest(
-          venueProfile.userId, 
-          req.user.id, 
-          artistName, 
+          venueProfile.userId,          req.user.id,
+          artistName,
           artistProfile.name
         );
       }

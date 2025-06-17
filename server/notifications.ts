@@ -50,8 +50,13 @@ export class NotificationService {
   }
 
   // Get notifications for a user filtered by active profile
-  async getUserNotifications(userId: number, limit = 20, offset = 0, activeProfileId?: number, activeProfileType?: string): Promise<any[]> {
+  async getUserNotifications(userId: number, limit = 20, offset = 0, activeProfileId?: number, activeProfileType?: string, excludeFriendRequests = false): Promise<any[]> {
     let whereConditions = [eq(notifications.recipientId, userId)];
+
+    // Exclude friend requests if requested (for notifications page)
+    if (excludeFriendRequests) {
+      whereConditions.push(sql`${notifications.type} != 'friend_request'`);
+    }
 
     const userNotifications = await db
       .select({
@@ -146,11 +151,16 @@ export class NotificationService {
   }
 
   // Get unread notification count filtered by active profile
-  async getUnreadCount(userId: number, activeProfileId?: number, activeProfileType?: string): Promise<number> {
+  async getUnreadCount(userId: number, activeProfileId?: number, activeProfileType?: string, excludeFriendRequests = false): Promise<number> {
     let whereConditions = [
       eq(notifications.recipientId, userId),
       eq(notifications.read, false)
     ];
+
+    // Exclude friend requests if requested (for notifications page)
+    if (excludeFriendRequests) {
+      whereConditions.push(sql`${notifications.type} != 'friend_request'`);
+    }
 
     const allNotifications = await db
       .select({

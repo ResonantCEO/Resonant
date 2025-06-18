@@ -959,7 +959,7 @@ export class Storage {
     }));
 
     return photosWithTaggedFriends;
-  },
+  }
 
   async createProfilePhotos(photosData: Array<{ profileId: number; albumId?: number | null; imageUrl: string; caption?: string; tags?: string[]; friendTags?: number[] }>) {
     const [insertedPhotos] = await Promise.all([
@@ -974,7 +974,7 @@ export class Storage {
     ]);
 
     return insertedPhotos;
-  },
+  }
 
   async getPhoto(photoId: number): Promise<Photo | null> {
     try {
@@ -999,7 +999,7 @@ export class Storage {
       .returning();
 
     return updatedPhoto;
-  },
+  }
 
   async deletePhoto(photoId: number): Promise<void> {
     try {
@@ -1131,7 +1131,7 @@ export class Storage {
     }));
 
     return buildCommentsTree(commentsWithTaggedFriends);
-  },
+  }
 
   async createPhotoComment(commentData: { photoId: number; profileId: number; content: string; parentId?: number; friendTags?: number[] }) {
     return await db.transaction(async (tx) => {
@@ -1183,7 +1183,7 @@ export class Storage {
 
       return result[0];
     });
-  },
+  }
 
   async deletePhotoComment(commentId: number, profileId: number) {
     // Get the comment to find the photo ID

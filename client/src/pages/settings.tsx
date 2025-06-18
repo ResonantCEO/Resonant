@@ -280,13 +280,13 @@ function SettingsContent() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('background', file);
-      
+
       const response = await fetch('/api/profile/background-image', {
         method: 'POST',
         body: formData,
         credentials: 'include',
       });
-      
+
       if (!response.ok) throw new Error('Failed to upload background image');
       return response.json();
     },
@@ -555,6 +555,59 @@ function SettingsContent() {
                   )}
                 </div>
               </div>
+
+              <Separator />
+
+              <div>
+                <Label htmlFor="profileBackground">Profile Background</Label>
+                <p className="text-sm text-muted-foreground mb-3">Choose a background style for your profile page</p>
+                <Select
+                  value={user.profileBackground || 'default'}
+                  onValueChange={(value) => handleUpdateSetting('profileBackground', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">Default (Cover Photo)</SelectItem>
+                    <SelectItem value="gradient-blue">Blue Gradient</SelectItem>
+                    <SelectItem value="gradient-purple">Purple Gradient</SelectItem>
+                    <SelectItem value="gradient-green">Green Gradient</SelectItem>
+                    <SelectItem value="gradient-orange">Orange Gradient</SelectItem>
+                    <SelectItem value="gradient-pink">Pink Gradient</SelectItem>
+                    <SelectItem value="solid-dark">Dark Solid</SelectItem>
+                    <SelectItem value="solid-light">Light Solid</SelectItem>
+                    <SelectItem value="pattern-dots">Dotted Pattern</SelectItem>
+                    <SelectItem value="pattern-waves">Wave Pattern</SelectItem>
+                    <SelectItem value="custom-photo">Custom Photo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {user.profileBackground === 'custom-photo' && (
+                <div className="space-y-3">
+                  <Label>Upload Custom Background Photo</Label>
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBackgroundPhotoUpload}
+                      className="hidden"
+                      ref={backgroundFileInputRef}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => backgroundFileInputRef.current?.click()}
+                      disabled={uploadBackgroundMutation.isPending}
+                    >
+                      <Camera className="w-4 h-4 mr-2" />
+                      {uploadBackgroundMutation.isPending ? 'Uploading...' : 'Choose Photo'}
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Upload a custom photo to use as your profile page background.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -609,59 +662,6 @@ function SettingsContent() {
                   onCheckedChange={(checked) => handleUpdateSetting('autoplayVideos', checked)}
                 />
               </div>
-
-              <Separator />
-
-              <div>
-                <Label htmlFor="profileBackground">Profile Background</Label>
-                <p className="text-sm text-muted-foreground mb-3">Choose a background style for your profile page</p>
-                <Select
-                  value={user.profileBackground || 'default'}
-                  onValueChange={(value) => handleUpdateSetting('profileBackground', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="default">Default (Cover Photo)</SelectItem>
-                    <SelectItem value="gradient-blue">Blue Gradient</SelectItem>
-                    <SelectItem value="gradient-purple">Purple Gradient</SelectItem>
-                    <SelectItem value="gradient-green">Green Gradient</SelectItem>
-                    <SelectItem value="gradient-orange">Orange Gradient</SelectItem>
-                    <SelectItem value="gradient-pink">Pink Gradient</SelectItem>
-                    <SelectItem value="solid-dark">Dark Solid</SelectItem>
-                    <SelectItem value="solid-light">Light Solid</SelectItem>
-                    <SelectItem value="pattern-dots">Dotted Pattern</SelectItem>
-                    <SelectItem value="pattern-waves">Wave Pattern</SelectItem>
-                    <SelectItem value="custom-photo">Custom Photo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {user.profileBackground === 'custom-photo' && (
-                <div className="space-y-3">
-                  <Label>Upload Custom Background Photo</Label>
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleBackgroundPhotoUpload}
-                      className="hidden"
-                      ref={backgroundFileInputRef}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => backgroundFileInputRef.current?.click()}
-                      disabled={uploadBackgroundMutation.isPending}
-                    >
-                      <Camera className="w-4 h-4 mr-2" />
-                      {uploadBackgroundMutation.isPending ? 'Uploading...' : 'Choose Photo'}
-                    </Button>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Upload a custom photo to use as your profile page background.</p>
-                </div>
-              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -904,7 +904,7 @@ function SettingsContent() {
 
 export default function Settings() {
   const { isCollapsed } = useSidebar();
-  
+
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
       <Sidebar />

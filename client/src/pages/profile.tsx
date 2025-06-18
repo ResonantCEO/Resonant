@@ -483,10 +483,198 @@ export default function Profile() {
           {/* About Tab */}
           {activeTab === "about" && (
             <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
-              <div className="text-center text-gray-500 dark:text-gray-400">
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">About</h3>
-                <p>About functionality coming soon...</p>
-              </div>
+              {profile?.type === "audience" ? (
+                <div className="space-y-8">
+                  {/* Header */}
+                  <div className="text-center">
+                    <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">About {profile.name}</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Get to know this music enthusiast</p>
+                  </div>
+
+                  {/* Basic Information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Personal Info */}
+                    <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <Users className="w-5 h-5 mr-2 text-blue-500" />
+                        Personal Information
+                      </h4>
+                      <div className="space-y-3">
+                        {user?.firstName || user?.lastName ? (
+                          <div className="flex items-center">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Name:</span>
+                            <span className="text-gray-900 dark:text-white">{user.firstName} {user.lastName}</span>
+                          </div>
+                        ) : null}
+                        
+                        {profile.location && (
+                          <div className="flex items-center">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Location:</span>
+                            <span className="text-gray-900 dark:text-white">{profile.location}</span>
+                          </div>
+                        )}
+                        
+                        {profile.hometown && (
+                          <div className="flex items-center">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Hometown:</span>
+                            <span className="text-gray-900 dark:text-white">{profile.hometown}</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center">
+                          <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Joined:</span>
+                          <span className="text-gray-900 dark:text-white">
+                            {new Date(profile.createdAt).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Music Interests */}
+                    <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <MessageSquare className="w-5 h-5 mr-2 text-green-500" />
+                        Music Interests
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="text-gray-600 dark:text-gray-400 text-sm">
+                          Discover what music this person enjoys by checking their posts and activity.
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
+                            Music Enthusiast
+                          </span>
+                          <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">
+                            Concert Goer
+                          </span>
+                          <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">
+                            Community Member
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bio Section */}
+                  {profile.bio && (
+                    <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <FileText className="w-5 h-5 mr-2 text-purple-500" />
+                        About Me
+                      </h4>
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                        {profile.bio}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Activity Stats */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <BarChart3 className="w-5 h-5 mr-2 text-orange-500" />
+                      Activity Overview
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                          {/* This would show actual post count from API */}
+                          --
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Posts Shared</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          --
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Friends</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                          --
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Photos</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                          --
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Comments</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Music Discovery Preferences */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <Search className="w-5 h-5 mr-2 text-red-500" />
+                      Music Discovery
+                    </h4>
+                    <div className="space-y-4">
+                      <p className="text-gray-600 dark:text-gray-400">
+                        This user enjoys discovering new music through the Resonant community. 
+                        They engage with artists, venues, and fellow music lovers to expand their musical horizons.
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        <div className="flex items-center space-x-2 bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900 dark:to-purple-900 px-3 py-2 rounded-lg">
+                          <span className="text-sm font-medium text-pink-800 dark:text-pink-200">
+                            🎵 Explores new genres
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2 bg-gradient-to-r from-blue-100 to-teal-100 dark:from-blue-900 dark:to-teal-900 px-3 py-2 rounded-lg">
+                          <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                            🎤 Supports local artists
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 px-3 py-2 rounded-lg">
+                          <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                            🎪 Attends live shows
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact & Social */}
+                  {profile.website && (
+                    <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                        <Globe className="w-5 h-5 mr-2 text-indigo-500" />
+                        Connect
+                      </h4>
+                      <div className="space-y-2">
+                        <a 
+                          href={profile.website} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                        >
+                          <Globe className="w-4 h-4 mr-2" />
+                          Visit Website
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Footer */}
+                  <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p>
+                      {isOwn 
+                        ? "This is how your profile appears to others. You can edit your information in Settings."
+                        : `This is ${profile.name}'s public profile on Resonant.`
+                      }
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 dark:text-gray-400">
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">About</h3>
+                  <p>About functionality for {profile?.type} profiles coming soon...</p>
+                </div>
+              )}
             </div>
           )}
 

@@ -1019,7 +1019,7 @@ export class Storage {
       const result = await db
         .insert(albums)
         .values(albumData)
-        .returning();
+        .returning();```text
 
       return result[0];
     } catch (error) {
@@ -1064,10 +1064,12 @@ export class Storage {
 
   // Photo comment methods
   async getPhotoComments(photoId: number) {
-    return await db
+    const comments = await db
       .select({
         id: photoComments.id,
+        parentId: photoComments.parentId,
         content: photoComments.content,
+        repliesCount: photoComments.repliesCount,
         createdAt: photoComments.createdAt,
         updatedAt: photoComments.updatedAt,
         profile: {
@@ -1079,7 +1081,30 @@ export class Storage {
       .from(photoComments)
       .innerJoin(profiles, eq(photoComments.profileId, profiles.id))
       .where(eq(photoComments.photoId, photoId))
-      .orderBy(desc(photoComments.createdAt));
+      .orderBy(photoComments.createdAt);
+
+    // Organize comments into a tree structure
+    const commentMap = new Map();
+    const rootComments = [];
+
+    // First pass: create all comment objects
+    comments.forEach(comment => {
+      commentMap.set(comment.id, { ...comment, replies: [] });
+    });
+
+    // Second pass: organize into tree structure
+    comments.forEach(comment => {
+      if (comment.parentId) {
+        const parent = commentMap.get(comment.parentId);
+        if (parent) {
+          parent.replies.push(commentMap.get(comment.id));
+        }
+      } else {
+        rootComments.push(commentMap.get(comment.id));
+      }
+    });
+
+    return rootComments;
   }
 
   async createPhotoComment(commentData: any) {
@@ -1097,7 +1122,9 @@ export class Storage {
     const [commentWithProfile] = await db
       .select({
         id: photoComments.id,
+        parentId: photoComments.parentId,
         content: photoComments.content,
+        repliesCount: photoComments.repliesCount,
         createdAt: photoComments.createdAt,
         updatedAt: photoComments.updatedAt,
         profile: {

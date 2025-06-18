@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { formatDistanceToNow } from "date-fns";
 
 interface GalleryTabProps {
   profile: any;
@@ -173,6 +174,157 @@ function FriendTagSearch({ friends, selectedFriends, onSelectionChange }: Friend
   );
 }
 
+interface CommentThreadProps {
+  comment: any;
+  activeProfile: any;
+  onDelete: (commentId: number) => void;
+  onReply: (commentId: number) => void;
+  replyingTo: number | null;
+  replyText: string;
+  setReplyText: (text: string) => void;
+  onSubmitReply: (parentId: number) => void;
+  onCancelReply: () => void;
+  expandedThreads: Set<number>;
+  onToggleThread: (commentId: number) => void;
+  isSubmittingComment: boolean;
+  depth?: number;
+}
+
+const CommentThread: React.FC<CommentThreadProps> = ({
+  comment,
+  activeProfile,
+  onDelete,
+  onReply,
+  replyingTo,
+  replyText,
+  setReplyText,
+  onSubmitReply,
+  onCancelReply,
+  expandedThreads,
+  onToggleThread,
+  isSubmittingComment,
+  depth = 0
+}) => {
+  const maxDepth = 3; // Limit nesting depth
+  const marginLeft = Math.min(depth * 20, maxDepth * 20);
+
+  return (
+    <div style={{ marginLeft: `${marginLeft}px` }}>
+      <div className="flex space-x-3">
+        <Avatar className="w-8 h-8 flex-shrink-0">
+          <AvatarImage src={comment.profile.profileImageUrl || ''} />
+          <AvatarFallback>
+            {comment.profile.name?.[0]?.toUpperCase() || '?'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="bg-white/20 dark:bg-gray-700/20 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {comment.profile.name}
+              </span>
+              {activeProfile?.id === comment.profile.id && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete(comment.id)}
+                  className="h-6 w-6 p-0 text-gray-500 hover:text-red-500"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              )}
+            </div>
+            <p className="text-sm text-gray-800 dark:text-gray-200">
+              {comment.content}
+            </p>
+          </div>
+          <div className="flex items-center mt-1 space-x-3 text-xs text-gray-500 dark:text-gray-400">
+            <span>
+              {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+            </span>
+            {depth < maxDepth && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onReply(comment.id)}
+                className="h-6 px-2 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400"
+              >
+                Reply
+              </Button>
+            )}
+            {comment.replies && comment.replies.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onToggleThread(comment.id)}
+                className="h-6 px-2 text-xs text-gray-600 hover:text-gray-800 dark:text-gray-400"
+              >
+                {expandedThreads.has(comment.id) ? 'Hide' : 'Show'} {comment.replies.length} {comment.replies.length === 1 ? 'reply' : 'replies'}
+              </Button>
+            )}
+          </div>
+
+          {/* Reply Form */}
+          {replyingTo === comment.id && (
+            <div className="mt-3 space-y-2">
+              <textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Write a reply..."
+                className="w-full p-2 text-sm bg-white/30 dark:bg-gray-800/30 border border-white/20 dark:border-gray-600/20 rounded-lg resize-none"
+                rows={2}
+                autoFocus
+              />
+              <div className="flex space-x-2">
+                <Button
+                  size="sm"
+                  onClick={() => onSubmitReply(comment.id)}
+                  disabled={!replyText.trim() || isSubmittingComment}
+                  className="text-xs"
+                >
+                  {isSubmittingComment ? 'Posting...' : 'Reply'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={onCancelReply}
+                  className="text-xs"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Nested Replies */}
+          {comment.replies && comment.replies.length > 0 && expandedThreads.has(comment.id) && (
+            <div className="mt-3 space-y-3">
+              {comment.replies.map((reply: any) => (
+                <CommentThread
+                  key={reply.id}
+                  comment={reply}
+                  activeProfile={activeProfile}
+                  onDelete={onDelete}
+                  onReply={onReply}
+                  replyingTo={replyingTo}
+                  replyText={replyText}
+                  setReplyText={setReplyText}
+                  onSubmitReply={onSubmitReply}
+                  onCancelReply={onCancelReply}
+                  expandedThreads={expandedThreads}
+                  onToggleThread={onToggleThread}
+                  isSubmittingComment={isSubmittingComment}
+                  depth={depth + 1}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
   const { toast } = useToast();
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -197,6 +349,9 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
   const [photoComments, setPhotoComments] = useState<PhotoComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [expandedThreads, setExpandedThreads] = useState<Set<number>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch photos for this profile
@@ -435,12 +590,12 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
 
   // Create photo comment mutation
   const createCommentMutation = useMutation({
-    mutationFn: async ({ photoId, content }: { photoId: number; content: string }) => {
+    mutationFn: async ({ photoId, content, parentId }: { photoId: number; content: string; parentId: number | null }) => {
       const response = await fetch(`/api/photos/${photoId}/comments`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, parentId }),
       });
       if (!response.ok) throw new Error('Failed to create comment');
       return response.json();
@@ -449,6 +604,8 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
       refetchComments();
       setNewComment('');
       setIsSubmittingComment(false);
+      setReplyingTo(null);
+      setReplyText('');
     },
     onError: (error: any) => {
       setIsSubmittingComment(false);
@@ -601,6 +758,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
     createCommentMutation.mutate({
       photoId: selectedPhoto.id,
       content: newComment.trim(),
+      parentId: null,
     });
   };
 
@@ -608,6 +766,30 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
     if (confirm('Are you sure you want to delete this comment?')) {
       deleteCommentMutation.mutate(commentId);
     }
+  };
+
+  const handleReplyClick = (commentId: number) => {
+    setReplyingTo(commentId);
+  };
+
+  const handleSubmitReply = (parentId: number) => {
+    if (!selectedPhoto || !replyText.trim() || isSubmittingComment) return;
+    setIsSubmittingComment(true);
+    createCommentMutation.mutate({
+      photoId: selectedPhoto.id,
+      content: replyText.trim(),
+      parentId: parentId,
+    });
+  };
+
+  const toggleThread = (commentId: number) => {
+    const newExpandedThreads = new Set(expandedThreads);
+    if (newExpandedThreads.has(commentId)) {
+      newExpandedThreads.delete(commentId);
+    } else {
+      newExpandedThreads.add(commentId);
+    }
+    setExpandedThreads(newExpandedThreads);
   };
 
   // Get current photos based on view
@@ -649,6 +831,8 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
 
   // Get all unique tags
   const allTags = Array.from(new Set(photos.flatMap(photo => photo.tags)));
+
+  const activeProfile = profile;
 
   if (isLoading) {
     return (
@@ -699,7 +883,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                 size="sm"
                 onClick={handleViewAllPhotos}
                 className="flex items-center gap-2"
-              >
+              >```tool_code
                 <Camera className="w-4 h-4" />
                 All Photos
               </Button>
@@ -1180,7 +1364,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                                 variant: "destructive",
                               });
                             }
-                            
+
                             // Hide input and show display text
                             e.target.style.display = 'none';
                             const display = document.getElementById('caption-display');
@@ -1311,49 +1495,21 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                         </p>
                       ) : (
                         commentsData.map((comment) => (
-                          <div key={comment.id} className="bg-white/5 dark:bg-gray-800/20 rounded-lg p-3 border border-white/10 dark:border-gray-700/20">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex items-start gap-2 flex-1">
-                                {comment.profile.profileImageUrl ? (
-                                  <img
-                                    src={comment.profile.profileImageUrl}
-                                    alt={comment.profile.name}
-                                    className="w-6 h-6 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-6 h-6 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                                    <User className="w-3 h-3 text-gray-500 dark:text-gray-400" />
-                                  </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                    {comment.profile.name}
-                                  </p>
-                                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 break-words">
-                                    {comment.content}
-                                  </p>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {new Date(comment.createdAt).toLocaleDateString()} at{' '}
-                                    {new Date(comment.createdAt).toLocaleTimeString([], { 
-                                      hour: '2-digit', 
-                                      minute: '2-digit' 
-                                    })}
-                                  </p>
-                                </div>
-                              </div>
-                              {/* Delete button for own comments */}
-                              {isOwn && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteComment(comment.id)}
-                                  className="h-6 w-6 p-0 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                                >
-                                  <X className="w-3 h-3" />
-                                </Button>
-                              )}
-                            </div>
-                          </div>
+                          <CommentThread
+                            key={comment.id}
+                            comment={comment}
+                            activeProfile={activeProfile}
+                            onDelete={handleDeleteComment}
+                            onReply={handleReplyClick}
+                            replyingTo={replyingTo}
+                            replyText={replyText}
+                            setReplyText={setReplyText}
+                            onSubmitReply={handleSubmitReply}
+                            onCancelReply={() => setReplyingTo(null)}
+                            expandedThreads={expandedThreads}
+                            onToggleThread={toggleThread}
+                            isSubmittingComment={isSubmittingComment}
+                          />
                         ))
                       )}
                     </div>
@@ -1497,7 +1653,8 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description (optional)</label>
               <Textarea
-                value={albumDescription}
+                value```tool_code
+={albumDescription}
                 onChange={(e) => setAlbumDescription(e.target.value)}
                 placeholder="Enter album description..."
                 className="mt-1"

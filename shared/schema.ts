@@ -185,7 +185,9 @@ export const photoComments = pgTable("photo_comments", {
   id: serial("id").primaryKey(),
   photoId: integer("photo_id").notNull().references(() => photos.id, { onDelete: "cascade" }),
   profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  parentId: integer("parent_id").references(() => photoComments.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
+  repliesCount: integer("replies_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -234,7 +236,7 @@ export const photosRelations = relations(photos, ({ one, many }) => ({
   comments: many(photoComments),
 }));
 
-export const photoCommentsRelations = relations(photoComments, ({ one }) => ({
+export const photoCommentsRelations = relations(photoComments, ({ one, many }) => ({
   photo: one(photos, {
     fields: [photoComments.photoId],
     references: [photos.id],
@@ -242,6 +244,14 @@ export const photoCommentsRelations = relations(photoComments, ({ one }) => ({
   profile: one(profiles, {
     fields: [photoComments.profileId],
     references: [profiles.id],
+  }),
+  parent: one(photoComments, {
+    fields: [photoComments.parentId],
+    references: [photoComments.id],
+    relationName: "parent",
+  }),
+  replies: many(photoComments, {
+    relationName: "parent",
   }),
 }));
 

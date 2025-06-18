@@ -1997,7 +1997,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/photos/:id/comments', isAuthenticated, async (req: any, res) => {
     try {
       const photoId = parseInt(req.params.id);
-      const { content } = req.body;
+      const { content, parentId } = req.body;
 
       if (!content || content.trim().length === 0) {
         return res.status(400).json({ message: "Comment content is required" });
@@ -2008,11 +2008,17 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      const comment = await storage.createPhotoComment({
+      const commentData: any = {
         photoId,
         profileId: activeProfile.id,
         content: content.trim(),
-      });
+      };
+
+      if (parentId) {
+        commentData.parentId = parseInt(parentId);
+      }
+
+      const comment = await storage.createPhotoComment(commentData);
 
       // Send notification to photo owner
       const { notificationService } = await import('./notifications');

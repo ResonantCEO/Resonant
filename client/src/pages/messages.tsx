@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { MessageCircle, Send, Search, Plus, MoreVertical, Reply, Edit, Trash2, Check, CheckCheck, Archive, Volume2, VolumeX, AlertTriangle, UserX, Pin, Heart, Smile, FileText, Image as ImageIcon, Calendar, Link, Settings, Users } from "lucide-react";
+import { MessageCircle, Send, Search, Plus, MoreVertical, Reply, Edit, Trash2, Trash, Check, CheckCheck, Archive, Volume2, VolumeX, AlertTriangle, UserX, Pin, Heart, Smile, FileText, Image as ImageIcon, Calendar, Link, Settings, Users } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -1269,7 +1269,7 @@ export default function MessagesPage() {
                                                     onClick={() => handleDeleteMessage(message.id)}
                                                     className="text-red-600"
                                                   >
-                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    <Trash className="w-4 h-4 mr-2" />
                                                     Delete
                                                   </DropdownMenuItem>
                                                 </>

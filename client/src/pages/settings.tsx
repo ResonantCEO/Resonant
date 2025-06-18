@@ -119,7 +119,7 @@ function SettingsContent() {
       const formData = new FormData();
       formData.append('profileImage', file);
 
-      const response = await fetch('/api/user/profile-image', {
+      const response = await fetch(`/api/profiles/${activeProfile?.id}/profile-image`, {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -132,7 +132,8 @@ function SettingsContent() {
         title: "Profile picture updated",
         description: "Your profile picture has been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles'] });
       setProfileImageFile(null);
     },
     onError: (error: any) => {
@@ -150,7 +151,7 @@ function SettingsContent() {
       const formData = new FormData();
       formData.append('coverImage', file);
 
-      const response = await fetch('/api/user/cover-image', {
+      const response = await fetch(`/api/profiles/${activeProfile?.id}/cover-image`, {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -163,7 +164,8 @@ function SettingsContent() {
         title: "Cover photo updated",
         description: "Your cover photo has been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles'] });
       setCoverImageFile(null);
     },
     onError: (error: any) => {
@@ -181,7 +183,7 @@ function SettingsContent() {
   // Remove cover photo mutation
   const removeCoverPhotoMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/user/cover-image', {
+      const response = await fetch(`/api/profiles/${activeProfile?.id}/cover-image`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -193,7 +195,8 @@ function SettingsContent() {
         title: "Cover photo removed",
         description: "Your cover photo has been removed successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles'] });
     },
     onError: (error: any) => {
       toast({
@@ -464,9 +467,9 @@ function SettingsContent() {
                     className="relative w-20 h-20 rounded-full overflow-hidden cursor-pointer group"
                     onClick={() => document.getElementById('profileImageInput')?.click()}
                   >
-                    {currentProfileData?.profileImageUrl ? (
+                    {activeProfile?.profileImageUrl ? (
                       <img
-                        src={currentProfileData.profileImageUrl}
+                        src={activeProfile.profileImageUrl}
                         alt="Profile"
                         className="w-full h-full object-cover"
                       />
@@ -503,9 +506,9 @@ function SettingsContent() {
                     className="relative w-full h-32 rounded-lg overflow-hidden cursor-pointer group"
                     onClick={() => document.getElementById('coverImageInput')?.click()}
                   >
-                    {currentProfileData?.coverImageUrl ? (
+                    {activeProfile?.coverImageUrl ? (
                       <img
-                        src={currentProfileData.coverImageUrl}
+                        src={activeProfile.coverImageUrl}
                         alt="Cover"
                         className="w-full h-full object-cover"
                       />
@@ -534,7 +537,7 @@ function SettingsContent() {
                     disabled={uploadCoverPhotoMutation.isPending}
                     className="hidden"
                   />
-                  {currentProfileData?.coverImageUrl && (
+                  {activeProfile?.coverImageUrl && (
                     <Button
                       type="button"
                       variant="destructive"

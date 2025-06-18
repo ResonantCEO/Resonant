@@ -1013,8 +1013,7 @@ export class Storage {
   }
 
   // Album methods
-  async getProfileAlbums(profileId: number):```tool_code
- Promise<Album[]> {
+  async getProfileAlbums(profileId: number): Promise<Album[]> {
     try {
       const result = await db
         .select()

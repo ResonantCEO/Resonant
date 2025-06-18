@@ -1047,8 +1047,7 @@ export class Storage {
           ? conv.otherParticipant?.name || 'Unknown User'
           : conv.conversation.name;
         const displayImage = isDirectMessage
-          ? conv.otherParticipant?.profileImageUrl
-          : conv.conversation.imageUrl;
+          ? conv.otherParticipant?.profileImageUrl          : conv.conversation.imageUrl;
 
         return {
           id: conv.conversation.id,
@@ -1122,6 +1121,180 @@ export class Storage {
     }
   }
 
+  // Create group conversation
+  async createGroupConversation(data: {
+    name: string;
+    description?: string;
+    createdBy: number;
+    isPrivate?: boolean;
+    maxMembers?: number;
+    participantIds: number[];
+  }) {
+    const { name, description, createdBy, isPrivate = false, maxMembers = 50, participantIds } = data;
+
+    // Create the conversation
+    const [conversation] = await db.insert(conversations).values({
+      type: 'group',
+      name,
+      description,
+      createdBy,
+      isPrivate,
+      maxMembers,
+      settings: {
+        canMembersInvite: !isPrivate,
+        canMembersLeave: true,
+        adminOnlyMessages: false,
+      },
+    }).returning();
+
+    // Add participants
+    const participants = participantIds.map(profileId => ({
+      conversationId: conversation.id,
+      profileId,
+      role: profileId === createdBy ? 'admin' : 'member',
+    }));
+
+    await db.insert(conversationParticipants).values(participants);
+
+    return conversation;
+  }
+
+  // Add member to group
+  async addGroupMember(conversationId: number, profileId: number, addedBy: number, role: string = 'member') {
+    // Check if conversation is a group
+    const conversation = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, conversationId))
+      .limit(1);
+
+    if (!conversation[0] || conversation[0].type !== 'group') {
+      throw new Error('Not a group conversation');
+    }
+
+    // Check if user is already a member
+    const existingMember = await db
+      .select()
+      .from(conversationParticipants)
+      .where(and(
+        eq(conversationParticipants.conversationId, conversationId),
+        eq(conversationParticipants.profileId, profileId),
+        isNull(conversationParticipants.leftAt)
+      ))
+      .limit(1);
+
+    if (existingMember[0]) {
+      throw new Error('User is already a member of this group');
+    }
+
+    // Check group member limit
+    const memberCount = await db
+      .select({ count: sql`count(*)` })
+      .from(conversationParticipants)
+      .where(and(
+        eq(conversationParticipants.conversationId, conversationId),
+        isNull(conversationParticipants.leftAt)
+      ));
+
+    if (Number(memberCount[0].count) >= conversation[0].maxMembers!) {
+      throw new Error('Group has reached maximum member limit');
+    }
+
+    // Add member
+    await db.insert(conversationParticipants).values({
+      conversationId,
+      profileId,
+      role,
+    });
+
+    // Send system message
+    await this.sendMessage({
+      conversationId,
+      senderId: addedBy,
+      content: `Added new member to the group`,
+      messageType: 'system',
+    });
+
+    return { success: true };
+  }
+
+  // Remove member from group
+  async removeGroupMember(conversationId: number, profileId: number, removedBy: number) {
+    // Update participant to mark as left
+    await db
+      .update(conversationParticipants)
+      .set({ leftAt: new Date() })
+      .where(and(
+        eq(conversationParticipants.conversationId, conversationId),
+        eq(conversationParticipants.profileId, profileId),
+        isNull(conversationParticipants.leftAt)
+      ));
+
+    // Send system message
+    await this.sendMessage({
+      conversationId,
+      senderId: removedBy,
+      content: `Member left the group`,
+      messageType: 'system',
+    });
+
+    return { success: true };
+  }
+
+  // Update group info
+  async updateGroupInfo(conversationId: number, updatedBy: number, updates: {
+    name?: string;
+    description?: string;
+    imageUrl?: string;
+    settings?: any;
+  }) {
+    // Check if user is admin
+    const participant = await db
+      .select()
+      .from(conversationParticipants)
+      .where(and(
+        eq(conversationParticipants.conversationId, conversationId),
+        eq(conversationParticipants.profileId, updatedBy),
+        isNull(conversationParticipants.leftAt)
+      ))
+      .limit(1);
+
+    if (!participant[0] || participant[0].role !== 'admin') {
+      throw new Error('Only group admins can update group info');
+    }
+
+    await db
+      .update(conversations)
+      .set(updates)
+      .where(eq(conversations.id, conversationId));
+
+    return { success: true };
+  }
+
+  // Get group members
+  async getGroupMembers(conversationId: number) {
+    const members = await db
+      .select({
+        participant: conversationParticipants,
+        profile: {
+          id: profiles.id,
+          name: profiles.name,
+          profileImageUrl: profiles.profileImageUrl,
+          type: profiles.type,
+        },
+      })
+      .from(conversationParticipants)
+      .leftJoin(profiles, eq(conversationParticipants.profileId, profiles.id))
+      .where(and(
+        eq(conversationParticipants.conversationId, conversationId),
+        isNull(conversationParticipants.leftAt)
+      ))
+      .orderBy(conversationParticipants.joinedAt);
+
+    return members;
+  }
+
+  // Get or create direct conversation
   async getOrCreateDirectConversation(profileId1: number, profileId2: number): Promise<any> {
     try {
       // Check if conversation already exists

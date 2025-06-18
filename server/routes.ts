@@ -2555,6 +2555,119 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Create group conversation
+  app.post('/api/groups', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const { name, description, isPrivate, maxMembers, participantIds } = req.body;
+
+      if (!name || !name.trim()) {
+        return res.status(400).json({ message: "Group name is required" });
+      }
+
+      if (!participantIds || !Array.isArray(participantIds) || participantIds.length === 0) {
+        return res.status(400).json({ message: "At least one participant is required" });
+      }
+
+      // Add creator to participants if not included
+      const allParticipants = [...new Set([activeProfile.id, ...participantIds])];
+
+      const group = await storage.createGroupConversation({
+        name: name.trim(),
+        description: description?.trim(),
+        createdBy: activeProfile.id,
+        isPrivate: isPrivate || false,
+        maxMembers: maxMembers || 50,
+        participantIds: allParticipants,
+      });
+
+      res.json(group);
+    } catch (error) {
+      console.error("Error creating group:", error);
+      res.status(500).json({ message: "Failed to create group" });
+    }
+  });
+
+  // Get group members
+  app.get('/api/conversations/:id/members', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const members = await storage.getGroupMembers(conversationId);
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching group members:", error);
+      res.status(500).json({ message: "Failed to fetch group members" });
+    }
+  });
+
+  // Add member to group
+  app.post('/api/conversations/:id/members', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const { profileId, role } = req.body;
+
+      if (!profileId) {
+        return res.status(400).json({ message: "Profile ID is required" });
+      }
+
+      await storage.addGroupMember(conversationId, profileId, activeProfile.id, role || 'member');
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error adding group member:", error);
+      res.status(500).json({ message: error.message || "Failed to add member" });
+    }
+  });
+
+  // Remove member from group
+  app.delete('/api/conversations/:id/members/:profileId', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const profileId = parseInt(req.params.profileId);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      await storage.removeGroupMember(conversationId, profileId, activeProfile.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing group member:", error);
+      res.status(500).json({ message: "Failed to remove member" });
+    }
+  });
+
+  // Update group info
+  app.patch('/api/conversations/:id/info', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const updates = req.body;
+      await storage.updateGroupInfo(conversationId, activeProfile.id, updates);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating group info:", error);
+      res.status(500).json({ message: error.message || "Failed to update group" });
+    }
+  });
+
   // Archive/unarchive conversation
   app.patch('/api/conversations/:id/archive', isAuthenticated, async (req: any, res) => {
     try {

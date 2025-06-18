@@ -539,6 +539,9 @@ export const conversations = pgTable("conversations", {
   description: text("description"), // For group chats
   imageUrl: varchar("image_url"), // For group chats
   createdBy: integer("created_by").references(() => profiles.id),
+  isPrivate: boolean("is_private").default(false), // Private groups require invitation
+  maxMembers: integer("max_members").default(50), // Group size limit
+  settings: jsonb("settings").default({}), // Group settings like permissions
   isArchived: boolean("is_archived").default(false),
   lastMessageId: integer("last_message_id"),
   lastActivityAt: timestamp("last_activity_at").defaultNow(),

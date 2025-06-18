@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { MessageCircle, Send, Search, Plus, MoreVertical, Reply, Edit, Trash2, Check, CheckCheck, Archive, Volume2, VolumeX, AlertTriangle, UserX, Pin, Heart, Smile, FileText, Image as ImageIcon, Calendar, Link, Settings } from "lucide-react";
+import { MessageCircle, Send, Search, Plus, MoreVertical, Reply, Edit, Trash2, Check, CheckCheck, Archive, Volume2, VolumeX, AlertTriangle, UserX, Pin, Heart, Smile, FileText, Image as ImageIcon, Calendar, Link, Settings, Users } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -103,6 +103,13 @@ export default function MessagesPage() {
   const [editContent, setEditContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [showNewConversation, setShowNewConversation] = useState(false);
+  const [showNewGroup, setShowNewGroup] = useState(false);
+  const [showGroupSettings, setShowGroupSettings] = useState(false);
+  const [selectedGroupMembers, setSelectedGroupMembers] = useState<number[]>([]);
+  const [groupName, setGroupName] = useState("");
+  const [groupDescription, setGroupDescription] = useState("");
+  const [isPrivateGroup, setIsPrivateGroup] = useState(false);
+  const [maxGroupMembers, setMaxGroupMembers] = useState(50);
   const [showArchivedConversations, setShowArchivedConversations] = useState(false);
   const [showConversationSettings, setShowConversationSettings] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
@@ -324,6 +331,38 @@ export default function MessagesPage() {
     },
   });
 
+  // Create group mutation
+  const createGroupMutation = useMutation({
+    mutationFn: (data: { 
+      name: string; 
+      description?: string; 
+      isPrivate?: boolean; 
+      maxMembers?: number; 
+      participantIds: number[] 
+    }) => apiRequest("POST", "/api/groups", data),
+    onSuccess: (group) => {
+      setSelectedConversation(group.id);
+      setShowNewGroup(false);
+      setGroupName("");
+      setGroupDescription("");
+      setSelectedGroupMembers([]);
+      setIsPrivateGroup(false);
+      setMaxGroupMembers(50);
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+      toast({
+        title: "Success",
+        description: "Group created successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Start conversation mutation
   const startConversationMutation = useMutation({
     mutationFn: (data: { profileId: number; message?: string }) =>
@@ -485,6 +524,34 @@ export default function MessagesPage() {
     });
   };
 
+  const handleCreateGroup = () => {
+    if (!groupName.trim()) {
+      toast({
+        title: "Error",
+        description: "Group name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedGroupMembers.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select at least one member",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createGroupMutation.mutate({
+      name: groupName.trim(),
+      description: groupDescription.trim() || undefined,
+      isPrivate: isPrivateGroup,
+      maxMembers: maxGroupMembers,
+      participantIds: selectedGroupMembers,
+    });
+  };
+
   const filteredConversations = conversations
     .filter((conv: Conversation) => {
       const matchesSearch = conv.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -538,11 +605,27 @@ export default function MessagesPage() {
                       >
                         <Archive className="w-4 h-4" />
                       </Button>
-                      <Dialog open={showNewConversation} onOpenChange={setShowNewConversation}>
-                        <DialogTrigger asChild>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                           <Button size="sm" variant="outline">
                             <Plus className="w-4 h-4" />
                           </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem onClick={() => setShowNewConversation(true)}>
+                            <MessageCircle className="w-4 h-4 mr-2" />
+                            New Chat
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowNewGroup(true)}>
+                            <Users className="w-4 h-4 mr-2" />
+                            New Group
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      <Dialog open={showNewConversation} onOpenChange={setShowNewConversation}>
+                        <DialogTrigger asChild>
+                          <div style={{ display: 'none' }} />
                         </DialogTrigger>
                         <DialogContent className="max-w-md">
                           <DialogHeader>
@@ -641,6 +724,177 @@ export default function MessagesPage() {
                                 className="bg-blue-600 hover:bg-blue-700"
                               >
                                 {startConversationMutation.isPending ? "Starting..." : "Start Conversation"}
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
+                      {/* New Group Dialog */}
+                      <Dialog open={showNewGroup} onOpenChange={setShowNewGroup}>
+                        <DialogContent className="max-w-lg">
+                          <DialogHeader>
+                            <DialogTitle>Create New Group</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            {/* Group Name */}
+                            <div>
+                              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2 block">
+                                Group Name *
+                              </label>
+                              <Input
+                                placeholder="Enter group name"
+                                value={groupName}
+                                onChange={(e) => setGroupName(e.target.value)}
+                              />
+                            </div>
+
+                            {/* Group Description */}
+                            <div>
+                              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2 block">
+                                Description (optional)
+                              </label>
+                              <Textarea
+                                placeholder="Enter group description"
+                                value={groupDescription}
+                                onChange={(e) => setGroupDescription(e.target.value)}
+                                className="min-h-[60px] resize-none"
+                              />
+                            </div>
+
+                            {/* Group Settings */}
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                                    Private Group
+                                  </label>
+                                  <p className="text-xs text-neutral-500">
+                                    Only admins can add new members
+                                  </p>
+                                </div>
+                                <Switch
+                                  checked={isPrivateGroup}
+                                  onCheckedChange={setIsPrivateGroup}
+                                />
+                              </div>
+
+                              <div>
+                                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2 block">
+                                  Max Members ({maxGroupMembers})
+                                </label>
+                                <input
+                                  type="range"
+                                  min="5"
+                                  max="100"
+                                  value={maxGroupMembers}
+                                  onChange={(e) => setMaxGroupMembers(parseInt(e.target.value))}
+                                  className="w-full"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Member Selection */}
+                            <div>
+                              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2 block">
+                                Add Members
+                              </label>
+                              <div className="relative mb-2">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                                <Input
+                                  placeholder="Search friends..."
+                                  value={friendSearchQuery}
+                                  onChange={(e) => setFriendSearchQuery(e.target.value)}
+                                  className="pl-10"
+                                />
+                              </div>
+
+                              {/* Selected Members Count */}
+                              {selectedGroupMembers.length > 0 && (
+                                <p className="text-sm text-blue-600 mb-2">
+                                  {selectedGroupMembers.length} member(s) selected
+                                </p>
+                              )}
+
+                              <div className="max-h-48 overflow-y-auto space-y-2">
+                                {loadingFriends ? (
+                                  <div className="text-center py-4">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                                  </div>
+                                ) : filteredFriends.length === 0 ? (
+                                  <div className="text-center py-4 text-neutral-500">
+                                    {friendSearchQuery ? "No friends found" : "No friends available"}
+                                  </div>
+                                ) : (
+                                  filteredFriends.map((friend: any) => {
+                                    const isSelected = selectedGroupMembers.includes(friend.id);
+                                    return (
+                                      <div
+                                        key={friend.id}
+                                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                                          isSelected
+                                            ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
+                                            : "hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                                        }`}
+                                        onClick={() => {
+                                          if (isSelected) {
+                                            setSelectedGroupMembers(prev => prev.filter(id => id !== friend.id));
+                                          } else {
+                                            setSelectedGroupMembers(prev => [...prev, friend.id]);
+                                          }
+                                        }}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isSelected}
+                                          onChange={() => {}}
+                                          className="text-blue-600"
+                                        />
+                                        <Avatar className="w-10 h-10">
+                                          <AvatarImage src={friend.profileImageUrl} />
+                                          <AvatarFallback>
+                                            {friend.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-medium text-neutral-900 dark:text-white truncate">
+                                            {friend.name}
+                                          </p>
+                                          {friend.bio && (
+                                            <p className="text-sm text-neutral-600 dark:text-neutral-400 truncate">
+                                              {friend.bio}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setShowNewGroup(false);
+                                  setGroupName("");
+                                  setGroupDescription("");
+                                  setSelectedGroupMembers([]);
+                                  setIsPrivateGroup(false);
+                                  setMaxGroupMembers(50);
+                                  setFriendSearchQuery("");
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={handleCreateGroup}
+                                disabled={!groupName.trim() || selectedGroupMembers.length === 0 || createGroupMutation.isPending}
+                                className="bg-blue-600 hover:bg-blue-700"
+                              >
+                                {createGroupMutation.isPending ? "Creating..." : "Create Group"}
                               </Button>
                             </div>
                           </div>

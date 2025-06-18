@@ -110,6 +110,9 @@ export default function MessagesPage() {
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
+  const [selectedFriend, setSelectedFriend] = useState<any>(null);
+  const [friendSearchQuery, setFriendSearchQuery] = useState("");
+  const [initialMessage, setInitialMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -126,6 +129,21 @@ export default function MessagesPage() {
     queryFn: () => apiRequest("GET", `/api/conversations/${selectedConversation}/messages`),
     enabled: !!selectedConversation,
     refetchInterval: 2000, // Refresh every 2 seconds for real-time feel
+  });
+
+  // Fetch friends for starting new conversations
+  const { data: friends = [], isLoading: loadingFriends } = useQuery({
+    queryKey: ["/api/friends"],
+    queryFn: () => apiRequest("GET", "/api/friends"),
+    select: (data) => {
+      if (!data || !Array.isArray(data)) return [];
+      return data.map((item: any) => {
+        if (item.friend) {
+          return item.friend;
+        }
+        return item;
+      });
+    }
   });
 
   // Send message mutation
@@ -306,6 +324,31 @@ export default function MessagesPage() {
     },
   });
 
+  // Start conversation mutation
+  const startConversationMutation = useMutation({
+    mutationFn: (data: { profileId: number; message?: string }) =>
+      apiRequest("POST", "/api/conversations", data),
+    onSuccess: (conversation) => {
+      setSelectedConversation(conversation.id);
+      setShowNewConversation(false);
+      setSelectedFriend(null);
+      setInitialMessage("");
+      setFriendSearchQuery("");
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+      toast({
+        title: "Success",
+        description: "Conversation started successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -426,12 +469,32 @@ export default function MessagesPage() {
     reactToMessageMutation.mutate({ messageId, reaction });
   };
 
+  const handleStartConversation = () => {
+    if (!selectedFriend) {
+      toast({
+        title: "Error",
+        description: "Please select a friend to message",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    startConversationMutation.mutate({
+      profileId: selectedFriend.id,
+      message: initialMessage.trim() || undefined,
+    });
+  };
+
   const filteredConversations = conversations
     .filter((conv: Conversation) => {
       const matchesSearch = conv.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesArchiveFilter = showArchivedConversations ? conv.isArchived : !conv.isArchived;
       return matchesSearch && matchesArchiveFilter;
     });
+
+  const filteredFriends = friends.filter((friend: any) =>
+    friend.name.toLowerCase().includes(friendSearchQuery.toLowerCase())
+  );
 
   const filteredMessages = messages.filter((message: Message) => {
     if (!messageSearchQuery) return true;
@@ -481,13 +544,106 @@ export default function MessagesPage() {
                             <Plus className="w-4 h-4" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="max-w-md">
                           <DialogHeader>
                             <DialogTitle>Start New Conversation</DialogTitle>
                           </DialogHeader>
-                          <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                            To start a new conversation, visit a profile and click the "Message" button.
-                          </p>
+                          <div className="space-y-4">
+                            {/* Friend Search */}
+                            <div>
+                              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2 block">
+                                Select a friend to message
+                              </label>
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                                <Input
+                                  placeholder="Search friends..."
+                                  value={friendSearchQuery}
+                                  onChange={(e) => setFriendSearchQuery(e.target.value)}
+                                  className="pl-10"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Friends List */}
+                            <div className="max-h-60 overflow-y-auto space-y-2">
+                              {loadingFriends ? (
+                                <div className="text-center py-4">
+                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                                </div>
+                              ) : filteredFriends.length === 0 ? (
+                                <div className="text-center py-4 text-neutral-500">
+                                  {friendSearchQuery ? "No friends found" : "No friends available"}
+                                </div>
+                              ) : (
+                                filteredFriends.map((friend: any) => (
+                                  <div
+                                    key={friend.id}
+                                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                                      selectedFriend?.id === friend.id
+                                        ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
+                                        : "hover:bg-neutral-50 dark:hover:bg-neutral-800"
+                                    }`}
+                                    onClick={() => setSelectedFriend(friend)}
+                                  >
+                                    <Avatar className="w-10 h-10">
+                                      <AvatarImage src={friend.profileImageUrl} />
+                                      <AvatarFallback>
+                                        {friend.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium text-neutral-900 dark:text-white truncate">
+                                        {friend.name}
+                                      </p>
+                                      {friend.bio && (
+                                        <p className="text-sm text-neutral-600 dark:text-neutral-400 truncate">
+                                          {friend.bio}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+
+                            {/* Initial Message */}
+                            {selectedFriend && (
+                              <div>
+                                <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2 block">
+                                  Start with a message (optional)
+                                </label>
+                                <Textarea
+                                  placeholder="Type your message..."
+                                  value={initialMessage}
+                                  onChange={(e) => setInitialMessage(e.target.value)}
+                                  className="min-h-[80px] resize-none"
+                                />
+                              </div>
+                            )}
+
+                            {/* Actions */}
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setShowNewConversation(false);
+                                  setSelectedFriend(null);
+                                  setInitialMessage("");
+                                  setFriendSearchQuery("");
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={handleStartConversation}
+                                disabled={!selectedFriend || startConversationMutation.isPending}
+                                className="bg-blue-600 hover:bg-blue-700"
+                              >
+                                {startConversationMutation.isPending ? "Starting..." : "Start Conversation"}
+                              </Button>
+                            </div>
+                          </div>
                         </DialogContent>
                       </Dialog>
                     </div>

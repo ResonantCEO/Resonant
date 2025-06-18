@@ -1792,6 +1792,36 @@ export function registerRoutes(app: Express): Server {
         console.log('Photo data to be created:', photoData);
 
         const photos = await storage.createProfilePhotos(photoData);
+
+        // Send notifications to tagged friends
+        const { notificationService } = await import('./notifications');
+        for (const photo of photos) {
+          if (photo.friendTags && photo.friendTags.length > 0) {
+            // Get the profile that uploaded the photo
+            const uploaderProfile = await storage.getProfile(photo.profileId);
+            if (uploaderProfile) {
+              // Get the uploader's user details
+              const uploaderUser = await storage.getUser(req.user.id);
+              const uploaderName = `${uploaderUser?.firstName} ${uploaderUser?.lastName}`;
+
+              // Send notification to each tagged friend
+              for (const friendProfileId of photo.friendTags) {
+                const friendProfile = await storage.getProfile(friendProfileId);
+                if (friendProfile?.userId) {
+                  await notificationService.notifyPhotoTag(
+                    friendProfile.userId,
+                    req.user.id,
+                    uploaderName,
+                    photo.id,
+                    photo.caption || "a photo",
+                    photo.imageUrl
+                  );
+                }
+              }
+            }
+          }
+        }
+
         res.json(photos);
       } catch (error) {
         console.error("Error uploading photos:", error);
@@ -2073,6 +2103,26 @@ export function registerRoutes(app: Express): Server {
             content.trim(),
             photo.imageUrl
           );
+        }
+      }
+
+      // Send notifications to tagged friends in the comment
+      if (friendTags && friendTags.length > 0) {
+        const commenterUser = await storage.getUser(req.user.id);
+        const commenterName = `${commenterUser?.firstName} ${commenterUser?.lastName}`;
+
+        for (const friendProfileId of friendTags) {
+          const friendProfile = await storage.getProfile(friendProfileId);
+          if (friendProfile?.userId && friendProfile.userId !== req.user.id) {
+            await notificationService.notifyCommentTag(
+              friendProfile.userId,
+              req.user.id,
+              commenterName,
+              photoId,
+              content.trim(),
+              photo?.imageUrl || ""
+            );
+          }
         }
       }
 

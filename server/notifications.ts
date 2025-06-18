@@ -124,8 +124,8 @@ export class NotificationService {
         return activeProfileType === 'artist' || activeProfileType === 'venue';
       }
       
-      // For photo comment notifications, show for all profile types
-      if (notification.type === 'photo_comment') {
+      // For photo comment, photo tag, and comment tag notifications, show for all profile types
+      if (notification.type === 'photo_comment' || notification.type === 'photo_tag' || notification.type === 'comment_tag') {
         return true;
       }
       
@@ -545,6 +545,38 @@ export class NotificationService {
       type: "photo_comment",
       title: "New Photo Comment",
       message: `${senderName} commented on your photo`,
+      data: { 
+        photoId, 
+        senderId, 
+        commentContent: commentContent || "",
+        photoUrl: photoUrl || ""
+      },
+    });
+  }
+
+  async notifyPhotoTag(recipientId: number, senderId: number, senderName: string, photoId: number, photoCaption?: string, photoUrl?: string): Promise<void> {
+    await this.createNotification({
+      recipientId,
+      senderId,
+      type: "photo_tag",
+      title: "Tagged in Photo",
+      message: `${senderName} tagged you in ${photoCaption}`,
+      data: { 
+        photoId, 
+        senderId, 
+        photoCaption: photoCaption || "",
+        photoUrl: photoUrl || ""
+      },
+    });
+  }
+
+  async notifyCommentTag(recipientId: number, senderId: number, senderName: string, photoId: number, commentContent?: string, photoUrl?: string): Promise<void> {
+    await this.createNotification({
+      recipientId,
+      senderId,
+      type: "comment_tag",
+      title: "Tagged in Comment",
+      message: `${senderName} tagged you in a comment`,
       data: { 
         photoId, 
         senderId, 

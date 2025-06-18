@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos } from "@shared/schema";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
 import { z } from "zod";

@@ -1665,7 +1665,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
 
       {/* Upload Dialog */}
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>Upload Photos</DialogTitle>
           </DialogHeader>

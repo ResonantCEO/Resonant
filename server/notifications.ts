@@ -87,12 +87,12 @@ export class NotificationService {
       if (notification.type === 'booking_request') {
         return activeProfileType === 'venue';
       }
-
+      
       // For booking responses, ONLY show them when artist profile is active
       if (notification.type === 'booking_response') {
         return activeProfileType === 'artist';
       }
-
+      
       // For friend requests, only show them for the specific target profile
       if (notification.type === 'friend_request') {
         const data = notification.data as any;
@@ -107,7 +107,7 @@ export class NotificationService {
         }
         return false;
       }
-
+      
       // For friend accepted notifications, only show to the profile that made the original request
       if (notification.type === 'friend_accepted') {
         const data = notification.data as any;
@@ -117,18 +117,18 @@ export class NotificationService {
         // Legacy support: if no senderProfileId, show to all profiles (but this shouldn't happen with new notifications)
         return true;
       }
-
+      
       // For post-related notifications, show based on profile type
       if (notification.type === 'post_like' || notification.type === 'post_comment') {
         // Only show post notifications for artist and venue profiles (not audience)
         return activeProfileType === 'artist' || activeProfileType === 'venue';
       }
-
+      
       // For photo comment, photo tag, and comment tag notifications, show for all profile types
       if (notification.type === 'photo_comment' || notification.type === 'photo_tag' || notification.type === 'comment_tag') {
         return true;
       }
-
+      
       // For other notification types, show to all profiles
       return true;
     });
@@ -187,14 +187,14 @@ export class NotificationService {
         console.log(`Booking request notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} for ${activeProfileType} profile`);
         return shouldInclude;
       }
-
+      
       // For booking responses, ONLY count them when artist profile is active
       if (notification.type === 'booking_response') {
         const shouldInclude = activeProfileType === 'artist';
         console.log(`Booking response notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} for ${activeProfileType} profile`);
         return shouldInclude;
       }
-
+      
       // For friend requests, only count them for the specific target profile
       if (notification.type === 'friend_request') {
         const data = notification.data as any;
@@ -207,7 +207,7 @@ export class NotificationService {
         console.log(`Friend request notification ${notification.id}: excluded (no targetProfileId)`);
         return false;
       }
-
+      
       // For friend accepted notifications, only count for the profile that made the original request
       if (notification.type === 'friend_accepted') {
         const data = notification.data as any;
@@ -220,7 +220,7 @@ export class NotificationService {
         console.log(`Friend accepted notification ${notification.id}: included for all profiles (legacy)`);
         return true;
       }
-
+      
       // For post-related notifications, count based on profile type
       if (notification.type === 'post_like' || notification.type === 'post_comment') {
         // Only count post notifications for artist and venue profiles (not audience)
@@ -228,13 +228,13 @@ export class NotificationService {
         console.log(`Post notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} for ${activeProfileType} profile`);
         return shouldInclude;
       }
-
+      
       // For photo comment notifications, count for all profile types
       if (notification.type === 'photo_comment') {
         console.log(`Photo comment notification ${notification.id}: included for all profiles`);
         return true;
       }
-
+      
       // For other notification types, count for all profiles
       console.log(`Other notification ${notification.id} (${notification.type}): included for all profiles`);
       return true;
@@ -378,7 +378,7 @@ export class NotificationService {
     // Get sender profile details if senderProfileId is provided
     let senderProfileData = null;
     let primaryImageUrl = null;
-
+    
     if (senderProfileId) {
       const senderProfile = await db
         .select({
@@ -390,7 +390,7 @@ export class NotificationService {
         .from(profiles)
         .where(eq(profiles.id, senderProfileId))
         .limit(1);
-
+      
       if (senderProfile.length > 0) {
         senderProfileData = senderProfile[0];
         // Profile image takes priority
@@ -411,7 +411,7 @@ export class NotificationService {
       .limit(1);
 
     const senderUserData = senderUser.length > 0 ? senderUser[0] : null;
-
+    
     // If no profile image, use user image as fallback
     if (!primaryImageUrl && senderUserData?.profileImageUrl) {
       primaryImageUrl = senderUserData.profileImageUrl;
@@ -526,7 +526,7 @@ export class NotificationService {
     });
   }
 
-  async notifyBookingResponse(venueUserId: number, artistUserId: number, venueName: string, venueProfileName: string, status: string) {
+  async notifyBookingResponse(artistUserId: number, venueUserId: number, venueName: string, venueProfileName: string, status: string) {
     const statusText = status === 'accepted' ? 'accepted' : 'declined';
     await this.createNotification({
       recipientId: artistUserId,
@@ -583,17 +583,6 @@ export class NotificationService {
         commentContent: commentContent || "",
         photoUrl: photoUrl || ""
       },
-    });
-  }
-
-  async notifyMessage(recipientId: number, senderId: number, senderName: string, conversationId: number, message: string): Promise<void> {
-    await this.createNotification({
-      recipientId,
-      senderId,
-      type: 'message',
-      title: 'New message',
-      message: `${senderName}: ${message}`,
-      data: { conversationId, messagePreview: message.substring(0, 100) }
     });
   }
 }

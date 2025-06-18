@@ -531,6 +531,145 @@ export const notificationTypeSchema = z.enum([
   "system_announcement"
 ]);
 
+// Messages and conversations tables
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  type: varchar("type").notNull().default("direct"), // 'direct', 'group'
+  name: varchar("name"), // For group chats
+  description: text("description"), // For group chats
+  imageUrl: varchar("image_url"), // For group chats
+  createdBy: integer("created_by").references(() => profiles.id),
+  isArchived: boolean("is_archived").default(false),
+  lastMessageId: integer("last_message_id"),
+  lastActivityAt: timestamp("last_activity_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const conversationParticipants = pgTable("conversation_participants", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  role: varchar("role").default("member"), // 'admin', 'member'
+  joinedAt: timestamp("joined_at").defaultNow(),
+  leftAt: timestamp("left_at"),
+  lastReadAt: timestamp("last_read_at").defaultNow(),
+  isMuted: boolean("is_muted").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  senderId: integer("sender_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  replyToId: integer("reply_to_id").references(() => messages.id),
+  content: text("content").notNull(),
+  messageType: varchar("message_type").default("text"), // 'text', 'image', 'file', 'system'
+  attachments: jsonb("attachments").default([]),
+  reactions: jsonb("reactions").default({}),
+  editedAt: timestamp("edited_at"),
+  deletedAt: timestamp("deleted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const messageReads = pgTable("message_reads", {
+  id: serial("id").primaryKey(),
+  messageId: integer("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  readAt: timestamp("read_at").defaultNow(),
+});
+
+// Relations for messages
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+  creator: one(profiles, {
+    fields: [conversations.createdBy],
+    references: [profiles.id],
+  }),
+  participants: many(conversationParticipants),
+  messages: many(messages),
+  lastMessage: one(messages, {
+    fields: [conversations.lastMessageId],
+    references: [messages.id],
+  }),
+}));
+
+export const conversationParticipantsRelations = relations(conversationParticipants, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [conversationParticipants.conversationId],
+    references: [conversations.id],
+  }),
+  profile: one(profiles, {
+    fields: [conversationParticipants.profileId],
+    references: [profiles.id],
+  }),
+}));
+
+export const messagesRelations = relations(messages, ({ one, many }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(profiles, {
+    fields: [messages.senderId],
+    references: [profiles.id],
+  }),
+  replyTo: one(messages, {
+    fields: [messages.replyToId],
+    references: [messages.id],
+    relationName: "reply",
+  }),
+  replies: many(messages, {
+    relationName: "reply",
+  }),
+  reads: many(messageReads),
+}));
+
+export const messageReadsRelations = relations(messageReads, ({ one }) => ({
+  message: one(messages, {
+    fields: [messageReads.messageId],
+    references: [messages.id],
+  }),
+  profile: one(profiles, {
+    fields: [messageReads.profileId],
+    references: [profiles.id],
+  }),
+}));
+
+// Insert schemas
+export const insertConversationSchema = createInsertSchema(conversations).omit({
+  id: true,
+  lastMessageId: true,
+  lastActivityAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMessageSchema = createInsertSchema(messages).omit({
+  id: true,
+  editedAt: true,
+  deletedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertConversationParticipantSchema = createInsertSchema(conversationParticipants).omit({
+  id: true,
+  joinedAt: true,
+  leftAt: true,
+  lastReadAt: true,
+  createdAt: true,
+});
+
+// Type exports
+export type Conversation = InferSelectModel<typeof conversations>;
+export type InsertConversation = InferInsertModel<typeof conversations>;
+export type ConversationParticipant = InferSelectModel<typeof conversationParticipants>;
+export type InsertConversationParticipant = InferInsertModel<typeof conversationParticipants>;
+export type Message = InferSelectModel<typeof messages>;
+export type InsertMessage = InferInsertModel<typeof messages>;
+export type MessageRead = InferSelectModel<typeof messageReads>;
+
 export type BookingRequest = InferSelectModel<typeof bookingRequests>;
 export type InsertBookingRequest = InferInsertModel<typeof bookingRequests>;
 export type Album = InferSelectModel<typeof albums>;

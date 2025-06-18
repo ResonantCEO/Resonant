@@ -1002,6 +1002,12 @@ export function registerRoutes(app: Express): Server {
 
       const requests = await storage.getFriendRequests(activeProfile.id);
       console.log(`Found ${requests.length} pending friend requests for profile ${activeProfile.id}`);
+      
+      // Log the structure of requests to debug
+      if (requests.length > 0) {
+        console.log('Sample friend request structure:', JSON.stringify(requests[0], null, 2));
+      }
+      
       res.json(requests);
     } catch (error) {
       console.error("Error fetching friend requests:", error);

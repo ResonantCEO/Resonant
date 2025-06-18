@@ -232,14 +232,24 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
       return null;
     }
 
-    // The profile data is directly on the request object, not nested under 'profile'
-    const profile = {
+    console.log('Processing friend request:', request);
+
+    // Extract profile data - check multiple possible locations
+    const profile = request.profile || {
       id: request.id,
-      name: request.name,
-      profileImageUrl: request.profileImageUrl,
-      type: request.type,
+      name: request.name || request.senderName || 'Unknown User',
+      profileImageUrl: request.profileImageUrl || request.senderProfileImageUrl,
+      type: request.type || 'audience',
       bio: request.bio
     };
+
+    // Determine the friendship ID for actions
+    const friendshipId = request.friendship?.id || request.id;
+    
+    if (!friendshipId) {
+      console.error('No friendship ID found for request:', request);
+      return null;
+    }
 
     return (
       <Card className="hover:shadow-xl transition-all duration-300 border border-gray-700 bg-gray-800 hover:bg-gray-750">
@@ -273,11 +283,9 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (request.friendship?.id) {
-                    acceptFriendRequestMutation.mutate(request.friendship.id);
-                  }
+                  acceptFriendRequestMutation.mutate(friendshipId);
                 }}
-                disabled={acceptFriendRequestMutation.isPending || !request.friendship?.id}
+                disabled={acceptFriendRequestMutation.isPending}
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white border-0 shadow-lg"
               >
                 <Heart className="w-3 h-3 mr-1" />
@@ -287,11 +295,9 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (request.friendship?.id) {
-                    rejectFriendRequestMutation.mutate(request.friendship.id);
-                  }
+                  rejectFriendRequestMutation.mutate(friendshipId);
                 }}
-                disabled={rejectFriendRequestMutation.isPending || !request.friendship?.id}
+                disabled={rejectFriendRequestMutation.isPending}
                 className="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-300 border-0 shadow-lg"
               >
                 <UserMinus className="w-3 h-3 mr-1" />

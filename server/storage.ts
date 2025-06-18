@@ -314,42 +314,44 @@ export class Storage {
     }
   }
 
-  async getFriendRequests(profileId: number): Promise<any[]> {
-    try {
-      const requestsData = await db
-        .select({
-          friendship: friendships,
-          requesterProfile: profiles,
-        })
-        .from(friendships)
-        .innerJoin(profiles, eq(friendships.requesterId, profiles.id))
-        .where(
-          and(
-            eq(friendships.addresseeId, profileId),
-            eq(friendships.status, 'pending'),
-            isNull(profiles.deletedAt)
-          )
-        )
-        .orderBy(desc(friendships.createdAt));
-
-      return requestsData.map(item => ({
-        id: item.friendship.id,
-        requesterId: item.friendship.requesterId,
-        addresseeId: item.friendship.addresseeId,
-        status: item.friendship.status,
-        createdAt: item.friendship.createdAt,
-        requester: {
-          id: item.requesterProfile.id,
-          name: item.requesterProfile.name,
-          profileImageUrl: item.requesterProfile.profileImageUrl,
-          type: item.requesterProfile.type,
-          location: item.requesterProfile.location,
+  async getFriendRequests(profileId: number) {
+    const requests = await db
+      .select({
+        friendship: {
+          id: friendships.id,
+          requesterId: friendships.requesterId,
+          addresseeId: friendships.addresseeId,
+          status: friendships.status,
+          createdAt: friendships.createdAt,
         },
-      }));
-    } catch (error) {
-      console.error("Error fetching friend requests:", error);
-      throw error;
+        // Profile data from the requester
+        id: profiles.id,
+        name: profiles.name,
+        profileImageUrl: profiles.profileImageUrl,
+        type: profiles.type,
+        bio: profiles.bio,
+        location: profiles.location,
+        website: profiles.website,
+        genre: profiles.genre,
+        // Add user data as fallback
+        userId: profiles.userId,
+      })
+      .from(friendships)
+      .innerJoin(profiles, eq(friendships.requesterId, profiles.id))
+      .where(
+        and(
+          eq(friendships.addresseeId, profileId),
+          eq(friendships.status, 'pending')
+        )
+      )
+      .orderBy(desc(friendships.createdAt));
+
+    console.log(`getFriendRequests: Found ${requests.length} requests for profile ${profileId}`);
+    if (requests.length > 0) {
+      console.log('Sample request data:', requests[0]);
     }
+
+    return requests;
   }
 
   async getFriendshipStatus(profileId1: number, profileId2: number): Promise<any> {
@@ -469,7 +471,7 @@ export class Storage {
         );
 
       const friendProfileIds = friendIds.map(f => f.friendId);
-      
+
       // Include own profile in feed
       const feedProfileIds = [profileId, ...friendProfileIds];
 
@@ -560,7 +562,7 @@ export class Storage {
       // Delete related data first
       await db.delete(postLikes).where(eq(postLikes.postId, postId));
       await db.delete(comments).where(eq(comments.postId, postId));
-      
+
       // Delete the post
       await db.delete(posts).where(eq(posts.id, postId));
     } catch (error) {
@@ -751,7 +753,7 @@ export class Storage {
   async createProfileInvitation(invitationData: any): Promise<any> {
     try {
       const token = crypto.randomBytes(32).toString('hex');
-      
+
       const [invitation] = await db
         .insert(profileInvitations)
         .values({
@@ -926,7 +928,7 @@ export class Storage {
   async getBookingRequests(profileId: number, profileType: string): Promise<any[]> {
     try {
       let whereCondition;
-      
+
       if (profileType === 'artist') {
         whereCondition = eq(bookingRequests.artistProfileId, profileId);
       } else if (profileType === 'venue') {

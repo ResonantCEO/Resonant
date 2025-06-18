@@ -47,6 +47,18 @@ function SettingsContent() {
     }
   });
 
+  // Fetch active profile
+  const { data: activeProfile } = useQuery({
+    queryKey: ['/api/profiles/active'],
+    queryFn: async () => {
+      const response = await fetch('/api/profiles/active', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch active profile');
+      return response.json();
+    }
+  });
+
   // Delete profile mutation
   const deleteProfileMutation = useMutation({
     mutationFn: async (profileId: number) => {
@@ -196,6 +208,38 @@ function SettingsContent() {
     updateUserMutation.mutate({ [key]: value });
   };
 
+  // Profile update mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async (updates: any) => {
+      const response = await fetch(`/api/profiles/${activeProfile?.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(updates)
+      });
+      if (!response.ok) throw new Error('Failed to update profile');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been saved.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/profiles/active'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleUpdateProfileSetting = (key: string, value: any) => {
+    updateProfileMutation.mutate({ [key]: value });
+  };
+
   const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -304,7 +348,11 @@ function SettingsContent() {
   const artistProfiles = profiles.filter((p: any) => p.type === 'artist');
   const venueProfiles = profiles.filter((p: any) => p.type === 'venue');
 
-  if (!user) {
+  // Determine if we should show profile-specific settings
+  const isAudienceProfile = activeProfile?.type === 'audience';
+  const currentProfileData = isAudienceProfile ? user : activeProfile;
+
+  if (!user || !activeProfile) {
     return <div>Loading...</div>;
   }
 
@@ -343,34 +391,69 @@ function SettingsContent() {
               <CardDescription>Update your personal information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    value={user.firstName || ''}
-                    onChange={(e) => handleUpdateSetting('firstName', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    value={user.lastName || ''}
-                    onChange={(e) => handleUpdateSetting('lastName', e.target.value)}
-                  />
-                </div>
-              </div>
+              {isAudienceProfile ? (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        value={user.firstName || ''}
+                        onChange={(e) => handleUpdateSetting('firstName', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        value={user.lastName || ''}
+                        onChange={(e) => handleUpdateSetting('lastName', e.target.value)}
+                      />
+                    </div>
+                  </div>
 
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={user.email || ''}
-                  onChange={(e) => handleUpdateSetting('email', e.target.value)}
-                />
-              </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={user.email || ''}
+                      onChange={(e) => handleUpdateSetting('email', e.target.value)}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <Label htmlFor="profileName">Profile Name</Label>
+                    <Input
+                      id="profileName"
+                      value={activeProfile?.name || ''}
+                      onChange={(e) => handleUpdateProfileSetting('name', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="profileBio">Bio</Label>
+                    <Input
+                      id="profileBio"
+                      value={activeProfile?.bio || ''}
+                      onChange={(e) => handleUpdateProfileSetting('bio', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="profileLocation">Location</Label>
+                    <Input
+                      id="profileLocation"
+                      value={activeProfile?.location || ''}
+                      onChange={(e) => handleUpdateProfileSetting('location', e.target.value)}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    You are editing settings for your {activeProfile?.type} profile "{activeProfile?.name}".
+                    User account settings (name, email) can be found in your audience profile.
+                  </p>
+                </>
+              )}
 
               <Separator />
 
@@ -381,9 +464,9 @@ function SettingsContent() {
                     className="relative w-20 h-20 rounded-full overflow-hidden cursor-pointer group"
                     onClick={() => document.getElementById('profileImageInput')?.click()}
                   >
-                    {user?.profileImageUrl ? (
+                    {currentProfileData?.profileImageUrl ? (
                       <img
-                        src={user.profileImageUrl}
+                        src={currentProfileData.profileImageUrl}
                         alt="Profile"
                         className="w-full h-full object-cover"
                       />
@@ -420,9 +503,9 @@ function SettingsContent() {
                     className="relative w-full h-32 rounded-lg overflow-hidden cursor-pointer group"
                     onClick={() => document.getElementById('coverImageInput')?.click()}
                   >
-                    {user?.coverImageUrl ? (
+                    {currentProfileData?.coverImageUrl ? (
                       <img
-                        src={user.coverImageUrl}
+                        src={currentProfileData.coverImageUrl}
                         alt="Cover"
                         className="w-full h-full object-cover"
                       />
@@ -451,7 +534,7 @@ function SettingsContent() {
                     disabled={uploadCoverPhotoMutation.isPending}
                     className="hidden"
                   />
-                  {user?.coverImageUrl && (
+                  {currentProfileData?.coverImageUrl && (
                     <Button
                       type="button"
                       variant="destructive"

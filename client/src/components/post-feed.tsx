@@ -265,7 +265,10 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
                     </h4>
                     <div className="flex items-center space-x-2 text-sm text-neutral-600">
                       <span>
-                        {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                        {post.createdAt && !isNaN(new Date(post.createdAt).getTime()) 
+                          ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
+                          : 'Invalid date'
+                        }
                       </span>
                       <span>•</span>
                       {getVisibilityIcon(post.visibility)}

@@ -1,4 +1,4 @@
-import { eq, and, or, desc, asc, sql, like, ilike, ne, isNull, isNotNull, inArray, lt } from "drizzle-orm";
+import { eq, and, or, desc, asc, sql, like, ilike, ne, isNull, isNotNull, inArray, lt, gt } from "drizzle-orm";
 import { db } from "./db";
 import {
   users,
@@ -210,6 +210,783 @@ export class Storage {
     } catch (error) {
       console.error("Error cleaning up expired profiles:", error);
       throw error;
+    }
+  }
+
+  // Search and Discovery functions
+  async searchProfiles(query?: string, type?: string, location?: string, limit: number = 20, offset: number = 0): Promise<Profile[]> {
+    try {
+      let whereConditions = [isNull(profiles.deletedAt)];
+
+      if (query) {
+        whereConditions.push(
+          or(
+            ilike(profiles.name, `%${query}%`),
+            ilike(profiles.bio, `%${query}%`)
+          )
+        );
+      }
+
+      if (type && type !== 'all') {
+        whereConditions.push(eq(profiles.type, type as any));
+      }
+
+      if (location && location !== 'all-locations') {
+        whereConditions.push(ilike(profiles.location, `%${location}%`));
+      }
+
+      return await db
+        .select()
+        .from(profiles)
+        .where(and(...whereConditions))
+        .orderBy(desc(profiles.createdAt))
+        .limit(limit)
+        .offset(offset);
+    } catch (error) {
+      console.error("Error searching profiles:", error);
+      throw error;
+    }
+  }
+
+  async discoverProfiles(type?: string, location?: string, genre?: string, limit: number = 20, offset: number = 0, excludeProfileId?: number): Promise<Profile[]> {
+    try {
+      let whereConditions = [isNull(profiles.deletedAt)];
+
+      if (excludeProfileId) {
+        whereConditions.push(ne(profiles.id, excludeProfileId));
+      }
+
+      if (type && type !== 'all') {
+        whereConditions.push(eq(profiles.type, type as any));
+      }
+
+      if (location && location !== 'all-locations') {
+        whereConditions.push(ilike(profiles.location, `%${location}%`));
+      }
+
+      // Note: Genre filtering would need to be implemented when genre support is added to profiles
+
+      return await db
+        .select()
+        .from(profiles)
+        .where(and(...whereConditions))
+        .orderBy(desc(profiles.createdAt))
+        .limit(limit)
+        .offset(offset);
+    } catch (error) {
+      console.error("Error discovering profiles:", error);
+      throw error;
+    }
+  }
+
+  // Friend functions
+  async getFriends(profileId: number): Promise<any[]> {
+    try {
+      const friendsData = await db
+        .select({
+          friendship: friendships,
+          profile: profiles,
+        })
+        .from(friendships)
+        .innerJoin(profiles, 
+          or(
+            and(eq(friendships.requesterId, profileId), eq(friendships.addresseeId, profiles.id)),
+            and(eq(friendships.addresseeId, profileId), eq(friendships.requesterId, profiles.id))
+          )
+        )
+        .where(
+          and(
+            eq(friendships.status, 'accepted'),
+            ne(profiles.id, profileId),
+            isNull(profiles.deletedAt)
+          )
+        )
+        .orderBy(profiles.name);
+
+      return friendsData.map(item => ({
+        ...item.profile,
+        friendshipId: item.friendship.id,
+        friendsSince: item.friendship.createdAt,
+      }));
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+      throw error;
+    }
+  }
+
+  async getFriendRequests(profileId: number): Promise<any[]> {
+    try {
+      const requestsData = await db
+        .select({
+          friendship: friendships,
+          requesterProfile: profiles,
+        })
+        .from(friendships)
+        .innerJoin(profiles, eq(friendships.requesterId, profiles.id))
+        .where(
+          and(
+            eq(friendships.addresseeId, profileId),
+            eq(friendships.status, 'pending'),
+            isNull(profiles.deletedAt)
+          )
+        )
+        .orderBy(desc(friendships.createdAt));
+
+      return requestsData.map(item => ({
+        id: item.friendship.id,
+        requesterId: item.friendship.requesterId,
+        addresseeId: item.friendship.addresseeId,
+        status: item.friendship.status,
+        createdAt: item.friendship.createdAt,
+        requester: {
+          id: item.requesterProfile.id,
+          name: item.requesterProfile.name,
+          profileImageUrl: item.requesterProfile.profileImageUrl,
+          type: item.requesterProfile.type,
+          location: item.requesterProfile.location,
+        },
+      }));
+    } catch (error) {
+      console.error("Error fetching friend requests:", error);
+      throw error;
+    }
+  }
+
+  async getFriendshipStatus(profileId1: number, profileId2: number): Promise<any> {
+    try {
+      const [friendship] = await db
+        .select()
+        .from(friendships)
+        .where(
+          or(
+            and(eq(friendships.requesterId, profileId1), eq(friendships.addresseeId, profileId2)),
+            and(eq(friendships.requesterId, profileId2), eq(friendships.addresseeId, profileId1))
+          )
+        )
+        .limit(1);
+
+      return friendship || null;
+    } catch (error) {
+      console.error("Error fetching friendship status:", error);
+      throw error;
+    }
+  }
+
+  async getFriendshipById(friendshipId: number): Promise<any> {
+    try {
+      const [friendship] = await db
+        .select()
+        .from(friendships)
+        .where(eq(friendships.id, friendshipId))
+        .limit(1);
+
+      return friendship || null;
+    } catch (error) {
+      console.error("Error fetching friendship by ID:", error);
+      throw error;
+    }
+  }
+
+  async sendFriendRequest(requesterId: number, addresseeId: number): Promise<any> {
+    try {
+      const [friendship] = await db
+        .insert(friendships)
+        .values({
+          requesterId,
+          addresseeId,
+          status: 'pending',
+        })
+        .returning();
+
+      return friendship;
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      throw error;
+    }
+  }
+
+  async acceptFriendRequest(friendshipId: number): Promise<any> {
+    try {
+      const [friendship] = await db
+        .update(friendships)
+        .set({ status: 'accepted' })
+        .where(eq(friendships.id, friendshipId))
+        .returning();
+
+      return friendship;
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+      throw error;
+    }
+  }
+
+  async rejectFriendRequest(friendshipId: number): Promise<any> {
+    try {
+      const [friendship] = await db
+        .update(friendships)
+        .set({ status: 'rejected' })
+        .where(eq(friendships.id, friendshipId))
+        .returning();
+
+      return friendship;
+    } catch (error) {
+      console.error("Error rejecting friend request:", error);
+      throw error;
+    }
+  }
+
+  async deleteFriendship(friendshipId: number): Promise<void> {
+    try {
+      await db
+        .delete(friendships)
+        .where(eq(friendships.id, friendshipId));
+    } catch (error) {
+      console.error("Error deleting friendship:", error);
+      throw error;
+    }
+  }
+
+  // Post functions
+  async getFeedPosts(profileId: number): Promise<any[]> {
+    try {
+      // Get friend IDs first
+      const friendIds = await db
+        .select({
+          friendId: sql<number>`CASE 
+            WHEN ${friendships.requesterId} = ${profileId} THEN ${friendships.addresseeId}
+            ELSE ${friendships.requesterId}
+          END`.as('friend_id')
+        })
+        .from(friendships)
+        .where(
+          and(
+            or(
+              eq(friendships.requesterId, profileId),
+              eq(friendships.addresseeId, profileId)
+            ),
+            eq(friendships.status, 'accepted')
+          )
+        );
+
+      const friendProfileIds = friendIds.map(f => f.friendId);
+      
+      // Include own profile in feed
+      const feedProfileIds = [profileId, ...friendProfileIds];
+
+      const postsData = await db
+        .select({
+          post: posts,
+          profile: profiles,
+          likeCount: sql<number>`COUNT(DISTINCT ${postLikes.id})`.as('like_count'),
+          commentCount: sql<number>`COUNT(DISTINCT ${comments.id})`.as('comment_count'),
+          isLiked: sql<boolean>`COUNT(CASE WHEN ${postLikes.profileId} = ${profileId} THEN 1 END) > 0`.as('is_liked'),
+        })
+        .from(posts)
+        .innerJoin(profiles, eq(posts.profileId, profiles.id))
+        .leftJoin(postLikes, eq(posts.id, postLikes.postId))
+        .leftJoin(comments, eq(posts.id, comments.postId))
+        .where(
+          and(
+            inArray(posts.profileId, feedProfileIds),
+            isNull(profiles.deletedAt)
+          )
+        )
+        .groupBy(posts.id, profiles.id)
+        .orderBy(desc(posts.createdAt));
+
+      return postsData;
+    } catch (error) {
+      console.error("Error fetching feed posts:", error);
+      throw error;
+    }
+  }
+
+  async getPosts(profileId: number, viewerProfileId?: number): Promise<any[]> {
+    try {
+      const postsData = await db
+        .select({
+          post: posts,
+          profile: profiles,
+          likeCount: sql<number>`COUNT(DISTINCT ${postLikes.id})`.as('like_count'),
+          commentCount: sql<number>`COUNT(DISTINCT ${comments.id})`.as('comment_count'),
+          isLiked: viewerProfileId 
+            ? sql<boolean>`COUNT(CASE WHEN ${postLikes.profileId} = ${viewerProfileId} THEN 1 END) > 0`.as('is_liked')
+            : sql<boolean>`false`.as('is_liked'),
+        })
+        .from(posts)
+        .innerJoin(profiles, eq(posts.profileId, profiles.id))
+        .leftJoin(postLikes, eq(posts.id, postLikes.postId))
+        .leftJoin(comments, eq(posts.id, comments.postId))
+        .where(eq(posts.profileId, profileId))
+        .groupBy(posts.id, profiles.id)
+        .orderBy(desc(posts.createdAt));
+
+      return postsData;
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      throw error;
+    }
+  }
+
+  async createPost(postData: InsertPost): Promise<any> {
+    try {
+      const [post] = await db
+        .insert(posts)
+        .values(postData)
+        .returning();
+
+      // Get the post with profile info
+      const [postWithProfile] = await db
+        .select({
+          post: posts,
+          profile: profiles,
+          likeCount: sql<number>`0`.as('like_count'),
+          commentCount: sql<number>`0`.as('comment_count'),
+          isLiked: sql<boolean>`false`.as('is_liked'),
+        })
+        .from(posts)
+        .innerJoin(profiles, eq(posts.profileId, profiles.id))
+        .where(eq(posts.id, post.id));
+
+      return postWithProfile;
+    } catch (error) {
+      console.error("Error creating post:", error);
+      throw error;
+    }
+  }
+
+  async deletePost(postId: number): Promise<void> {
+    try {
+      // Delete related data first
+      await db.delete(postLikes).where(eq(postLikes.postId, postId));
+      await db.delete(comments).where(eq(comments.postId, postId));
+      
+      // Delete the post
+      await db.delete(posts).where(eq(posts.id, postId));
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      throw error;
+    }
+  }
+
+  async likePost(postId: number, profileId: number): Promise<void> {
+    try {
+      await db
+        .insert(postLikes)
+        .values({ postId, profileId })
+        .onConflictDoNothing();
+    } catch (error) {
+      console.error("Error liking post:", error);
+      throw error;
+    }
+  }
+
+  async unlikePost(postId: number, profileId: number): Promise<void> {
+    try {
+      await db
+        .delete(postLikes)
+        .where(
+          and(
+            eq(postLikes.postId, postId),
+            eq(postLikes.profileId, profileId)
+          )
+        );
+    } catch (error) {
+      console.error("Error unliking post:", error);
+      throw error;
+    }
+  }
+
+  async isPostLikedByProfile(postId: number, profileId: number): Promise<boolean> {
+    try {
+      const [like] = await db
+        .select()
+        .from(postLikes)
+        .where(
+          and(
+            eq(postLikes.postId, postId),
+            eq(postLikes.profileId, profileId)
+          )
+        )
+        .limit(1);
+
+      return !!like;
+    } catch (error) {
+      console.error("Error checking if post is liked:", error);
+      return false;
+    }
+  }
+
+  // Comment functions
+  async getComments(postId: number): Promise<any[]> {
+    try {
+      const commentsData = await db
+        .select({
+          comment: comments,
+          profile: profiles,
+        })
+        .from(comments)
+        .innerJoin(profiles, eq(comments.profileId, profiles.id))
+        .where(eq(comments.postId, postId))
+        .orderBy(comments.createdAt);
+
+      return commentsData;
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      throw error;
+    }
+  }
+
+  async createComment(commentData: InsertComment): Promise<any> {
+    try {
+      const [comment] = await db
+        .insert(comments)
+        .values(commentData)
+        .returning();
+
+      // Get the comment with profile info
+      const [commentWithProfile] = await db
+        .select({
+          comment: comments,
+          profile: profiles,
+        })
+        .from(comments)
+        .innerJoin(profiles, eq(comments.profileId, profiles.id))
+        .where(eq(comments.id, comment.id));
+
+      return commentWithProfile;
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      throw error;
+    }
+  }
+
+  // Profile membership functions
+  async getProfileMemberships(profileId: number): Promise<any[]> {
+    try {
+      const memberships = await db
+        .select({
+          membership: profileMemberships,
+          user: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            profileImageUrl: users.profileImageUrl,
+          },
+        })
+        .from(profileMemberships)
+        .innerJoin(users, eq(profileMemberships.userId, users.id))
+        .where(eq(profileMemberships.profileId, profileId))
+        .orderBy(profileMemberships.createdAt);
+
+      return memberships;
+    } catch (error) {
+      console.error("Error fetching profile memberships:", error);
+      throw error;
+    }
+  }
+
+  async getUserMemberships(userId: number): Promise<any[]> {
+    try {
+      const memberships = await db
+        .select({
+          membership: profileMemberships,
+          profile: profiles,
+        })
+        .from(profileMemberships)
+        .innerJoin(profiles, eq(profileMemberships.profileId, profiles.id))
+        .where(
+          and(
+            eq(profileMemberships.userId, userId),
+            isNull(profiles.deletedAt)
+          )
+        )
+        .orderBy(profileMemberships.createdAt);
+
+      return memberships;
+    } catch (error) {
+      console.error("Error fetching user memberships:", error);
+      throw error;
+    }
+  }
+
+  async checkProfilePermission(userId: number, profileId: number, permission: string): Promise<boolean> {
+    try {
+      // Check if user is the profile owner
+      const [profile] = await db
+        .select()
+        .from(profiles)
+        .where(eq(profiles.id, profileId))
+        .limit(1);
+
+      if (profile?.userId === userId) {
+        return true;
+      }
+
+      // Check membership permissions
+      const [membership] = await db
+        .select()
+        .from(profileMemberships)
+        .where(
+          and(
+            eq(profileMemberships.profileId, profileId),
+            eq(profileMemberships.userId, userId),
+            eq(profileMemberships.status, 'active')
+          )
+        )
+        .limit(1);
+
+      if (!membership) {
+        return false;
+      }
+
+      return membership.permissions.includes(permission);
+    } catch (error) {
+      console.error("Error checking profile permission:", error);
+      return false;
+    }
+  }
+
+  async createProfileInvitation(invitationData: any): Promise<any> {
+    try {
+      const token = crypto.randomBytes(32).toString('hex');
+      
+      const [invitation] = await db
+        .insert(profileInvitations)
+        .values({
+          ...invitationData,
+          token,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        })
+        .returning();
+
+      return invitation;
+    } catch (error) {
+      console.error("Error creating profile invitation:", error);
+      throw error;
+    }
+  }
+
+  async acceptProfileInvitation(token: string, userId: number): Promise<any> {
+    try {
+      const [invitation] = await db
+        .select()
+        .from(profileInvitations)
+        .where(
+          and(
+            eq(profileInvitations.token, token),
+            eq(profileInvitations.status, 'pending'),
+            sql`${profileInvitations.expiresAt} > NOW()`
+          )
+        )
+        .limit(1);
+
+      if (!invitation) {
+        throw new Error("Invalid or expired invitation");
+      }
+
+      // Create membership
+      const [membership] = await db
+        .insert(profileMemberships)
+        .values({
+          profileId: invitation.profileId,
+          userId,
+          role: invitation.role,
+          permissions: invitation.permissions,
+          status: 'active',
+        })
+        .returning();
+
+      // Update invitation status
+      await db
+        .update(profileInvitations)
+        .set({ status: 'accepted' })
+        .where(eq(profileInvitations.id, invitation.id));
+
+      return membership;
+    } catch (error) {
+      console.error("Error accepting profile invitation:", error);
+      throw error;
+    }
+  }
+
+  async declineProfileInvitation(token: string): Promise<void> {
+    try {
+      await db
+        .update(profileInvitations)
+        .set({ status: 'declined' })
+        .where(eq(profileInvitations.token, token));
+    } catch (error) {
+      console.error("Error declining profile invitation:", error);
+      throw error;
+    }
+  }
+
+  async getUserProfileRole(userId: number, profileId: number): Promise<any> {
+    try {
+      const [membership] = await db
+        .select()
+        .from(profileMemberships)
+        .where(
+          and(
+            eq(profileMemberships.userId, userId),
+            eq(profileMemberships.profileId, profileId)
+          )
+        )
+        .limit(1);
+
+      return membership || null;
+    } catch (error) {
+      console.error("Error fetching user profile role:", error);
+      return null;
+    }
+  }
+
+  async updateProfileMembership(membershipId: number, updates: any): Promise<any> {
+    try {
+      const [membership] = await db
+        .update(profileMemberships)
+        .set(updates)
+        .where(eq(profileMemberships.id, membershipId))
+        .returning();
+
+      return membership;
+    } catch (error) {
+      console.error("Error updating profile membership:", error);
+      throw error;
+    }
+  }
+
+  async removeProfileMembership(membershipId: number): Promise<void> {
+    try {
+      await db
+        .delete(profileMemberships)
+        .where(eq(profileMemberships.id, membershipId));
+    } catch (error) {
+      console.error("Error removing profile membership:", error);
+      throw error;
+    }
+  }
+
+  async getProfileInvitations(profileId: number): Promise<any[]> {
+    try {
+      return await db
+        .select()
+        .from(profileInvitations)
+        .where(eq(profileInvitations.profileId, profileId))
+        .orderBy(desc(profileInvitations.createdAt));
+    } catch (error) {
+      console.error("Error fetching profile invitations:", error);
+      throw error;
+    }
+  }
+
+  async getInvitationById(invitationId: number): Promise<any> {
+    try {
+      const [invitation] = await db
+        .select()
+        .from(profileInvitations)
+        .where(eq(profileInvitations.id, invitationId))
+        .limit(1);
+
+      return invitation || null;
+    } catch (error) {
+      console.error("Error fetching invitation by ID:", error);
+      return null;
+    }
+  }
+
+  async deleteProfileInvitation(invitationId: number): Promise<void> {
+    try {
+      await db
+        .delete(profileInvitations)
+        .where(eq(profileInvitations.id, invitationId));
+    } catch (error) {
+      console.error("Error deleting profile invitation:", error);
+      throw error;
+    }
+  }
+
+  // Booking request functions
+  async createBookingRequest(requestData: any): Promise<any> {
+    try {
+      const [request] = await db
+        .insert(bookingRequests)
+        .values(requestData)
+        .returning();
+
+      return request;
+    } catch (error) {
+      console.error("Error creating booking request:", error);
+      throw error;
+    }
+  }
+
+  async getBookingRequests(profileId: number, profileType: string): Promise<any[]> {
+    try {
+      let whereCondition;
+      
+      if (profileType === 'artist') {
+        whereCondition = eq(bookingRequests.artistProfileId, profileId);
+      } else if (profileType === 'venue') {
+        whereCondition = eq(bookingRequests.venueProfileId, profileId);
+      } else {
+        return [];
+      }
+
+      const requests = await db
+        .select({
+          request: bookingRequests,
+          artistProfile: sql`artist_profile`,
+          venueProfile: sql`venue_profile`,
+        })
+        .from(bookingRequests)
+        .leftJoin(
+          sql`profiles artist_profile`,
+          sql`${bookingRequests.artistProfileId} = artist_profile.id`
+        )
+        .leftJoin(
+          sql`profiles venue_profile`, 
+          sql`${bookingRequests.venueProfileId} = venue_profile.id`
+        )
+        .where(whereCondition)
+        .orderBy(desc(bookingRequests.requestedAt));
+
+      return requests;
+    } catch (error) {
+      console.error("Error fetching booking requests:", error);
+      throw error;
+    }
+  }
+
+  async updateBookingRequestStatus(requestId: number, status: string, profileId: number): Promise<any> {
+    try {
+      const [request] = await db
+        .update(bookingRequests)
+        .set({ status })
+        .where(eq(bookingRequests.id, requestId))
+        .returning();
+
+      return request;
+    } catch (error) {
+      console.error("Error updating booking request status:", error);
+      throw error;
+    }
+  }
+
+  async getBookingRequestById(requestId: number): Promise<any> {
+    try {
+      const [request] = await db
+        .select()
+        .from(bookingRequests)
+        .where(eq(bookingRequests.id, requestId))
+        .limit(1);
+
+      return request || null;
+    } catch (error) {
+      console.error("Error fetching booking request by ID:", error);
+      return null;
     }
   }
 

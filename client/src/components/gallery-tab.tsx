@@ -1646,7 +1646,8 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Album</DialogTitle>
-          </DialogHeader          <div className="space-y-4">
+          </DialogHeader>
+          <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Album Name</label>
               <Input

@@ -147,38 +147,45 @@ export default function Profile() {
   // For shared profiles, always show management if user owns the profile
   const canManageMembers = isOwn && isSharedProfile;
 
-  const getPageBackground = (backgroundType: string | null, backgroundImageUrl?: string | null) => {
-    if (backgroundType === 'custom-photo' && backgroundImageUrl) {
-      return 'bg-gray-100 dark:bg-gray-900';
-    }
-
+  const getPageBackground = (backgroundType: string, backgroundImageUrl?: string) => {
     switch (backgroundType) {
-      case 'sunset':
-        return 'bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600';
-      case 'ocean':
-        return 'bg-gradient-to-br from-blue-400 via-cyan-500 to-teal-600';
-      case 'forest':
-        return 'bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600';
-      case 'gradient-1':
-        return 'bg-gradient-to-br from-purple-400 via-pink-500 to-red-500';
-      case 'gradient-2':
-        return 'bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700';
-      case 'gradient-3':
-        return 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500';
+      case 'gradient-blue':
+        return 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900';
+      case 'gradient-purple':
+        return 'bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900';
+      case 'gradient-green':
+        return 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900';
+      case 'gradient-orange':
+        return 'bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900';
+      case 'gradient-pink':
+        return 'bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-950 dark:to-pink-900';
+      case 'solid-dark':
+        return 'bg-gray-900 dark:bg-black';
+      case 'solid-light':
+        return 'bg-white dark:bg-gray-900';
+      case 'pattern-dots':
+        return 'bg-neutral-50 dark:bg-neutral-950 bg-[radial-gradient(circle_at_1px_1px,rgba(59,130,246,0.1)_1px,transparent_0)] bg-[length:30px_30px]';
+      case 'pattern-waves':
+        return 'bg-neutral-50 dark:bg-neutral-950 bg-[url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%2359130f\' fill-opacity=\'0.03\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")]';
+      case 'custom-photo':
+        return backgroundImageUrl ? '' : 'bg-neutral-50 dark:bg-neutral-950';
       default:
-        return 'bg-gray-100 dark:bg-gray-900';
+        return 'bg-neutral-50 dark:bg-neutral-950';
     }
   };
 
-  const getBackgroundImageStyle = (imageUrl?: string | null) => {
-    if (!imageUrl) return {};
-    return {
-      backgroundImage: `url(${imageUrl})`,
+  const getBackgroundImageStyle = (backgroundImageUrl?: string) => {
+    return backgroundImageUrl ? {
+      backgroundImage: `url(${backgroundImageUrl})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
-    };
-  };
+      backgroundAttachment: 'fixed',
+      minHeight: '100vh',
+      width: '100vw',
+      height: '100vh',
+    } : {}
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -437,18 +444,21 @@ export default function Profile() {
 
       {/* Main Content */}
       <div 
-        className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0 min-h-screen relative mobile-content ${getPageBackground(user?.profileBackground || 'default', user?.backgroundImageUrl)}`}
-        style={user?.profileBackground === 'custom-photo' ? getBackgroundImageStyle(user?.backgroundImageUrl) : {}}
+        className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0 min-h-screen relative mobile-content ${getPageBackground(profile?.profileBackground || 'default', profile?.backgroundImageUrl)}`}
+        style={profile?.profileBackground === 'custom-photo' ? getBackgroundImageStyle(profile?.backgroundImageUrl) : {}}
       >
         {/* Fixed Background Image */}
-        {user?.profileBackground === 'custom-photo' && user?.backgroundImageUrl && (
+        {profile?.profileBackground === 'custom-photo' && profile?.backgroundImageUrl && (
           <div 
             className="fixed top-0 bottom-0 right-0 pointer-events-none z-0"
             style={{
-              backgroundImage: `url(${user.backgroundImageUrl})`,
+              backgroundImage: `url(${profile.backgroundImageUrl})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
+              backgroundAttachment: 'fixed',
+              left: isCollapsed ? '64px' : '320px',
+              minHeight: '100vh',
               height: '100vh'
             }}
           />
@@ -560,7 +570,7 @@ export default function Profile() {
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
                       <div className="flex items-center mb-4">
                         <div className="bg-green-100 dark:bg-green-900 p-2 rounded-lg">
-                          <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="This commit modifies the Profile component to correctly display custom background images by using the user's background image URL when the custom photo option is selected.none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                           </svg>
                         </div>

@@ -15,7 +15,7 @@ import {
 import CreateProfileModal from "./create-profile-modal";
 import SharedProfilesWidget from "./shared-profiles-widget";
 import { useState } from "react";
-import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell, Menu, ChevronLeft, ChevronRight } from "lucide-react";
+import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, ChevronDown, BarChart3, Bell, Menu, ChevronLeft, ChevronRight, MessageCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -482,6 +482,21 @@ export default function Sidebar() {
                   {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
                 </span>
               )}
+            </Button>
+          </li>
+
+          <li>
+            <Button
+              variant="ghost"
+              className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
+                isActivePath("/messages") 
+                  ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
+                  : "text-neutral-600 hover:bg-neutral-100"
+              }`}
+              onClick={() => setLocation("/messages")}
+            >
+              <MessageCircle className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
+              {!isCollapsed && "Messages"}
             </Button>
           </li>
 

@@ -17,6 +17,7 @@ import Dashboard from "@/pages/dashboard";
 import Friends from "@/pages/friends";
 import NotFound from "@/pages/not-found";
 import NotificationsPage from "./pages/notifications";
+import Messages from "./pages/messages";
 
 function LoadingScreen() {
   return (
@@ -60,6 +61,7 @@ function Router() {
       <Route path="/discover" component={Discover} />
       <Route path="/settings" component={Settings} />
       <Route path="/notifications" component={NotificationsPage} />
+      <Route path="/messages" component={Messages} />
       <Route path="/*" component={Profile} />
     </Switch>
   );

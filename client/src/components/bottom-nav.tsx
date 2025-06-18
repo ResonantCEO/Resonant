@@ -6,7 +6,8 @@ import {
   Users, 
   Settings, 
   BarChart3,
-  Menu
+  Menu,
+  MessageCircle
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -47,6 +48,7 @@ export default function BottomNav() {
       label: "Friends", 
       badge: friendRequests.length > 0 ? friendRequests.length : null 
     },
+    { path: "/messages", icon: MessageCircle, label: "Messages" },
   ];
 
   // Add Dashboard for Artist and Venue profiles

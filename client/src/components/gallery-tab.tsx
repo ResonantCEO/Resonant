@@ -2,12 +2,19 @@ import { useState, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, Search, Filter, Grid, List, FolderPlus, Folder, Plus, X, Check, Trash2, Download, Eye, MoreVertical, ArrowLeft, User, Image as ImageIcon, Wallpaper, Upload, UserPlus, MessageCircle, Send } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatDistanceToNow } from "date-fns";
 
@@ -883,7 +890,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                 size="sm"
                 onClick={handleViewAllPhotos}
                 className="flex items-center gap-2"
-              >```tool_code
+              >
                 <Camera className="w-4 h-4" />
                 All Photos
               </Button>
@@ -1639,8 +1646,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Album</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
+          </DialogHeader          <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Album Name</label>
               <Input

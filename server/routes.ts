@@ -876,8 +876,7 @@ export function registerRoutes(app: Express): Server {
       const profiles = await storage.searchProfiles(query, type, location, limit, offset);
       res.json(profiles);
     } catch (error) {
-      console.error("Error searching profiles:", error);
-      res.status(500).json({ message: "Failed to search profiles" });
+      console.error("Error searching profiles:", error);      res.status(500).json({ message: "Failed to search profiles" });
     }
   });
 
@@ -2046,20 +2045,106 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  app.delete('/api/photo-comments/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/photo-comments/:id', requireAuth, async (req, res) => {
     try {
       const commentId = parseInt(req.params.id);
+      const userId = req.user!.id;
 
-      const activeProfile = await storage.getActiveProfile(req.user.id);
-      if (!activeProfile) {
-        return res.status(400).json({ message: "No active profile" });
+      // Check if comment exists and belongs to user
+      const [comment] = await db
+        .select()
+        .from(photoComments)
+        .where(eq(photoComments.id, commentId));
+
+      if (!comment) {
+        return res.status(404).json({ error: 'Comment not found' });
       }
 
-      await storage.deletePhotoComment(commentId, activeProfile.id);
+      // Get profile that owns this comment
+      const [commentProfile] = await db
+        .select()
+        .from(profiles)
+        .where(eq(profiles.id, comment.profileId));
+
+      if (!commentProfile || commentProfile.userId !== userId) {
+        return res.status(403).json({ error: 'Not authorized to delete this comment' });
+      }
+
+      await db.delete(photoComments).where(eq(photoComments.id, commentId));
+
       res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting photo comment:", error);
-      res.status(500).json({ message: "Failed to delete photo comment" });
+      console.error('Error deleting photo comment:', error);
+      res.status(500).json({ error: 'Failed to delete comment' });
+    }
+  });
+
+  // Set photo as profile/cover/background image
+  app.post('/api/photos/:id/set-as', requireAuth, async (req, res) => {
+    try {
+      const photoId = parseInt(req.params.id);
+      const { type } = req.body;
+      const userId = req.user!.id;
+
+      if (!['profile', 'cover', 'background'].includes(type)) {
+        return res.status(400).json({ error: 'Invalid type. Must be profile, cover, or background' });
+      }
+
+      // Get the photo and verify ownership
+      const [photo] = await db
+        .select({
+          id: photos.id,
+          imageUrl: photos.imageUrl,
+          profileId: photos.profileId
+        })
+        .from(photos)
+        .where(eq(photos.id, photoId));
+
+      if (!photo) {
+        return res.status(404).json({ error: 'Photo not found' });
+      }
+
+      // Get the profile that owns this photo
+      const [photoProfile] = await db
+        .select()
+        .from(profiles)
+        .where(eq(profiles.id, photo.profileId));
+
+      if (!photoProfile || photoProfile.userId !== userId) {
+        return res.status(403).json({ error: 'Not authorized to use this photo' });
+      }
+
+      // Update the profile with the new image URL
+      const updateData: any = {};
+      if (type === 'profile') {
+        updateData.profileImageUrl = photo.imageUrl;
+      } else if (type === 'cover') {
+        updateData.coverImageUrl = photo.imageUrl;
+      } else if (type === 'background') {
+        updateData.backgroundImageUrl = photo.imageUrl;
+        updateData.profileBackground = 'custom-photo';
+      }
+
+      await db
+        .update(profiles)
+        .set(updateData)
+        .where(eq(profiles.id, photo.profileId));
+
+      // If setting as background, also update user's background settings
+      if (type === 'background') {
+        await db
+          .update(users)
+          .set({
+            backgroundImageUrl: photo.imageUrl,
+            profileBackground: 'custom-photo'
+          })
+          .where(eq(users.id, userId));
+      }
+
+      res.json({ success: true, type, imageUrl: photo.imageUrl });
+    } catch (error) {
+      console.error('Error setting photo as image:', error);
+      res.status(500).json({ error: 'Failed to set photo as image' });
     }
   });
 

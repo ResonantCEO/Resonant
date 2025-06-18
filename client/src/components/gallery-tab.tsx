@@ -4,6 +4,7 @@ import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Search, Filter, Grid, List, FolderPlus, Folder, Plus, X, Check, Trash2, Download, Eye, MoreVertical, ArrowLeft, User, Image as ImageIcon, Wallpaper, Upload, UserPlus, MessageCircle, Send } from "lucide-react";
+import { Camera, Search, Filter, Grid, List, FolderPlus, Folder, Plus, X, Check, Trash2, Download, Eye, MoreVertical, ArrowLeft, User, Image as ImageIcon, Wallpaper, Upload, UserPlus, MessageCircle, Send, Settings2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatDistanceToNow } from "date-fns";
 
@@ -645,6 +646,36 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
       toast({
         title: "Delete failed",
         description: error.message || "Failed to delete comment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Set photo as profile/cover/background mutation
+  const setPhotoAsMutation = useMutation({
+    mutationFn: async ({ photoId, type }: { photoId: number; type: 'profile' | 'cover' | 'background' }) => {
+      const response = await fetch(`/api/photos/${photoId}/set-as`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type }),
+      });
+      if (!response.ok) throw new Error(`Failed to set photo as ${type} image`);
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+      toast({
+        title: "Photo updated",
+        description: `Photo has been set as your ${variables.type} image.`,
+      });
+    },
+    onError: (error: any, variables) => {
+      toast({
+        title: "Update failed",
+        description: error.message || `Failed to set photo as ${variables.type} image`,
         variant: "destructive",
       });
     },
@@ -1410,15 +1441,54 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                       <Download className="w-4 h-4" />
                     </Button>
                     {isOwn && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deletePhotoMutation.mutate(selectedPhoto.id)}
-                        disabled={deletePhotoMutation.isPending}
-                        className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 hover:bg-red-500/30 text-red-700 dark:text-red-300"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 hover:bg-blue-500/30 text-blue-700 dark:text-blue-300"
+                            >
+                              <Settings2 className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem
+                              onClick={() => setPhotoAsMutation.mutate({ photoId: selectedPhoto.id, type: 'profile' })}
+                              disabled={setPhotoAsMutation.isPending}
+                              className="flex items-center gap-2"
+                            >
+                              <User className="w-4 h-4" />
+                              Set as Profile Picture
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setPhotoAsMutation.mutate({ photoId: selectedPhoto.id, type: 'cover' })}
+                              disabled={setPhotoAsMutation.isPending}
+                              className="flex items-center gap-2"
+                            >
+                              <ImageIcon className="w-4 h-4" />
+                              Set as Cover Photo
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setPhotoAsMutation.mutate({ photoId: selectedPhoto.id, type: 'background' })}
+                              disabled={setPhotoAsMutation.isPending}
+                              className="flex items-center gap-2"
+                            >
+                              <Wallpaper className="w-4 h-4" />
+                              Set as Background Image
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deletePhotoMutation.mutate(selectedPhoto.id)}
+                          disabled={deletePhotoMutation.isPending}
+                          className="bg-red-500/20 backdrop-blur-sm border border-red-400/30 hover:bg-red-500/30 text-red-700 dark:text-red-300"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </>
                     )}
                   </div>
                 </DialogTitle>

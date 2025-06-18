@@ -928,34 +928,53 @@ export class Storage {
   }
 
   // Photo operations
-  async getProfilePhotos(profileId: number): Promise<Photo[]> {
-    try {
-      const result = await db
-        .select()
-        .from(photos)
-        .where(eq(photos.profileId, profileId))
-        .orderBy(desc(photos.createdAt));
+  async getProfilePhotos(profileId: number) {
+    const result = await db
+      .select()
+      .from(photos)
+      .where(eq(photos.profileId, profileId))
+      .orderBy(desc(photos.createdAt));
 
-      return result;
-    } catch (error) {
-      console.error("Error fetching profile photos:", error);
-      throw error;
-    }
-  }
+    // Get tagged friends data for each photo
+    const photosWithTaggedFriends = await Promise.all(result.map(async (photo) => {
+      if (photo.friendTags && photo.friendTags.length > 0) {
+        const taggedFriends = await db
+          .select({
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+          })
+          .from(profiles)
+          .where(inArray(profiles.id, photo.friendTags));
 
-  async createProfilePhotos(photosData: Omit<Photo, 'id' | 'createdAt'>[]): Promise<Photo[]> {
-    try {
-      const result = await db
-        .insert(photos)
-        .values(photosData)
-        .returning();
+        return {
+          ...photo,
+          taggedFriends,
+        };
+      }
+      return {
+        ...photo,
+        taggedFriends: [],
+      };
+    }));
 
-      return result;
-    } catch (error) {
-      console.error("Error creating photos:", error);
-      throw error;
-    }
-  }
+    return photosWithTaggedFriends;
+  },
+
+  async createProfilePhotos(photosData: Array<{ profileId: number; albumId?: number | null; imageUrl: string; caption?: string; tags?: string[]; friendTags?: number[] }>) {
+    const [insertedPhotos] = await Promise.all([
+      db.insert(photos).values(photosData.map(data => ({
+        profileId: data.profileId,
+        albumId: data.albumId,
+        imageUrl: data.imageUrl,
+        caption: data.caption,
+        tags: data.tags || [],
+        friendTags: data.friendTags || [],
+      }))).returning()
+    ]);
+
+    return insertedPhotos;
+  },
 
   async getPhoto(photoId: number): Promise<Photo | null> {
     try {
@@ -972,20 +991,15 @@ export class Storage {
     }
   }
 
-  async updatePhoto(photoId: number, updates: Partial<Omit<Photo, 'id' | 'profileId' | 'createdAt'>>): Promise<Photo> {
-    try {
-      const result = await db
-        .update(photos)
-        .set(updates)
-        .where(eq(photos.id, photoId))
-        .returning();
+  async updatePhoto(photoId: number, updates: { caption?: string; friendTags?: number[] }) {
+    const [updatedPhoto] = await db
+      .update(photos)
+      .set(updates)
+      .where(eq(photos.id, photoId))
+      .returning();
 
-      return result[0];
-    } catch (error) {
-      console.error("Error updating photo:", error);
-      throw error;
-    }
-  }
+    return updatedPhoto;
+  },
 
   async deletePhoto(photoId: number): Promise<void> {
     try {
@@ -999,7 +1013,8 @@ export class Storage {
   }
 
   // Album methods
-  async getProfileAlbums(profileId: number): Promise<Album[]> {
+  async getProfileAlbums(profileId: number):```tool_code
+ Promise<Album[]> {
     try {
       const result = await db
         .select()
@@ -1064,14 +1079,24 @@ export class Storage {
 
   // Photo comment methods
   async getPhotoComments(photoId: number) {
-    const comments = await db
+    // Build the comments tree
+    const buildCommentsTree = (comments: any[], parentId: number | null = null): any[] => {
+      return comments
+        .filter(comment => comment.parentId === parentId)
+        .map(comment => ({
+          ...comment,
+          replies: buildCommentsTree(comments, comment.id)
+        }));
+    };
+
+    const commentsData = await db
       .select({
         id: photoComments.id,
-        parentId: photoComments.parentId,
         content: photoComments.content,
-        repliesCount: photoComments.repliesCount,
+        friendTags: photoComments.friendTags,
         createdAt: photoComments.createdAt,
         updatedAt: photoComments.updatedAt,
+        parentId: photoComments.parentId,
         profile: {
           id: profiles.id,
           name: profiles.name,
@@ -1083,62 +1108,83 @@ export class Storage {
       .where(eq(photoComments.photoId, photoId))
       .orderBy(photoComments.createdAt);
 
-    // Organize comments into a tree structure
-    const commentMap = new Map();
-    const rootComments = [];
+    // Get tagged friends data for each comment
+    const commentsWithTaggedFriends = await Promise.all(commentsData.map(async (comment) => {
+      if (comment.friendTags && comment.friendTags.length > 0) {
+        const taggedFriends = await db
+          .select({
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+          })
+          .from(profiles)
+          .where(inArray(profiles.id, comment.friendTags));
 
-    // First pass: create all comment objects
-    comments.forEach(comment => {
-      commentMap.set(comment.id, { ...comment, replies: [] });
-    });
-
-    // Second pass: organize into tree structure
-    comments.forEach(comment => {
-      if (comment.parentId) {
-        const parent = commentMap.get(comment.parentId);
-        if (parent) {
-          parent.replies.push(commentMap.get(comment.id));
-        }
-      } else {
-        rootComments.push(commentMap.get(comment.id));
+        return {
+          ...comment,
+          taggedFriends,
+        };
       }
+      return {
+        ...comment,
+        taggedFriends: [],
+      };
+    }));
+
+    return buildCommentsTree(commentsWithTaggedFriends);
+  },
+
+  async createPhotoComment(commentData: { photoId: number; profileId: number; content: string; parentId?: number; friendTags?: number[] }) {
+    return await db.transaction(async (tx) => {
+      // Create the comment
+      const [comment] = await tx
+        .insert(photoComments)
+        .values({
+          ...commentData,
+          friendTags: commentData.friendTags || [],
+        })
+        .returning();
+
+      // Update parent comment replies count if this is a reply
+      if (commentData.parentId) {
+        await tx
+          .update(photoComments)
+          .set({
+            repliesCount: sql`${photoComments.repliesCount} + 1`
+          })
+          .where(eq(photoComments.id, commentData.parentId));
+      }
+
+      // Update photo comments count
+      await tx
+        .update(photos)
+        .set({
+          commentsCount: sql`${photos.commentsCount} + 1`
+        })
+        .where(eq(photos.id, commentData.photoId));
+
+      // Return comment with profile data
+      const result = await tx
+        .select({
+          id: photoComments.id,
+          content: photoComments.content,
+          friendTags: photoComments.friendTags,
+          createdAt: photoComments.createdAt,
+          updatedAt: photoComments.updatedAt,
+          parentId: photoComments.parentId,
+          profile: {
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+          },
+        })
+        .from(photoComments)
+        .innerJoin(profiles, eq(photoComments.profileId, profiles.id))
+        .where(eq(photoComments.id, comment.id));
+
+      return result[0];
     });
-
-    return rootComments;
-  }
-
-  async createPhotoComment(commentData: any) {
-    const [comment] = await db.insert(photoComments).values(commentData).returning();
-
-    // Update comments count
-    await db
-      .update(photos)
-      .set({ 
-        commentsCount: sql`${photos.commentsCount} + 1` 
-      })
-      .where(eq(photos.id, commentData.photoId));
-
-    // Return comment with profile data
-    const [commentWithProfile] = await db
-      .select({
-        id: photoComments.id,
-        parentId: photoComments.parentId,
-        content: photoComments.content,
-        repliesCount: photoComments.repliesCount,
-        createdAt: photoComments.createdAt,
-        updatedAt: photoComments.updatedAt,
-        profile: {
-          id: profiles.id,
-          name: profiles.name,
-          profileImageUrl: profiles.profileImageUrl,
-        },
-      })
-      .from(photoComments)
-      .innerJoin(profiles, eq(photoComments.profileId, profiles.id))
-      .where(eq(photoComments.id, comment.id));
-
-    return commentWithProfile;
-  }
+  },
 
   async deletePhotoComment(commentId: number, profileId: number) {
     // Get the comment to find the photo ID

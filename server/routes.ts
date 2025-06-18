@@ -1777,6 +1777,7 @@ export function registerRoutes(app: Express): Server {
           const file = files[i];
           const caption = req.body[`caption_${i}`] || '';
           const tags = req.body[`tags_${i}`] ? JSON.parse(req.body[`tags_${i}`]) : [];
+          const friendTags = req.body[`friendTags_${i}`] ? JSON.parse(req.body[`friendTags_${i}`]) : [];
 
           photoData.push({
             profileId,
@@ -1784,6 +1785,7 @@ export function registerRoutes(app: Express): Server {
             imageUrl: `/uploads/${file.filename}`,
             caption,
             tags,
+            friendTags,
           });
         }
 
@@ -1802,7 +1804,7 @@ export function registerRoutes(app: Express): Server {
   app.put("/api/photos/:photoId", requireAuth, async (req, res) => {
     try {
       const photoId = parseInt(req.params.photoId);
-      const { caption } = req.body;
+      const { caption, friendTags } = req.body;
 
       const photo = await storage.getPhoto(photoId);
 
@@ -1816,7 +1818,11 @@ export function registerRoutes(app: Express): Server {
         return res.status(403).json({ error: "Not authorized to update this photo" });
       }
 
-      const updatedPhoto = await storage.updatePhoto(photoId, { caption });
+      const updateData: any = {};
+      if (caption !== undefined) updateData.caption = caption;
+      if (friendTags !== undefined) updateData.friendTags = friendTags;
+
+      const updatedPhoto = await storage.updatePhoto(photoId, updateData);
       res.json(updatedPhoto);
     } catch (error) {
       console.error("Error updating photo:", error);
@@ -2027,7 +2033,7 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/photos/:id/comments', isAuthenticated, async (req: any, res) => {
     try {
       const photoId = parseInt(req.params.id);
-      const { content, parentId } = req.body;
+      const { content, parentId, friendTags } = req.body;
 
       if (!content || content.trim().length === 0) {
         return res.status(400).json({ message: "Comment content is required" });
@@ -2042,6 +2048,7 @@ export function registerRoutes(app: Express): Server {
         photoId,
         profileId: activeProfile.id,
         content: content.trim(),
+        friendTags: friendTags || [],
       };
 
       if (parentId) {

@@ -61,9 +61,11 @@ interface FriendTagSearchProps {
   friends: any[];
   selectedFriends: number[];
   onSelectionChange: (selectedIds: number[]) => void;
+  placeholder?: string;
+  compact?: boolean;
 }
 
-function FriendTagSearch({ friends, selectedFriends, onSelectionChange }: FriendTagSearchProps) {
+function FriendTagSearch({ friends, selectedFriends, onSelectionChange, placeholder = "Search friends to tag...", compact = false }: FriendTagSearchProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -118,11 +120,11 @@ function FriendTagSearch({ friends, selectedFriends, onSelectionChange }: Friend
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
-            placeholder="Search friends to tag..."
+            placeholder={placeholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsOpen(true)}
-            className="pl-10"
+            className={compact ? "pl-10 h-8 text-sm" : "pl-10"}
           />
         </div>
 
@@ -248,6 +250,19 @@ const CommentThread: React.FC<CommentThreadProps> = ({
             <p className="text-sm text-gray-800 dark:text-gray-200">
               {comment.content}
             </p>
+            {comment.taggedFriends && comment.taggedFriends.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {comment.taggedFriends.map((friend: any) => (
+                  <span
+                    key={friend.id}
+                    className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full"
+                  >
+                    <User className="w-3 h-3" />
+                    {friend.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex items-center mt-1 space-x-3 text-xs text-gray-500 dark:text-gray-400">
             <span>
@@ -286,6 +301,18 @@ const CommentThread: React.FC<CommentThreadProps> = ({
                 rows={2}
                 autoFocus
               />
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Tag Friends (optional)
+                </label>
+                <FriendTagSearch
+                  friends={friends}
+                  selectedFriends={replyFriendTags}
+                  onSelectionChange={setReplyFriendTags}
+                  placeholder="Tag friends in reply..."
+                  compact={true}
+                />
+              </div>
               <div className="flex space-x-2">
                 <Button
                   size="sm"
@@ -363,6 +390,8 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
   const [expandedThreads, setExpandedThreads] = useState<Set<number>>(new Set());
+  const [commentFriendTags, setCommentFriendTags] = useState<number[]>([]);
+  const [replyFriendTags, setReplyFriendTags] = useState<number[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch photos for this profile
@@ -601,12 +630,12 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
 
   // Create photo comment mutation
   const createCommentMutation = useMutation({
-    mutationFn: async ({ photoId, content, parentId }: { photoId: number; content: string; parentId: number | null }) => {
+    mutationFn: async ({ photoId, content, parentId, friendTags }: { photoId: number; content: string; parentId: number | null; friendTags?: number[] }) => {
       const response = await fetch(`/api/photos/${photoId}/comments`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, parentId }),
+        body: JSON.stringify({ content, parentId, friendTags }),
       });
       if (!response.ok) throw new Error('Failed to create comment');
       return response.json();
@@ -614,9 +643,11 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
     onSuccess: () => {
       refetchComments();
       setNewComment('');
+      setCommentFriendTags([]);
       setIsSubmittingComment(false);
       setReplyingTo(null);
       setReplyText('');
+      setReplyFriendTags([]);
     },
     onError: (error: any) => {
       setIsSubmittingComment(false);
@@ -800,6 +831,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
       photoId: selectedPhoto.id,
       content: newComment.trim(),
       parentId: null,
+      friendTags: commentFriendTags,
     });
   };
 
@@ -820,6 +852,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
       photoId: selectedPhoto.id,
       content: replyText.trim(),
       parentId: parentId,
+      friendTags: replyFriendTags,
     });
   };
 
@@ -1514,6 +1547,23 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                       {new Date(selectedPhoto.createdAt).toLocaleDateString()}
                     </p>
 
+                    {selectedPhoto.taggedFriends && selectedPhoto.taggedFriends.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Tagged Friends:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedPhoto.taggedFriends.map((friend: any) => (
+                            <span
+                              key={friend.id}
+                              className="text-sm bg-green-500/20 border border-green-400/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full backdrop-blur-sm flex items-center gap-1"
+                            >
+                              <User className="w-3 h-3" />
+                              {friend.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {selectedPhoto.tags.length > 0 && (
                       <div className="space-y-2">
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Tags:</p>
@@ -1551,6 +1601,18 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
                         className="min-h-[80px] bg-white/20 dark:bg-gray-800/20 border border-white/30 dark:border-gray-600/30 backdrop-blur-sm rounded-lg text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
                         rows={3}
                       />
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Tag Friends (optional)
+                        </label>
+                        <FriendTagSearch
+                          friends={friends}
+                          selectedFriends={commentFriendTags}
+                          onSelectionChange={setCommentFriendTags}
+                          placeholder="Tag friends in comment..."
+                          compact={true}
+                        />
+                      </div>
                       <Button
                         onClick={handleSubmitComment}
                         disabled={!newComment.trim() || isSubmittingComment}

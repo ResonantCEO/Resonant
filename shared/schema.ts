@@ -179,6 +179,7 @@ export const photos = pgTable("photos", {
   imageUrl: varchar("image_url", { length: 500 }).notNull(),
   caption: text("caption"),
   tags: text("tags").array().default([]).notNull(),
+  friendTags: integer("friend_tags").array().default([]).notNull(), // Array of profile IDs
   commentsCount: integer("comments_count").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -189,6 +190,7 @@ export const photoComments = pgTable("photo_comments", {
   profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
   parentId: integer("parent_id").references(() => photoComments.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
+  friendTags: integer("friend_tags").array().default([]).notNull(), // Array of profile IDs
   repliesCount: integer("replies_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

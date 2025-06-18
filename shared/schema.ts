@@ -65,6 +65,8 @@ export const profiles = pgTable("profiles", {
   coverImageUrl: varchar("cover_image_url"),
   coverPositionX: real("cover_position_x").default(50),
   coverPositionY: real("cover_position_y").default(50),
+  profilePositionX: real("profile_position_x").default(50),
+  profilePositionY: real("profile_position_y").default(50),
   backgroundImageUrl: varchar("background_image_url"),
   profileBackground: text("profile_background"), // 'sunset', 'ocean', 'forest', 'gradient-1', etc., or 'custom-photo'
   visibility: varchar("visibility").notNull().default("public"), // 'public', 'friends', 'private'

@@ -78,6 +78,13 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const coverContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Profile picture positioning states
+  const [isProfilePositioningMode, setIsProfilePositioningMode] = useState(false);
+  const [profilePhotoPosition, setProfilePhotoPosition] = useState({ x: 50, y: 50 });
+  const [isProfileDragging, setIsProfileDragging] = useState(false);
+  const [profileDragStart, setProfileDragStart] = useState({ x: 0, y: 0 });
+  const profileContainerRef = useRef<HTMLDivElement>(null);
 
   // Don't render if profile is not loaded
   if (!profile) {
@@ -378,6 +385,28 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     },
   });
 
+  // Update profile picture position mutation
+  const updateProfilePositionMutation = useMutation({
+    mutationFn: async (position: { x: number; y: number }) => {
+      return await apiRequest("PATCH", `/api/profiles/${profile.id}/profile-position`, position);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      setIsProfilePositioningMode(false);
+      toast({
+        title: "Profile Picture Position Updated",
+        description: "Your profile picture position has been saved.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile picture position",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCoverUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -521,6 +550,100 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
   const handleTouchEnd = () => {
     setIsDragging(false);
+  };
+
+  // Profile picture positioning handlers
+  const handleProfilePositionMode = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (profile?.profileImageUrl) {
+      if (isProfilePositioningMode) {
+        // Save and exit positioning mode
+        updateProfilePositionMutation.mutate(profilePhotoPosition);
+      } else {
+        // Enter positioning mode
+        setIsProfilePositioningMode(true);
+        // Initialize position from profile data or default to center
+        setProfilePhotoPosition({
+          x: profile.profilePositionX || 50,
+          y: profile.profilePositionY || 50
+        });
+      }
+    }
+  };
+
+  const handleCancelProfilePosition = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsProfilePositioningMode(false);
+    setProfilePhotoPosition({
+      x: profile.profilePositionX || 50,
+      y: profile.profilePositionY || 50
+    });
+  };
+
+  const handleProfileMouseDown = (e: React.MouseEvent) => {
+    if (!isProfilePositioningMode) return;
+    setIsProfileDragging(true);
+    setProfileDragStart({ x: e.clientX, y: e.clientY });
+    e.preventDefault();
+  };
+
+  const handleProfileMouseMove = (e: React.MouseEvent) => {
+    if (!isProfileDragging || !isProfilePositioningMode || !profileContainerRef.current) return;
+
+    const container = profileContainerRef.current;
+    const rect = container.getBoundingClientRect();
+
+    const deltaX = e.clientX - profileDragStart.x;
+    const deltaY = e.clientY - profileDragStart.y;
+
+    // Convert pixel movement to percentage
+    const percentX = (deltaX / rect.width) * 100;
+    const percentY = (deltaY / rect.height) * 100;
+
+    const newX = Math.max(0, Math.min(100, profilePhotoPosition.x - percentX));
+    const newY = Math.max(0, Math.min(100, profilePhotoPosition.y - percentY));
+
+    setProfilePhotoPosition({ x: newX, y: newY });
+    setProfileDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleProfileMouseUp = () => {
+    setIsProfileDragging(false);
+  };
+
+  const handleProfileTouchStart = (e: React.TouchEvent) => {
+    if (!isProfilePositioningMode) return;
+    const touch = e.touches[0];
+    setIsProfileDragging(true);
+    setProfileDragStart({ x: touch.clientX, y: touch.clientY });
+    e.preventDefault();
+  };
+
+  const handleProfileTouchMove = (e: React.TouchEvent) => {
+    if (!isProfileDragging || !isProfilePositioningMode || !profileContainerRef.current) return;
+
+    const touch = e.touches[0];
+    const container = profileContainerRef.current;
+    const rect = container.getBoundingClientRect();
+
+    const deltaX = touch.clientX - profileDragStart.x;
+    const deltaY = touch.clientY - profileDragStart.y;
+
+    // Convert pixel movement to percentage
+    const percentX = (deltaX / rect.width) * 100;
+    const percentY = (deltaY / rect.height) * 100;
+
+    const newX = Math.max(0, Math.min(100, profilePhotoPosition.x - percentX));
+    const newY = Math.max(0, Math.min(100, profilePhotoPosition.y - percentY));
+
+    setProfilePhotoPosition({ x: newX, y: newY });
+    setProfileDragStart({ x: touch.clientX, y: touch.clientY });
+
+    e.preventDefault();
+  };
+
+  const handleProfileTouchEnd = () => {
+    setIsProfileDragging(false);
   };
 
   const renderActionButtons = () => {
@@ -743,32 +866,100 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           {profile?.type === 'artist' && (
             <div className="absolute left-4 sm:left-6 -top-6 sm:-top-10 z-10">
               <div className="relative">
-                <Avatar 
-                  className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
-                  onClick={handleProfilePictureClick}
+                <div
+                  ref={profileContainerRef}
+                  className={`w-24 h-24 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg ${
+                    isOwn && !isProfilePositioningMode 
+                      ? 'cursor-pointer hover:opacity-80 transition-opacity' 
+                      : isProfilePositioningMode 
+                        ? isProfileDragging 
+                          ? 'cursor-grabbing' 
+                          : 'cursor-grab'
+                        : ''
+                  }`}
+                  onClick={isOwn && !isProfilePositioningMode ? handleProfilePictureClick : undefined}
+                  onMouseDown={handleProfileMouseDown}
+                  onMouseMove={handleProfileMouseMove}
+                  onMouseUp={handleProfileMouseUp}
+                  onMouseLeave={handleProfileMouseUp}
+                  onTouchStart={handleProfileTouchStart}
+                  onTouchMove={handleProfileTouchMove}
+                  onTouchEnd={handleProfileTouchEnd}
                 >
-                  <AvatarImage 
-                    src={profile.profileImageUrl || ""} 
-                    className="object-cover w-full h-full"
-                  />
-                  <AvatarFallback className="text-lg sm:text-3xl">
-                    {getDisplayName().slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                {isOwn && (
-                  <>
-                    <div 
-                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                      onClick={handleProfilePictureClick}
-                    >
-                      <Camera className="w-8 h-8 text-white" />
+                  {profile.profileImageUrl ? (
+                    <img 
+                      src={profile.profileImageUrl} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                      style={{
+                        objectPosition: isProfilePositioningMode 
+                          ? `${profilePhotoPosition.x}% ${profilePhotoPosition.y}%`
+                          : `${profile.profilePositionX || 50}% ${profile.profilePositionY || 50}%`
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-lg sm:text-3xl">
+                      {getDisplayName().slice(0, 2).toUpperCase()}
                     </div>
-                    {uploadProfilePictureMutation.isPending && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-                      </div>
+                  )}
+
+                  {/* Positioning mode indicator */}
+                  {isProfilePositioningMode && (
+                    <div className="absolute bottom-1 left-1 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs z-20 pointer-events-none">
+                      {Math.round(profilePhotoPosition.x)}%, {Math.round(profilePhotoPosition.y)}%
+                    </div>
+                  )}
+
+                  {/* Hover overlay for owned profiles */}
+                  {isOwn && !isProfilePositioningMode && (
+                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
+                      <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    </div>
+                  )}
+
+                  {/* Upload progress indicator */}
+                  {uploadProfilePictureMutation.isPending && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Profile picture management buttons */}
+                {isOwn && profile?.profileImageUrl && (
+                  <div className="absolute -top-2 -right-2 flex space-x-1 z-20">
+                    <Button
+                      onClick={handleProfilePositionMode}
+                      size="sm"
+                      variant="secondary"
+                      className={`text-xs px-2 py-1 h-6 ${
+                        isProfilePositioningMode 
+                          ? 'bg-green-500/90 hover:bg-green-600/90 text-white' 
+                          : 'bg-white/80 hover:bg-white/90 text-gray-800'
+                      }`}
+                      disabled={updateProfilePositionMutation.isPending}
+                    >
+                      {isProfilePositioningMode ? (
+                        <>
+                          <Check className="w-3 h-3" />
+                        </>
+                      ) : (
+                        <>
+                          <Move className="w-3 h-3" />
+                        </>
+                      )}
+                    </Button>
+                    {isProfilePositioningMode && (
+                      <Button
+                        onClick={handleCancelProfilePosition}
+                        size="sm"
+                        variant="outline"
+                        className="text-xs px-2 py-1 h-6 bg-white/80 hover:bg-white/90 text-gray-800"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -778,32 +969,100 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           {profile?.type !== 'artist' && (
             <div className="absolute left-4 sm:left-6 -top-6 sm:-top-10 z-10">
               <div className="relative">
-                <Avatar 
-                  className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
-                  onClick={handleProfilePictureClick}
+                <div
+                  ref={profileContainerRef}
+                  className={`w-24 h-24 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg ${
+                    isOwn && !isProfilePositioningMode 
+                      ? 'cursor-pointer hover:opacity-80 transition-opacity' 
+                      : isProfilePositioningMode 
+                        ? isProfileDragging 
+                          ? 'cursor-grabbing' 
+                          : 'cursor-grab'
+                        : ''
+                  }`}
+                  onClick={isOwn && !isProfilePositioningMode ? handleProfilePictureClick : undefined}
+                  onMouseDown={handleProfileMouseDown}
+                  onMouseMove={handleProfileMouseMove}
+                  onMouseUp={handleProfileMouseUp}
+                  onMouseLeave={handleProfileMouseUp}
+                  onTouchStart={handleProfileTouchStart}
+                  onTouchMove={handleProfileTouchMove}
+                  onTouchEnd={handleProfileTouchEnd}
                 >
-                  <AvatarImage 
-                    src={profile.profileImageUrl || ""} 
-                    className="object-cover w-full h-full"
-                  />
-                  <AvatarFallback className="text-lg sm:text-3xl">
-                    {getDisplayName().slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                {isOwn && (
-                  <>
-                    <div 
-                      className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-                      onClick={handleProfilePictureClick}
-                    >
-                      <Camera className="w-8 h-8 text-white" />
+                  {profile.profileImageUrl ? (
+                    <img 
+                      src={profile.profileImageUrl} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                      style={{
+                        objectPosition: isProfilePositioningMode 
+                          ? `${profilePhotoPosition.x}% ${profilePhotoPosition.y}%`
+                          : `${profile.profilePositionX || 50}% ${profile.profilePositionY || 50}%`
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-lg sm:text-3xl">
+                      {getDisplayName().slice(0, 2).toUpperCase()}
                     </div>
-                    {uploadProfilePictureMutation.isPending && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-                      </div>
+                  )}
+
+                  {/* Positioning mode indicator */}
+                  {isProfilePositioningMode && (
+                    <div className="absolute bottom-1 left-1 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs z-20 pointer-events-none">
+                      {Math.round(profilePhotoPosition.x)}%, {Math.round(profilePhotoPosition.y)}%
+                    </div>
+                  )}
+
+                  {/* Hover overlay for owned profiles */}
+                  {isOwn && !isProfilePositioningMode && (
+                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
+                      <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    </div>
+                  )}
+
+                  {/* Upload progress indicator */}
+                  {uploadProfilePictureMutation.isPending && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Profile picture management buttons */}
+                {isOwn && profile?.profileImageUrl && (
+                  <div className="absolute -top-2 -right-2 flex space-x-1 z-20">
+                    <Button
+                      onClick={handleProfilePositionMode}
+                      size="sm"
+                      variant="secondary"
+                      className={`text-xs px-2 py-1 h-6 ${
+                        isProfilePositioningMode 
+                          ? 'bg-green-500/90 hover:bg-green-600/90 text-white' 
+                          : 'bg-white/80 hover:bg-white/90 text-gray-800'
+                      }`}
+                      disabled={updateProfilePositionMutation.isPending}
+                    >
+                      {isProfilePositioningMode ? (
+                        <>
+                          <Check className="w-3 h-3" />
+                        </>
+                      ) : (
+                        <>
+                          <Move className="w-3 h-3" />
+                        </>
+                      )}
+                    </Button>
+                    {isProfilePositioningMode && (
+                      <Button
+                        onClick={handleCancelProfilePosition}
+                        size="sm"
+                        variant="outline"
+                        className="text-xs px-2 py-1 h-6 bg-white/80 hover:bg-white/90 text-gray-800"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
             </div>

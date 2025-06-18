@@ -8,12 +8,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { MessageCircle, Send, Search, Plus, MoreVertical, Reply, Edit, Trash2, Check, CheckCheck } from "lucide-react";
+import { MessageCircle, Send, Search, Plus, MoreVertical, Reply, Edit, Trash2, Check, CheckCheck, Archive, Volume2, VolumeX, AlertTriangle, UserX, Pin, Heart, Smile, FileText, Image as ImageIcon, Calendar, Link, Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface Message {
   id: number;
@@ -38,6 +42,7 @@ interface Message {
   editedAt?: string;
   createdAt: string;
   updatedAt: string;
+  isPinned?: boolean;
 }
 
 interface Conversation {
@@ -57,10 +62,17 @@ interface Conversation {
   lastActivityAt: string;
   isArchived: boolean;
   isMuted: boolean;
+  isBlocked?: boolean;
   participants?: {
     id: number;
     name?: string;
   }[];
+}
+
+interface ConversationSettings {
+  notifications: boolean;
+  archived: boolean;
+  muted: boolean;
 }
 
 async function apiRequest(method: string, url: string, body?: any) {
@@ -86,11 +98,20 @@ export default function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [messageSearchQuery, setMessageSearchQuery] = useState("");
   const [editingMessage, setEditingMessage] = useState<number | null>(null);
   const [editContent, setEditContent] = useState("");
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [showNewConversation, setShowNewConversation] = useState(false);
+  const [showArchivedConversations, setShowArchivedConversations] = useState(false);
+  const [showConversationSettings, setShowConversationSettings] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch conversations
   const { data: conversations = [], isLoading: loadingConversations } = useQuery({
@@ -168,6 +189,123 @@ export default function MessagesPage() {
       apiRequest("POST", `/api/conversations/${conversationId}/read`),
   });
 
+  // Archive conversation mutation
+  const archiveConversationMutation = useMutation({
+    mutationFn: (conversationId: number) =>
+      apiRequest("PATCH", `/api/conversations/${conversationId}/archive`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+      toast({
+        title: "Success",
+        description: "Conversation archived",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mute conversation mutation
+  const muteConversationMutation = useMutation({
+    mutationFn: ({ conversationId, muted }: { conversationId: number; muted: boolean }) =>
+      apiRequest("PATCH", `/api/conversations/${conversationId}/mute`, { muted }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+      toast({
+        title: "Success",
+        description: "Notification settings updated",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Block user mutation
+  const blockUserMutation = useMutation({
+    mutationFn: (profileId: number) =>
+      apiRequest("POST", `/api/profiles/${profileId}/block`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+      setShowBlockDialog(false);
+      toast({
+        title: "Success",
+        description: "User blocked successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Report user mutation
+  const reportUserMutation = useMutation({
+    mutationFn: ({ profileId, reason }: { profileId: number; reason: string }) =>
+      apiRequest("POST", `/api/profiles/${profileId}/report`, { reason }),
+    onSuccess: () => {
+      setShowReportDialog(false);
+      toast({
+        title: "Success",
+        description: "Report submitted successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Pin message mutation
+  const pinMessageMutation = useMutation({
+    mutationFn: (messageId: number) =>
+      apiRequest("POST", `/api/messages/${messageId}/pin`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations", selectedConversation, "messages"] });
+      toast({
+        title: "Success",
+        description: "Message pinned",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // React to message mutation
+  const reactToMessageMutation = useMutation({
+    mutationFn: ({ messageId, reaction }: { messageId: number; reaction: string }) =>
+      apiRequest("POST", `/api/messages/${messageId}/react`, { reaction }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/conversations", selectedConversation, "messages"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -225,6 +363,28 @@ export default function MessagesPage() {
     setReplyingTo(null);
   };
 
+  // Typing indicator effect
+  useEffect(() => {
+    if (newMessage.length > 0 && !isTyping) {
+      setIsTyping(true);
+      // Send typing indicator to other participants
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+    }, 1000);
+
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [newMessage, isTyping]);
+
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -242,9 +402,41 @@ export default function MessagesPage() {
     }
   };
 
-  const filteredConversations = conversations.filter((conv: Conversation) =>
-    conv.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleArchiveConversation = (conversationId: number) => {
+    archiveConversationMutation.mutate(conversationId);
+  };
+
+  const handleMuteConversation = (conversationId: number, muted: boolean) => {
+    muteConversationMutation.mutate({ conversationId, muted });
+  };
+
+  const handleBlockUser = (profileId: number) => {
+    blockUserMutation.mutate(profileId);
+  };
+
+  const handleReportUser = (profileId: number, reason: string) => {
+    reportUserMutation.mutate({ profileId, reason });
+  };
+
+  const handlePinMessage = (messageId: number) => {
+    pinMessageMutation.mutate(messageId);
+  };
+
+  const handleReactToMessage = (messageId: number, reaction: string) => {
+    reactToMessageMutation.mutate({ messageId, reaction });
+  };
+
+  const filteredConversations = conversations
+    .filter((conv: Conversation) => {
+      const matchesSearch = conv.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesArchiveFilter = showArchivedConversations ? conv.isArchived : !conv.isArchived;
+      return matchesSearch && matchesArchiveFilter;
+    });
+
+  const filteredMessages = messages.filter((message: Message) => {
+    if (!messageSearchQuery) return true;
+    return message.content.toLowerCase().includes(messageSearchQuery.toLowerCase());
+  });
 
   const selectedConversationData = conversations.find((c: Conversation) => c.id === selectedConversation);
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -275,21 +467,30 @@ export default function MessagesPage() {
                       <MessageCircle className="w-5 h-5" />
                       Conversations
                     </CardTitle>
-                    <Dialog open={showNewConversation} onOpenChange={setShowNewConversation}>
-                      <DialogTrigger asChild>
-                        <Button size="sm" variant="outline">
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Start New Conversation</DialogTitle>
-                        </DialogHeader>
-                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                          To start a new conversation, visit a profile and click the "Message" button.
-                        </p>
-                      </DialogContent>
-                    </Dialog>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant={showArchivedConversations ? "default" : "outline"}
+                        onClick={() => setShowArchivedConversations(!showArchivedConversations)}
+                      >
+                        <Archive className="w-4 h-4" />
+                      </Button>
+                      <Dialog open={showNewConversation} onOpenChange={setShowNewConversation}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline">
+                            <Plus className="w-4 h-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Start New Conversation</DialogTitle>
+                          </DialogHeader>
+                          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                            To start a new conversation, visit a profile and click the "Message" button.
+                          </p>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
@@ -316,12 +517,12 @@ export default function MessagesPage() {
                         filteredConversations.map((conversation: Conversation) => (
                           <div
                             key={conversation.id}
-                            onClick={() => setSelectedConversation(conversation.id)}
-                            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                            className={`relative group flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                               selectedConversation === conversation.id
                                 ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
                                 : "hover:bg-neutral-50 dark:hover:bg-neutral-800"
                             }`}
+                            onClick={() => setSelectedConversation(conversation.id)}
                           >
                             <Avatar className="w-10 h-10">
                               <AvatarImage src={conversation.image} />
@@ -331,9 +532,17 @@ export default function MessagesPage() {
                             </Avatar>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
-                                <p className="font-medium text-neutral-900 dark:text-white truncate">
-                                  {conversation.name}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-neutral-900 dark:text-white truncate">
+                                    {conversation.name}
+                                  </p>
+                                  {conversation.isMuted && (
+                                    <VolumeX className="w-3 h-3 text-neutral-400" />
+                                  )}
+                                  {conversation.isArchived && (
+                                    <Archive className="w-3 h-3 text-neutral-400" />
+                                  )}
+                                </div>
                                 <span className="text-xs text-neutral-500">
                                   {conversation.lastMessage && formatTime(conversation.lastMessage.createdAt)}
                                 </span>
@@ -346,11 +555,54 @@ export default function MessagesPage() {
                                 )}
                               </p>
                             </div>
-                            {conversation.unreadCount > 0 && (
-                              <Badge className="bg-blue-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                                {conversation.unreadCount}
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {conversation.unreadCount > 0 && (
+                                <Badge className="bg-blue-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
+                                  {conversation.unreadCount}
+                                </Badge>
+                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <MoreVertical className="w-3 h-3" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleMuteConversation(conversation.id, !conversation.isMuted);
+                                    }}
+                                  >
+                                    {conversation.isMuted ? (
+                                      <>
+                                        <Volume2 className="w-4 h-4 mr-2" />
+                                        Unmute
+                                      </>
+                                    ) : (
+                                      <>
+                                        <VolumeX className="w-4 h-4 mr-2" />
+                                        Mute
+                                      </>
+                                    )}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleArchiveConversation(conversation.id);
+                                    }}
+                                  >
+                                    <Archive className="w-4 h-4 mr-2" />
+                                    {conversation.isArchived ? "Unarchive" : "Archive"}
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
                         ))
                       )}
@@ -365,20 +617,83 @@ export default function MessagesPage() {
                   <>
                     {/* Message Header */}
                     <CardHeader className="pb-4 border-b">
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={selectedConversationData.image} />
-                          <AvatarFallback>
-                            {selectedConversationData.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-semibold text-neutral-900 dark:text-white">
-                            {selectedConversationData.name}
-                          </h3>
-                          <p className="text-sm text-neutral-500">
-                            {selectedConversationData.type === 'direct' ? 'Direct Message' : 'Group Chat'}
-                          </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={selectedConversationData.image} />
+                            <AvatarFallback>
+                              {selectedConversationData.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-semibold text-neutral-900 dark:text-white">
+                              {selectedConversationData.name}
+                            </h3>
+                            <p className="text-sm text-neutral-500">
+                              {selectedConversationData.type === 'direct' ? 'Direct Message' : 'Group Chat'}
+                              {typingUsers.length > 0 && (
+                                <span className="ml-2 text-blue-500">
+                                  {typingUsers.join(', ')} typing...
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                            <Input
+                              placeholder="Search messages..."
+                              value={messageSearchQuery}
+                              onChange={(e) => setMessageSearchQuery(e.target.value)}
+                              className="pl-10 w-48"
+                            />
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="outline">
+                                <Settings className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleMuteConversation(selectedConversation, !selectedConversationData.isMuted)}
+                              >
+                                {selectedConversationData.isMuted ? (
+                                  <>
+                                    <Volume2 className="w-4 h-4 mr-2" />
+                                    Unmute Notifications
+                                  </>
+                                ) : (
+                                  <>
+                                    <VolumeX className="w-4 h-4 mr-2" />
+                                    Mute Notifications
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleArchiveConversation(selectedConversation)}
+                              >
+                                <Archive className="w-4 h-4 mr-2" />
+                                Archive Conversation
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => setShowBlockDialog(true)}
+                                className="text-red-600"
+                              >
+                                <UserX className="w-4 h-4 mr-2" />
+                                Block User
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setShowReportDialog(true)}
+                                className="text-red-600"
+                              >
+                                <AlertTriangle className="w-4 h-4 mr-2" />
+                                Report User
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     </CardHeader>
@@ -396,12 +711,20 @@ export default function MessagesPage() {
                               No messages yet. Start the conversation!
                             </div>
                           ) : (
-                            messages.map((message: Message) => {
+                            filteredMessages.map((message: Message) => {
                               const isCurrentUser = message.senderId === currentUser.profileId;
                               
                               return (
                                 <div key={message.id} className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
                                   <div className={`max-w-xs lg:max-w-md ${isCurrentUser ? 'order-2' : 'order-1'}`}>
+                                    {/* Pinned indicator */}
+                                    {message.isPinned && (
+                                      <div className="mb-1 flex items-center gap-1 text-xs text-amber-600">
+                                        <Pin className="w-3 h-3" />
+                                        <span>Pinned message</span>
+                                      </div>
+                                    )}
+                                    
                                     {/* Reply indicator */}
                                     {message.replyTo && (
                                       <div className="mb-1 px-3 py-1 text-xs bg-neutral-100 dark:bg-neutral-700 rounded border-l-2 border-blue-500">
@@ -447,6 +770,24 @@ export default function MessagesPage() {
                                             </p>
                                           )}
                                           <p className="text-sm break-words">{message.content}</p>
+                                          
+                                          {/* Message reactions */}
+                                          {message.reactions && Object.keys(message.reactions).length > 0 && (
+                                            <div className="flex gap-1 mt-2 flex-wrap">
+                                              {Object.entries(message.reactions).map(([emoji, count]) => (
+                                                <Button
+                                                  key={emoji}
+                                                  size="sm"
+                                                  variant="outline"
+                                                  className="h-6 px-2 text-xs"
+                                                  onClick={() => handleReactToMessage(message.id, emoji)}
+                                                >
+                                                  {emoji} {count}
+                                                </Button>
+                                              ))}
+                                            </div>
+                                          )}
+                                          
                                           <div className="flex items-center justify-between mt-1">
                                             <p className={`text-xs ${
                                               isCurrentUser ? 'text-blue-100' : 'text-neutral-500'
@@ -466,8 +807,33 @@ export default function MessagesPage() {
                                       )}
 
                                       {/* Message actions */}
-                                      {isCurrentUser && editingMessage !== message.id && (
-                                        <div className="absolute -left-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <div className="absolute -left-12 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                        <Button 
+                                          size="sm" 
+                                          variant="ghost" 
+                                          className="h-6 w-6 p-0"
+                                          onClick={() => handleReactToMessage(message.id, '❤️')}
+                                        >
+                                          <Heart className="w-3 h-3" />
+                                        </Button>
+                                        <DropdownMenu>
+                                          <DropdownMenuTrigger asChild>
+                                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                              <Smile className="w-3 h-3" />
+                                            </Button>
+                                          </DropdownMenuTrigger>
+                                          <DropdownMenuContent>
+                                            {['😀', '😂', '😍', '👍', '👎', '😢', '😮', '😡'].map((emoji) => (
+                                              <DropdownMenuItem
+                                                key={emoji}
+                                                onClick={() => handleReactToMessage(message.id, emoji)}
+                                              >
+                                                {emoji}
+                                              </DropdownMenuItem>
+                                            ))}
+                                          </DropdownMenuContent>
+                                        </DropdownMenu>
+                                        {(isCurrentUser || !isCurrentUser) && (
                                           <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                               <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
@@ -479,35 +845,29 @@ export default function MessagesPage() {
                                                 <Reply className="w-4 h-4 mr-2" />
                                                 Reply
                                               </DropdownMenuItem>
-                                              <DropdownMenuItem onClick={() => startEdit(message)}>
-                                                <Edit className="w-4 h-4 mr-2" />
-                                                Edit
+                                              <DropdownMenuItem onClick={() => handlePinMessage(message.id)}>
+                                                <Pin className="w-4 h-4 mr-2" />
+                                                Pin Message
                                               </DropdownMenuItem>
-                                              <DropdownMenuItem 
-                                                onClick={() => handleDeleteMessage(message.id)}
-                                                className="text-red-600"
-                                              >
-                                                <Trash2 className="w-4 h-4 mr-2" />
-                                                Delete
-                                              </DropdownMenuItem>
+                                              {isCurrentUser && (
+                                                <>
+                                                  <DropdownMenuItem onClick={() => startEdit(message)}>
+                                                    <Edit className="w-4 h-4 mr-2" />
+                                                    Edit
+                                                  </DropdownMenuItem>
+                                                  <DropdownMenuItem 
+                                                    onClick={() => handleDeleteMessage(message.id)}
+                                                    className="text-red-600"
+                                                  >
+                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    Delete
+                                                  </DropdownMenuItem>
+                                                </>
+                                              )}
                                             </DropdownMenuContent>
                                           </DropdownMenu>
-                                        </div>
-                                      )}
-
-                                      {/* Reply button for other users' messages */}
-                                      {!isCurrentUser && (
-                                        <div className="absolute -right-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                          <Button 
-                                            size="sm" 
-                                            variant="ghost" 
-                                            className="h-6 w-6 p-0"
-                                            onClick={() => startReply(message)}
-                                          >
-                                            <Reply className="w-3 h-3" />
-                                          </Button>
-                                        </div>
-                                      )}
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                   
@@ -547,22 +907,40 @@ export default function MessagesPage() {
                         </div>
                       )}
                       
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Type a message..."
-                          value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              handleSendMessage();
-                            }
-                          }}
-                          className="flex-1"
-                        />
+                      <div className="flex gap-2 items-end">
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="outline" className="h-10 w-10 p-0">
+                            <ImageIcon className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-10 w-10 p-0">
+                            <FileText className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <div className="flex-1 relative">
+                          <Input
+                            placeholder="Type a message..."
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendMessage();
+                              }
+                            }}
+                            className="pr-12"
+                          />
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                          >
+                            <Smile className="w-4 h-4" />
+                          </Button>
+                        </div>
                         <Button 
                           onClick={handleSendMessage} 
                           disabled={!newMessage.trim() || sendMessageMutation.isPending}
+                          className="h-10"
                         >
                           <Send className="w-4 h-4" />
                         </Button>
@@ -587,6 +965,80 @@ export default function MessagesPage() {
           </div>
         </div>
       </div>
+
+      {/* Block User Dialog */}
+      <AlertDialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Block User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to block this user? They won't be able to send you messages or see your profile.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (selectedConversationData?.participants?.[0]?.id) {
+                  handleBlockUser(selectedConversationData.participants[0].id);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Block User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Report User Dialog */}
+      <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Report User</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              Please tell us why you're reporting this user:
+            </p>
+            <div className="space-y-2">
+              {[
+                "Harassment or bullying",
+                "Spam or unwanted messages",
+                "Inappropriate content",
+                "Impersonation",
+                "Other"
+              ].map((reason) => (
+                <Label key={reason} className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="reportReason"
+                    value={reason}
+                    className="text-blue-600"
+                  />
+                  <span>{reason}</span>
+                </Label>
+              ))}
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowReportDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  const reason = document.querySelector('input[name="reportReason"]:checked')?.value as string;
+                  if (reason && selectedConversationData?.participants?.[0]?.id) {
+                    handleReportUser(selectedConversationData.participants[0].id, reason);
+                  }
+                }}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Submit Report
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

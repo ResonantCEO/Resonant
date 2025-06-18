@@ -1360,7 +1360,7 @@ export class Storage {
         id: message.id,
         content: message.content,
         messageType: message.messageType,
-        senderId: message.senderId,
+        senderId: data.senderId,
         senderName: sender[0]?.name,
         senderImage: sender[0]?.profileImageUrl,
         attachments: message.attachments,
@@ -1498,39 +1498,168 @@ export class Storage {
     }
   }
 
-  async updateMessage(messageId: number, profileId: number, content: string): Promise<any> {
+  async updateMessage(messageId: number, senderId: number, content: string): Promise<any> {
     try {
-      // Verify user owns the message
-      const message = await db
-        .select()
-        .from(messages)
-        .where(
-          and(
-            eq(messages.id, messageId),
-            eq(messages.senderId, profileId),
-            isNull(messages.deletedAt)
-          )
-        )
-        .limit(1);
-
-      if (message.length === 0) {
-        throw new Error("Message not found or not authorized to edit");
-      }
-
-      // Update the message
-      const [updatedMessage] = await db
+      const [message] = await db
         .update(messages)
-        .set({ 
+        .set({
           content,
           editedAt: new Date(),
           updatedAt: new Date(),
         })
-        .where(eq(messages.id, messageId))
+        .where(and(
+          eq(messages.id, messageId),
+          eq(messages.senderId, senderId)
+        ))
         .returning();
 
-      return updatedMessage;
+      if (!message) {
+        throw new Error("Message not found or unauthorized");
+      }
+
+      return message;
     } catch (error) {
       console.error("Error updating message:", error);
+      throw error;
+    }
+  }
+
+  async toggleConversationArchive(conversationId: number, profileId: number): Promise<void> {
+    try {
+      // Update the participant's archived status
+      await db
+        .update(conversationParticipants)
+        .set({
+          isArchived: sql`NOT is_archived`
+        })
+        .where(and(
+          eq(conversationParticipants.conversationId, conversationId),
+          eq(conversationParticipants.profileId, profileId)
+        ));
+    } catch (error) {
+      console.error("Error toggling conversation archive:", error);
+      throw error;
+    }
+  }
+
+  async updateConversationMute(conversationId: number, profileId: number, muted: boolean): Promise<void> {
+    try {
+      await db
+        .update(conversationParticipants)
+        .set({
+          isMuted: muted
+        })
+        .where(and(
+          eq(conversationParticipants.conversationId, conversationId),
+          eq(conversationParticipants.profileId, profileId)
+        ));
+    } catch (error) {
+      console.error("Error updating conversation mute:", error);
+      throw error;
+    }
+  }
+
+  async toggleMessagePin(messageId: number, profileId: number): Promise<void> {
+    try {
+      // Check if user has permission to pin messages in this conversation
+      const message = await db
+        .select({
+          conversationId: messages.conversationId
+        })
+        .from(messages)
+        .where(eq(messages.id, messageId))
+        .limit(1);
+
+      if (!message[0]) {
+        throw new Error("Message not found");
+      }
+
+      // Check if user is participant in the conversation
+      const participant = await db
+        .select()
+        .from(conversationParticipants)
+        .where(and(
+          eq(conversationParticipants.conversationId, message[0].conversationId),
+          eq(conversationParticipants.profileId, profileId)
+        ))
+        .limit(1);
+
+      if (!participant[0]) {
+        throw new Error("Unauthorized");
+      }
+
+      // Toggle pin status
+      await db
+        .update(messages)
+        .set({
+          isPinned: sql`NOT COALESCE(is_pinned, false)`
+        })
+        .where(eq(messages.id, messageId));
+    } catch (error) {
+      console.error("Error toggling message pin:", error);
+      throw error;
+    }
+  }
+
+  async addMessageReaction(messageId: number, profileId: number, reaction: string): Promise<void> {
+    try {
+      // Get current reactions
+      const [message] = await db
+        .select({
+          reactions: messages.reactions
+        })
+        .from(messages)
+        .where(eq(messages.id, messageId));
+
+      if (!message) {
+        throw new Error("Message not found");
+      }
+
+      const reactions = message.reactions as Record<string, number> || {};
+
+      // Toggle reaction
+      if (reactions[reaction]) {
+        reactions[reaction]++;
+      } else {
+        reactions[reaction] = 1;
+      }
+
+      // Update message with new reactions
+      await db
+        .update(messages)
+        .set({
+          reactions: reactions
+        })
+        .where(eq(messages.id, messageId));
+    } catch (error) {
+      console.error("Error adding message reaction:", error);
+      throw error;
+    }
+  }
+
+  async blockProfile(blockerProfileId: number, blockedProfileId: number): Promise<void> {
+    try {
+      // Create block record (you'll need to create a blocks table)
+      await db.execute(sql`
+        INSERT INTO profile_blocks (blocker_profile_id, blocked_profile_id, created_at)
+        VALUES (${blockerProfileId}, ${blockedProfileId}, NOW())
+        ON CONFLICT (blocker_profile_id, blocked_profile_id) DO NOTHING
+      `);
+    } catch (error) {
+      console.error("Error blocking profile:", error);
+      throw error;
+    }
+  }
+
+  async reportProfile(reporterProfileId: number, reportedProfileId: number, reason: string): Promise<void> {
+    try {
+      // Create report record (you'll need to create a reports table)
+      await db.execute(sql`
+        INSERT INTO profile_reports (reporter_profile_id, reported_profile_id, reason, created_at)
+        VALUES (${reporterProfileId}, ${reportedProfileId}, ${reason}, NOW())
+      `);
+    } catch (error) {
+      console.error("Error reporting profile:", error);
       throw error;
     }
   }

@@ -661,6 +661,86 @@ export const insertConversationParticipantSchema = createInsertSchema(conversati
   createdAt: true,
 });
 
+// Profile blocks and reports tables
+export const profileBlocks = pgTable("profile_blocks", {
+  id: serial("id").primaryKey(),
+  blockerProfileId: integer("blocker_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  blockedProfileId: integer("blocked_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const profileReports = pgTable("profile_reports", {
+  id: serial("id").primaryKey(),
+  reporterProfileId: integer("reporter_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  reportedProfileId: integer("reported_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  reason: text("reason").notNull(),
+  status: varchar("status").default("pending"), // pending, reviewed, resolved
+  reviewedBy: integer("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Add missing columns to existing tables
+export const messagesExtended = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  senderId: integer("sender_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  replyToId: integer("reply_to_id").references(() => messages.id),
+  content: text("content").notNull(),
+  messageType: varchar("message_type").default("text"),
+  attachments: jsonb("attachments").default([]),
+  reactions: jsonb("reactions").default({}),
+  isPinned: boolean("is_pinned").default(false),
+  editedAt: timestamp("edited_at"),
+  deletedAt: timestamp("deleted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const conversationParticipantsExtended = pgTable("conversation_participants", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  role: varchar("role").default("member"),
+  joinedAt: timestamp("joined_at").defaultNow(),
+  leftAt: timestamp("left_at"),
+  lastReadAt: timestamp("last_read_at").defaultNow(),
+  isMuted: boolean("is_muted").default(false),
+  isArchived: boolean("is_archived").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Relations for new tables
+export const profileBlocksRelations = relations(profileBlocks, ({ one }) => ({
+  blocker: one(profiles, {
+    fields: [profileBlocks.blockerProfileId],
+    references: [profiles.id],
+    relationName: "blocker",
+  }),
+  blocked: one(profiles, {
+    fields: [profileBlocks.blockedProfileId],
+    references: [profiles.id],
+    relationName: "blocked",
+  }),
+}));
+
+export const profileReportsRelations = relations(profileReports, ({ one }) => ({
+  reporter: one(profiles, {
+    fields: [profileReports.reporterProfileId],
+    references: [profiles.id],
+    relationName: "reporter",
+  }),
+  reported: one(profiles, {
+    fields: [profileReports.reportedProfileId],
+    references: [profiles.id],
+    relationName: "reported",
+  }),
+  reviewer: one(users, {
+    fields: [profileReports.reviewedBy],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
 export type Conversation = InferSelectModel<typeof conversations>;
 export type InsertConversation = InferInsertModel<typeof conversations>;
@@ -669,6 +749,10 @@ export type InsertConversationParticipant = InferInsertModel<typeof conversation
 export type Message = InferSelectModel<typeof messages>;
 export type InsertMessage = InferInsertModel<typeof messages>;
 export type MessageRead = InferSelectModel<typeof messageReads>;
+export type ProfileBlock = InferSelectModel<typeof profileBlocks>;
+export type InsertProfileBlock = InferInsertModel<typeof profileBlocks>;
+export type ProfileReport = InferSelectModel<typeof profileReports>;
+export type InsertProfileReport = InferInsertModel<typeof profileReports>;
 
 export type BookingRequest = InferSelectModel<typeof bookingRequests>;
 export type InsertBookingRequest = InferInsertModel<typeof bookingRequests>;

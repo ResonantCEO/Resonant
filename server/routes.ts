@@ -2555,6 +2555,111 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Archive/unarchive conversation
+  app.patch('/api/conversations/:id/archive', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      await storage.toggleConversationArchive(conversationId, activeProfile.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error archiving conversation:", error);
+      res.status(500).json({ message: "Failed to archive conversation" });
+    }
+  });
+
+  // Mute/unmute conversation
+  app.patch('/api/conversations/:id/mute', isAuthenticated, async (req: any, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const { muted } = req.body;
+      await storage.updateConversationMute(conversationId, activeProfile.id, muted);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating conversation mute:", error);
+      res.status(500).json({ message: "Failed to update conversation mute" });
+    }
+  });
+
+  // Pin/unpin message
+  app.post('/api/messages/:id/pin', isAuthenticated, async (req: any, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      await storage.toggleMessagePin(messageId, activeProfile.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error pinning message:", error);
+      res.status(500).json({ message: "Failed to pin message" });
+    }
+  });
+
+  // React to message
+  app.post('/api/messages/:id/react', isAuthenticated, async (req: any, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const { reaction } = req.body;
+      await storage.addMessageReaction(messageId, activeProfile.id, reaction);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error reacting to message:", error);
+      res.status(500).json({ message: "Failed to react to message" });
+    }
+  });
+
+  // Block profile
+  app.post('/api/profiles/:id/block', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      await storage.blockProfile(activeProfile.id, profileId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error blocking profile:", error);
+      res.status(500).json({ message: "Failed to block profile" });
+    }
+  });
+
+  // Report profile
+  app.post('/api/profiles/:id/report', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const { reason } = req.body;
+      await storage.reportProfile(activeProfile.id, profileId, reason);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error reporting profile:", error);
+      res.status(500).json({ message: "Failed to report profile" });
+    }
+  });
+
   // Update profile image
   app.post("/api/profiles/:profileId/image", requireAuth, upload.single('profileImage'), async (req, res) => {
     try {

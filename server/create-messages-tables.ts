@@ -73,6 +73,42 @@ async function createMessagesTables() {
       FOREIGN KEY (last_message_id) REFERENCES messages(id)
     `);
 
+    // Add new columns to existing tables
+    await db.execute(sql`
+      ALTER TABLE messages 
+      ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT false
+    `);
+
+    await db.execute(sql`
+      ALTER TABLE conversation_participants 
+      ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT false
+    `);
+
+    // Create profile_blocks table
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS profile_blocks (
+        id SERIAL PRIMARY KEY,
+        blocker_profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+        blocked_profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(blocker_profile_id, blocked_profile_id)
+      )
+    `);
+
+    // Create profile_reports table
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS profile_reports (
+        id SERIAL PRIMARY KEY,
+        reporter_profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+        reported_profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+        reason TEXT NOT NULL,
+        status VARCHAR DEFAULT 'pending',
+        reviewed_by INTEGER REFERENCES users(id),
+        reviewed_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
     // Create indexes for better performance
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_conversation_participants_conversation_id ON conversation_participants(conversation_id)
@@ -96,6 +132,22 @@ async function createMessagesTables() {
     
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_message_reads_profile_id ON message_reads(profile_id)
+    `);
+
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_profile_blocks_blocker ON profile_blocks(blocker_profile_id)
+    `);
+
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_profile_blocks_blocked ON profile_blocks(blocked_profile_id)
+    `);
+
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_profile_reports_reporter ON profile_reports(reporter_profile_id)
+    `);
+
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_profile_reports_reported ON profile_reports(reported_profile_id)
     `);
 
     console.log("Messages tables created successfully!");

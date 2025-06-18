@@ -220,7 +220,10 @@ const CommentThread: React.FC<CommentThreadProps> = ({
     <div style={{ marginLeft: `${marginLeft}px` }}>
       <div className="flex space-x-3">
         <Avatar className="w-8 h-8 flex-shrink-0">
-          <AvatarImage src={comment.profile.profileImageUrl || ''} />
+          <AvatarImage 
+            src={comment.profile.profileImageUrl || ''} 
+            className="object-cover w-full h-full"
+          />
           <AvatarFallback>
             {comment.profile.name?.[0]?.toUpperCase() || '?'}
           </AvatarFallback>

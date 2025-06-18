@@ -471,7 +471,7 @@ function SettingsContent() {
                       <img
                         src={activeProfile.profileImageUrl}
                         alt="Profile"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover rounded-full"
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">

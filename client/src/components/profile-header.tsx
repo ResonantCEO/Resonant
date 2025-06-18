@@ -747,7 +747,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
                   onClick={handleProfilePictureClick}
                 >
-                  <AvatarImage src={profile.profileImageUrl || ""} />
+                  <AvatarImage 
+                    src={profile.profileImageUrl || ""} 
+                    className="object-cover w-full h-full"
+                  />
                   <AvatarFallback className="text-lg sm:text-3xl">
                     {getDisplayName().slice(0, 2).toUpperCase()}
                   </AvatarFallback>
@@ -779,7 +782,10 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   className={`w-24 h-24 sm:w-40 sm:h-40 border-4 border-white shadow-lg ${isOwn ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
                   onClick={handleProfilePictureClick}
                 >
-                  <AvatarImage src={profile.profileImageUrl || ""} />
+                  <AvatarImage 
+                    src={profile.profileImageUrl || ""} 
+                    className="object-cover w-full h-full"
+                  />
                   <AvatarFallback className="text-lg sm:text-3xl">
                     {getDisplayName().slice(0, 2).toUpperCase()}
                   </AvatarFallback>

@@ -1019,7 +1019,7 @@ export class Storage {
       const result = await db
         .insert(albums)
         .values(albumData)
-        .returning();```text
+        .returning();
 
       return result[0];
     } catch (error) {

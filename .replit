@@ -15,7 +15,7 @@ localPort = 5000
 externalPort = 80
 
 [workflows]
-runButton = "Start application"
+runButton = "Start Dev Server"
 
 [[workflows.workflow]]
 name = "Project"
@@ -39,6 +39,10 @@ waitForPort = 5000
 name = "Start Dev Server"
 author = 41959174
 mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pkill -f \"node.*server/index.ts\" || true"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

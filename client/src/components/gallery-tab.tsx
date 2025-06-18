@@ -1653,8 +1653,7 @@ export default function GalleryTab({ profile, isOwn }: GalleryTabProps) {
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description (optional)</label>
               <Textarea
-                value```tool_code
-={albumDescription}
+                value={albumDescription}
                 onChange={(e) => setAlbumDescription(e.target.value)}
                 placeholder="Enter album description..."
                 className="mt-1"

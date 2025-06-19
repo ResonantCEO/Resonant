@@ -53,10 +53,15 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
   const { data: friendRequests, isLoading: requestsLoading } = useQuery({
     queryKey: [`/api/friend-requests`],
     enabled: !!profile?.id && isOwn,
-    refetchInterval: 3000, // Poll every 3 seconds for real-time updates
+    refetchInterval: 2000, // Poll every 2 seconds for real-time updates
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
     onSuccess: (data) => {
       console.log('Friend requests fetched:', data);
       console.log('Friend requests length:', data?.length || 0);
+      // Invalidate notification counts when friend requests change
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
     },
   });
 
@@ -74,7 +79,10 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
       });
     },
     onSuccess: () => {
+      // Invalidate all related queries immediately for instant updates
       queryClient.invalidateQueries({ queryKey: [`/api/sent-requests`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/friend-requests`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
       toast({
         title: "Friend Request Sent",
         description: "Your friend request has been sent successfully.",
@@ -95,9 +103,11 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
       return await apiRequest("POST", `/api/friend-requests/${friendshipId}/accept`);
     },
     onSuccess: () => {
+      // Invalidate all related queries immediately
       queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}/friends`] });
       queryClient.invalidateQueries({ queryKey: [`/api/friend-requests`] });
       queryClient.invalidateQueries({ queryKey: [`/api/friends`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
       toast({
         title: "Friend Request Accepted",
         description: "You are now friends!",
@@ -118,7 +128,9 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
       return await apiRequest("POST", `/api/friend-requests/${friendshipId}/reject`);
     },
     onSuccess: () => {
+      // Invalidate all related queries immediately
       queryClient.invalidateQueries({ queryKey: [`/api/friend-requests`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
       toast({
         title: "Friend Request Rejected",
         description: "The friend request has been declined.",

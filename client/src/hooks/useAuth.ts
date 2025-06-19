@@ -34,6 +34,12 @@ export function useAuth() {
   const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ["/api/user"],
     retry: false,
+    onSuccess: (data) => {
+      setUser(data);
+      // Refresh friend-related data when user logs in
+      queryClient.invalidateQueries({ queryKey: [`/api/friend-requests`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+    },
   });
 
   // Track when we receive data (success or error)

@@ -62,7 +62,11 @@ export default function Sidebar() {
 
   const { data: friendRequests = [] } = useQuery({
     queryKey: ["/api/friend-requests"],
-    enabled: !!user,
+    enabled: !!user && !!activeProfile,
+    refetchInterval: 3000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 
   // Fetch profile-specific notification counts
@@ -438,38 +442,36 @@ export default function Sidebar() {
               <Users className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
               {!isCollapsed && "Friends"}
               {(() => {
-                // Get total friend request count from profile notification counts
-                let totalFriendRequests = 0;
+                // Get friend request count from profile notification counts
+                let friendRequestCount = 0;
                 if (profileNotificationCounts && activeProfile) {
-                  const activeProfileCount = getProfileNotificationCount(activeProfile);
-                  // Extract friend request count from the notification data
                   const counts = profileNotificationCounts || {};
                   const countData = counts[String(activeProfile.id)] || counts[Number(activeProfile.id)];
                   if (countData && typeof countData === 'object') {
-                    totalFriendRequests = countData.friendRequests || 0;
+                    friendRequestCount = countData.friendRequests || 0;
                   }
                 }
 
-                return totalFriendRequests > 0 && !isCollapsed && (
+                return friendRequestCount > 0 && !isCollapsed && (
                   <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                    {totalFriendRequests > 99 ? '99+' : totalFriendRequests}
+                    {friendRequestCount > 99 ? '99+' : friendRequestCount}
                   </Badge>
                 );
               })()}
               {(() => {
-                // Get total friend request count from profile notification counts for collapsed state
-                let totalFriendRequests = 0;
+                // Get friend request count from profile notification counts for collapsed state
+                let friendRequestCount = 0;
                 if (profileNotificationCounts && activeProfile) {
                   const counts = profileNotificationCounts || {};
                   const countData = counts[String(activeProfile.id)] || counts[Number(activeProfile.id)];
                   if (countData && typeof countData === 'object') {
-                    totalFriendRequests = countData.friendRequests || 0;
+                    friendRequestCount = countData.friendRequests || 0;
                   }
                 }
 
-                return isCollapsed && totalFriendRequests > 0 && (
+                return isCollapsed && friendRequestCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
-                    {totalFriendRequests > 99 ? '99+' : totalFriendRequests}
+                    {friendRequestCount > 99 ? '99+' : friendRequestCount}
                   </span>
                 );
               })()}

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import Sidebar from "@/components/sidebar";
 import FriendsTab from "@/components/friends-tab";
 import FriendsWidget from "@/components/friends-widget";
@@ -12,6 +13,12 @@ export default function Friends() {
   // Get user's active profile
   const { data: activeProfile, isLoading: profileLoading } = useQuery({
     queryKey: ["/api/profiles/active"],
+    refetchOnMount: true,
+    onSuccess: () => {
+      // Refresh friend requests and notification counts when profile loads
+      queryClient.invalidateQueries({ queryKey: [`/api/friend-requests`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+    },
   });
 
   if (profileLoading) {

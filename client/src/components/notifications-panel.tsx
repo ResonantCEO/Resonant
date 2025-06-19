@@ -331,8 +331,18 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
     setAcceptingBooking(bookingId);
     try {
-      await apiRequest("POST", `/api/bookings/${bookingId}/accept`);
+      const response = await fetch(`/api/booking-requests/${bookingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "accepted" }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to accept booking request");
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
       toast({
         title: "Booking Request Accepted",
         description: "The booking request has been accepted.",
@@ -353,8 +363,18 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
     setDecliningBooking(bookingId);
     try {
-      await apiRequest("POST", `/api/bookings/${bookingId}/decline`);
+      const response = await fetch(`/api/booking-requests/${bookingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "rejected" }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to decline booking request");
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
       toast({
         title: "Booking Request Declined",
         description: "The booking request has been declined.",

@@ -211,7 +211,8 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
                     <Button
                       type="submit"
                       disabled={!newPost.trim() || createPostMutation.isPending}
-                      className="bg-blue-500 hover:bg-blue-600 text-white font-bold"
+                      variant="default"
+                      className="font-bold"
                     >
                       {createPostMutation.isPending ? "Posting..." : "Post"}
                     </Button>

@@ -158,6 +158,11 @@ export const bookingRequests = pgTable("booking_requests", {
   venueProfileId: integer("venue_profile_id").references(() => profiles.id).notNull(),
   status: varchar("status", { length: 20 }).default("pending").notNull(), // pending, accepted, rejected
   requestedAt: timestamp("requested_at").notNull(),
+  eventDate: timestamp("event_date"),
+  eventTime: varchar("event_time"),
+  budget: real("budget"),
+  requirements: text("requirements"),
+  message: text("message"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

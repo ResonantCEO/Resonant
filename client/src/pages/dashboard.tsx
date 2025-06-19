@@ -8,6 +8,7 @@ import { Calendar, Users, Music, Building, BarChart3, Settings, Plus, Check, Use
 import ProfileManagement from "@/components/profile-management";
 import BookingCalendar from "@/components/booking-calendar";
 import { useSidebar } from "@/hooks/useSidebar";
+import BookingManagement from "@/components/booking-management";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -396,6 +397,11 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Booking Management Section */}
+          <div className="mt-8">
+            <BookingManagement profileType={activeProfile.type as 'artist' | 'venue'} />
           </div>
 
           {/* Booking Calendar Section */}

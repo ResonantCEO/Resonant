@@ -2247,7 +2247,7 @@ export function registerRoutes(app: Express): Server {
   // Booking request routes
   app.post('/api/booking-requests', isAuthenticated, async (req: any, res) => {
     try {
-      const { venueId } = req.body;
+      const { venueId, eventDate, eventTime, budget, requirements, message } = req.body;
       const artistProfile = await storage.getActiveProfile(req.user.id);
 
       if (!artistProfile || artistProfile.type !== 'artist') {
@@ -2260,13 +2260,40 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "Invalid venue profile" });
       }
 
-      // Create booking request
-      const bookingRequest = await storage.createBookingRequest({
+      // Check for existing pending request
+      const existingRequest = await db
+        .select()
+        .from(bookingRequests)
+        .where(
+          and(
+            eq(bookingRequests.artistProfileId, artistProfile.id),
+            eq(bookingRequests.venueProfileId, venueId),
+            eq(bookingRequests.status, 'pending')
+          )
+        )
+        .limit(1);
+
+      if (existingRequest.length > 0) {
+        return res.status(400).json({ message: "You already have a pending booking request with this venue" });
+      }
+
+      // Create booking request with additional details
+      const bookingRequestData: any = {
         artistProfileId: artistProfile.id,
         venueProfileId: venueId,
         status: 'pending',
-        requestedAt: new Date()
-      });
+        requestedAt: new Date(),
+        eventDate: eventDate ? new Date(eventDate) : null,
+        eventTime,
+        budget: budget ? parseFloat(budget) : null,
+        requirements,
+        message
+      };
+
+      const [bookingRequest] = await db
+        .insert(bookingRequests)
+        .values(bookingRequestData)
+        .returning();
 
       // Send notification to venue owner
       const { notificationService } = await import('./notifications');
@@ -2274,9 +2301,11 @@ export function registerRoutes(app: Express): Server {
         const artistUser = await storage.getUser(req.user.id);
         const artistName = `${artistUser?.firstName} ${artistUser?.lastName}`;
         await notificationService.notifyBookingRequest(
-          venueProfile.userId,          req.user.id,
+          venueProfile.userId,
+          req.user.id,
           artistName,
-          artistProfile.name
+          artistProfile.name,
+          bookingRequest.id
         );
       }
 
@@ -2294,8 +2323,79 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      const bookingRequests = await storage.getBookingRequests(activeProfile.id, activeProfile.type);
-      res.json(bookingRequests);
+      let requests;
+      const artistProfiles = alias(profiles, 'artistProfiles');
+      const venueProfiles = alias(profiles, 'venueProfiles');
+
+      if (activeProfile.type === 'artist') {
+        // Get requests sent by this artist
+        requests = await db
+          .select({
+            id: bookingRequests.id,
+            artistProfileId: bookingRequests.artistProfileId,
+            venueProfileId: bookingRequests.venueProfileId,
+            status: bookingRequests.status,
+            requestedAt: bookingRequests.requestedAt,
+            eventDate: bookingRequests.eventDate,
+            eventTime: bookingRequests.eventTime,
+            budget: bookingRequests.budget,
+            requirements: bookingRequests.requirements,
+            message: bookingRequests.message,
+            artistProfile: {
+              id: artistProfiles.id,
+              name: artistProfiles.name,
+              profileImageUrl: artistProfiles.profileImageUrl,
+              bio: artistProfiles.bio
+            },
+            venueProfile: {
+              id: venueProfiles.id,
+              name: venueProfiles.name,
+              profileImageUrl: venueProfiles.profileImageUrl,
+              location: venueProfiles.location
+            }
+          })
+          .from(bookingRequests)
+          .leftJoin(artistProfiles, eq(bookingRequests.artistProfileId, artistProfiles.id))
+          .leftJoin(venueProfiles, eq(bookingRequests.venueProfileId, venueProfiles.id))
+          .where(eq(bookingRequests.artistProfileId, activeProfile.id))
+          .orderBy(sql`${bookingRequests.requestedAt} DESC`);
+      } else if (activeProfile.type === 'venue') {
+        // Get requests received by this venue
+        requests = await db
+          .select({
+            id: bookingRequests.id,
+            artistProfileId: bookingRequests.artistProfileId,
+            venueProfileId: bookingRequests.venueProfileId,
+            status: bookingRequests.status,
+            requestedAt: bookingRequests.requestedAt,
+            eventDate: bookingRequests.eventDate,
+            eventTime: bookingRequests.eventTime,
+            budget: bookingRequests.budget,
+            requirements: bookingRequests.requirements,
+            message: bookingRequests.message,
+            artistProfile: {
+              id: artistProfiles.id,
+              name: artistProfiles.name,
+              profileImageUrl: artistProfiles.profileImageUrl,
+              bio: artistProfiles.bio
+            },
+            venueProfile: {
+              id: venueProfiles.id,
+              name: venueProfiles.name,
+              profileImageUrl: venueProfiles.profileImageUrl,
+              location: venueProfiles.location
+            }
+          })
+          .from(bookingRequests)
+          .leftJoin(artistProfiles, eq(bookingRequests.artistProfileId, artistProfiles.id))
+          .leftJoin(venueProfiles, eq(bookingRequests.venueProfileId, venueProfiles.id))
+          .where(eq(bookingRequests.venueProfileId, activeProfile.id))
+          .orderBy(sql`${bookingRequests.requestedAt} DESC`);
+      } else {
+        return res.json([]);
+      }
+
+      res.json(requests);
     } catch (error) {
       console.error("Error fetching booking requests:", error);
       res.status(500).json({ message: "Failed to fetch booking requests" });

@@ -331,7 +331,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
     setAcceptingBooking(bookingId);
     try {
-      const response = await apiRequest("POST", `/api/booking-requests/${bookingId}/accept`);
+      const response = await apiRequest("PATCH", `/api/booking-requests/${bookingId}`, { status: 'accepted' });
       
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
@@ -357,7 +357,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
     setDecliningBooking(bookingId);
     try {
-      const response = await apiRequest("POST", `/api/booking-requests/${bookingId}/decline`);
+      const response = await apiRequest("PATCH", `/api/booking-requests/${bookingId}`, { status: 'rejected' });
       
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
@@ -573,30 +573,46 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const bookingId = notification.data?.bookingId || notification.data?.id;
+                      const bookingId = notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id;
+                      console.log('Accept booking - Notification data:', notification.data);
+                      console.log('Accept booking - Extracted booking ID:', bookingId);
                       if (bookingId) {
                         handleAcceptBookingRequest(bookingId);
+                      } else {
+                        toast({
+                          title: "Error",
+                          description: "Could not find booking request ID",
+                          variant: "destructive",
+                        });
                       }
                     }}
-                    disabled={acceptingBooking === (notification.data?.bookingId || notification.data?.id)}
+                    disabled={acceptingBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id)}
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
-                    {acceptingBooking === (notification.data?.bookingId || notification.data?.id) ? "..." : "Accept"}
+                    {acceptingBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id) ? "..." : "Accept"}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const bookingId = notification.data?.bookingId || notification.data?.id;
+                      const bookingId = notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id;
+                      console.log('Decline booking - Notification data:', notification.data);
+                      console.log('Decline booking - Extracted booking ID:', bookingId);
                       if (bookingId) {
                         handleDeclineBookingRequest(bookingId);
+                      } else {
+                        toast({
+                          title: "Error",
+                          description: "Could not find booking request ID",
+                          variant: "destructive",
+                        });
                       }
                     }}
-                    disabled={decliningBooking === (notification.data?.bookingId || notification.data?.id)}
+                    disabled={decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id)}
                     className="text-white border-white hover:bg-white hover:text-black"
                   >
-                    {decliningBooking === (notification.data?.bookingId || notification.data?.id) ? "..." : "Decline"}
+                    {decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id) ? "..." : "Decline"}
                   </Button>
                   <Button
                     size="sm"
@@ -605,8 +621,16 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                       e.stopPropagation();
                       // Navigate to artist profile - for booking requests, use artistProfileId
                       const profileId = notification.data?.artistProfileId || notification.data?.senderProfileId;
+                      console.log('View artist profile - Notification data:', notification.data);
+                      console.log('View artist profile - Extracted profile ID:', profileId);
                       if (profileId) {
                         window.location.href = `/profile/${profileId}`;
+                      } else {
+                        toast({
+                          title: "Error",
+                          description: "Could not find artist profile ID",
+                          variant: "destructive",
+                        });
                       }
                     }}
                     className="text-blue-400 border-blue-400 hover:bg-blue-400 hover:text-white"

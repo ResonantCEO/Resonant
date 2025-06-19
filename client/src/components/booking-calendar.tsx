@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Calendar, Plus, ChevronLeft, ChevronRight, Clock, MapPin, User, Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Calendar, Plus, ChevronLeft, ChevronRight, Clock, MapPin, User, Edit, Trash2, CheckCircle, XCircle, DollarSign } from "lucide-react";
 
 interface Booking {
   id: string;
@@ -34,6 +33,10 @@ interface BookingRequest {
   venueProfileId: number;
   status: 'pending' | 'accepted' | 'rejected';
   requestedAt: string;
+  eventDate?: string;
+  eventTime?: string;
+  message?: string;
+  budget?: string;
   artistProfile: {
     id: number;
     name: string;
@@ -43,7 +46,16 @@ interface BookingRequest {
     id: number;
     name: string;
     profileImageUrl?: string;
+    location?: string;
   };
+}
+
+interface CalendarEvent extends Omit<Booking, 'date'> {
+  date: Date;
+  artistProfileId?: number;
+  venueProfileId?: number;
+  isRequest?: boolean;
+  budget?: number;
 }
 
 interface BookingCalendarProps {
@@ -51,11 +63,14 @@ interface BookingCalendarProps {
 }
 
 export default function BookingCalendar({ profileType }: BookingCalendarProps) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
-  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [showRequestDialog, setShowRequestDialog] = useState(false);
+  const [editingBooking, setEditingBooking] = useState<CalendarEvent | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<BookingRequest | null>(null);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [newBooking, setNewBooking] = useState({
     title: '',
     date: '',
@@ -65,7 +80,8 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     status: 'confirmed' as const,
     client: '',
     location: '',
-    notes: ''
+    notes: '',
+    budget: ''
   });
 
   const queryClient = useQueryClient();
@@ -80,7 +96,16 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     queryKey: ["/api/profiles/active"],
   });
 
-  // Mutation for accepting/rejecting booking requests
+  // Fetch calendar events (mock for now, you can implement actual storage later)
+  const { data: storedEvents = [] } = useQuery<CalendarEvent[]>({
+    queryKey: ["/api/calendar-events"],
+    queryFn: async () => {
+      // For now, return empty array - you can implement actual storage later
+      return [];
+    },
+  });
+
+  // Update booking request mutation
   const updateBookingRequestMutation = useMutation({
     mutationFn: async ({ requestId, status }: { requestId: number; status: 'accepted' | 'rejected' }) => {
       const response = await fetch(`/api/booking-requests/${requestId}`, {
@@ -97,6 +122,8 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
         title: "Success",
         description: "Booking request updated successfully",
       });
+      setShowRequestDialog(false);
+      setSelectedRequest(null);
     },
     onError: (error: Error) => {
       toast({
@@ -106,6 +133,34 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       });
     },
   });
+
+  useEffect(() => {
+    // Convert booking requests to calendar events
+    const eventsFromRequests: CalendarEvent[] = bookingRequests
+      .filter(request => request.eventDate)
+      .map(request => ({
+        id: `request-${request.id}`,
+        title: profileType === 'artist' 
+          ? `Booking at ${request.venueProfile.name}` 
+          : `Booking with ${request.artistProfile.name}`,
+        date: new Date(request.eventDate!),
+        startTime: request.eventTime || '20:00',
+        endTime: '', // Can be calculated or added later
+        type: 'booking' as const,
+        status: request.status === 'accepted' ? 'confirmed' as const : 
+               request.status === 'rejected' ? 'cancelled' as const : 'pending' as const,
+        client: profileType === 'artist' ? request.venueProfile.name : request.artistProfile.name,
+        location: request.venueProfile.location || '',
+        notes: request.message || '',
+        artistProfileId: request.artistProfileId,
+        venueProfileId: request.venueProfileId,
+        isRequest: true,
+        budget: request.budget ? parseFloat(request.budget) : undefined
+      }));
+
+    // Combine with stored events
+    setCalendarEvents([...storedEvents, ...eventsFromRequests]);
+  }, [bookingRequests, storedEvents, profileType]);
 
   const resetForm = () => {
     setNewBooking({
@@ -117,22 +172,23 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       status: 'confirmed',
       client: '',
       location: '',
-      notes: ''
+      notes: '',
+      budget: ''
     });
     setEditingBooking(null);
   };
 
   const handleSaveBooking = () => {
-    if (!newBooking.title || !newBooking.date || !newBooking.startTime) {
+    if (!newBooking.title || !newBooking.date) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in the required fields",
         variant: "destructive",
       });
       return;
     }
 
-    const bookingData: Booking = {
+    const event: CalendarEvent = {
       id: editingBooking?.id || Date.now().toString(),
       title: newBooking.title,
       date: new Date(newBooking.date),
@@ -143,51 +199,85 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       client: newBooking.client,
       location: newBooking.location,
       notes: newBooking.notes,
+      budget: newBooking.budget ? parseFloat(newBooking.budget) : undefined
     };
 
     if (editingBooking) {
-      setBookings(prev => prev.map(b => b.id === editingBooking.id ? bookingData : b));
+      setCalendarEvents(prev => prev.map(e => e.id === event.id ? event : e));
       toast({
         title: "Success",
-        description: "Booking updated successfully",
+        description: "Event updated successfully",
       });
     } else {
-      setBookings(prev => [...prev, bookingData]);
+      setCalendarEvents(prev => [...prev, event]);
       toast({
         title: "Success",
-        description: "Booking created successfully",
+        description: "Event created successfully",
       });
     }
 
     setShowBookingDialog(false);
-    resetForm();
+    setEditingBooking(null);
+    setNewBooking({
+      title: '',
+      date: '',
+      startTime: '',
+      endTime: '',
+      type: 'booking',
+      status: 'confirmed',
+      client: '',
+      location: '',
+      notes: '',
+      budget: ''
+    });
   };
 
-  const handleEditBooking = (booking: Booking) => {
-    setEditingBooking(booking);
+  const handleEditEvent = (event: CalendarEvent) => {
+    if (event.isRequest) {
+      // If it's a booking request, open request dialog instead
+      const request = bookingRequests.find(r => `request-${r.id}` === event.id);
+      if (request) {
+        setSelectedRequest(request);
+        setShowRequestDialog(true);
+      }
+      return;
+    }
+
+    setEditingBooking(event);
     setNewBooking({
-      title: booking.title,
-      date: booking.date.toISOString().split('T')[0],
-      startTime: booking.startTime,
-      endTime: booking.endTime,
-      type: booking.type,
-      status: booking.status,
-      client: booking.client || '',
-      location: booking.location || '',
-      notes: booking.notes || ''
+      title: event.title,
+      date: event.date.toISOString().split('T')[0],
+      startTime: event.startTime,
+      endTime: event.endTime,
+      type: event.type,
+      status: event.status,
+      client: event.client || '',
+      location: event.location || '',
+      notes: event.notes || '',
+      budget: event.budget?.toString() || ''
     });
     setShowBookingDialog(true);
   };
 
-  const handleDeleteBooking = (bookingId: string) => {
-    setBookings(prev => prev.filter(b => b.id !== bookingId));
+  const handleDeleteEvent = (eventId: string) => {
+    const event = calendarEvents.find(e => e.id === eventId);
+    if (event?.isRequest) {
+      toast({
+        title: "Cannot Delete",
+        description: "Booking requests must be accepted or rejected, not deleted.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCalendarEvents(prev => prev.filter(e => e.id !== eventId));
     toast({
       title: "Success",
-      description: "Booking deleted successfully",
+      description: "Event deleted successfully",
     });
   };
 
-  const handleBookingRequestResponse = (requestId: number, status: 'accepted' | 'rejected') => {
+  const handleBookingResponse = (requestId: number, status: 'accepted' | 'rejected') => {
     updateBookingRequestMutation.mutate({ requestId, status });
   };
 
@@ -209,14 +299,28 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     return days;
   };
 
-  const getBookingsForDate = (date: Date) => {
-    return bookings.filter(booking => 
-      booking.date.toDateString() === date.toDateString()
-    );
+  const getDayEvents = (day: number) => {
+    const date = new Date(currentYear, currentMonth, day);
+    return calendarEvents.filter(event => {
+      const eventDate = event.date;
+      return eventDate.getDate() === day &&
+             eventDate.getMonth() === currentMonth &&
+             eventDate.getFullYear() === currentYear;
+    });
+  };
+
+  const getSelectedDateEvents = () => {
+    if (!selectedDate) return [];
+    return calendarEvents.filter(event => {
+      const eventDate = event.date;
+      return eventDate.getDate() === selectedDate.getDate() &&
+             eventDate.getMonth() === selectedDate.getMonth() &&
+             eventDate.getFullYear() === selectedDate.getFullYear();
+    });
   };
 
   const isDateUnavailable = (date: Date) => {
-    const unavailableBookings = getBookingsForDate(date).filter(b => b.type === 'unavailable');
+    const unavailableBookings = getSelectedDateEvents().filter(b => b.type === 'unavailable');
     return unavailableBookings.length > 0;
   };
 
@@ -254,6 +358,8 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     setCurrentDate(newDate);
   };
 
+  const calendarDays = Array.from({ length: new Date(currentYear, currentMonth + 1, 0).getDate() }, (_, i) => i + 1);
+
   return (
     <div className="space-y-6">
       {/* Booking Requests Section - Only for venues */}
@@ -288,7 +394,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                         size="sm"
                         variant="outline"
                         className="text-green-600 border-green-600 hover:bg-green-50"
-                        onClick={() => handleBookingRequestResponse(request.id, 'accepted')}
+                        onClick={() => handleBookingResponse(request.id, 'accepted')}
                       >
                         <CheckCircle className="w-4 h-4 mr-1" />
                         Accept
@@ -297,7 +403,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                         size="sm"
                         variant="outline"
                         className="text-red-600 border-red-600 hover:bg-red-50"
-                        onClick={() => handleBookingRequestResponse(request.id, 'rejected')}
+                        onClick={() => handleBookingResponse(request.id, 'rejected')}
                       >
                         <XCircle className="w-4 h-4 mr-1" />
                         Decline
@@ -421,6 +527,16 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                         placeholder={profileType === 'artist' ? 'Studio, venue address' : 'Room, stage area'}
                       />
                     </div>
+                     <div>
+                      <Label htmlFor="budget">Budget</Label>
+                      <Input
+                        id="budget"
+                        type="number"
+                        value={newBooking.budget}
+                        onChange={(e) => setNewBooking({...newBooking, budget: e.target.value})}
+                        placeholder="Enter budget if applicable"
+                      />
+                    </div>
                     <div>
                       <Label htmlFor="notes">Notes</Label>
                       <Textarea
@@ -470,11 +586,11 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                 </div>
               ))}
               {days.map((day, index) => {
-                const dayBookings = getBookingsForDate(day);
-                const isCurrentMonth = day.getMonth() === currentMonth;
+                const dayEvents = getDayEvents(day);
                 const isToday = day.toDateString() === new Date().toDateString();
                 const isSelected = selectedDate?.toDateString() === day.toDateString();
                 const isUnavailable = isDateUnavailable(day);
+                const isCurrentMonth = day.getMonth() === currentMonth;
 
                 return (
                   <div
@@ -493,17 +609,17 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                       {day.getDate()}
                     </div>
                     <div className="space-y-1 mt-1">
-                      {dayBookings.slice(0, 2).map((booking, i) => (
+                      {dayEvents.slice(0, 2).map((event, i) => (
                         <div
                           key={i}
-                          className={`text-xs px-1 py-0.5 rounded text-white truncate ${getTypeColor(booking.type)}`}
+                          className={`text-xs px-1 py-0.5 rounded text-white truncate ${getTypeColor(event.type)}`}
                         >
-                          {booking.title}
+                          {event.title}
                         </div>
                       ))}
-                      {dayBookings.length > 2 && (
+                      {dayEvents.length > 2 && (
                         <div className="text-xs text-gray-500">
-                          +{dayBookings.length - 2} more
+                          +{dayEvents.length - 2} more
                         </div>
                       )}
                     </div>
@@ -526,62 +642,107 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {getBookingsForDate(selectedDate).length > 0 ? (
+                  {getSelectedDateEvents().length > 0 ? (
                     <div className="space-y-4">
-                      {getBookingsForDate(selectedDate).map((booking) => (
-                        <div key={booking.id} className="border rounded-lg p-4">
+                      {getSelectedDateEvents().map((event) => (
+                        <div key={event.id} className={`bg-white p-3 rounded border ${event.isRequest ? 'border-l-4 border-l-blue-500' : ''}`}>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-2">
-                                <h4 className="font-medium">{booking.title}</h4>
-                                <Badge variant="outline" className={getTypeColor(booking.type) + ' text-white'}>
-                                  {booking.type}
+                                <h5 className="font-medium">
+                                  {event.isRequest ? '📩 ' : ''}{event.title}
+                                  {event.isRequest && ' (Booking Request)'}
+                                </h5>
+                                <Badge variant="outline" className={getTypeColor(event.type) + ' text-white'}>
+                                  {event.type}
                                 </Badge>
-                                <Badge variant="outline" className={getStatusColor(booking.status)}>
-                                  {booking.status}
+                                <Badge variant="outline" className={getStatusColor(event.status)}>
+                                  {event.status}
                                 </Badge>
                               </div>
-                              {booking.startTime && (
+                              {event.startTime && (
                                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
                                   <Clock className="w-4 h-4" />
                                   <span>
-                                    {booking.startTime}
-                                    {booking.endTime && ` - ${booking.endTime}`}
+                                    {event.startTime}
+                                    {event.endTime && ` - ${event.endTime}`}
                                   </span>
                                 </div>
                               )}
-                              {booking.client && (
+                              {event.client && (
                                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
                                   <User className="w-4 h-4" />
-                                  <span>{booking.client}</span>
+                                  <span>{event.client}</span>
                                 </div>
                               )}
-                              {booking.location && (
+                              {event.location && (
                                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
                                   <MapPin className="w-4 h-4" />
-                                  <span>{booking.location}</span>
+                                  <span>{event.location}</span>
                                 </div>
                               )}
-                              {booking.notes && (
-                                <p className="mt-2 text-sm text-gray-600">{booking.notes}</p>
+                              {event.budget && (
+                                <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
+                                  <DollarSign className="w-4 h-4" />
+                                  <span>${event.budget}</span>
+                                </div>
+                              )}
+                              {event.notes && (
+                                <p className="mt-2 text-sm text-gray-600">{event.notes}</p>
                               )}
                             </div>
                             <div className="flex space-x-2 ml-4">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditBooking(booking)}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteBooking(booking.id)}
-                                className="text-red-600 border-red-600 hover:bg-red-50"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                              {event.isRequest && profileType === 'venue' && event.status === 'pending' ? (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    className="bg-green-600 hover:bg-green-700 !text-white"
+                                    onClick={() => {
+                                      const request = bookingRequests.find(r => `request-${r.id}` === event.id);
+                                      if (request) handleBookingResponse(request.id, 'accepted');
+                                    }}
+                                  >
+                                    <CheckCircle className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-red-600 hover:bg-red-50"
+                                    onClick={() => {
+                                      const request = bookingRequests.find(r => `request-${r.id}` === event.id);
+                                      if (request) handleBookingResponse(request.id, 'rejected');
+                                    }}
+                                  >
+                                    <XCircle className="w-4 h-4" />
+                                  </Button>
+                                </>
+                              ) : !event.isRequest ? (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleEditEvent(event)}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-red-600 hover:bg-red-50"
+                                    onClick={() => handleDeleteEvent(event.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleEditEvent(event)}
+                                >
+                                  View Details
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </div>

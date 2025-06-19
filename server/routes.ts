@@ -2267,6 +2267,43 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Calendar events routes
+  app.get('/api/calendar-events', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // For now, return empty array - you can implement actual calendar events storage
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching calendar events:", error);
+      res.status(500).json({ message: "Failed to fetch calendar events" });
+    }
+  });
+
+  app.post('/api/calendar-events', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // For now, just return the posted event with an ID
+      const event = {
+        id: Date.now().toString(),
+        ...req.body,
+        profileId: activeProfile.id
+      };
+
+      res.json(event);
+    } catch (error) {
+      console.error("Error creating calendar event:", error);
+      res.status(500).json({ message: "Failed to create calendar event" });
+    }
+  });
+
   // Booking request routes
   // Create booking request
   app.post('/api/booking-requests', isAuthenticated, async (req: any, res) => {
@@ -2440,6 +2477,26 @@ export function registerRoutes(app: Express): Server {
       }
 
       const updatedRequest = await storage.updateBookingRequestStatus(requestId, status, activeProfile.id);
+
+      // If booking was accepted, send confirmation notification
+      if (status === 'accepted') {
+        const { notificationService } = await import('./notifications');
+        const bookingRequest = await storage.getBookingRequestById(requestId);
+        if (bookingRequest) {
+          const artistProfile = await storage.getProfile(bookingRequest.artistProfileId);
+          if (artistProfile?.userId) {
+            const venueUser = await storage.getUser(req.user.id);
+            const venueName = `${venueUser?.firstName} ${venueUser?.lastName}`;
+            await notificationService.notifyBookingConfirmed(
+              artistProfile.userId,
+              req.user.id,
+              venueName,
+              activeProfile.name,
+              bookingRequest.eventDate ? new Date(bookingRequest.eventDate).toLocaleDateString() : 'TBD'
+            );
+          }
+        }
+      }
 
       res.json(updatedRequest);
     } catch (error) {

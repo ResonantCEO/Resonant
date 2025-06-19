@@ -405,7 +405,7 @@ export default function Dashboard() {
           </div>
 
           {/* Booking Calendar Section */}
-          <div className="mt-8">
+          <div className="mt-8" data-calendar-section>
             <BookingCalendar profileType={activeProfile.type as 'artist' | 'venue'} />
           </div>
 

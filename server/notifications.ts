@@ -596,6 +596,17 @@ export class NotificationService {
       data: { conversationId, messagePreview: message.substring(0, 100) }
     });
   }
+
+  async notifyBookingConfirmed(venueUserId: number, artistUserId: number, venueName: string, venueProfileName: string, eventDate: string) {
+    await this.createNotification({
+      recipientId: artistUserId,
+      senderId: venueUserId,
+      type: 'booking_confirmed',
+      title: 'Booking Confirmed! 🎉',
+      message: `${venueName} (${venueProfileName}) has confirmed your booking for ${eventDate}`,
+      data: { venueUserId, venueName, venueProfileName, eventDate }
+    });
+  }
 }
 
 export const notificationService = new NotificationService();

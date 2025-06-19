@@ -200,14 +200,15 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         <h2 className="text-2xl font-bold">
           {profileType === 'artist' ? 'Venue Bookings' : 'Booking Requests'}
         </h2>
-        {profileType === 'artist' && (
-          <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
-            <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700 !text-white">
-                <Plus className="w-4 h-4 mr-2" />
-                Request Booking
-              </Button>
-            </DialogTrigger>
+        <div className="flex space-x-2">
+          {profileType === 'artist' && (
+            <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700 !text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Request Booking
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>Request Venue Booking</DialogTitle>
@@ -301,7 +302,21 @@ export default function BookingManagement({ profileType }: BookingManagementProp
               </div>
             </DialogContent>
           </Dialog>
-        )}
+          )}
+          <Button 
+            variant="outline"
+            onClick={() => {
+              // Scroll to calendar section
+              const calendarSection = document.querySelector('[data-calendar-section]');
+              if (calendarSection) {
+                calendarSection.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+          >
+            <Calendar className="w-4 h-4 mr-2" />
+            View Calendar
+          </Button>
+        </div>
       </div>
 
       {/* Pending Requests */}

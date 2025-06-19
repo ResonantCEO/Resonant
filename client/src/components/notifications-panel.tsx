@@ -573,7 +573,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const bookingId = notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id;
+                      const bookingId = notification.data?.bookingRequestId || 
+                                      notification.data?.bookingId || 
+                                      notification.data?.id ||
+                                      notification.data?.requestId;
                       console.log('Accept booking - Notification data:', notification.data);
                       console.log('Accept booking - Extracted booking ID:', bookingId);
                       if (bookingId) {
@@ -586,17 +589,20 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                         });
                       }
                     }}
-                    disabled={acceptingBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id)}
+                    disabled={acceptingBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId)}
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
-                    {acceptingBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id) ? "..." : "Accept"}
+                    {acceptingBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId) ? "..." : "Accept"}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      const bookingId = notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id;
+                      const bookingId = notification.data?.bookingRequestId || 
+                                      notification.data?.bookingId || 
+                                      notification.data?.id ||
+                                      notification.data?.requestId;
                       console.log('Decline booking - Notification data:', notification.data);
                       console.log('Decline booking - Extracted booking ID:', bookingId);
                       if (bookingId) {
@@ -609,18 +615,21 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                         });
                       }
                     }}
-                    disabled={decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id)}
+                    disabled={decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId)}
                     className="text-white border-white hover:bg-white hover:text-black"
                   >
-                    {decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id) ? "..." : "Decline"}
+                    {decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId) ? "..." : "Decline"}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Navigate to artist profile - for booking requests, use artistProfileId
-                      const profileId = notification.data?.artistProfileId || notification.data?.senderProfileId;
+                      // Navigate to artist profile - try multiple possible field names
+                      const profileId = notification.data?.artistProfileId || 
+                                      notification.data?.senderProfileId || 
+                                      notification.data?.artistId ||
+                                      notification.data?.fromProfileId;
                       console.log('View artist profile - Notification data:', notification.data);
                       console.log('View artist profile - Extracted profile ID:', profileId);
                       if (profileId) {

@@ -607,9 +607,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Navigate to artist profile or booking details
-                      if (notification.data?.senderProfileId) {
-                        window.open(`/profile/${notification.data.senderProfileId}`, '_blank');
+                      // Navigate to artist profile - for booking requests, use artistProfileId
+                      const profileId = notification.data?.artistProfileId || notification.data?.senderProfileId;
+                      if (profileId) {
+                        window.location.href = `/profile/${profileId}`;
                       }
                     }}
                     className="text-blue-400 border-blue-400 hover:bg-blue-400 hover:text-white"

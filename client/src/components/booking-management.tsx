@@ -181,10 +181,10 @@ export default function BookingManagement({ profileType }: BookingManagementProp
     }
   };
 
-  // Filter requests based on profile type
+  // Filter requests based on profile type and active profile
   const filteredRequests = profileType === 'artist' 
-    ? bookingRequests.filter(req => req.artistProfile) // Requests sent by this artist
-    : bookingRequests.filter(req => req.venueProfile); // Requests received by this venue
+    ? bookingRequests.filter(req => req.artistProfile && req.artistProfileId === activeProfile?.id) // Requests sent by this artist
+    : bookingRequests.filter(req => req.venueProfile && req.venueProfileId === activeProfile?.id); // Requests received by this venue
 
   const pendingRequests = filteredRequests.filter(req => req.status === 'pending');
   const completedRequests = filteredRequests.filter(req => req.status !== 'pending');

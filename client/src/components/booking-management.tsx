@@ -416,7 +416,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         </Card>
       )}
 
-      {/* Completed Requests */}
+      {/* Recent Activity - Only show accepted/rejected requests */}
       {completedRequests.length > 0 && (
         <Card>
           <CardHeader>
@@ -427,7 +427,10 @@ export default function BookingManagement({ profileType }: BookingManagementProp
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {completedRequests.slice(0, 5).map((request) => (
+              {completedRequests
+                .filter(request => request.status !== 'pending')
+                .slice(0, 5)
+                .map((request) => (
                 <div key={request.id} className="border rounded-lg p-4 opacity-75">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">

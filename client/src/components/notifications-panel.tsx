@@ -22,11 +22,24 @@ async function apiRequest(method: string, url: string, body?: any) {
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: "Request failed" }));
+    let error;
+    try {
+      const text = await response.text();
+      error = text ? JSON.parse(text) : { message: "Request failed" };
+    } catch {
+      error = { message: "Request failed" };
+    }
     throw new Error(error.message || `Request failed: ${response.status}`);
   }
 
-  return response.json();
+  // Only try to parse JSON if there's content
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    const text = await response.text();
+    return text.trim() ? JSON.parse(text) : {};
+  }
+  
+  return {};
 }
 
 export default function NotificationsPanel({ showAsCard = true }: NotificationsPanelProps) {
@@ -331,7 +344,26 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
     setAcceptingBooking(bookingId);
     try {
-      const response = await apiRequest("PATCH", `/api/booking-requests/${bookingId}`, { status: 'accepted' });
+      const response = await fetch(`/api/booking-requests/${bookingId}`, {
+        method: 'PATCH',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: 'accepted' }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      // Only try to parse JSON if there's content
+      let result = null;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const text = await response.text();
+        if (text.trim()) {
+          result = JSON.parse(text);
+        }
+      }
       
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
@@ -357,7 +389,26 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
     setDecliningBooking(bookingId);
     try {
-      const response = await apiRequest("PATCH", `/api/booking-requests/${bookingId}`, { status: 'rejected' });
+      const response = await fetch(`/api/booking-requests/${bookingId}`, {
+        method: 'PATCH',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: 'rejected' }),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      // Only try to parse JSON if there's content
+      let result = null;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const text = await response.text();
+        if (text.trim()) {
+          result = JSON.parse(text);
+        }
+      }
       
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });

@@ -629,17 +629,23 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                       const profileId = notification.data?.artistProfileId || 
                                       notification.data?.senderProfileId || 
                                       notification.data?.artistId ||
-                                      notification.data?.fromProfileId;
+                                      notification.data?.fromProfileId ||
+                                      notification.data?.senderProfile?.id;
                       console.log('View artist profile - Notification data:', notification.data);
                       console.log('View artist profile - Extracted profile ID:', profileId);
                       if (profileId) {
                         window.location.href = `/profile/${profileId}`;
                       } else {
-                        toast({
-                          title: "Error",
-                          description: "Could not find artist profile ID",
-                          variant: "destructive",
-                        });
+                        // If no profile ID found, try to get it from the sender
+                        if (notification.sender?.id) {
+                          handleViewProfile(notification.sender.id);
+                        } else {
+                          toast({
+                            title: "Error",
+                            description: "Could not find artist profile ID",
+                            variant: "destructive",
+                          });
+                        }
                       }
                     }}
                     className="text-blue-400 border-blue-400 hover:bg-blue-400 hover:text-white"

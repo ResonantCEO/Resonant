@@ -331,9 +331,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
     setAcceptingBooking(bookingId);
     try {
-      const response = await apiRequest("PATCH", `/api/booking-requests/${bookingId}`, { 
-        status: "accepted" 
-      });
+      const response = await apiRequest("POST", `/api/booking-requests/${bookingId}/accept`);
       
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
@@ -359,9 +357,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
     setDecliningBooking(bookingId);
     try {
-      const response = await apiRequest("PATCH", `/api/booking-requests/${bookingId}`, { 
-        status: "rejected" 
-      });
+      const response = await apiRequest("POST", `/api/booking-requests/${bookingId}/decline`);
       
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });

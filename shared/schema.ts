@@ -154,8 +154,8 @@ export const comments = pgTable("comments", {
 
 export const bookingRequests = pgTable("booking_requests", {
   id: serial("id").primaryKey(),
-  artistProfileId: integer("artist_profile_id").references(() => profiles.id).notNull(),
-  venueProfileId: integer("venue_profile_id").references(() => profiles.id).notNull(),
+  artistProfileId: integer("artist_profile_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  venueProfileId: integer("venue_profile_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
   status: varchar("status", { length: 20 }).default("pending").notNull(), // pending, accepted, rejected
   requestedAt: timestamp("requested_at").notNull(),
   eventDate: timestamp("event_date"),
@@ -165,6 +165,7 @@ export const bookingRequests = pgTable("booking_requests", {
   message: text("message"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  respondedAt: timestamp("responded_at"),
 });
 
 export const albums = pgTable("albums", {
@@ -489,7 +490,7 @@ export type Comment = typeof comments.$inferSelect;
 export type PostLike = typeof postLikes.$inferSelect;
 export type InsertProfileMembership = z.infer<typeof insertProfileMembershipSchema>;
 export type ProfileMembership = typeof profileMemberships.$inferSelect;
-export type InsertProfileInvitation = z.infer<typeof insertProfileInvitationSchema>;
+export type InsertProfileInvitation = z.infer<typeof profileInvitationSchema>;
 export type ProfileInvitation = typeof profileInvitations.$inferSelect;
 export type ProfileRole = z.infer<typeof profileRoleSchema>;
 export type ProfilePermission = z.infer<typeof profilePermissionSchema>;

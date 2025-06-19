@@ -222,6 +222,9 @@ export default function Sidebar() {
     // Get profile-specific notification count
     const getProfileNotificationCount = (profile: any) => {
       const counts = profileNotificationCounts || {};
+      console.log(`Getting notification count for profile ${profile.id} (${profile.name})`);
+      console.log("Available counts data:", counts);
+      console.log("Available keys:", Object.keys(counts));
 
       // Try string key first, then number key
       const stringKey = String(profile.id);
@@ -239,11 +242,11 @@ export default function Sidebar() {
       if (typeof countData === 'number') {
         finalCount = countData;
       } else if (countData && typeof countData === 'object') {
-        // Only show actual notifications count, not friend requests
-        // Friend requests are handled separately and shown in the friends section
-        finalCount = countData.notifications || 0;
+        // Use total count which includes both notifications and friend requests
+        finalCount = countData.total || 0;
       }
 
+      console.log(`Final count for profile ${profile.id} (${profile.name}):`, finalCount);
       return finalCount;
   };
 

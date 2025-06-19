@@ -303,7 +303,7 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
                   acceptFriendRequestMutation.mutate(friendshipId);
                 }}
                 disabled={acceptFriendRequestMutation.isPending}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white border-0 shadow-lg"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold border-0 shadow-lg"
               >
                 <Heart className="w-3 h-3 mr-1" />
                 {acceptFriendRequestMutation.isPending ? "Accepting..." : "Accept"}
@@ -315,7 +315,7 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
                   rejectFriendRequestMutation.mutate(friendshipId);
                 }}
                 disabled={rejectFriendRequestMutation.isPending}
-                className="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-300 border-0 shadow-lg"
+                className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold border-0 shadow-lg"
               >
                 <UserMinus className="w-3 h-3 mr-1" />
                 {rejectFriendRequestMutation.isPending ? "Declining..." : "Decline"}

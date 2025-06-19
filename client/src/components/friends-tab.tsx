@@ -53,6 +53,11 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
   const { data: friendRequests, isLoading: requestsLoading } = useQuery({
     queryKey: [`/api/friend-requests`],
     enabled: !!profile?.id && isOwn,
+    refetchInterval: 3000, // Poll every 3 seconds for real-time updates
+    onSuccess: (data) => {
+      console.log('Friend requests fetched:', data);
+      console.log('Friend requests length:', data?.length || 0);
+    },
   });
 
   // Fetch sent friend requests (for own profiles)
@@ -360,9 +365,12 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
           </CardHeader>
           <CardContent className="p-6 bg-gray-900">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {friendRequests.map((request: any) => (
-                <FriendRequestCard key={request.friendship?.id || request.id} request={request} />
-              ))}
+              {friendRequests.map((request: any) => {
+                console.log('Rendering friend request:', request);
+                return (
+                  <FriendRequestCard key={request.id || request.friendship?.id} request={request} />
+                );
+              })}
             </div>
           </CardContent>
         </Card>

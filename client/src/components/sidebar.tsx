@@ -427,37 +427,53 @@ export default function Sidebar() {
           </li>
           <li>
             <Button
-                variant="ghost"
-                className={`${isCollapsed ? 'w-full justify-center p-2 relative' : 'w-full justify-start'} ${
-                  isActivePath("/friends")
-                    ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium"
-                    : "text-neutral-600 hover:bg-neutral-100"
-                }`}
-                onClick={() => setLocation("/friends")}
-              >
-                <Users className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
-                {!isCollapsed && "Friends"}
-                {(() => {
-                  // Only show badge if there are actual friend requests in the friendRequests query
-                  const actualFriendRequestCount = friendRequests?.length || 0;
-                  
-                  return actualFriendRequestCount > 0 && !isCollapsed && (
-                    <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                      {actualFriendRequestCount > 99 ? '99+' : actualFriendRequestCount}
-                    </Badge>
-                  );
-                })()}
-                {(() => {
-                  // Only show badge if there are actual friend requests in the friendRequests query
-                  const actualFriendRequestCount = friendRequests?.length || 0;
-                  
-                  return isCollapsed && actualFriendRequestCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
-                      {actualFriendRequestCount > 99 ? '99+' : actualFriendRequestCount}
-                    </span>
-                  );
-                })()}
-              </Button>
+              variant="ghost"
+              className={`${isCollapsed ? 'w-full justify-center p-2 relative' : 'w-full justify-start'} ${
+                isActivePath("/friends")
+                  ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium"
+                  : "text-neutral-600 hover:bg-neutral-100"
+              }`}
+              onClick={() => setLocation("/friends")}
+            >
+              <Users className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
+              {!isCollapsed && "Friends"}
+              {(() => {
+                // Get total friend request count from profile notification counts
+                let totalFriendRequests = 0;
+                if (profileNotificationCounts && activeProfile) {
+                  const activeProfileCount = getProfileNotificationCount(activeProfile);
+                  // Extract friend request count from the notification data
+                  const counts = profileNotificationCounts || {};
+                  const countData = counts[String(activeProfile.id)] || counts[Number(activeProfile.id)];
+                  if (countData && typeof countData === 'object') {
+                    totalFriendRequests = countData.friendRequests || 0;
+                  }
+                }
+
+                return totalFriendRequests > 0 && !isCollapsed && (
+                  <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
+                    {totalFriendRequests > 99 ? '99+' : totalFriendRequests}
+                  </Badge>
+                );
+              })()}
+              {(() => {
+                // Get total friend request count from profile notification counts for collapsed state
+                let totalFriendRequests = 0;
+                if (profileNotificationCounts && activeProfile) {
+                  const counts = profileNotificationCounts || {};
+                  const countData = counts[String(activeProfile.id)] || counts[Number(activeProfile.id)];
+                  if (countData && typeof countData === 'object') {
+                    totalFriendRequests = countData.friendRequests || 0;
+                  }
+                }
+
+                return isCollapsed && totalFriendRequests > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
+                    {totalFriendRequests > 99 ? '99+' : totalFriendRequests}
+                  </span>
+                );
+              })()}
+            </Button>
           </li>
 
           <li>

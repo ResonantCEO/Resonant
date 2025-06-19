@@ -27,6 +27,8 @@ export default function Friends() {
     );
   }
 
+  console.log('Friends page - activeProfile:', activeProfile);
+
   return (
     <div className="min-h-screen flex bg-neutral-50">
       <Sidebar />

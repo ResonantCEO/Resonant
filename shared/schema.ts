@@ -760,7 +760,6 @@ export type MessageRead = InferSelectModel<typeof messageReads>;
 export type ProfileBlock = InferSelectModel<typeof profileBlocks>;
 export type InsertProfileBlock = InferInsertModel<typeof profileBlocks>;
 export type ProfileReport = InferSelectModel<typeof profileReports>;
-export type InsertProfileReport = InferInsertModel<typeof profileReports>;
 
 export type BookingRequest = InferSelectModel<typeof bookingRequests>;
 export type InsertBookingRequest = InferInsertModel<typeof bookingRequests>;

@@ -67,17 +67,27 @@ export default function BookingManagement({ profileType }: BookingManagementProp
   // Create booking request mutation
   const createBookingRequestMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log('Sending booking request with data:', data);
       const response = await fetch("/api/booking-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error("Failed to create booking request");
-      return response.json();
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Booking request failed:', response.status, errorData);
+        throw new Error(errorData.message || `Failed to create booking request (${response.status})`);
+      }
+      
+      const result = await response.json();
+      console.log('Booking request created successfully:', result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
       setShowRequestDialog(false);
+      setSelectedVenue(null);
       setNewRequest({
         eventDate: '',
         eventTime: '',
@@ -91,9 +101,10 @@ export default function BookingManagement({ profileType }: BookingManagementProp
       });
     },
     onError: (error: Error) => {
+      console.error('Booking request mutation error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to send booking request",
         variant: "destructive",
       });
     },
@@ -127,20 +138,35 @@ export default function BookingManagement({ profileType }: BookingManagementProp
   });
 
   const handleCreateBookingRequest = () => {
-    if (!selectedVenue || !newRequest.eventDate) {
+    if (!selectedVenue) {
       toast({
         title: "Error",
-        description: "Please select a venue and event date",
+        description: "Please select a venue",
         variant: "destructive",
       });
       return;
     }
 
-    createBookingRequestMutation.mutate({
+    if (!newRequest.eventDate) {
+      toast({
+        title: "Error",
+        description: "Please select an event date",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const requestData = {
       venueId: selectedVenue.id,
-      ...newRequest,
-      budget: newRequest.budget ? parseFloat(newRequest.budget) : undefined,
-    });
+      eventDate: newRequest.eventDate,
+      eventTime: newRequest.eventTime || null,
+      budget: newRequest.budget ? parseFloat(newRequest.budget) : null,
+      requirements: newRequest.requirements || null,
+      message: newRequest.message || null,
+    };
+
+    console.log('Creating booking request with data:', requestData);
+    createBookingRequestMutation.mutate(requestData);
   };
 
   const handleBookingResponse = (requestId: number, status: 'accepted' | 'rejected') => {

@@ -913,15 +913,33 @@ export class Storage {
   // Booking request functions
   async createBookingRequest(requestData: any): Promise<any> {
     try {
+      console.log('Storage: Creating booking request with data:', requestData);
+      
+      // Ensure all required fields are present
+      const sanitizedData = {
+        artistProfileId: requestData.artistProfileId,
+        venueProfileId: requestData.venueProfileId,
+        status: requestData.status || 'pending',
+        requestedAt: requestData.requestedAt || new Date(),
+        eventDate: requestData.eventDate || null,
+        eventTime: requestData.eventTime || null,
+        budget: requestData.budget || null,
+        requirements: requestData.requirements || null,
+        message: requestData.message || null
+      };
+
+      console.log('Storage: Sanitized data:', sanitizedData);
+
       const [request] = await db
         .insert(bookingRequests)
-        .values(requestData)
+        .values(sanitizedData)
         .returning();
 
+      console.log('Storage: Booking request created:', request);
       return request;
     } catch (error) {
-      console.error("Error creating booking request:", error);
-      throw error;
+      console.error("Storage: Error creating booking request:", error);
+      throw new Error(`Failed to create booking request: ${error.message}`);
     }
   }
 

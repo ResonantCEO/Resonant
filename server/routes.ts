@@ -2245,74 +2245,78 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Booking request routes
+  // Create booking request
   app.post('/api/booking-requests', isAuthenticated, async (req: any, res) => {
     try {
       const { venueId, eventDate, eventTime, budget, requirements, message } = req.body;
-      const artistProfile = await storage.getActiveProfile(req.user.id);
 
-      if (!artistProfile || artistProfile.type !== 'artist') {
-        return res.status(400).json({ message: "Only artist profiles can send booking requests" });
+      console.log('Creating booking request with data:', { venueId, eventDate, eventTime, budget, requirements, message });
+
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+
+      if (!activeProfile) {
+        console.log('No active profile found for user:', req.user.id);
+        return res.status(400).json({ message: "No active profile" });
       }
 
-      // Verify the target is a venue
+      if (activeProfile.type !== 'artist') {
+        console.log('Active profile is not an artist:', activeProfile.type);
+        return res.status(400).json({ message: "Only artists can send booking requests" });
+      }
+
+      // Validate venue exists
       const venueProfile = await storage.getProfile(venueId);
-      if (!venueProfile || venueProfile.type !== 'venue') {
-        return res.status(400).json({ message: "Invalid venue profile" });
+      if (!venueProfile) {
+        console.log('Venue profile not found:', venueId);
+        return res.status(400).json({ message: "Venue not found" });
       }
 
-      // Check for existing pending request
-      const existingRequest = await db
-        .select()
-        .from(bookingRequests)
-        .where(
-          and(
-            eq(bookingRequests.artistProfileId, artistProfile.id),
-            eq(bookingRequests.venueProfileId, venueId),
-            eq(bookingRequests.status, 'pending')
-          )
-        )
-        .limit(1);
-
-      if (existingRequest.length > 0) {
-        return res.status(400).json({ message: "You already have a pending booking request with this venue" });
+      if (venueProfile.type !== 'venue') {
+        console.log('Target profile is not a venue:', venueProfile.type);
+        return res.status(400).json({ message: "Target profile is not a venue" });
       }
 
-      // Create booking request with additional details
-      const bookingRequestData: any = {
-        artistProfileId: artistProfile.id,
+      const bookingRequestData = {
+        artistProfileId: activeProfile.id,
         venueProfileId: venueId,
         status: 'pending',
         requestedAt: new Date(),
         eventDate: eventDate ? new Date(eventDate) : null,
-        eventTime,
+        eventTime: eventTime || null,
         budget: budget ? parseFloat(budget) : null,
-        requirements,
-        message
+        requirements: requirements || null,
+        message: message || null
       };
 
-      const [bookingRequest] = await db
-        .insert(bookingRequests)
-        .values(bookingRequestData)
-        .returning();
+      console.log('Creating booking request with data:', bookingRequestData);
 
-      // Send notification to venue owner
-      const { notificationService } = await import('./notifications');
-      if (venueProfile.userId) {
-        const artistUser = await storage.getUser(req.user.id);
-        const artistName = `${artistUser?.firstName} ${artistUser?.lastName}`;
-        await notificationService.notifyBookingRequest(
-          venueProfile.userId,
-          req.user.id,
-          artistName,
-          artistProfile.name,
-          bookingRequest.id
-        );
+      const bookingRequest = await storage.createBookingRequest(bookingRequestData);
+
+      console.log('Booking request created successfully:', bookingRequest);
+
+      // Send notification to venue
+      try {
+        const { notificationService } = await import('./notifications');
+        if (venueProfile.userId) {
+          const artistUser = await storage.getUser(req.user.id);
+          const artistName = `${artistUser?.firstName} ${artistUser?.lastName}`;
+          await notificationService.notifyBookingRequest(
+            venueProfile.userId,
+            req.user.id,
+            artistName,
+            activeProfile.name
+          );
+          console.log('Notification sent successfully');
+        }
+      } catch (notificationError) {
+        console.error('Error sending notification:', notificationError);
+        // Don't fail the request if notification fails
       }
 
       res.json(bookingRequest);
     } catch (error) {
       console.error("Error creating booking request:", error);
-      res.status(500).json({ message: "Failed to send booking request" });
+      res.status(500).json({ message: "Failed to create booking request", error: error.message });
     }
   });
 

@@ -344,8 +344,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     }
   };
 
-  const currentMonth = currentDate.getMonth();
-  const currentYear = currentDate.getFullYear();
+  const currentDate = new Date(currentYear, currentMonth);
   const days = getDaysInMonth(currentDate);
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -353,9 +352,21 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
   ];
 
   const navigateMonth = (direction: 'prev' | 'next') => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(currentDate.getMonth() + (direction === 'next' ? 1 : -1));
-    setCurrentDate(newDate);
+    if (direction === 'next') {
+      if (currentMonth === 11) {
+        setCurrentMonth(0);
+        setCurrentYear(currentYear + 1);
+      } else {
+        setCurrentMonth(currentMonth + 1);
+      }
+    } else {
+      if (currentMonth === 0) {
+        setCurrentMonth(11);
+        setCurrentYear(currentYear - 1);
+      } else {
+        setCurrentMonth(currentMonth - 1);
+      }
+    }
   };
 
   const calendarDays = Array.from({ length: new Date(currentYear, currentMonth + 1, 0).getDate() }, (_, i) => i + 1);

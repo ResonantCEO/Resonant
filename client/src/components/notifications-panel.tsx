@@ -573,28 +573,23 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Try multiple possible field names for booking ID
+                      // For booking_request notifications, the booking ID should be in the notification ID itself
+                      // or we need to derive it from the notification data
                       const bookingId = notification.data?.bookingRequestId || 
                                       notification.data?.bookingId || 
                                       notification.data?.id ||
                                       notification.data?.requestId ||
                                       notification.data?.booking_id ||
-                                      notification.data?.booking_request_id;
-                      
-                      // Also try extracting from nested objects
-                      const nestedBookingId = notification.data?.booking?.id ||
-                                            notification.data?.request?.id ||
-                                            notification.data?.bookingRequest?.id;
-                      
-                      const finalBookingId = bookingId || nestedBookingId;
+                                      notification.data?.booking_request_id ||
+                                      notification.id; // Use notification ID as fallback
                       
                       console.log('Accept booking - Full notification:', notification);
                       console.log('Accept booking - Notification data:', notification.data);
-                      console.log('Accept booking - Extracted booking ID:', finalBookingId);
+                      console.log('Accept booking - Extracted booking ID:', bookingId);
                       console.log('Accept booking - Available keys:', notification.data ? Object.keys(notification.data) : 'No data');
                       
-                      if (finalBookingId) {
-                        handleAcceptBookingRequest(finalBookingId);
+                      if (bookingId) {
+                        handleAcceptBookingRequest(bookingId);
                       } else {
                         toast({
                           title: "Error",
@@ -603,38 +598,33 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                         });
                       }
                     }}
-                    disabled={acceptingBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId)}
+                    disabled={acceptingBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId || notification.id)}
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
-                    {acceptingBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId) ? "..." : "Accept"}
+                    {acceptingBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId || notification.id) ? "..." : "Accept"}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Try multiple possible field names for booking ID
+                      // For booking_request notifications, the booking ID should be in the notification ID itself
+                      // or we need to derive it from the notification data
                       const bookingId = notification.data?.bookingRequestId || 
                                       notification.data?.bookingId || 
                                       notification.data?.id ||
                                       notification.data?.requestId ||
                                       notification.data?.booking_id ||
-                                      notification.data?.booking_request_id;
-                      
-                      // Also try extracting from nested objects
-                      const nestedBookingId = notification.data?.booking?.id ||
-                                            notification.data?.request?.id ||
-                                            notification.data?.bookingRequest?.id;
-                      
-                      const finalBookingId = bookingId || nestedBookingId;
+                                      notification.data?.booking_request_id ||
+                                      notification.id; // Use notification ID as fallback
                       
                       console.log('Decline booking - Full notification:', notification);
                       console.log('Decline booking - Notification data:', notification.data);
-                      console.log('Decline booking - Extracted booking ID:', finalBookingId);
+                      console.log('Decline booking - Extracted booking ID:', bookingId);
                       console.log('Decline booking - Available keys:', notification.data ? Object.keys(notification.data) : 'No data');
                       
-                      if (finalBookingId) {
-                        handleDeclineBookingRequest(finalBookingId);
+                      if (bookingId) {
+                        handleDeclineBookingRequest(bookingId);
                       } else {
                         toast({
                           title: "Error",
@@ -643,10 +633,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                         });
                       }
                     }}
-                    disabled={decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId)}
+                    disabled={decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId || notification.id)}
                     className="text-white border-white hover:bg-white hover:text-black"
                   >
-                    {decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId) ? "..." : "Decline"}
+                    {decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId || notification.id) ? "..." : "Decline"}
                   </Button>
                   <Button
                     size="sm"

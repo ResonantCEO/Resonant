@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles, bookings } from "@shared/schema";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles, bookingRequests } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -2553,7 +2553,7 @@ export function registerRoutes(app: Express): Server {
       res.json(message);
     } catch (error) {
       console.error("Error updating message:", error);
-      res.status(500).json({ message: "Failed to update message" });
+      res.status(500.json({ message: "Failed to update message" });
     }
   });
 
@@ -3111,12 +3111,12 @@ app.post("/api/bookings/:bookingId/accept", requireAuth, async (req, res) => {
 
     // Update booking status to accepted
     await db
-      .update(bookings)
+      .update(bookingRequests)
       .set({ 
         status: "accepted",
         updatedAt: new Date()
       })
-      .where(eq(bookings.id, bookingId));
+      .where(eq(bookingRequests.id, bookingId));
 
     // Get booking details for notification
     const artistProfiles = alias(profiles, 'artistProfiles');
@@ -3124,9 +3124,9 @@ app.post("/api/bookings/:bookingId/accept", requireAuth, async (req, res) => {
 
     const booking = await db
       .select({
-        id: bookings.id,
-        artistId: bookings.artistId,
-        venueId: bookings.venueId,
+        id: bookingRequests.id,
+        artistId: bookingRequests.artistProfileId,
+        venueId: bookingRequests.venueProfileId,
         artistProfile: {
           id: artistProfiles.id,
           name: artistProfiles.name,
@@ -3140,10 +3140,10 @@ app.post("/api/bookings/:bookingId/accept", requireAuth, async (req, res) => {
           userId: venueProfiles.userId
         }
       })
-      .from(bookings)
-      .leftJoin(artistProfiles, eq(bookings.artistId, artistProfiles.id))
-      .leftJoin(venueProfiles, eq(bookings.venueId, venueProfiles.id))
-      .where(eq(bookings.id, bookingId))
+      .from(bookingRequests)
+      .leftJoin(artistProfiles, eq(bookingRequests.artistProfileId, artistProfiles.id))
+      .leftJoin(venueProfiles, eq(bookingRequests.venueProfileId, venueProfiles.id))
+      .where(eq(bookingRequests.id, bookingId))
       .limit(1);
 
     if (booking.length > 0) {
@@ -3184,12 +3184,12 @@ app.post("/api/bookings/:bookingId/decline", requireAuth, async (req, res) => {
 
     // Update booking status to declined
     await db
-      .update(bookings)
+      .update(bookingRequests)
       .set({ 
         status: "declined",
         updatedAt: new Date()
       })
-      .where(eq(bookings.id, bookingId));
+      .where(eq(bookingRequests.id, bookingId));
 
     // Get booking details for notification
     const artistProfiles = alias(profiles, 'artistProfiles');
@@ -3197,9 +3197,9 @@ app.post("/api/bookings/:bookingId/decline", requireAuth, async (req, res) => {
 
     const booking = await db
       .select({
-        id: bookings.id,
-        artistId: bookings.artistId,
-        venueId: bookings.venueId,
+        id: bookingRequests.id,
+        artistId: bookingRequests.artistProfileId,
+        venueId: bookingRequests.venueProfileId,
         artistProfile: {
           id: artistProfiles.id,
           name: artistProfiles.name,
@@ -3213,10 +3213,10 @@ app.post("/api/bookings/:bookingId/decline", requireAuth, async (req, res) => {
           userId: venueProfiles.userId
         }
       })
-      .from(bookings)
-      .leftJoin(artistProfiles, eq(bookings.artistId, artistProfiles.id))
-      .leftJoin(venueProfiles, eq(bookings.venueId, venueProfiles.id))
-      .where(eq(bookings.id, bookingId))
+      .from(bookingRequests)
+      .leftJoin(artistProfiles, eq(bookingRequests.artistProfileId, artistProfiles.id))
+      .leftJoin(venueProfiles, eq(bookingRequests.venueProfileId, venueProfiles.id))
+      .where(eq(bookingRequests.id, bookingId))
       .limit(1);
 
     if (booking.length > 0) {

@@ -873,7 +873,7 @@ export function registerRoutes(app: Express): Server {
       });
     } catch (error) {
       console.error("Error restoring profile:", error);
-      res.status(500).json({ message: error.message || "Failed to restore profile" });<previous_generation>
+      res.status(500).json({ message: error.message || "Failed to restore profile" });
     }
   });
 
@@ -1676,7 +1676,7 @@ export function registerRoutes(app: Express): Server {
       return response;
     } catch (error) {
       console.error("Error fetching profile notification counts:", error);
-      res.status(500).json({ message: "Failed to fetch profilenotification counts", error: error.message });
+      res.status(500).json({ message: "Failed to fetch profile notification counts", error: error.message });
     }
   });
 
@@ -2553,7 +2553,7 @@ export function registerRoutes(app: Express): Server {
       res.json(message);
     } catch (error) {
       console.error("Error updating message:", error);
-      res.status(500.json({ message: "Failed to update message" });
+      res.status(500).json({ message: "Failed to update message" });
     }
   });
 

@@ -1679,7 +1679,6 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
-  ```text
   app.post('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
     try {
       const notificationId = parseInt(req.params.id);
@@ -2555,7 +2554,6 @@ export function registerRoutes(app: Express): Server {
       console.error("Error updating message:", error);
       res.status(500).json({ message: "Failed to update message" });
     }
-  ```text
   });
 
   // Create group conversation

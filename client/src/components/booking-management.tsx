@@ -416,46 +416,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         </Card>
       )}
 
-      {/* Recent Activity - Only show accepted/rejected requests */}
-      {completedRequests.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <CheckCircle className="w-5 h-5" />
-              <span>Recent Activity</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {completedRequests
-                .filter(request => request.status !== 'pending')
-                .slice(0, 5)
-                .map((request) => (
-                <div key={request.id} className="border rounded-lg p-4 opacity-75">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gray-500 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">
-                          {profileType === 'artist' ? request.venueProfile.name : request.artistProfile.name}
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {request.eventDate && new Date(request.eventDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge className={getStatusColor(request.status)}>
-                      {request.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      
 
       {/* Empty State */}
       {filteredRequests.length === 0 && (

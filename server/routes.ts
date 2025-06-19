@@ -877,7 +877,6 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Admin route for cleanup (you may want to add admin authentication)
-  ```python
   app.post('/api/admin/cleanup-expired-profiles', isAuthenticated, async (req: any, res) => {
     try {
       // Add admin check here if needed
@@ -908,7 +907,8 @@ export function registerRoutes(app: Express): Server {
       const profiles = await storage.searchProfiles(query, type, location, limit, offset);
       res.json(profiles);
     } catch (error) {
-      console.error("Error searching profiles:", error);      res.status(500).json({ message: "Failed to search profiles" });
+      console.error("Error searching profiles:", error);
+      res.status(500).json({ message: "Failed to search profiles" });
     }
   });
 
@@ -2778,10 +2778,10 @@ export function registerRoutes(app: Express): Server {
   app.post("/api/profiles/:profileId/image", requireAuth, upload.single('profileImage'), async (req, res) => {
     try {
       const profileId = parseInt(req.params.profileId);
-      const userId = req.session.userId!;
+      const userId = req.user.id;
 
       // Verify user has permission to update this profile
-      const hasPermission = await checkProfilePermission(userId, profileId, 'manage_profile');
+      const hasPermission = await storage.checkProfilePermission(userId, profileId, 'manage_profile');
       if (!hasPermission) {
         return res.status(403).json({ message: 'No permission to update this profile' });
       }
@@ -2830,10 +2830,10 @@ export function registerRoutes(app: Express): Server {
   app.post("/api/profiles/:profileId/background", requireAuth, upload.single('backgroundImage'), async (req, res) => {
     try {
       const profileId = parseInt(req.params.profileId);
-      const userId = req.session.userId!;
+      const userId = req.user.id;
 
       // Verify user has permission to update this profile
-      const hasPermission = await checkProfilePermission(userId, profileId, 'manage_profile');
+      const hasPermission = await storage.checkProfilePermission(userId, profileId, 'manage_profile');
       if (!hasPermission) {
         return res.status(403).json({ message: 'No permission to update this profile' });
       }
@@ -2882,10 +2882,10 @@ export function registerRoutes(app: Express): Server {
   app.post("/api/profiles/:profileId/cover", requireAuth, upload.single('coverImage'), async (req, res) => {
     try {
       const profileId = parseInt(req.params.profileId);
-      const userId = req.session.userId!;
+      const userId = req.user.id;
 
       // Verify user has permission to update this profile
-      const hasPermission = await checkProfilePermission(userId, profileId, 'manage_profile');
+      const hasPermission = await storage.checkProfilePermission(userId, profileId, 'manage_profile');
       if (!hasPermission) {
         return res.status(403).json({ message: 'No permission to update this profile' });
       }
@@ -2934,10 +2934,10 @@ export function registerRoutes(app: Express): Server {
   app.post("/api/profiles/:profileId/photos/upload", requireAuth, upload.array('photos', 10), async (req, res) => {
     try {
       const profileId = parseInt(req.params.profileId);
-      const userId = req.session.userId!;
+      const userId = req.user.id;
 
       // Verify user has permission to upload to this profile
-      const hasPermission = await checkProfilePermission(userId, profileId, 'manage_posts');
+      const hasPermission = await storage.checkProfilePermission(userId, profileId, 'manage_posts');
       if (!hasPermission) {
         return res.status(403).json({ message: 'No permission to upload photos to this profile' });
       }
@@ -2995,7 +2995,7 @@ export function registerRoutes(app: Express): Server {
   app.post("/api/profiles", requireAuth, async (req, res) => {
     try {
       const data = insertProfileSchema.parse(req.body);
-      const userId = req.session.userId!;
+      const userId = req.user.id;
 
       // Set the userId and default to inactive initially
       const profileData = {

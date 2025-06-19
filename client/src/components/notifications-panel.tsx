@@ -573,18 +573,32 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
+                      // Try multiple possible field names for booking ID
                       const bookingId = notification.data?.bookingRequestId || 
                                       notification.data?.bookingId || 
                                       notification.data?.id ||
-                                      notification.data?.requestId;
+                                      notification.data?.requestId ||
+                                      notification.data?.booking_id ||
+                                      notification.data?.booking_request_id;
+                      
+                      // Also try extracting from nested objects
+                      const nestedBookingId = notification.data?.booking?.id ||
+                                            notification.data?.request?.id ||
+                                            notification.data?.bookingRequest?.id;
+                      
+                      const finalBookingId = bookingId || nestedBookingId;
+                      
+                      console.log('Accept booking - Full notification:', notification);
                       console.log('Accept booking - Notification data:', notification.data);
-                      console.log('Accept booking - Extracted booking ID:', bookingId);
-                      if (bookingId) {
-                        handleAcceptBookingRequest(bookingId);
+                      console.log('Accept booking - Extracted booking ID:', finalBookingId);
+                      console.log('Accept booking - Available keys:', notification.data ? Object.keys(notification.data) : 'No data');
+                      
+                      if (finalBookingId) {
+                        handleAcceptBookingRequest(finalBookingId);
                       } else {
                         toast({
                           title: "Error",
-                          description: "Could not find booking request ID",
+                          description: "Could not find booking request ID. Available data: " + (notification.data ? Object.keys(notification.data).join(', ') : 'None'),
                           variant: "destructive",
                         });
                       }
@@ -599,18 +613,32 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
+                      // Try multiple possible field names for booking ID
                       const bookingId = notification.data?.bookingRequestId || 
                                       notification.data?.bookingId || 
                                       notification.data?.id ||
-                                      notification.data?.requestId;
+                                      notification.data?.requestId ||
+                                      notification.data?.booking_id ||
+                                      notification.data?.booking_request_id;
+                      
+                      // Also try extracting from nested objects
+                      const nestedBookingId = notification.data?.booking?.id ||
+                                            notification.data?.request?.id ||
+                                            notification.data?.bookingRequest?.id;
+                      
+                      const finalBookingId = bookingId || nestedBookingId;
+                      
+                      console.log('Decline booking - Full notification:', notification);
                       console.log('Decline booking - Notification data:', notification.data);
-                      console.log('Decline booking - Extracted booking ID:', bookingId);
-                      if (bookingId) {
-                        handleDeclineBookingRequest(bookingId);
+                      console.log('Decline booking - Extracted booking ID:', finalBookingId);
+                      console.log('Decline booking - Available keys:', notification.data ? Object.keys(notification.data) : 'No data');
+                      
+                      if (finalBookingId) {
+                        handleDeclineBookingRequest(finalBookingId);
                       } else {
                         toast({
                           title: "Error",
-                          description: "Could not find booking request ID",
+                          description: "Could not find booking request ID. Available data: " + (notification.data ? Object.keys(notification.data).join(', ') : 'None'),
                           variant: "destructive",
                         });
                       }

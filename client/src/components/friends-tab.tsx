@@ -234,17 +234,17 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
 
     console.log('Processing friend request:', request);
 
-    // Extract profile data - check multiple possible locations
-    const profile = request.profile || {
-      id: request.id,
-      name: request.name || request.senderName || 'Unknown User',
-      profileImageUrl: request.profileImageUrl || request.senderProfileImageUrl,
-      type: request.type || 'audience',
-      bio: request.bio
+    // Extract profile data - the API returns requesterProfile nested object
+    const profile = request.requesterProfile || request.profile || {
+      id: request.requesterId || request.id,
+      name: request.requesterProfile?.name || request.name || request.senderName || 'Unknown User',
+      profileImageUrl: request.requesterProfile?.profileImageUrl || request.profileImageUrl || request.senderProfileImageUrl,
+      type: request.requesterProfile?.type || request.type || 'audience',
+      bio: request.requesterProfile?.bio || request.bio
     };
 
-    // Determine the friendship ID for actions
-    const friendshipId = request.friendship?.id || request.id;
+    // Use the friendship ID directly from the request
+    const friendshipId = request.id;
     
     if (!friendshipId) {
       console.error('No friendship ID found for request:', request);

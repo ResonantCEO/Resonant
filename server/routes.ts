@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles } from "@shared/schema";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles, bookings } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -877,6 +877,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Admin route for cleanup (you may want to add admin authentication)
+  ```python
   app.post('/api/admin/cleanup-expired-profiles', isAuthenticated, async (req: any, res) => {
     try {
       // Add admin check here if needed
@@ -1002,12 +1003,12 @@ export function registerRoutes(app: Express): Server {
 
       const requests = await storage.getFriendRequests(activeProfile.id);
       console.log(`Found ${requests.length} pending friend requests for profile ${activeProfile.id}`);
-      
+
       // Log the structure of requests to debug
       if (requests.length > 0) {
         console.log('Sample friend request structure:', JSON.stringify(requests[0], null, 2));
       }
-      
+
       res.json(requests);
     } catch (error) {
       console.error("Error fetching friend requests:", error);
@@ -2365,7 +2366,7 @@ export function registerRoutes(app: Express): Server {
   });
 
   // Messaging routes
-  
+
   // Get conversations for current user's active profile
   app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
     try {
@@ -2469,7 +2470,7 @@ export function registerRoutes(app: Express): Server {
       const { notificationService } = await import('./notifications');
       const conversations = await storage.getConversations(activeProfile.id);
       const conversation = conversations.find(c => c.id === conversationId);
-      
+
       if (conversation && conversation.participants) {
         for (const participant of conversation.participants) {
           if (participant.id !== activeProfile.id) {

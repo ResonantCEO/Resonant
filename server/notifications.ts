@@ -515,14 +515,14 @@ export class NotificationService {
     }
   }
 
-  async notifyBookingRequest(venueUserId: number, artistUserId: number, artistName: string, artistProfileName: string) {
+  async notifyBookingRequest(venueUserId: number, artistUserId: number, artistName: string, artistProfileName: string, bookingId?: number) {
     await this.createNotification({
       recipientId: venueUserId,
       senderId: artistUserId,
       type: 'booking_request',
       title: 'New Booking Request',
       message: `${artistName} (${artistProfileName}) wants to book your venue`,
-      data: { artistUserId, artistName, artistProfileName }
+      data: { artistUserId, artistName, artistProfileName, bookingId }
     });
   }
 

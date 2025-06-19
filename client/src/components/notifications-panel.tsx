@@ -213,6 +213,52 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     },
   });
 
+  // Accept booking request mutation
+  const acceptBookingRequestMutation = useMutation({
+    mutationFn: async (bookingId: number) => {
+      return await apiRequest("POST", `/api/bookings/${bookingId}/accept`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+      toast({
+        title: "Booking Request Accepted",
+        description: "You have accepted the booking request",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to accept booking request",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Decline booking request mutation
+  const declineBookingRequestMutation = useMutation({
+    mutationFn: async (bookingId: number) => {
+      return await apiRequest("POST", `/api/bookings/${bookingId}/decline`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+      toast({
+        title: "Booking Request Declined",
+        description: "You have declined the booking request",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to decline booking request",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleMarkAsRead = (notificationId: number) => {
     markAsReadMutation.mutate(notificationId);
   };
@@ -251,6 +297,14 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
       e.preventDefault();
       handleReplyToComment(photoId);
     }
+  };
+
+  const handleAcceptBookingRequest = (bookingId: number) => {
+    acceptBookingRequestMutation.mutate(bookingId);
+  };
+
+  const handleDeclineBookingRequest = (bookingId: number) => {
+    declineBookingRequestMutation.mutate(bookingId);
   };
 
   const handleViewProfile = async (senderId: number) => {
@@ -445,16 +499,43 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
           )}
 
           {/* Booking Request Actions */}
-          {notification.type === "booking_request" && notification.sender && (
-            <div className="mt-3">
+          {notification.type === "booking_request" && notification.sender && notification.data?.bookingId && (
+            <div className="mt-3 space-y-2">
+              <div className="flex space-x-2">
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAcceptBookingRequest(notification.data?.bookingId);
+                  }}
+                  disabled={acceptBookingRequestMutation.isPending || declineBookingRequestMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                >
+                  <Check className="w-3 h-3 mr-1" />
+                  {acceptBookingRequestMutation.isPending ? "Accepting..." : "Accept"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeclineBookingRequest(notification.data?.bookingId);
+                  }}
+                  disabled={acceptBookingRequestMutation.isPending || declineBookingRequestMutation.isPending}
+                  className="flex-1"
+                >
+                  <UserMinus className="w-3 h-3 mr-1" />
+                  {declineBookingRequestMutation.isPending ? "Declining..." : "Decline"}
+                </Button>
+              </div>
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleViewProfile(notification.sender.id);
                 }}
-                className="flex items-center"
+                className="flex items-center w-full"
               >
                 <ExternalLink className="w-3 h-3 mr-1" />
                 View Artist Profile

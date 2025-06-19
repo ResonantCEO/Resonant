@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,13 +72,13 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('Booking request failed:', response.status, errorData);
         throw new Error(errorData.message || `Failed to create booking request (${response.status})`);
       }
-      
+
       const result = await response.json();
       console.log('Booking request created successfully:', result);
       return result;
@@ -232,7 +231,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="eventDate">Event Date *</Label>

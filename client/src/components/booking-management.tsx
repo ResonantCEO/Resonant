@@ -52,6 +52,11 @@ export default function BookingManagement({ profileType }: BookingManagementProp
 
   const queryClient = useQueryClient();
 
+  // Fetch active profile
+  const { data: activeProfile } = useQuery({
+    queryKey: ["/api/profiles/active"],
+  });
+
   // Fetch booking requests
   const { data: bookingRequests = [], isLoading } = useQuery<BookingRequest[]>({
     queryKey: ["/api/booking-requests"],

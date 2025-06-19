@@ -1002,15 +1002,38 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      const requests = await storage.getFriendRequests(activeProfile.id);
-      console.log(`Found ${requests.length} pending friend requests for profile ${activeProfile.id}`);
+      // Get friend requests using a simpler query
+      const friendshipRequests = await db
+        .select({
+          id: friendships.id,
+          requesterId: friendships.requesterId,
+          addresseeId: friendships.addresseeId,
+          status: friendships.status,
+          createdAt: friendships.createdAt,
+          requesterProfile: {
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+            type: profiles.type,
+            bio: profiles.bio
+          }
+        })
+        .from(friendships)
+        .leftJoin(profiles, eq(friendships.requesterId, profiles.id))
+        .where(and(
+          eq(friendships.addresseeId, activeProfile.id),
+          eq(friendships.status, 'pending')
+        ))
+        .orderBy(sql`${friendships.createdAt} DESC`);
+
+      console.log(`Found ${friendshipRequests.length} pending friend requests for profile ${activeProfile.id}`);
 
       // Log the structure of requests to debug
-      if (requests.length > 0) {
-        console.log('Sample friend request structure:', JSON.stringify(requests[0], null, 2));
+      if (friendshipRequests.length > 0) {
+        console.log('Sample friend request structure:', JSON.stringify(friendshipRequests[0], null, 2));
       }
 
-      res.json(requests);
+      res.json(friendshipRequests);
     } catch (error) {
       console.error("Error fetching friend requests:", error);
       res.status(500).json({ message: "Failed to fetch friend requests" });

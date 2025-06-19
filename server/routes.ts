@@ -2441,26 +2441,6 @@ export function registerRoutes(app: Express): Server {
 
       const updatedRequest = await storage.updateBookingRequestStatus(requestId, status, activeProfile.id);
 
-      // Send notification back to artist if status changed
-      if (status === 'accepted' || status === 'rejected') {
-        const { notificationService } = await import('./notifications');
-        const bookingRequest = await storage.getBookingRequestById(requestId);
-        if (bookingRequest) {
-          const artistProfile = await storage.getProfile(bookingRequest.artistProfileId);
-          if (artistProfile?.userId) {
-            const venueUser = await storage.getUser(req.user.id);
-            const venueName = `${venueUser?.firstName} ${venueUser?.lastName}`;
-            await notificationService.notifyBookingResponse(
-              artistProfile.userId,
-              req.user.id,
-              venueName,
-              activeProfile.name,
-              status
-            );
-          }
-        }
-      }
-
       res.json(updatedRequest);
     } catch (error) {
       console.error("Error updating booking request:", error);

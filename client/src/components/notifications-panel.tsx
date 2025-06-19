@@ -331,18 +331,14 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
     setAcceptingBooking(bookingId);
     try {
-      const response = await fetch(`/api/booking-requests/${bookingId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "accepted" }),
+      const response = await apiRequest("PATCH", `/api/booking-requests/${bookingId}`, { 
+        status: "accepted" 
       });
-      
-      if (!response.ok) {
-        throw new Error("Failed to accept booking request");
-      }
       
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
       toast({
         title: "Booking Request Accepted",
         description: "The booking request has been accepted.",
@@ -363,18 +359,14 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
     setDecliningBooking(bookingId);
     try {
-      const response = await fetch(`/api/booking-requests/${bookingId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "rejected" }),
+      const response = await apiRequest("PATCH", `/api/booking-requests/${bookingId}`, { 
+        status: "rejected" 
       });
-      
-      if (!response.ok) {
-        throw new Error("Failed to decline booking request");
-      }
       
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
       toast({
         title: "Booking Request Declined",
         description: "The booking request has been declined.",
@@ -585,24 +577,30 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleAcceptBookingRequest(notification.data?.bookingId);
+                      const bookingId = notification.data?.bookingId || notification.data?.id;
+                      if (bookingId) {
+                        handleAcceptBookingRequest(bookingId);
+                      }
                     }}
-                    disabled={acceptingBooking === notification.data?.bookingId}
+                    disabled={acceptingBooking === (notification.data?.bookingId || notification.data?.id)}
                     className="bg-green-600 hover:bg-green-700 text-white"
                   >
-                    {acceptingBooking === notification.data?.bookingId ? "..." : "Accept"}
+                    {acceptingBooking === (notification.data?.bookingId || notification.data?.id) ? "..." : "Accept"}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDeclineBookingRequest(notification.data?.bookingId);
+                      const bookingId = notification.data?.bookingId || notification.data?.id;
+                      if (bookingId) {
+                        handleDeclineBookingRequest(bookingId);
+                      }
                     }}
-                    disabled={decliningBooking === notification.data?.bookingId}
+                    disabled={decliningBooking === (notification.data?.bookingId || notification.data?.id)}
                     className="text-white border-white hover:bg-white hover:text-black"
                   >
-                    {decliningBooking === notification.data?.bookingId ? "..." : "Decline"}
+                    {decliningBooking === (notification.data?.bookingId || notification.data?.id) ? "..." : "Decline"}
                   </Button>
                   <Button
                     size="sm"

@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles, bookings } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, alias } from "drizzle-orm";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
@@ -1679,6 +1679,7 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  ```text
   app.post('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
     try {
       const notificationId = parseInt(req.params.id);
@@ -2554,6 +2555,7 @@ export function registerRoutes(app: Express): Server {
       console.error("Error updating message:", error);
       res.status(500).json({ message: "Failed to update message" });
     }
+  ```text
   });
 
   // Create group conversation
@@ -3045,6 +3047,208 @@ export function registerRoutes(app: Express): Server {
       res.status(400).json({ message: error.message || 'Failed to create profile' });
     }
   });
+
+  // Accept friend request
+app.post("/api/friend-requests/:friendshipId/accept", requireAuth, async (req, res) => {
+  try {
+    const friendshipId = parseInt(req.params.friendshipId);
+    const userId = req.user!.id;
+
+    // Get the friendship request
+    const friendship = await db
+      .select()
+      .from(friendships)
+      .where(eq(friendships.id, friendshipId))
+      .limit(1);
+
+    if (friendship.length === 0) {
+      return res.status(404).json({ error: "Friend request not found" });
+    }
+
+    const friendshipRecord = friendship[0];
+
+    // Check if the current user is the addressee
+    if (friendshipRecord.addresseeId !== userId) {
+      return res.status(403).json({ error: "Not authorized to accept this request" });
+    }
+
+    // Update the friendship status to accepted
+    await db
+      .update(friendships)
+      .set({ 
+        status: "accepted",
+        updatedAt: new Date()
+      })
+      .where(eq(friendships.id, friendshipId));
+
+    // Create notification for the sender (requester)
+    await db.insert(notifications).values({
+      userId: friendshipRecord.requesterId,
+      type: "friend_accepted",
+      title: "Friend Request Accepted",
+      message: "Your friend request has been accepted",
+      data: {
+        friendshipId: friendshipId,
+        accepterId: userId,
+        senderId: friendshipRecord.requesterId,
+        senderProfileId: friendshipRecord.requesterProfileId
+      },
+      createdAt: new Date(),
+      read: false
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error accepting friend request:", error);
+    res.status(500).json({ error: "Failed to accept friend request" });
+  }
+});
+
+// Accept booking request
+app.post("/api/bookings/:bookingId/accept", requireAuth, async (req, res) => {
+  try {
+    const bookingId = parseInt(req.params.bookingId);
+    const userId = req.user!.id;
+
+    // Update booking status to accepted
+    await db
+      .update(bookings)
+      .set({ 
+        status: "accepted",
+        updatedAt: new Date()
+      })
+      .where(eq(bookings.id, bookingId));
+
+    // Get booking details for notification
+    const artistProfiles = alias(profiles, 'artistProfiles');
+    const venueProfiles = alias(profiles, 'venueProfiles');
+
+    const booking = await db
+      .select({
+        id: bookings.id,
+        artistId: bookings.artistId,
+        venueId: bookings.venueId,
+        artistProfile: {
+          id: artistProfiles.id,
+          name: artistProfiles.name,
+          profileImageUrl: artistProfiles.profileImageUrl,
+          userId: artistProfiles.userId
+        },
+        venueProfile: {
+          id: venueProfiles.id,
+          name: venueProfiles.name,
+          profileImageUrl: venueProfiles.profileImageUrl,
+          userId: venueProfiles.userId
+        }
+      })
+      .from(bookings)
+      .leftJoin(artistProfiles, eq(bookings.artistId, artistProfiles.id))
+      .leftJoin(venueProfiles, eq(bookings.venueId, venueProfiles.id))
+      .where(eq(bookings.id, bookingId))
+      .limit(1);
+
+    if (booking.length > 0) {
+      const bookingData = booking[0];
+
+      // Create notification for the artist
+      if (bookingData.artistProfile?.userId) {
+        await db.insert(notifications).values({
+          userId: bookingData.artistProfile.userId,
+          type: "booking_accepted",
+          title: "Booking Request Accepted",
+          message: `${bookingData.venueProfile?.name || 'A venue'} has accepted your booking request`,
+          data: {
+            bookingId: bookingId,
+            venueId: bookingData.venueId,
+            venueName: bookingData.venueProfile?.name,
+            venueProfileImageUrl: bookingData.venueProfile?.profileImageUrl,
+            senderProfileId: bookingData.venueId
+          },
+          createdAt: new Date(),
+          read: false
+        });
+      }
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error accepting booking request:", error);
+    res.status(500).json({ error: "Failed to accept booking request" });
+  }
+});
+
+// Decline booking request
+app.post("/api/bookings/:bookingId/decline", requireAuth, async (req, res) => {
+  try {
+    const bookingId = parseInt(req.params.bookingId);
+    const userId = req.user!.id;
+
+    // Update booking status to declined
+    await db
+      .update(bookings)
+      .set({ 
+        status: "declined",
+        updatedAt: new Date()
+      })
+      .where(eq(bookings.id, bookingId));
+
+    // Get booking details for notification
+    const artistProfiles = alias(profiles, 'artistProfiles');
+    const venueProfiles = alias(profiles, 'venueProfiles');
+
+    const booking = await db
+      .select({
+        id: bookings.id,
+        artistId: bookings.artistId,
+        venueId: bookings.venueId,
+        artistProfile: {
+          id: artistProfiles.id,
+          name: artistProfiles.name,
+          profileImageUrl: artistProfiles.profileImageUrl,
+          userId: artistProfiles.userId
+        },
+        venueProfile: {
+          id: venueProfiles.id,
+          name: venueProfiles.name,
+          profileImageUrl: venueProfiles.profileImageUrl,
+          userId: venueProfiles.userId
+        }
+      })
+      .from(bookings)
+      .leftJoin(artistProfiles, eq(bookings.artistId, artistProfiles.id))
+      .leftJoin(venueProfiles, eq(bookings.venueId, venueProfiles.id))
+      .where(eq(bookings.id, bookingId))
+      .limit(1);
+
+    if (booking.length > 0) {
+      const bookingData = booking[0];
+
+      // Create notification for the artist
+      if (bookingData.artistProfile?.userId) {
+        await db.insert(notifications).values({
+          userId: bookingData.artistProfile.userId,
+          type: "booking_declined",
+          title: "Booking Request Declined",
+          message: `${bookingData.venueProfile?.name || 'A venue'} has declined your booking request`,
+          data: {
+            bookingId: bookingId,
+            venueId: bookingData.venueId,
+            venueName: bookingData.venueProfile?.name,
+            venueProfileImageUrl: bookingData.venueProfile?.profileImageUrl,
+            senderProfileId: bookingData.venueId
+          },
+          createdAt: new Date(),
+          read: false
+        });
+      }
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error declining booking request:", error);
+    res.status(500).json({ error: "Failed to decline booking request" });
+  }
+});
 
   const httpServer = createServer(app);
   return httpServer;

@@ -34,6 +34,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
   const queryClient = useQueryClient();
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [acceptingRequest, setAcceptingRequest] = useState<number | null>(null);
+  const [decliningRequest, setDecliningRequest] = useState<number | null>(null);
+  const [acceptingBooking, setAcceptingBooking] = useState<number | null>(null);
+  const [decliningBooking, setDecliningBooking] = useState<number | null>(null);
 
   // Fetch notifications with real-time polling
   const { data: notifications = [], isLoading } = useQuery({
@@ -299,12 +303,71 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     }
   };
 
-  const handleAcceptBookingRequest = (bookingId: number) => {
-    acceptBookingRequestMutation.mutate(bookingId);
+  const handleDeclineFriendRequest = async (friendshipId: number) => {
+    if (!friendshipId) return;
+
+    setDecliningRequest(friendshipId);
+    try {
+      await apiRequest("POST", `/api/friend-requests/${friendshipId}/reject`);
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/friend-requests"] });
+      toast({
+        title: "Friend Request Declined",
+        description: "The friend request has been declined.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to decline friend request",
+        variant: "destructive",
+      });
+    } finally {
+      setDecliningRequest(null);
+    }
   };
 
-  const handleDeclineBookingRequest = (bookingId: number) => {
-    declineBookingRequestMutation.mutate(bookingId);
+  const handleAcceptBookingRequest = async (bookingId: number) => {
+    if (!bookingId) return;
+
+    setAcceptingBooking(bookingId);
+    try {
+      await apiRequest("POST", `/api/bookings/${bookingId}/accept`);
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      toast({
+        title: "Booking Request Accepted",
+        description: "The booking request has been accepted.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to accept booking request",
+        variant: "destructive",
+      });
+    } finally {
+      setAcceptingBooking(null);
+    }
+  };
+
+  const handleDeclineBookingRequest = async (bookingId: number) => {
+    if (!bookingId) return;
+
+    setDecliningBooking(bookingId);
+    try {
+      await apiRequest("POST", `/api/bookings/${bookingId}/decline`);
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      toast({
+        title: "Booking Request Declined",
+        description: "The booking request has been declined.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to decline booking request",
+        variant: "destructive",
+      });
+    } finally {
+      setDecliningBooking(null);
+    }
   };
 
   const handleViewProfile = async (senderId: number) => {
@@ -419,7 +482,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                   </div>
                 )}
               </div>
-              
+
               {/* Reply section */}
               <div className="mt-3">
                 {replyingTo === notification.id ? (
@@ -468,80 +531,75 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
             </div>
           )}
 
-          {/* Friend Request Actions */}
-          {notification.type === "friend_request" && notification.sender && notification.data?.friendshipId && (
-            <div className="flex space-x-2 mt-3">
-              <Button
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAcceptFriendRequest(notification.data?.friendshipId);
-                }}
-                disabled={acceptFriendRequestMutation.isPending || rejectFriendRequestMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Heart className="w-3 h-3 mr-1" />
-                {acceptFriendRequestMutation.isPending ? "Accepting..." : "Accept"}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRejectFriendRequest(notification.data?.friendshipId);
-                }}
-                disabled={acceptFriendRequestMutation.isPending || rejectFriendRequestMutation.isPending}
-              >
-                <UserMinus className="w-3 h-3 mr-1" />
-                {rejectFriendRequestMutation.isPending ? "Declining..." : "Decline"}
-              </Button>
-            </div>
-          )}
+          {notification.type === 'friend_request' && (
+                <div className="flex space-x-2 mt-2">
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAcceptFriendRequest(notification.data?.friendshipId);
+                    }}
+                    disabled={acceptingRequest === notification.data?.friendshipId}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {acceptingRequest === notification.data?.friendshipId ? "..." : "Accept"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeclineFriendRequest(notification.data?.friendshipId);
+                    }}
+                    disabled={decliningRequest === notification.data?.friendshipId}
+                    className="text-white border-white hover:bg-white hover:text-black"
+                  >
+                    {decliningRequest === notification.data?.friendshipId ? "..." : "Decline"}
+                  </Button>
+                </div>
+              )}
 
-          {/* Booking Request Actions */}
-          {notification.type === "booking_request" && notification.sender && notification.data?.bookingId && (
-            <div className="mt-3 space-y-2">
-              <div className="flex space-x-2">
-                <Button
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAcceptBookingRequest(notification.data?.bookingId);
-                  }}
-                  disabled={acceptBookingRequestMutation.isPending || declineBookingRequestMutation.isPending}
-                  className="bg-green-600 hover:bg-green-700 text-white flex-1"
-                >
-                  <Check className="w-3 h-3 mr-1" />
-                  {acceptBookingRequestMutation.isPending ? "Accepting..." : "Accept"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeclineBookingRequest(notification.data?.bookingId);
-                  }}
-                  disabled={acceptBookingRequestMutation.isPending || declineBookingRequestMutation.isPending}
-                  className="flex-1"
-                >
-                  <UserMinus className="w-3 h-3 mr-1" />
-                  {declineBookingRequestMutation.isPending ? "Declining..." : "Decline"}
-                </Button>
-              </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleViewProfile(notification.sender.id);
-                }}
-                className="flex items-center w-full"
-              >
-                <ExternalLink className="w-3 h-3 mr-1" />
-                View Artist Profile
-              </Button>
-            </div>
-          )}
+              {notification.type === 'booking_request' && (
+                <div className="flex space-x-2 mt-2">
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAcceptBookingRequest(notification.data?.bookingId);
+                    }}
+                    disabled={acceptingBooking === notification.data?.bookingId}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {acceptingBooking === notification.data?.bookingId ? "..." : "Accept"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeclineBookingRequest(notification.data?.bookingId);
+                    }}
+                    disabled={decliningBooking === notification.data?.bookingId}
+                    className="text-white border-white hover:bg-white hover:text-black"
+                  >
+                    {decliningBooking === notification.data?.bookingId ? "..." : "Decline"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Navigate to artist profile or booking details
+                      if (notification.data?.senderProfileId) {
+                        window.open(`/profile/${notification.data.senderProfileId}`, '_blank');
+                      }
+                    }}
+                    className="text-blue-400 border-blue-400 hover:bg-blue-400 hover:text-white"
+                  >
+                    View Artist Profile
+                  </Button>
+                </div>
+              )}
 
           {/* Booking Response Actions */}
           {notification.type === "booking_response" && notification.sender && (

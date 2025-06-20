@@ -595,7 +595,7 @@ export default function Profile() {
                         <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                           --
                         </div>
-                        <div className"text-sm text-gray-600 dark:text-gray-400">Friends</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Friends</div>
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">

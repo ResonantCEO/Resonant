@@ -26,6 +26,7 @@ import EPKTab from "@/components/epk-tab";
 import FriendsTab from "@/components/friends-tab";
 import StatsTab from "@/components/stats-tab";
 import GalleryTab from "@/components/gallery-tab";
+import MusicDiscoveryTab from "@/components/music-discovery-tab";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings, ChevronDown, UserPlus, Globe, MapPin, Music } from "lucide-react";
 
@@ -742,82 +743,11 @@ export default function Profile() {
           {activeTab === "music-discovery" && (
             <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
               {profile?.type === "audience" ? (
-                <div className="space-y-8">
-                  {/* Header */}
-                  <div className="text-center">
-                    <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Music Discovery Preferences</h3>
-                    <p className="text-gray-600 dark:text-gray-400">Explore {profile.name}'s musical taste</p>
-                  </div>
-
-                  {/* Genres */}
-                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                      <Music className="w-5 h-5 mr-2 text-pink-500" />
-                      Preferred Genres
-                    </h4>
-                    <div className="space-y-3">
-                      <p className="text-gray-600 dark:text-gray-400">
-                        These are some of the genres that {profile.name} enjoys listening to.
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
-                          Rock
-                        </span>
-                        <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">
-                          Pop
-                        </span>
-                        <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">
-                          Hip Hop
-                        </span>
-                        {/* Add more genres based on the user's preferences */}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Artists */}
-                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                      <Users className="w-5 h-5 mr-2 text-blue-500" />
-                      Favorite Artists
-                    </h4>
-                    <div className="space-y-3">
-                      <p className="text-gray-600 dark:text-gray-400">
-                        Here are some of the artists that {profile.name} loves.
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
-                          Artist 1
-                        </span>
-                        <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">
-                          Artist 2
-                        </span>
-                        {/* Add more artists based on the user's preferences */}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Venues */}
-                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                      <MapPin className="w-5 h-5 mr-2 text-green-500" />
-                      Preferred Venues
-                    </h4>
-                    <div className="space-y-3">
-                      <p className="text-gray-600 dark:text-gray-400">
-                        These are some of the venues that {profile.name} enjoys visiting.
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
-                          Venue 1
-                        </span>
-                        <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full">
-                          Venue 2
-                        </span>
-                        {/* Add more venues based on the user's preferences */}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <MusicDiscoveryTab 
+                  profile={profile} 
+                  isOwn={isOwn} 
+                  followedArtists={followedArtists}
+                />
               ) : (
                 <div className="text-center text-gray-500 dark:text-gray-400">
                   <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Music Discovery</h3>

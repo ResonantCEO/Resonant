@@ -1404,6 +1404,56 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Get artists followed by audience profile
+  app.get('/api/profiles/:id/following-artists', async (req, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      
+      // Get friends who are artists
+      const friendArtists = await db
+        .select({
+          id: profiles.id,
+          name: profiles.name,
+          profileImageUrl: profiles.profileImageUrl,
+          bio: profiles.bio,
+          location: profiles.location,
+          genre: profiles.genre,
+          type: profiles.type
+        })
+        .from(friendships)
+        .innerJoin(profiles, eq(friendships.requesterId, profiles.id))
+        .where(and(
+          eq(friendships.addresseeId, profileId),
+          eq(friendships.status, 'accepted'),
+          eq(profiles.type, 'artist')
+        ))
+        .union(
+          db
+            .select({
+              id: profiles.id,
+              name: profiles.name,
+              profileImageUrl: profiles.profileImageUrl,
+              bio: profiles.bio,
+              location: profiles.location,
+              genre: profiles.genre,
+              type: profiles.type
+            })
+            .from(friendships)
+            .innerJoin(profiles, eq(friendships.addresseeId, profiles.id))
+            .where(and(
+              eq(friendships.requesterId, profileId),
+              eq(friendships.status, 'accepted'),
+              eq(profiles.type, 'artist')
+            ))
+        );
+
+      res.json(friendArtists);
+    } catch (error) {
+      console.error("Error fetching followed artists:", error);
+      res.status(500).json({ message: "Failed to fetch followed artists" });
+    }
+  });
+
   app.use(express.json());
   // Authentication middleware
   const requireAuth = (req: any, res: any, next: any) => {

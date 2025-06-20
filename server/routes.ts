@@ -1097,6 +1097,15 @@ export function registerRoutes(app: Express): Server {
 
       const friendship = await storage.acceptFriendRequest(friendshipId);
 
+      // Clean up the friend request notification
+      await db
+        .delete(notifications)
+        .where(and(
+          eq(notifications.type, 'friend_request'),
+          eq(notifications.recipientId, req.user.id),
+          sql`${notifications.data}->>'friendshipId' = ${friendshipId.toString()}`
+        ));
+
       // Send notification to the requester
       const { notificationService } = await import('./notifications');
       const requesterProfile = await storage.getProfile(friendship.requesterId);
@@ -1134,6 +1143,16 @@ export function registerRoutes(app: Express): Server {
       }
 
       const friendship = await storage.rejectFriendRequest(friendshipId);
+
+      // Clean up the friend request notification
+      await db
+        .delete(notifications)
+        .where(and(
+          eq(notifications.type, 'friend_request'),
+          eq(notifications.recipientId, req.user.id),
+          sql`${notifications.data}->>'friendshipId' = ${friendshipId.toString()}`
+        ));
+
       res.json(friendship);
     } catch (error) {
       console.error("Error rejecting friend request:", error);

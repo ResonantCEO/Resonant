@@ -50,19 +50,20 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
   });
 
   // Fetch friend requests (for own profiles)
-  const { data: friendRequests, isLoading: requestsLoading } = useQuery({
-    queryKey: [`/api/friend-requests`],
-    enabled: !!profile?.id && isOwn,
-    refetchInterval: 2000, // Poll every 2 seconds for real-time updates
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    staleTime: 0,
+  const { data: friendRequests = [], isLoading: friendRequestsLoading, refetch: refetchFriendRequests } = useQuery({
+    queryKey: ["/api/friend-requests"],
+    refetchInterval: 3000,
+    refetchIntervalInBackground: true,
+    enabled: isOwn,
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache the data
     onSuccess: (data) => {
-      console.log('Friend requests fetched:', data);
-      console.log('Friend requests length:', data?.length || 0);
-      // Invalidate notification counts when friend requests change
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+      console.log("Friend requests received:", data);
+      console.log("Friend requests count:", data?.length || 0);
     },
+    onError: (error) => {
+      console.error("Error fetching friend requests:", error);
+    }
   });
 
   // Fetch sent friend requests (for own profiles)
@@ -262,7 +263,7 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
 
     // Use the friendship ID directly from the request
     const friendshipId = request.id;
-    
+
     if (!friendshipId) {
       console.error('No friendship ID found for request:', request);
       return null;

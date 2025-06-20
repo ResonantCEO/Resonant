@@ -27,7 +27,7 @@ import FriendsTab from "@/components/friends-tab";
 import StatsTab from "@/components/stats-tab";
 import GalleryTab from "@/components/gallery-tab";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings, ChevronDown, UserPlus, Globe, MapPin } from "lucide-react";
+import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings, ChevronDown, UserPlus, Globe, MapPin, Music } from "lucide-react";
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();

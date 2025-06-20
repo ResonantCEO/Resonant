@@ -1002,6 +1002,8 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
+      console.log(`Fetching friend requests for active profile ${activeProfile.id} (${activeProfile.name})`);
+
       // Get friend requests using a simpler query
       const friendshipRequests = await db
         .select({
@@ -1027,6 +1029,15 @@ export function registerRoutes(app: Express): Server {
         .orderBy(sql`${friendships.createdAt} DESC`);
 
       console.log(`Found ${friendshipRequests.length} pending friend requests for profile ${activeProfile.id}`);
+      console.log('All pending friendships in database:');
+      
+      // Debug: Check all pending friendships
+      const allPendingFriendships = await db
+        .select()
+        .from(friendships)
+        .where(eq(friendships.status, 'pending'));
+      
+      console.log('All pending friendships:', allPendingFriendships);
 
       // Log the structure of requests to debug
       if (friendshipRequests.length > 0) {

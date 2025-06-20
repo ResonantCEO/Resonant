@@ -201,10 +201,12 @@ export class NotificationService {
         if (data?.targetProfileId) {
           const shouldInclude = data.targetProfileId === activeProfileId;
           console.log(`Friend request notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} (target: ${data.targetProfileId}, active: ${activeProfileId})`);
+          console.log(`Notification data:`, data);
           return shouldInclude;
         }
         // If no targetProfileId, don't count it
         console.log(`Friend request notification ${notification.id}: excluded (no targetProfileId)`);
+        console.log(`Notification data:`, data);
         return false;
       }
 

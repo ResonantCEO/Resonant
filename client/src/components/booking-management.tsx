@@ -397,7 +397,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex flex-col space-y-2 ml-4">
+                    <div className="flex flex-wrap gap-2 ml-4">
                       {profileType === 'venue' && request.status === 'pending' && (
                         <>
                           <Button

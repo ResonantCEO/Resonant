@@ -118,6 +118,12 @@ export class NotificationService {
         return true;
       }
 
+      // For booking-related notifications, only show to relevant profiles
+      if (notification.type === 'booking_confirmed') {
+        // Only show booking confirmations to artist profiles (who made the original request)
+        return activeProfileType === 'artist';
+      }
+
       // For post-related notifications, show based on profile type
       if (notification.type === 'post_like' || notification.type === 'post_comment') {
         // Only show post notifications for artist and venue profiles (not audience)
@@ -223,6 +229,14 @@ export class NotificationService {
         return true;
       }
 
+      // For booking-related notifications, only count for relevant profiles
+      if (notification.type === 'booking_confirmed') {
+        // Only count booking confirmations for artist profiles (who made the original request)
+        const shouldInclude = activeProfileType === 'artist';
+        console.log(`Booking confirmed notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} for ${activeProfileType} profile`);
+        return shouldInclude;
+      }
+
       // For post-related notifications, count based on profile type
       if (notification.type === 'post_like' || notification.type === 'post_comment') {
         // Only count post notifications for artist and venue profiles (not audience)
@@ -231,9 +245,9 @@ export class NotificationService {
         return shouldInclude;
       }
 
-      // For photo comment notifications, count for all profile types
-      if (notification.type === 'photo_comment') {
-        console.log(`Photo comment notification ${notification.id}: included for all profiles`);
+      // For photo comment, photo tag, and comment tag notifications, count for all profile types
+      if (notification.type === 'photo_comment' || notification.type === 'photo_tag' || notification.type === 'comment_tag') {
+        console.log(`Photo/comment notification ${notification.id}: included for all profiles`);
         return true;
       }
 

@@ -397,13 +397,13 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex flex-wrap gap-2 ml-4">
+                    <div className="flex flex-row gap-2 ml-4">
                       {profileType === 'venue' && request.status === 'pending' && (
                         <>
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white"
+                            className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white whitespace-nowrap"
                             onClick={() => {
                               // Navigate to artist's profile to view their calendar
                               window.open(`/profile/${request.artistProfile.id}`, '_blank');
@@ -415,7 +415,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-orange-600 border-orange-600 hover:bg-orange-600 hover:text-white"
+                            className="text-orange-600 border-orange-600 hover:bg-orange-600 hover:text-white whitespace-nowrap"
                             onClick={() => {
                               // TODO: Implement contract proposal functionality
                               toast({
@@ -430,14 +430,14 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
+                            className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white whitespace-nowrap"
                           >
                             <MessageSquare className="w-4 h-4 mr-1" />
                             Message
                           </Button>
                           <Button
                             size="sm"
-                            className="bg-green-600 hover:bg-green-700 !text-white"
+                            className="bg-green-600 hover:bg-green-700 !text-white whitespace-nowrap"
                             onClick={() => handleBookingResponse(request.id, 'accepted')}
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
@@ -446,7 +446,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+                            className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white whitespace-nowrap"
                             onClick={() => handleBookingResponse(request.id, 'rejected')}
                           >
                             <XCircle className="w-4 h-4 mr-1" />

@@ -415,7 +415,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                            className="text-orange-600 border-orange-600 hover:bg-orange-600 hover:text-white"
                             onClick={() => {
                               // TODO: Implement contract proposal functionality
                               toast({
@@ -430,7 +430,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                            className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
                           >
                             <MessageSquare className="w-4 h-4 mr-1" />
                             Message
@@ -446,7 +446,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-red-600 border-red-600 hover:bg-red-50"
+                            className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
                             onClick={() => handleBookingResponse(request.id, 'rejected')}
                           >
                             <XCircle className="w-4 h-4 mr-1" />
@@ -458,7 +458,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                          className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
                         >
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Message

@@ -373,7 +373,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
 
   return (
     <div className="space-y-6">
-      
+
 
       {/* Calendar Section */}
       <Card>

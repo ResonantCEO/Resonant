@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Calendar, Clock, MapPin, User, Plus, CheckCircle, XCircle, MessageSquare } from "lucide-react";
+import { FileText } from "lucide-react";
 
 interface BookingRequest {
   id: number;
@@ -399,60 +400,67 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                     {/* Action buttons */}
                     <div className="flex flex-wrap gap-2 ml-4">
                       {profileType === 'venue' && request.status === 'pending' && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white"
-                            onClick={() => {
-                              // Navigate to artist's profile to view their calendar
-                              window.open(`/profile/${request.artistProfile.id}`, '_blank');
-                            }}
-                          >
-                            <Calendar className="w-4 h-4 mr-1" />
-                            Check Dates
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-orange-600 border-orange-600 hover:bg-orange-600 hover:text-white"
-                            onClick={() => {
-                              // TODO: Implement contract proposal functionality
-                              toast({
-                                title: "Contract Proposal",
-                                description: "Contract proposal feature coming soon",
-                              });
-                            }}
-                          >
-                            <MessageSquare className="w-4 h-4 mr-1" />
-                            Propose Contract
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
-                          >
-                            <MessageSquare className="w-4 h-4 mr-1" />
-                            Message
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 !text-white"
-                            onClick={() => handleBookingResponse(request.id, 'accepted')}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Accept
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
-                            onClick={() => handleBookingResponse(request.id, 'rejected')}
-                          >
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Decline
-                          </Button>
-                        </>
+                        <div className="flex gap-4">
+                          {/* Left column - Check Dates, Propose Contract, Message */}
+                          <div className="flex flex-col gap-2 flex-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white w-full justify-start"
+                              onClick={() => {
+                                // Navigate to artist's profile to view their calendar
+                                window.open(`/profile/${request.artistProfile.id}`, '_blank');
+                              }}
+                            >
+                              <Calendar className="w-4 h-4 mr-2" />
+                              Check Dates
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-orange-600 border-orange-600 hover:bg-orange-600 hover:text-white w-full justify-start"
+                              onClick={() => {
+                                // TODO: Implement contract proposal functionality
+                                toast({
+                                  title: "Contract Proposal",
+                                  description: "Contract proposal feature coming soon",
+                                });
+                              }}
+                            >
+                              <FileText className="w-4 h-4 mr-2" />
+                              Propose Contract
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white w-full justify-start"
+                            >
+                              <MessageSquare className="w-4 h-4 mr-2" />
+                              Message
+                            </Button>
+                          </div>
+
+                          {/* Right column - Accept and Decline */}
+                          <div className="flex flex-col gap-2 min-w-[100px]">
+                            <Button
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700 !text-white w-full justify-center"
+                              onClick={() => handleBookingResponse(request.id, 'accepted')}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white w-full justify-center"
+                              onClick={() => handleBookingResponse(request.id, 'rejected')}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Decline
+                            </Button>
+                          </div>
+                        </div>
                       )}
                       {!(profileType === 'venue' && request.status === 'pending') && (
                         <Button
@@ -473,7 +481,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         </Card>
       )}
 
-      
+
 
       {/* Empty State */}
       {filteredRequests.length === 0 && (

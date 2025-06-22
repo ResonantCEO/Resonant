@@ -373,60 +373,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
 
   return (
     <div className="space-y-6">
-      {/* Booking Requests Section - Only for venues */}
-      {profileType === 'venue' && bookingRequests.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Calendar className="w-5 h-5" />
-              <span>Booking Requests</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {bookingRequests
-                .filter(request => request.status === 'pending')
-                .map((request) => (
-                <div key={request.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">{request.artistProfile.name}</h4>
-                        <p className="text-sm text-gray-600">
-                          Booking request received on {new Date(request.requestedAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-green-600 border-green-600 hover:bg-green-50"
-                        onClick={() => handleBookingResponse(request.id, 'accepted')}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Accept
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-red-600 border-red-600 hover:bg-red-50"
-                        onClick={() => handleBookingResponse(request.id, 'rejected')}
-                      >
-                        <XCircle className="w-4 h-4 mr-1" />
-                        Decline
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      
 
       {/* Calendar Section */}
       <Card>

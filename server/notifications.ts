@@ -182,37 +182,24 @@ export class NotificationService {
       .from(notifications)
       .where(and(...whereConditions));
 
-    console.log(`Getting unread count for user ${userId}, profile ${activeProfileId} (${activeProfileType})`);
-    console.log(`Total unread notifications: ${allNotifications.length}`);
-
-    // Apply the same strict filtering as getUserNotifications
+    // Apply filtering based on profile type and notification relevance
     const filteredNotifications = allNotifications.filter(notification => {
       // For booking requests, ONLY count them when venue profile is active
       if (notification.type === 'booking_request') {
-        const shouldInclude = activeProfileType === 'venue';
-        console.log(`Booking request notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} for ${activeProfileType} profile`);
-        return shouldInclude;
+        return activeProfileType === 'venue';
       }
 
       // For booking responses, ONLY count them when artist profile is active
       if (notification.type === 'booking_response') {
-        const shouldInclude = activeProfileType === 'artist';
-        console.log(`Booking response notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} for ${activeProfileType} profile`);
-        return shouldInclude;
+        return activeProfileType === 'artist';
       }
 
       // For friend requests, only count them for the specific target profile
       if (notification.type === 'friend_request') {
         const data = notification.data as any;
         if (data?.targetProfileId) {
-          const shouldInclude = data.targetProfileId === activeProfileId;
-          console.log(`Friend request notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} (target: ${data.targetProfileId}, active: ${activeProfileId})`);
-          console.log(`Notification data:`, data);
-          return shouldInclude;
+          return data.targetProfileId === activeProfileId;
         }
-        // If no targetProfileId, don't count it
-        console.log(`Friend request notification ${notification.id}: excluded (no targetProfileId)`);
-        console.log(`Notification data:`, data);
         return false;
       }
 
@@ -220,43 +207,30 @@ export class NotificationService {
       if (notification.type === 'friend_accepted') {
         const data = notification.data as any;
         if (data?.senderProfileId) {
-          const shouldInclude = data.senderProfileId === activeProfileId;
-          console.log(`Friend accepted notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} (sender profile: ${data.senderProfileId}, active: ${activeProfileId})`);
-          return shouldInclude;
+          return data.senderProfileId === activeProfileId;
         }
-        // Legacy support: if no senderProfileId, count for all profiles
-        console.log(`Friend accepted notification ${notification.id}: included for all profiles (legacy)`);
-        return true;
+        return true; // Legacy support
       }
 
       // For booking-related notifications, only count for relevant profiles
       if (notification.type === 'booking_confirmed') {
-        // Only count booking confirmations for artist profiles (who made the original request)
-        const shouldInclude = activeProfileType === 'artist';
-        console.log(`Booking confirmed notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} for ${activeProfileType} profile`);
-        return shouldInclude;
+        return activeProfileType === 'artist';
       }
 
       // For post-related notifications, count based on profile type
       if (notification.type === 'post_like' || notification.type === 'post_comment') {
-        // Only count post notifications for artist and venue profiles (not audience)
-        const shouldInclude = activeProfileType === 'artist' || activeProfileType === 'venue';
-        console.log(`Post notification ${notification.id}: ${shouldInclude ? 'included' : 'excluded'} for ${activeProfileType} profile`);
-        return shouldInclude;
+        return activeProfileType === 'artist' || activeProfileType === 'venue';
       }
 
       // For photo comment, photo tag, and comment tag notifications, count for all profile types
       if (notification.type === 'photo_comment' || notification.type === 'photo_tag' || notification.type === 'comment_tag') {
-        console.log(`Photo/comment notification ${notification.id}: included for all profiles`);
         return true;
       }
 
       // For other notification types, count for all profiles
-      console.log(`Other notification ${notification.id} (${notification.type}): included for all profiles`);
       return true;
     });
 
-    console.log(`Filtered notifications for profile ${activeProfileId}: ${filteredNotifications.length}`);
     return filteredNotifications.length;
   }
 

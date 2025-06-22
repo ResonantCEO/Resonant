@@ -417,6 +417,18 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                             <XCircle className="w-4 h-4 mr-1" />
                             Decline
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-purple-600 border-purple-600 hover:bg-purple-50"
+                            onClick={() => {
+                              // Navigate to artist's profile to view their calendar
+                              window.open(`/profile/${request.artistProfile.id}`, '_blank');
+                            }}
+                          >
+                            <Calendar className="w-4 h-4 mr-1" />
+                            Check Dates
+                          </Button>
                         </>
                       )}
                       <Button

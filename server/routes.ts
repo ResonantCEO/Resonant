@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles, bookingRequests } from "@shared/schema";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles, bookingRequests, contractProposals, contractNegotiations, contractSignatures } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -2497,6 +2497,406 @@ export function registerRoutes(app: Express): Server {
               profileImageUrl: venueProfiles.profileImageUrl,
               location: venueProfiles.location
             }
+
+
+  // Contract proposal routes
+
+  // Create contract proposal
+  app.post('/api/contract-proposals', isAuthenticated, async (req: any, res) => {
+    try {
+      const {
+        bookingRequestId,
+        title,
+        description,
+        terms,
+        payment,
+        requirements,
+        attachments,
+        expiresAt
+      } = req.body;
+
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Verify the booking request exists and user has permission
+      const bookingRequest = await storage.getBookingRequestById(bookingRequestId);
+      if (!bookingRequest) {
+        return res.status(404).json({ message: "Booking request not found" });
+      }
+
+      // Only venue can propose contracts to artists
+      if (activeProfile.type !== 'venue' || bookingRequest.venueProfileId !== activeProfile.id) {
+        return res.status(403).json({ message: "Only venues can propose contracts for their booking requests" });
+      }
+
+      const proposalData = {
+        bookingRequestId,
+        proposedBy: activeProfile.id,
+        proposedTo: bookingRequest.artistProfileId,
+        title,
+        description,
+        terms,
+        payment,
+        requirements,
+        attachments: attachments || [],
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+      };
+
+      const [proposal] = await db.insert(contractProposals).values(proposalData).returning();
+
+      // Send notification to artist
+      const { notificationService } = await import('./notifications');
+      const artistProfile = await storage.getProfile(bookingRequest.artistProfileId);
+      if (artistProfile?.userId) {
+        const venueUser = await storage.getUser(req.user.id);
+        const venueName = `${venueUser?.firstName} ${venueUser?.lastName}`;
+        await notificationService.notifyContractProposal(
+          artistProfile.userId,
+          req.user.id,
+          venueName,
+          activeProfile.name,
+          title
+        );
+      }
+
+      res.json(proposal);
+    } catch (error) {
+      console.error("Error creating contract proposal:", error);
+      res.status(500).json({ message: "Failed to create contract proposal" });
+    }
+  });
+
+  // Get contract proposals for a booking request
+  app.get('/api/booking-requests/:id/contracts', isAuthenticated, async (req: any, res) => {
+    try {
+      const bookingRequestId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const proposals = await db
+        .select({
+          id: contractProposals.id,
+          bookingRequestId: contractProposals.bookingRequestId,
+          title: contractProposals.title,
+          description: contractProposals.description,
+          terms: contractProposals.terms,
+          payment: contractProposals.payment,
+          requirements: contractProposals.requirements,
+          attachments: contractProposals.attachments,
+          status: contractProposals.status,
+          expiresAt: contractProposals.expiresAt,
+          acceptedAt: contractProposals.acceptedAt,
+          rejectedAt: contractProposals.rejectedAt,
+          createdAt: contractProposals.createdAt,
+          updatedAt: contractProposals.updatedAt,
+          proposer: {
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+            type: profiles.type
+          }
+        })
+        .from(contractProposals)
+        .leftJoin(profiles, eq(contractProposals.proposedBy, profiles.id))
+        .where(eq(contractProposals.bookingRequestId, bookingRequestId))
+        .orderBy(sql`${contractProposals.createdAt} DESC`);
+
+      res.json(proposals);
+    } catch (error) {
+      console.error("Error fetching contract proposals:", error);
+      res.status(500).json({ message: "Failed to fetch contract proposals" });
+    }
+  });
+
+  // Get specific contract proposal with negotiations
+  app.get('/api/contract-proposals/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const proposalId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Get proposal details
+      const [proposal] = await db
+        .select({
+          id: contractProposals.id,
+          bookingRequestId: contractProposals.bookingRequestId,
+          proposedBy: contractProposals.proposedBy,
+          proposedTo: contractProposals.proposedTo,
+          title: contractProposals.title,
+          description: contractProposals.description,
+          terms: contractProposals.terms,
+          payment: contractProposals.payment,
+          requirements: contractProposals.requirements,
+          attachments: contractProposals.attachments,
+          status: contractProposals.status,
+          expiresAt: contractProposals.expiresAt,
+          acceptedAt: contractProposals.acceptedAt,
+          rejectedAt: contractProposals.rejectedAt,
+          createdAt: contractProposals.createdAt,
+          updatedAt: contractProposals.updatedAt,
+        })
+        .from(contractProposals)
+        .where(eq(contractProposals.id, proposalId));
+
+      if (!proposal) {
+        return res.status(404).json({ message: "Contract proposal not found" });
+      }
+
+      // Check permissions
+      if (proposal.proposedBy !== activeProfile.id && proposal.proposedTo !== activeProfile.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      // Get negotiations
+      const negotiations = await db
+        .select({
+          id: contractNegotiations.id,
+          message: contractNegotiations.message,
+          proposedChanges: contractNegotiations.proposedChanges,
+          createdAt: contractNegotiations.createdAt,
+          profile: {
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+            type: profiles.type
+          }
+        })
+        .from(contractNegotiations)
+        .leftJoin(profiles, eq(contractNegotiations.profileId, profiles.id))
+        .where(eq(contractNegotiations.contractProposalId, proposalId))
+        .orderBy(sql`${contractNegotiations.createdAt} ASC`);
+
+      // Get signatures
+      const signatures = await db
+        .select({
+          id: contractSignatures.id,
+          signedAt: contractSignatures.signedAt,
+          profile: {
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+            type: profiles.type
+          }
+        })
+        .from(contractSignatures)
+        .leftJoin(profiles, eq(contractSignatures.profileId, profiles.id))
+        .where(eq(contractSignatures.contractProposalId, proposalId));
+
+      res.json({
+        ...proposal,
+        negotiations,
+        signatures
+      });
+    } catch (error) {
+      console.error("Error fetching contract proposal:", error);
+      res.status(500).json({ message: "Failed to fetch contract proposal" });
+    }
+  });
+
+  // Accept contract proposal
+  app.post('/api/contract-proposals/:id/accept', isAuthenticated, async (req: any, res) => {
+    try {
+      const proposalId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const [proposal] = await db
+        .select()
+        .from(contractProposals)
+        .where(eq(contractProposals.id, proposalId));
+
+      if (!proposal) {
+        return res.status(404).json({ message: "Contract proposal not found" });
+      }
+
+      if (proposal.proposedTo !== activeProfile.id) {
+        return res.status(403).json({ message: "Only the recipient can accept this proposal" });
+      }
+
+      if (proposal.status !== 'pending') {
+        return res.status(400).json({ message: "Proposal is not in pending status" });
+      }
+
+      // Update proposal status
+      await db
+        .update(contractProposals)
+        .set({
+          status: 'accepted',
+          acceptedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(contractProposals.id, proposalId));
+
+      // Create signature record
+      await db.insert(contractSignatures).values({
+        contractProposalId: proposalId,
+        profileId: activeProfile.id,
+        signatureData: 'digital_acceptance',
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      // Send notification to proposer
+      const { notificationService } = await import('./notifications');
+      const proposerProfile = await storage.getProfile(proposal.proposedBy);
+      if (proposerProfile?.userId) {
+        const accepterUser = await storage.getUser(req.user.id);
+        const accepterName = `${accepterUser?.firstName} ${accepterUser?.lastName}`;
+        await notificationService.notifyContractAccepted(
+          proposerProfile.userId,
+          req.user.id,
+          accepterName,
+          proposal.title
+        );
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error accepting contract proposal:", error);
+      res.status(500).json({ message: "Failed to accept contract proposal" });
+    }
+  });
+
+  // Reject contract proposal
+  app.post('/api/contract-proposals/:id/reject', isAuthenticated, async (req: any, res) => {
+    try {
+      const proposalId = parseInt(req.params.id);
+      const { reason } = req.body;
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const [proposal] = await db
+        .select()
+        .from(contractProposals)
+        .where(eq(contractProposals.id, proposalId));
+
+      if (!proposal) {
+        return res.status(404).json({ message: "Contract proposal not found" });
+      }
+
+      if (proposal.proposedTo !== activeProfile.id) {
+        return res.status(403).json({ message: "Only the recipient can reject this proposal" });
+      }
+
+      if (proposal.status !== 'pending') {
+        return res.status(400).json({ message: "Proposal is not in pending status" });
+      }
+
+      // Update proposal status
+      await db
+        .update(contractProposals)
+        .set({
+          status: 'rejected',
+          rejectedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(contractProposals.id, proposalId));
+
+      // Add rejection reason as negotiation
+      if (reason) {
+        await db.insert(contractNegotiations).values({
+          contractProposalId: proposalId,
+          profileId: activeProfile.id,
+          message: `Rejected: ${reason}`
+        });
+      }
+
+      // Send notification to proposer
+      const { notificationService } = await import('./notifications');
+      const proposerProfile = await storage.getProfile(proposal.proposedBy);
+      if (proposerProfile?.userId) {
+        const rejecterUser = await storage.getUser(req.user.id);
+        const rejecterName = `${rejecterUser?.firstName} ${rejecterUser?.lastName}`;
+        await notificationService.notifyContractRejected(
+          proposerProfile.userId,
+          req.user.id,
+          rejecterName,
+          proposal.title
+        );
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error rejecting contract proposal:", error);
+      res.status(500).json({ message: "Failed to reject contract proposal" });
+    }
+  });
+
+  // Add negotiation message
+  app.post('/api/contract-proposals/:id/negotiate', isAuthenticated, async (req: any, res) => {
+    try {
+      const proposalId = parseInt(req.params.id);
+      const { message, proposedChanges } = req.body;
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const [proposal] = await db
+        .select()
+        .from(contractProposals)
+        .where(eq(contractProposals.id, proposalId));
+
+      if (!proposal) {
+        return res.status(404).json({ message: "Contract proposal not found" });
+      }
+
+      if (proposal.proposedBy !== activeProfile.id && proposal.proposedTo !== activeProfile.id) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      // Add negotiation
+      const [negotiation] = await db.insert(contractNegotiations).values({
+        contractProposalId: proposalId,
+        profileId: activeProfile.id,
+        message,
+        proposedChanges
+      }).returning();
+
+      // Update proposal status to negotiating if not already
+      if (proposal.status === 'pending') {
+        await db
+          .update(contractProposals)
+          .set({
+            status: 'negotiating',
+            updatedAt: new Date()
+          })
+          .where(eq(contractProposals.id, proposalId));
+      }
+
+      // Send notification to other party
+      const { notificationService } = await import('./notifications');
+      const otherProfileId = proposal.proposedBy === activeProfile.id ? proposal.proposedTo : proposal.proposedBy;
+      const otherProfile = await storage.getProfile(otherProfileId);
+      if (otherProfile?.userId) {
+        const senderUser = await storage.getUser(req.user.id);
+        const senderName = `${senderUser?.firstName} ${senderUser?.lastName}`;
+        await notificationService.notifyContractNegotiation(
+          otherProfile.userId,
+          req.user.id,
+          senderName,
+          proposal.title
+        );
+      }
+
+      res.json(negotiation);
+    } catch (error) {
+      console.error("Error adding negotiation:", error);
+      res.status(500).json({ message: "Failed to add negotiation" });
+    }
+  });
+
+
           })
           .from(bookingRequests)
           .leftJoin(artistProfiles, eq(bookingRequests.artistProfileId, artistProfiles.id))

@@ -597,6 +597,87 @@ export class NotificationService {
       data: { venueUserId, venueName, venueProfileName, eventDate }
     });
   }
+
+  async notifyContractProposal(recipientId: number, senderId: number, senderName: string, venueName: string, contractTitle: string) {
+    const settings = await this.getUserNotificationSettings(recipientId);
+    if (!settings.contract_proposal?.inApp) return;
+
+    const data = {
+      senderId,
+      senderName,
+      venueName,
+      contractTitle
+    };
+
+    await this.createNotification({
+      recipientId,
+      senderId,
+      type: 'contract_proposal',
+      title: 'Contract Proposal',
+      message: `${venueName} has sent you a contract proposal: ${contractTitle}`,
+      data
+    });
+  }
+
+  async notifyContractAccepted(recipientId: number, senderId: number, senderName: string, contractTitle: string) {
+    const settings = await this.getUserNotificationSettings(recipientId);
+    if (!settings.contract_accepted?.inApp) return;
+
+    const data = {
+      senderId,
+      senderName,
+      contractTitle
+    };
+
+    await this.createNotification({
+      recipientId,
+      senderId,
+      type: 'contract_accepted',
+      title: 'Contract Accepted',
+      message: `${senderName} has accepted your contract proposal: ${contractTitle}`,
+      data
+    });
+  }
+
+  async notifyContractRejected(recipientId: number, senderId: number, senderName: string, contractTitle: string) {
+    const settings = await this.getUserNotificationSettings(recipientId);
+    if (!settings.contract_rejected?.inApp) return;
+
+    const data = {
+      senderId,
+      senderName,
+      contractTitle
+    };
+
+    await this.createNotification({
+      recipientId,
+      senderId,
+      type: 'contract_rejected',
+      title: 'Contract Rejected',
+      message: `${senderName} has rejected your contract proposal: ${contractTitle}`,
+      data
+    });
+  }
+
+  async notifyContractNegotiation(recipientId: number, senderId: number, senderName: string, contractTitle: string) {
+    const settings = await this.getUserNotificationSettings(recipientId);
+    if (!settings.contract_negotiation?.inApp) return;
+
+    const data = {
+      senderId,
+      senderName,
+      contractTitle
+    };
+
+    await this.createNotification({
+      recipientId,
+      senderId,
+      type: 'contract_negotiation',
+      title: 'Contract Discussion',
+      message: `${senderName} has added a message to contract: ${contractTitle}`,
+      data
+    });
+  }
 }
 
 export const notificationService = new NotificationService();

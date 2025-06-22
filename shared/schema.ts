@@ -770,3 +770,96 @@ export type Photo = InferSelectModel<typeof photos>;
 export type InsertPhoto = InferInsertModel<typeof photos>;
 export type PhotoComment = InferSelectModel<typeof photoComments>;
 export type InsertPhotoComment = InferInsertModel<typeof photoComments>;
+
+
+// Contract proposals table
+export const contractProposals = pgTable("contract_proposals", {
+  id: serial("id").primaryKey(),
+  bookingRequestId: integer("booking_request_id").references(() => bookingRequests.id, { onDelete: "cascade" }).notNull(),
+  proposedBy: integer("proposed_by").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  proposedTo: integer("proposed_to").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  terms: jsonb("terms").notNull(), // Contract terms object
+  payment: jsonb("payment").notNull(), // Payment details
+  requirements: text("requirements"),
+  attachments: jsonb("attachments").default([]),
+  status: varchar("status").notNull().default("pending"), // pending, accepted, rejected, negotiating
+  expiresAt: timestamp("expires_at"),
+  acceptedAt: timestamp("accepted_at"),
+  rejectedAt: timestamp("rejected_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Contract negotiations table for back-and-forth proposals
+export const contractNegotiations = pgTable("contract_negotiations", {
+  id: serial("id").primaryKey(),
+  contractProposalId: integer("contract_proposal_id").references(() => contractProposals.id, { onDelete: "cascade" }).notNull(),
+  profileId: integer("profile_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  message: text("message").notNull(),
+  proposedChanges: jsonb("proposed_changes"), // Changes to terms/payment
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Contract signatures table
+export const contractSignatures = pgTable("contract_signatures", {
+  id: serial("id").primaryKey(),
+  contractProposalId: integer("contract_proposal_id").references(() => contractProposals.id, { onDelete: "cascade" }).notNull(),
+  profileId: integer("profile_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  signedAt: timestamp("signed_at").defaultNow().notNull(),
+  signatureData: text("signature_data"), // Digital signature or confirmation
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+});
+
+// Relations for contract system
+export const contractProposalsRelations = relations(contractProposals, ({ one, many }) => ({
+  bookingRequest: one(bookingRequests, {
+    fields: [contractProposals.bookingRequestId],
+    references: [bookingRequests.id],
+  }),
+  proposer: one(profiles, {
+    fields: [contractProposals.proposedBy],
+    references: [profiles.id],
+    relationName: "proposer",
+  }),
+  recipient: one(profiles, {
+    fields: [contractProposals.proposedTo],
+    references: [profiles.id],
+    relationName: "recipient",
+  }),
+  negotiations: many(contractNegotiations),
+  signatures: many(contractSignatures),
+}));
+
+export const contractNegotiationsRelations = relations(contractNegotiations, ({ one }) => ({
+  contractProposal: one(contractProposals, {
+    fields: [contractNegotiations.contractProposalId],
+    references: [contractProposals.id],
+  }),
+  profile: one(profiles, {
+    fields: [contractNegotiations.profileId],
+    references: [profiles.id],
+  }),
+}));
+
+export const contractSignaturesRelations = relations(contractSignatures, ({ one }) => ({
+  contractProposal: one(contractProposals, {
+    fields: [contractSignatures.contractProposalId],
+    references: [contractProposals.id],
+  }),
+  profile: one(profiles, {
+    fields: [contractSignatures.profileId],
+    references: [profiles.id],
+  }),
+}));
+
+// Type exports
+export type ContractProposal = InferSelectModel<typeof contractProposals>;
+export type InsertContractProposal = InferInsertModel<typeof contractProposals>;
+export type ContractNegotiation = InferSelectModel<typeof contractNegotiations>;
+export type InsertContractNegotiation = InferInsertModel<typeof contractNegotiations>;
+export type ContractSignature = InferSelectModel<typeof contractSignatures>;
+export type InsertContractSignature = InferInsertModel<typeof contractSignatures>;
+

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { Calendar, Clock, MapPin, User, Plus, CheckCircle, XCircle, MessageSquare } from "lucide-react";
 import { FileText } from "lucide-react";
+import ContractProposalDialog from "./contract-proposal-dialog";
 
 interface BookingRequest {
   id: number;
@@ -50,6 +51,8 @@ export default function BookingManagement({ profileType }: BookingManagementProp
     requirements: '',
     message: ''
   });
+  const [showContractDialog, setShowContractDialog] = useState(false);
+  const [selectedBookingForContract, setSelectedBookingForContract] = useState<any>(null);
 
   const queryClient = useQueryClient();
 
@@ -420,11 +423,8 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                               variant="outline"
                               className="text-orange-600 border-orange-600 hover:bg-orange-600 hover:text-white w-full justify-start"
                               onClick={() => {
-                                // TODO: Implement contract proposal functionality
-                                toast({
-                                  title: "Contract Proposal",
-                                  description: "Contract proposal feature coming soon",
-                                });
+                                setSelectedBookingForContract(request);
+                                setShowContractDialog(true);
                               }}
                             >
                               <FileText className="w-4 h-4 mr-2" />
@@ -509,6 +509,13 @@ export default function BookingManagement({ profileType }: BookingManagementProp
           </CardContent>
         </Card>
       )}
+
+      {/* Contract Proposal Dialog */}
+      <ContractProposalDialog 
+        open={showContractDialog}
+        onOpenChange={setShowContractDialog}
+        bookingRequest={selectedBookingForContract}
+      />
     </div>
   );
 }

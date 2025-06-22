@@ -241,12 +241,35 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="eventDate">Event Date *</Label>
-                    <Input
-                      id="eventDate"
-                      type="date"
-                      value={newRequest.eventDate}
-                      onChange={(e) => setNewRequest({...newRequest, eventDate: e.target.value})}
-                    />
+                    <div className="flex space-x-2">
+                      <Input
+                        id="eventDate"
+                        type="date"
+                        value={newRequest.eventDate}
+                        onChange={(e) => setNewRequest({...newRequest, eventDate: e.target.value})}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Navigate to calendar to check available dates
+                          const calendarSection = document.querySelector('[data-calendar-section]');
+                          if (calendarSection) {
+                            calendarSection.scrollIntoView({ behavior: 'smooth' });
+                            toast({
+                              title: "Check Calendar",
+                              description: "View your calendar below to see available dates before booking.",
+                            });
+                          }
+                        }}
+                        className="whitespace-nowrap"
+                      >
+                        <Calendar className="w-4 h-4 mr-1" />
+                        Check Available
+                      </Button>
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="eventTime">Event Time</Label>

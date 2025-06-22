@@ -372,7 +372,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
   const calendarDays = Array.from({ length: new Date(currentYear, currentMonth + 1, 0).getDate() }, (_, i) => i + 1);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-calendar-section>
       
 
       {/* Calendar Section */}

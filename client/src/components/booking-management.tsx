@@ -402,23 +402,6 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                         <>
                           <Button
                             size="sm"
-                            className="bg-green-600 hover:bg-green-700 !text-white"
-                            onClick={() => handleBookingResponse(request.id, 'accepted')}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Accept
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-red-600 border-red-600 hover:bg-red-50"
-                            onClick={() => handleBookingResponse(request.id, 'rejected')}
-                          >
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Decline
-                          </Button>
-                          <Button
-                            size="sm"
                             variant="outline"
                             className="text-purple-600 border-purple-600 hover:bg-purple-50"
                             onClick={() => {
@@ -444,16 +427,43 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                             <MessageSquare className="w-4 h-4 mr-1" />
                             Propose Contract
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                          >
+                            <MessageSquare className="w-4 h-4 mr-1" />
+                            Message
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700 !text-white"
+                            onClick={() => handleBookingResponse(request.id, 'accepted')}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Accept
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 border-red-600 hover:bg-red-50"
+                            onClick={() => handleBookingResponse(request.id, 'rejected')}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Decline
+                          </Button>
                         </>
                       )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                      >
-                        <MessageSquare className="w-4 h-4 mr-1" />
-                        Message
-                      </Button>
+                      {!(profileType === 'venue' && request.status === 'pending') && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                        >
+                          <MessageSquare className="w-4 h-4 mr-1" />
+                          Message
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>

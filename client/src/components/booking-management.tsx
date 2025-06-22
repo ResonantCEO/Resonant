@@ -429,6 +429,21 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                             <Calendar className="w-4 h-4 mr-1" />
                             Check Dates
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                            onClick={() => {
+                              // TODO: Implement contract proposal functionality
+                              toast({
+                                title: "Contract Proposal",
+                                description: "Contract proposal feature coming soon",
+                              });
+                            }}
+                          >
+                            <MessageSquare className="w-4 h-4 mr-1" />
+                            Propose Contract
+                          </Button>
                         </>
                       )}
                       <Button

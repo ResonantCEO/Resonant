@@ -2497,7 +2497,52 @@ export function registerRoutes(app: Express): Server {
               profileImageUrl: venueProfiles.profileImageUrl,
               location: venueProfiles.location
             }
+          })
+          .from(bookingRequests)
+          .leftJoin(artistProfiles, eq(bookingRequests.artistProfileId, artistProfiles.id))
+          .leftJoin(venueProfiles, eq(bookingRequests.venueProfileId, venueProfiles.id))
+          .where(eq(bookingRequests.artistProfileId, activeProfile.id));
+      } else if (activeProfile.type === 'venue') {
+        // Get requests sent to this venue
+        requests = await db
+          .select({
+            id: bookingRequests.id,
+            artistProfileId: bookingRequests.artistProfileId,
+            venueProfileId: bookingRequests.venueProfileId,
+            status: bookingRequests.status,
+            requestedAt: bookingRequests.requestedAt,
+            eventDate: bookingRequests.eventDate,
+            eventTime: bookingRequests.eventTime,
+            budget: bookingRequests.budget,
+            requirements: bookingRequests.requirements,
+            message: bookingRequests.message,
+            artistProfile: {
+              id: artistProfiles.id,
+              name: artistProfiles.name,
+              profileImageUrl: artistProfiles.profileImageUrl,
+              bio: artistProfiles.bio
+            },
+            venueProfile: {
+              id: venueProfiles.id,
+              name: venueProfiles.name,
+              profileImageUrl: venueProfiles.profileImageUrl,
+              location: venueProfiles.location
+            }
+          })
+          .from(bookingRequests)
+          .leftJoin(artistProfiles, eq(bookingRequests.artistProfileId, artistProfiles.id))
+          .leftJoin(venueProfiles, eq(bookingRequests.venueProfileId, venueProfiles.id))
+          .where(eq(bookingRequests.venueProfileId, activeProfile.id));
+      } else {
+        requests = [];
+      }
 
+      res.json(requests);
+    } catch (error) {
+      console.error('Error fetching booking requests:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 
   // Contract proposal routes
 
@@ -2893,56 +2938,6 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error adding negotiation:", error);
       res.status(500).json({ message: "Failed to add negotiation" });
-    }
-  });
-
-
-          })
-          .from(bookingRequests)
-          .leftJoin(artistProfiles, eq(bookingRequests.artistProfileId, artistProfiles.id))
-          .leftJoin(venueProfiles, eq(bookingRequests.venueProfileId, venueProfiles.id))
-          .where(eq(bookingRequests.artistProfileId, activeProfile.id))
-          .orderBy(sql`${bookingRequests.requestedAt} DESC`);
-      } else if (activeProfile.type === 'venue') {
-        // Get requests received by this venue
-        requests = await db
-          .select({
-            id: bookingRequests.id,
-            artistProfileId: bookingRequests.artistProfileId,
-            venueProfileId: bookingRequests.venueProfileId,
-            status: bookingRequests.status,
-            requestedAt: bookingRequests.requestedAt,
-            eventDate: bookingRequests.eventDate,
-            eventTime: bookingRequests.eventTime,
-            budget: bookingRequests.budget,
-            requirements: bookingRequests.requirements,
-            message: bookingRequests.message,
-            artistProfile: {
-              id: artistProfiles.id,
-              name: artistProfiles.name,
-              profileImageUrl: artistProfiles.profileImageUrl,
-              bio: artistProfiles.bio
-            },
-            venueProfile: {
-              id: venueProfiles.id,
-              name: venueProfiles.name,
-              profileImageUrl: venueProfiles.profileImageUrl,
-              location: venueProfiles.location
-            }
-          })
-          .from(bookingRequests)
-          .leftJoin(artistProfiles, eq(bookingRequests.artistProfileId, artistProfiles.id))
-          .leftJoin(venueProfiles, eq(bookingRequests.venueProfileId, venueProfiles.id))
-          .where(eq(bookingRequests.venueProfileId, activeProfile.id))
-          .orderBy(sql`${bookingRequests.requestedAt} DESC`);
-      } else {
-        return res.json([]);
-      }
-
-      res.json(requests);
-    } catch (error) {
-      console.error("Error fetching booking requests:", error);
-      res.status(500).json({ message: "Failed to fetch booking requests" });
     }
   });
 

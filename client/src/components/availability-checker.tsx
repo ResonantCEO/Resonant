@@ -313,22 +313,24 @@ export default function AvailabilityChecker({
                       `}
                       onClick={() => setSelectedDate(day)}
                     >
-                      <div className={`text-sm font-semibold ${
-                        !isCurrentMonth ? 'text-gray-400' :
-                        isToday ? 'text-blue-600' :
-                        availability.status === 'both-unavailable' ? 'text-red-600' :
-                        availability.status === 'artist-unavailable' ? 'text-orange-600' :
-                        availability.status === 'venue-unavailable' ? 'text-yellow-600' :
-                        availability.status === 'has-events' ? 'text-blue-600' :
-                        'text-green-600'
-                      }`}>
-                        {day.getDate()}
+                      <div className="flex items-center justify-between">
+                        <div className={`text-sm font-semibold ${
+                          !isCurrentMonth ? 'text-gray-400' :
+                          isToday ? 'text-blue-600' :
+                          availability.status === 'both-unavailable' ? 'text-red-600' :
+                          availability.status === 'artist-unavailable' ? 'text-orange-600' :
+                          availability.status === 'venue-unavailable' ? 'text-yellow-600' :
+                          availability.status === 'has-events' ? 'text-blue-600' :
+                          'text-green-600'
+                        }`}>
+                          {day.getDate()}
+                        </div>
+                        
+                        {/* Availability indicator - always show for current month */}
+                        {isCurrentMonth && (
+                          <div className={`w-2 h-2 rounded-full ${availability.color}`}></div>
+                        )}
                       </div>
-                      
-                      {/* Availability indicator */}
-                      {isCurrentMonth && dayEvents.length > 0 && (
-                        <div className={`absolute top-1 right-1 w-2 h-2 rounded-full ${availability.color}`}></div>
-                      )}
                       
                       {/* Event indicators */}
                       <div className="space-y-1 mt-1">

@@ -119,7 +119,16 @@ export default function Profile() {
       // Check for stored tab preference first
       const storedTab = localStorage.getItem('profileTab');
       if (storedTab) {
-        setActiveTab(storedTab);
+        // Validate that the stored tab is valid for this profile type
+        const validTabs = profile.type === 'artist' 
+          ? ['epk', 'community', 'stats', 'photos', 'members', 'management']
+          : ['posts', 'about', 'music-discovery', 'friends', 'photos', 'members', 'management'];
+        
+        if (validTabs.includes(storedTab)) {
+          setActiveTab(storedTab);
+        } else {
+          setActiveTab(getDefaultTab(profile.type));
+        }
         localStorage.removeItem('profileTab'); // Clear after use
       } else {
         setActiveTab(getDefaultTab(profile.type));

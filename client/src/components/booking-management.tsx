@@ -431,9 +431,12 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                               variant="outline"
                               className="text-emerald-600 border-emerald-600 hover:bg-emerald-600 hover:text-white w-full justify-start"
                               onClick={() => {
-                                // Navigate to artist profile and use local storage to set stats tab
+                                // Set the tab preference before navigation
                                 localStorage.setItem('profileTab', 'stats');
-                                window.open(`/profile/${request.artistProfileId}`, '_blank');
+                                // Small delay to ensure localStorage is set before navigation
+                                setTimeout(() => {
+                                  window.open(`/profile/${request.artistProfileId}`, '_blank');
+                                }, 10);
                               }}
                             >
                               <BarChart3 className="w-4 h-4 mr-2" />

@@ -10,7 +10,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Calendar, Clock, MapPin, User, Plus, CheckCircle, XCircle, MessageSquare } from "lucide-react";
+import { Calendar, Clock, MapPin, User, Plus, CheckCircle, XCircle, MessageSquare, BarChart3 } from "lucide-react";
 import { FileText } from "lucide-react";
 import ContractProposalDialog from "./contract-proposal-dialog";
 import AvailabilityChecker from "./availability-checker";
@@ -411,7 +411,33 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                     <div className="flex flex-wrap gap-2 ml-4">
                       {profileType === 'venue' && request.status === 'pending' && (
                         <div className="flex gap-4">
-                          {/* Left column - Check Dates, Propose Contract, Message */}
+                          {/* Left column - EPK, Stats */}
+                          <div className="flex flex-col gap-2 flex-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-indigo-600 border-indigo-600 hover:bg-indigo-600 hover:text-white w-full justify-start"
+                              onClick={() => {
+                                window.open(`/profile/${request.artistProfileId}?tab=epk`, '_blank');
+                              }}
+                            >
+                              <FileText className="w-4 h-4 mr-2" />
+                              View EPK
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-emerald-600 border-emerald-600 hover:bg-emerald-600 hover:text-white w-full justify-start"
+                              onClick={() => {
+                                window.open(`/profile/${request.artistProfileId}?tab=stats`, '_blank');
+                              }}
+                            >
+                              <BarChart3 className="w-4 h-4 mr-2" />
+                              View Stats
+                            </Button>
+                          </div>
+
+                          {/* Middle column - Check Dates, Propose Contract, Message */}
                           <div className="flex flex-col gap-2 flex-1">
                             <Button
                               size="sm"

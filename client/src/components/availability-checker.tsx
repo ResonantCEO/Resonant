@@ -313,7 +313,15 @@ export default function AvailabilityChecker({
                       `}
                       onClick={() => setSelectedDate(day)}
                     >
-                      <div className={`text-sm ${isToday ? 'font-bold text-blue-600' : ''}`}>
+                      <div className={`text-sm font-semibold ${
+                        !isCurrentMonth ? 'text-gray-400' :
+                        isToday ? 'text-blue-600' :
+                        availability.status === 'both-unavailable' ? 'text-red-600' :
+                        availability.status === 'artist-unavailable' ? 'text-orange-600' :
+                        availability.status === 'venue-unavailable' ? 'text-yellow-600' :
+                        availability.status === 'has-events' ? 'text-blue-600' :
+                        'text-green-600'
+                      }`}>
                         {day.getDate()}
                       </div>
                       

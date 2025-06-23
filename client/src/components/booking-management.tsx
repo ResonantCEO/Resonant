@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { Calendar, Clock, MapPin, User, Plus, CheckCircle, XCircle, MessageSquare } from "lucide-react";
 import { FileText } from "lucide-react";
 import ContractProposalDialog from "./contract-proposal-dialog";
+import AvailabilityChecker from "./availability-checker";
 
 interface BookingRequest {
   id: number;
@@ -53,6 +54,8 @@ export default function BookingManagement({ profileType }: BookingManagementProp
   });
   const [showContractDialog, setShowContractDialog] = useState(false);
   const [selectedBookingForContract, setSelectedBookingForContract] = useState<any>(null);
+  const [showAvailabilityChecker, setShowAvailabilityChecker] = useState(false);
+  const [selectedAvailabilityRequest, setSelectedAvailabilityRequest] = useState<any>(null);
 
   const queryClient = useQueryClient();
 
@@ -411,8 +414,8 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                               variant="outline"
                               className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white w-full justify-start"
                               onClick={() => {
-                                // Navigate to artist's profile to view their calendar
-                                window.open(`/profile/${request.artistProfile.id}`, '_blank');
+                                setSelectedAvailabilityRequest(request);
+                                setShowAvailabilityChecker(true);
                               }}
                             >
                               <Calendar className="w-4 h-4 mr-2" />
@@ -516,6 +519,18 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         onOpenChange={setShowContractDialog}
         bookingRequest={selectedBookingForContract}
       />
+
+      {/* Availability Checker Dialog */}
+      {selectedAvailabilityRequest && (
+        <AvailabilityChecker 
+          open={showAvailabilityChecker}
+          onOpenChange={setShowAvailabilityChecker}
+          artistProfileId={selectedAvailabilityRequest.artistProfileId}
+          venueProfileId={selectedAvailabilityRequest.venueProfileId}
+          artistName={selectedAvailabilityRequest.artistProfile.name}
+          venueName={selectedAvailabilityRequest.venueProfile.name}
+        />
+      )}
     </div>
   );
 }

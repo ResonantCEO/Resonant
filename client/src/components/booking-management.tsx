@@ -418,7 +418,9 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                               variant="outline"
                               className="text-indigo-600 border-indigo-600 hover:bg-indigo-600 hover:text-white w-full justify-start"
                               onClick={() => {
-                                window.open(`/profile/${request.artistProfileId}?tab=epk`, '_blank');
+                                // Navigate to artist profile and set EPK tab
+                                window.open(`/profile/${request.artistProfileId}`, '_blank');
+                                // Note: The profile component will default to EPK tab for artist profiles
                               }}
                             >
                               <FileText className="w-4 h-4 mr-2" />
@@ -429,7 +431,9 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                               variant="outline"
                               className="text-emerald-600 border-emerald-600 hover:bg-emerald-600 hover:text-white w-full justify-start"
                               onClick={() => {
-                                window.open(`/profile/${request.artistProfileId}?tab=stats`, '_blank');
+                                // Navigate to artist profile and use local storage to set stats tab
+                                localStorage.setItem('profileTab', 'stats');
+                                window.open(`/profile/${request.artistProfileId}`, '_blank');
                               }}
                             >
                               <BarChart3 className="w-4 h-4 mr-2" />

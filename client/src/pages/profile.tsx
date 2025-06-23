@@ -116,7 +116,14 @@ export default function Profile() {
   // Update active tab when profile changes
   React.useEffect(() => {
     if (profile) {
-      setActiveTab(getDefaultTab(profile.type));
+      // Check for stored tab preference first
+      const storedTab = localStorage.getItem('profileTab');
+      if (storedTab) {
+        setActiveTab(storedTab);
+        localStorage.removeItem('profileTab'); // Clear after use
+      } else {
+        setActiveTab(getDefaultTab(profile.type));
+      }
     }
   }, [profile?.id, profile?.type]);
 

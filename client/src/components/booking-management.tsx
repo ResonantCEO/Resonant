@@ -347,9 +347,12 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                          <User className="w-6 h-6 text-white" />
-                        </div>
+                        <Avatar className="w-12 h-12 ring-2 ring-blue-400">
+                          <AvatarImage src={request.artistProfile?.profileImageUrl || ""} />
+                          <AvatarFallback className="bg-blue-500 text-white">
+                            {request.artistProfile?.name?.charAt(0) || 'A'}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
                           <h4 className="font-medium text-lg">
                             {profileType === 'artist' ? request.venueProfile.name : request.artistProfile.name}

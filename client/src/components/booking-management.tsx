@@ -358,8 +358,8 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                             Request sent on {new Date(request.requestedAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <Badge className={getStatusColor(request.status)}>
-                          {request.status}
+                        <Badge className="bg-white text-purple-600 font-bold border-0 shadow-lg text-sm">
+                          pending
                         </Badge>
                       </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -32,8 +32,20 @@ function SettingsContent() {
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [backgroundImageFile, setBackgroundImageFile] = useState<File | null>(null);
+  const [birthdateInput, setBirthdateInput] = useState('');
   const coverFileInputRef = useRef<HTMLInputElement>(null);
   const backgroundFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize birthday input from existing user data
+  useEffect(() => {
+    if (user.birthdate) {
+      const date = new Date(user.birthdate);
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const year = String(date.getFullYear());
+      setBirthdateInput(month + day + year);
+    }
+  }, [user.birthdate]);
 
   // Fetch user profiles
   const { data: profiles = [] } = useQuery({
@@ -439,36 +451,23 @@ function SettingsContent() {
                     <Input
                       id="birthdate"
                       type="text"
-                      defaultValue={user.birthdate ? new Date(user.birthdate).toLocaleDateString('en-US') : ""}
+                      value={birthdateInput}
                       onChange={(e) => {
-                        let inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                        const inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                        
+                        // Limit to 8 digits maximum
+                        if (inputValue.length > 8) {
+                          return;
+                        }
+
+                        // Update the input state to show raw digits as user types
+                        setBirthdateInput(inputValue);
 
                         // Handle clearing the field
                         if (!inputValue) {
                           handleUpdateSetting('birthdate', null);
-                          e.target.value = '';
                           return;
                         }
-
-                        // Limit to 8 digits maximum
-                        if (inputValue.length > 8) {
-                          inputValue = inputValue.substring(0, 8);
-                        }
-
-                        // Format as user types: MM/DD/YYYY
-                        let formatted = inputValue;
-                        if (inputValue.length >= 2) {
-                          formatted = inputValue.substring(0, 2);
-                          if (inputValue.length >= 4) {
-                            formatted += '/' + inputValue.substring(2, 4);
-                            if (inputValue.length > 4) {
-                              formatted += '/' + inputValue.substring(4, 8);
-                            }
-                          }
-                        }
-
-                        // Update the input field to show formatted value
-                        e.target.value = formatted;
 
                         // Only validate and save when we have exactly 8 digits
                         if (inputValue.length === 8) {
@@ -507,8 +506,7 @@ function SettingsContent() {
                           }
 
                           // Check if input would exceed 8 digits
-                          const currentValue = (e.target as HTMLInputElement).value;
-                          const currentDigits = currentValue.replace(/\D/g, '').length;
+                          const currentDigits = birthdateInput.length;
 
                           // Prevent typing more numbers if we already have 8 digits
                           if (currentDigits >= 8) {
@@ -516,8 +514,8 @@ function SettingsContent() {
                             return;
                           }
                         }}
-                      placeholder="Type: 04261991 for 04/26/1991"
-                      maxLength={10}
+                      placeholder="Type your birthdate as MMDDYYYY (e.g., 04261991)"
+                      maxLength={8}
                     />
                     <p className="text-sm text-muted-foreground mt-1">Type your birthdate as MMDDYYYY (e.g., 04261991). Your birthday will only show the month and day on your profile</p>
                   </div>

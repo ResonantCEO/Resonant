@@ -181,56 +181,57 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
     <div className="space-y-6">
       {/* Create Post (only show when showCreatePost is true and on own profile or feed) */}
       {showCreatePost && (!profileId || profileId === activeProfile?.id) && activeProfile && (
-        <div className="lg:hidden">
-          <div className="mobile-post-composer">
-            <form onSubmit={handleCreatePost}>
-              <div className="mobile-post-header">
-                <Avatar className="mobile-avatar-composer">
-                  <AvatarImage src={activeProfile?.profileImageUrl || ""} />
-                  <AvatarFallback>{getDisplayName(activeProfile).slice(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="mobile-user-info">
-                  <h4 className="mobile-username">{getDisplayName(activeProfile)}</h4>
-                  <p className="mobile-user-subtitle">Share something with your audience</p>
+        <>
+          <div className="lg:hidden">
+            <div className="mobile-post-composer">
+              <form onSubmit={handleCreatePost}>
+                <div className="mobile-post-header">
+                  <Avatar className="mobile-avatar-composer">
+                    <AvatarImage src={activeProfile?.profileImageUrl || ""} />
+                    <AvatarFallback>{getDisplayName(activeProfile).slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="mobile-user-info">
+                    <h4 className="mobile-username">{getDisplayName(activeProfile)}</h4>
+                    <p className="mobile-user-subtitle">Share something with your audience</p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="mobile-post-input-container">
-                <Textarea
-                  value={newPost}
-                  onChange={(e) => setNewPost(e.target.value)}
-                  placeholder={`What's on your mind, ${getDisplayName(activeProfile)}?`}
-                  className="mobile-post-input"
-                  rows={3}
-                />
-              </div>
+                <div className="mobile-post-input-container">
+                  <Textarea
+                    value={newPost}
+                    onChange={(e) => setNewPost(e.target.value)}
+                    placeholder={`What's on your mind, ${getDisplayName(activeProfile)}?`}
+                    className="mobile-post-input"
+                    rows={3}
+                  />
+                </div>
 
-              <div className="mobile-post-actions">
-                <div className="mobile-post-buttons">
-                  <button type="button" className="mobile-post-button photo-button">
-                    <ImageIcon className="w-4 h-4" />
-                    <span className="mobile-post-button-text">Photo</span>
-                  </button>
-                  <button type="button" className="mobile-post-button location-button">
-                    <MapPin className="w-4 h-4" />
-                    <span className="mobile-post-button-text">Location</span>
-                  </button>
+                <div className="mobile-post-actions">
+                  <div className="mobile-post-buttons">
+                    <button type="button" className="mobile-post-button photo-button">
+                      <ImageIcon className="w-4 h-4" />
+                      <span className="mobile-post-button-text">Photo</span>
+                    </button>
+                    <button type="button" className="mobile-post-button location-button">
+                      <MapPin className="w-4 h-4" />
+                      <span className="mobile-post-button-text">Location</span>
+                    </button>
+                  </div>
+                  <div className="mobile-post-submit-container">
+                    <button
+                      type="submit"
+                      disabled={!newPost.trim() || createPostMutation.isPending}
+                      className="mobile-post-submit"
+                    >
+                      {createPostMutation.isPending ? "Posting..." : "Post"}
+                    </button>
+                  </div>
                 </div>
-                <div className="mobile-post-submit-container">
-                  <button
-                    type="submit"
-                    disabled={!newPost.trim() || createPostMutation.isPending}
-                    className="mobile-post-submit"
-                  >
-                    {createPostMutation.isPending ? "Posting..." : "Post"}
-                  </button>
-                </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
 
-        <Card className="hidden lg:block backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
+          <Card className="hidden lg:block backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
           <CardContent className="p-6">
             <form onSubmit={handleCreatePost}>
               <div className="flex items-start space-x-4">

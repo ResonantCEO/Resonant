@@ -47,20 +47,17 @@ function SettingsContent() {
     }
   }, [user.birthdate]);
 
-  // Format birthday input for display as MM/DD/YYYY
-  const formatBirthdateDisplay = (input: string) => {
-    const digitsOnly = input.replace(/\D/g, '');
-    if (digitsOnly.length >= 2) {
-      let formatted = digitsOnly.substring(0, 2);
-      if (digitsOnly.length >= 4) {
-        formatted += '/' + digitsOnly.substring(2, 4);
-        if (digitsOnly.length >= 6) {
-          formatted += '/' + digitsOnly.substring(4, 8);
-        }
-      }
-      return formatted;
+  // Format display value
+  const getDisplayValue = () => {
+    if (!birthdateInput) return '';
+    
+    if (birthdateInput.length <= 2) {
+      return birthdateInput;
+    } else if (birthdateInput.length <= 4) {
+      return birthdateInput.substring(0, 2) + '/' + birthdateInput.substring(2);
+    } else {
+      return birthdateInput.substring(0, 2) + '/' + birthdateInput.substring(2, 4) + '/' + birthdateInput.substring(4);
     }
-    return digitsOnly;
   };
 
   // Fetch user profiles
@@ -467,70 +464,34 @@ function SettingsContent() {
                     <Input
                       id="birthdate"
                       type="text"
-                      value={formatBirthdateDisplay(birthdateInput)}
+                      value={getDisplayValue()}
                       onChange={(e) => {
-                        const inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                        const digitsOnly = e.target.value.replace(/\D/g, '');
                         
-                        // Limit to 8 digits maximum
-                        if (inputValue.length > 8) {
-                          return;
-                        }
-
-                        // Update the input state to store raw digits
-                        setBirthdateInput(inputValue);
-
-                        // Handle clearing the field
-                        if (!inputValue) {
-                          handleUpdateSetting('birthdate', null);
-                          return;
-                        }
-
-                        // Only validate and save when we have exactly 8 digits
-                        if (inputValue.length === 8) {
-                          const month = inputValue.substring(0, 2);
-                          const day = inputValue.substring(2, 4);
-                          const year = inputValue.substring(4, 8);
-
-                          const monthNum = parseInt(month, 10);
-                          const dayNum = parseInt(day, 10);
-                          const yearNum = parseInt(year, 10);
-
-                          // Basic validation - allow any reasonable date
-                          if (monthNum >= 1 && monthNum <= 12 && 
-                              dayNum >= 1 && dayNum <= 31 && 
-                              yearNum >= 1900 && yearNum <= new Date().getFullYear()) {
-
-                            const selectedDate = new Date(yearNum, monthNum - 1, dayNum);
-                            handleUpdateSetting('birthdate', selectedDate.toISOString());
+                        if (digitsOnly.length <= 8) {
+                          setBirthdateInput(digitsOnly);
+                          
+                          if (digitsOnly.length === 0) {
+                            handleUpdateSetting('birthdate', null);
+                          } else if (digitsOnly.length === 8) {
+                            const month = digitsOnly.substring(0, 2);
+                            const day = digitsOnly.substring(2, 4);
+                            const year = digitsOnly.substring(4, 8);
+                            
+                            const monthNum = parseInt(month, 10);
+                            const dayNum = parseInt(day, 10);
+                            const yearNum = parseInt(year, 10);
+                            
+                            if (monthNum >= 1 && monthNum <= 12 && 
+                                dayNum >= 1 && dayNum <= 31 && 
+                                yearNum >= 1900 && yearNum <= new Date().getFullYear()) {
+                              const selectedDate = new Date(yearNum, monthNum - 1, dayNum);
+                              handleUpdateSetting('birthdate', selectedDate.toISOString());
+                            }
                           }
                         }
                       }}
-                      onKeyDown={(e) => {
-                          // Allow backspace, delete, tab, escape, enter, arrow keys
-                          if ([8, 9, 27, 13, 46, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
-                              // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z
-                              (e.ctrlKey && [65, 67, 86, 88, 90].indexOf(e.keyCode) !== -1)) {
-                            return;
-                          }
-
-                          // Only allow number keys
-                          const isNumberKey = (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105);
-                          
-                          if (!isNumberKey) {
-                            e.preventDefault();
-                            return;
-                          }
-
-                          // Check if input would exceed 8 digits - use raw digit count
-                          const currentDigits = birthdateInput.replace(/\D/g, '').length;
-
-                          // Prevent typing more numbers if we already have 8 digits
-                          if (currentDigits >= 8) {
-                            e.preventDefault();
-                            return;
-                          }
-                        }}
-                      placeholder="Type your birthdate as MMDDYYYY (e.g., 04261991 shows as 04/26/1991)"
+                      placeholder="Type MMDDYYYY (e.g., 04261991 → 04/26/1991)"
                       maxLength={10}
                     />
                     <p className="text-sm text-muted-foreground mt-1">Type your birthdate as MMDDYYYY (e.g., 04261991). Your birthday will only show the month and day on your profile</p>

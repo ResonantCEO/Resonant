@@ -62,7 +62,7 @@ export default function BottomNav() {
   return (
     <>
       {/* Top header - only visible on mobile */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-700 shadow-sm">
         <div className="flex items-center justify-between p-4">
           <img src="/resonant-logo.png" alt="Resonant" className="h-8 block dark:hidden" />
           <img src="/resonant-logo-white.png" alt="Resonant" className="h-8 hidden dark:block" />
@@ -83,7 +83,7 @@ export default function BottomNav() {
         </div>
       </div>
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/98 dark:bg-neutral-900/98 backdrop-blur-lg border-t border-neutral-200 dark:border-neutral-700 z-50 shadow-xl mobile-safe-area">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700 z-50 shadow-xl mobile-safe-area">
         <div className="flex items-center justify-around px-2 py-2 pb-safe">
           {/* Main navigation items */}
 

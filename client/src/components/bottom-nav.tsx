@@ -27,10 +27,13 @@ export default function BottomNav() {
 
   const { data: activeProfile } = useQuery({
     queryKey: ["/api/profiles/active"],
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { data: friendRequests = [] } = useQuery({
     queryKey: ["/api/friend-requests"],
+    refetchInterval: 30000, // 30 seconds instead of constant polling
+    staleTime: 15000, // 15 seconds
   });
 
   // Helper function to check if a path is active
@@ -67,7 +70,7 @@ export default function BottomNav() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex flex-col items-center justify-center h-12 min-w-[50px] flex-1 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 px-1"
+                className="touch-button flex flex-col items-center justify-center h-12 min-w-[50px] flex-1 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 px-1"
               >
                 <Menu className="w-4 h-4 mb-0.5" />
                 <span className="text-xs font-medium leading-tight">Menu</span>
@@ -83,7 +86,7 @@ export default function BottomNav() {
               key={item.path}
               variant="ghost"
               size="sm"
-              className={`flex flex-col items-center justify-center h-12 min-w-[50px] flex-1 relative px-1 ${
+              className={`touch-button flex flex-col items-center justify-center h-12 min-w-[50px] flex-1 relative px-1 ${
                 isActivePath(item.path)
                   ? "bg-blue-500 !text-white hover:bg-blue-600 rounded-lg"
                   : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"

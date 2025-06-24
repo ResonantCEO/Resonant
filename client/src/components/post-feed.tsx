@@ -230,7 +230,6 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
           </div>
         </div>
 
-        {/* Desktop Post Composer */}
         <Card className="hidden lg:block backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
           <CardContent className="p-6">
             <form onSubmit={handleCreatePost}>

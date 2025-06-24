@@ -695,7 +695,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   return (
     <>
       {/* Profile Header */}
-      <div className={`bg-white rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden min-h-[300px] sm:min-h-[340px]`}>
+      <div className={`bg-white sm:rounded-xl shadow-sm border border-neutral-200 mb-6 overflow-hidden min-h-[300px] sm:min-h-[340px]`}>
         {/* Cover Photo */}
         <div 
           ref={coverContainerRef}

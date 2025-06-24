@@ -10,7 +10,7 @@ async function updateUserHometown() {
     // Update the user with email josgood05@gmail.com
     const result = await db
       .update(users)
-      .set({ hometown: "80526" })
+      .set({ hometown: "Fort Collins, CO" })
       .where(eq(users.email, "josgood05@gmail.com"))
       .returning();
     

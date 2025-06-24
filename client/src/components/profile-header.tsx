@@ -842,7 +842,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
 
         {/* Profile Info */}
-        <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 pb-16 pl-32 sm:pl-52' : 'pt-4 pb-20'} relative h-32 sm:min-h-[168px] md:min-h-[192px]`}>
+        <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 pb-16 pl-32 sm:pl-52' : 'pt-4 pb-20'} relative h-24 sm:min-h-[168px] md:min-h-[192px]`}>
           {/* Profile Type & Visibility - Absolutely positioned */}
           <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
             <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">

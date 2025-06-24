@@ -842,7 +842,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
 
         {/* Profile Info */}
-        <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 pb-16 pl-32 sm:pl-52' : 'pt-6 pb-16'} relative min-h-[168px] sm:min-h-[192px]`}>
+        <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 pb-16 pl-32 sm:pl-52' : 'pt-4 pb-20'} relative min-h-[140px] sm:min-h-[168px] md:min-h-[192px]`}>
           {/* Profile Type & Visibility - Absolutely positioned */}
           <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
             <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
@@ -971,7 +971,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               <div className="relative">
                 <div
                   ref={profileContainerRef}
-                  className={`w-24 h-24 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg ${
+                  className={`w-16 h-16 sm:w-24 sm:h-24 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg ${
                     isOwn && !isProfilePositioningMode 
                       ? 'cursor-pointer hover:opacity-80 transition-opacity' 
                       : isProfilePositioningMode 
@@ -1001,7 +1001,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                       }}
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-lg sm:text-3xl">
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-sm sm:text-lg md:text-3xl">
                       {getDisplayName().slice(0, 2).toUpperCase()}
                     </div>
                   )}
@@ -1016,14 +1016,14 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   {/* Hover overlay for owned profiles */}
                   {isOwn && !isProfilePositioningMode && (
                     <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center opacity-0 hover:opacity-100">
-                      <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                      <Camera className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
                     </div>
                   )}
 
                   {/* Upload progress indicator */}
                   {uploadProfilePictureMutation.isPending && (
                     <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   )}
                 </div>
@@ -1069,23 +1069,23 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
 
           {/* Profile Details - Absolutely positioned */}
-          <div className={`absolute ${profile?.type === 'artist' ? 'left-32 sm:left-52 top-6 sm:top-4 right-4 sm:right-4' : 'left-32 sm:left-52 top-4 right-4 sm:right-4'}`}>
+          <div className={`absolute ${profile?.type === 'artist' ? 'left-32 sm:left-52 top-6 sm:top-4 right-4 sm:right-4' : 'left-20 sm:left-32 md:left-52 top-2 sm:top-4 right-4 sm:right-4'}`}>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-3xl font-bold text-neutral-900 mb-1 truncate">{getDisplayName()}</h1>
-              <div className="flex flex-col text-neutral-600 mb-1 space-y-1">
-                <span className="flex items-center text-sm">
-                  <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <h1 className="text-sm sm:text-xl md:text-3xl font-bold text-neutral-900 mb-1 truncate leading-tight">{getDisplayName()}</h1>
+              <div className="flex flex-col text-neutral-600 mb-1 space-y-0.5 sm:space-y-1">
+                <span className="flex items-center text-xs sm:text-sm">
+                  <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
                   {friends.length} friends
                 </span>
                 {profile?.type === "audience" && (
-                  <span className="flex items-center text-sm">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="flex items-center text-xs sm:text-sm">
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
                     <span className="truncate">{profile?.hometown || profile?.location || "Location not specified"}</span>
                   </span>
                 )}
                 {profile?.location && profile?.type !== "audience" && (
-                  <span className="flex items-center text-sm">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="flex items-center text-xs sm:text-sm">
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
                     <span className="truncate">{profile?.location}</span>
                   </span>
                 )}
@@ -1093,13 +1093,13 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
               {/* Genre and Hometown for Artist profiles */}
               {profile?.type === "artist" && (
-                <div className="space-y-1 text-neutral-600 mb-2">
-                  <span className="flex items-center text-sm">
-                    <Music className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <div className="space-y-0.5 sm:space-y-1 text-neutral-600 mb-2">
+                  <span className="flex items-center text-xs sm:text-sm">
+                    <Music className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
                     <span className="truncate">{profile?.genre || "Genre not specified"}</span>
                   </span>
-                  <span className="flex items-center text-sm">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="flex items-center text-xs sm:text-sm">
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
                     <span className="truncate">{profile?.hometown || "Hometown not specified"}</span>
                   </span>
                 </div>
@@ -1113,29 +1113,27 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
           {/* Friend Button - Aligned vertically with share button, horizontally centered with profile picture */}
           {!isOwn && (
-            <div className="absolute left-4 sm:left-6 bottom-2 sm:bottom-4 z-10 flex justify-center w-24 sm:w-40">
+            <div className="absolute left-2 sm:left-4 md:left-6 bottom-2 sm:bottom-4 z-10 flex justify-center w-16 sm:w-24 md:w-40">
               {friendshipStatus?.status === 'accepted' ? (
                 <Button 
                   onClick={() => unfriendMutation.mutate()}
                   disabled={unfriendMutation.isPending}
                   variant="outline"
                   size="sm"
-                  className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-bold"
+                  className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
                 >
-                  <UserMinus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <UserMinus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
                   <span className="hidden sm:inline">Unfriend</span>
-                  <span className="sm:hidden">Remove</span>
                 </Button>
               ) : friendshipStatus?.status === 'pending' ? (
                 <Button 
                   disabled
                   variant="outline"
                   size="sm"
-                  className="bg-gray-400 text-white border-gray-400 font-bold cursor-not-allowed"
+                  className="bg-gray-400 text-white border-gray-400 font-bold cursor-not-allowed text-xs sm:text-sm px-1 sm:px-2 py-1"
                 >
-                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
                   <span className="hidden sm:inline">Pending</span>
-                  <span className="sm:hidden">Pending</span>
                 </Button>
               ) : (
                 <Button 
@@ -1143,28 +1141,27 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   disabled={sendFriendRequestMutation.isPending}
                   variant="outline"
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold"
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
                 >
-                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
                   <span className="hidden sm:inline">Add Friend</span>
-                  <span className="sm:hidden">Add</span>
                 </Button>
               )}
             </div>
           )}
 
           {/* Social Media Buttons - Absolutely positioned */}
-          <div className="absolute flex items-center justify-center space-x-2 bottom-2 sm:bottom-4 left-0 right-0">
+          <div className="absolute flex items-center justify-center space-x-1 sm:space-x-2 bottom-12 sm:bottom-16 left-0 right-0">
             {/* Facebook */}
             {(isOwn || profile?.facebookUrl) && (
               <Button
                 variant="outline"
                 size="sm"
-                className="p-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 rounded-full"
+                className="p-1.5 sm:p-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 rounded-full"
                 onClick={() => profile?.facebookUrl && window.open(profile.facebookUrl, '_blank')}
                 disabled={!profile?.facebookUrl && !isOwn}
               >
-                <Facebook className="w-4 h-4" />
+                <Facebook className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             )}
 
@@ -1173,11 +1170,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               <Button
                 variant="outline"
                 size="sm"
-                className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-full"
+                className="p-1.5 sm:p-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 rounded-full"
                 onClick={() => profile?.instagramUrl && window.open(profile.instagramUrl, '_blank')}
                 disabled={!profile?.instagramUrl && !isOwn}
               >
-                <Instagram className="w-4 h-4" />
+                <Instagram className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             )}
 
@@ -1186,11 +1183,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               <Button
                 variant="outline"
                 size="sm"
-                className="p-2 bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400 rounded-full"
+                className="p-1.5 sm:p-2 bg-yellow-400 hover:bg-yellow-500 text-black border-yellow-400 rounded-full"
                 onClick={() => profile?.snapchatUrl && window.open(profile.snapchatUrl, '_blank')}
                 disabled={!profile?.snapchatUrl && !isOwn}
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             )}
 
@@ -1199,11 +1196,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               <Button
                 variant="outline"
                 size="sm"
-                className="p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
+                className="p-1.5 sm:p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
                 onClick={() => profile?.tiktokUrl && window.open(profile.tiktokUrl, '_blank')}
                 disabled={!profile?.tiktokUrl && !isOwn}
               >
-                <div className="w-4 h-4 font-bold text-xs flex items-center justify-center">T</div>
+                <div className="w-3 h-3 sm:w-4 sm:h-4 font-bold text-xs flex items-center justify-center">T</div>
               </Button>
             )}
 
@@ -1212,11 +1209,11 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
               <Button
                 variant="outline"
                 size="sm"
-                className="p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
+                className="p-1.5 sm:p-2 bg-black hover:bg-gray-800 text-white border-black rounded-full"
                 onClick={() => profile?.twitterUrl && window.open(profile.twitterUrl, '_blank')}
                 disabled={!profile?.twitterUrl && !isOwn}
               >
-                <Twitter className="w-4 h-4" />
+                <Twitter className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             )}
           </div>

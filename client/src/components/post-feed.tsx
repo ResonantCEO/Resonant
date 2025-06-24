@@ -231,8 +231,8 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
             </div>
           </div>
 
-          <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-neutral-200">
-            <div className="p-6">
+          <Card className="hidden lg:block backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
+          <CardContent className="p-6">
             <form onSubmit={handleCreatePost}>
               <div className="flex items-start space-x-4">
                 <Avatar>
@@ -270,8 +270,8 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
                 </div>
               </div>
             </form>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </>
       )}
 

@@ -543,11 +543,11 @@ export default function Profile() {
                           </div>
                         )}
 
-                        {profile.birthday && (
+                        {user?.birthdate && (
                           <div className="flex items-center">
                             <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Birthday:</span>
                             <span className="text-gray-900 dark:text-white">
-                              {new Date(profile.birthday).toLocaleDateString('en-US', { 
+                              {new Date(user.birthdate).toLocaleDateString('en-US', { 
                                 month: 'long', 
                                 day: 'numeric'
                               })}

@@ -16,6 +16,9 @@ export default function AuthPage() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const [showHometownPrompt, setShowHometownPrompt] = useState(false);
+  const [hometownInput, setHometownInput] = useState("");
+  const [pendingUser, setPendingUser] = useState<any>(null);
   
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -37,14 +40,24 @@ export default function AuthPage() {
       const response = await apiRequest("POST", "/api/login", credentials);
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      toast({
-        title: "Welcome back!",
-        description: "You've successfully logged in.",
-      });
-      // Redirect to home page after successful login
-      setLocation("/");
+    onSuccess: (data) => {
+      if (data.requiresHometown) {
+        // Show hometown prompt instead of completing login
+        setPendingUser(data);
+        setShowHometownPrompt(true);
+        toast({
+          title: "Additional Information Required",
+          description: "Please provide your hometown to continue.",
+        });
+      } else {
+        // Complete login normally
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully logged in.",
+        });
+        setLocation("/");
+      }
     },
     onError: (error: any) => {
       toast({
@@ -78,6 +91,31 @@ export default function AuthPage() {
     },
   });
 
+  const hometownMutation = useMutation({
+    mutationFn: async (hometown: string) => {
+      const response = await apiRequest("POST", "/api/update-hometown", { hometown });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setShowHometownPrompt(false);
+      setPendingUser(null);
+      setHometownInput("");
+      toast({
+        title: "Welcome back!",
+        description: "Your hometown has been updated successfully.",
+      });
+      setLocation("/");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update hometown",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginForm.email.trim() || !loginForm.password.trim()) {
@@ -104,10 +142,70 @@ export default function AuthPage() {
     registerMutation.mutate(registerForm);
   };
 
+  const handleHometownSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!hometownInput.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter your hometown",
+        variant: "destructive",
+      });
+      return;
+    }
+    hometownMutation.mutate(hometownInput.trim());
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex">
+      {/* Hometown Prompt Modal */}
+      {showHometownPrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h2 className="text-xl font-semibold mb-4">Complete Your Profile</h2>
+            <p className="text-gray-600 mb-4">
+              Hi {pendingUser?.firstName || 'there'}! We need your hometown to personalize your experience.
+            </p>
+            <form onSubmit={handleHometownSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="hometown-input">Hometown</Label>
+                <Input
+                  id="hometown-input"
+                  type="text"
+                  value={hometownInput}
+                  onChange={(e) => setHometownInput(e.target.value)}
+                  placeholder="Enter your hometown (e.g., Denver, CO)"
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  type="submit" 
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
+                  disabled={hometownMutation.isPending}
+                >
+                  {hometownMutation.isPending ? "Updating..." : "Continue"}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowHometownPrompt(false);
+                    setPendingUser(null);
+                    setHometownInput("");
+                  }}
+                  disabled={hometownMutation.isPending}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Left Column - Auth Forms */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8"></div>
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <img src="/resonant-logo-login-new.png" alt="Resonant" className="h-20 mx-auto mb-4" />

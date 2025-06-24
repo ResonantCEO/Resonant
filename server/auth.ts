@@ -159,6 +159,19 @@ export function setupAuth(app: Express) {
         if (!completeUser) {
           return res.status(500).json({ message: "Failed to fetch user data" });
         }
+
+        // Check if user needs to provide hometown information
+        if (!completeUser.hometown) {
+          return res.status(200).json({
+            requiresHometown: true,
+            id: completeUser.id,
+            email: completeUser.email,
+            firstName: completeUser.firstName,
+            lastName: completeUser.lastName,
+            profileImageUrl: completeUser.profileImageUrl,
+            message: "Please provide your hometown to continue"
+          });
+        }
         
         // Automatically create and set audience profile as active on login
         try {
@@ -203,6 +216,62 @@ export function setupAuth(app: Express) {
         });
       });
     })(req, res, next);
+  });
+
+  app.post("/api/update-hometown", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const { hometown } = req.body;
+      
+      if (!hometown || typeof hometown !== 'string' || hometown.trim().length === 0) {
+        return res.status(400).json({ message: "Hometown is required" });
+      }
+
+      // Update user's hometown
+      const updatedUser = await storage.updateUser(req.user!.id, { 
+        hometown: hometown.trim() 
+      });
+
+      // Now complete the login process with profile creation
+      try {
+        console.log("HOMETOWN UPDATE: Setting audience profile as active for user", req.user!.id);
+        const userProfiles = await storage.getProfilesByUserId(req.user!.id);
+        
+        let audienceProfile = userProfiles.find(p => p.type === 'audience' && !p.deletedAt);
+        
+        if (!audienceProfile) {
+          const userName = updatedUser.firstName && updatedUser.lastName 
+            ? `${updatedUser.firstName} ${updatedUser.lastName}`
+            : updatedUser.firstName || updatedUser.lastName || "My Profile";
+          
+          audienceProfile = await storage.createProfile({
+            userId: req.user!.id,
+            type: 'audience',
+            name: userName,
+            bio: '',
+            isActive: true
+          });
+        } else {
+          await storage.setActiveProfile(req.user!.id, audienceProfile.id);
+        }
+      } catch (error) {
+        console.error("Error setting audience profile as active:", error);
+        // Don't fail the hometown update if profile activation fails
+      }
+
+      res.status(200).json({ 
+        id: updatedUser.id, 
+        email: updatedUser.email,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        profileImageUrl: updatedUser.profileImageUrl,
+        hometown: updatedUser.hometown
+      });
+    } catch (error) {
+      console.error("Error updating hometown:", error);
+      res.status(500).json({ message: "Failed to update hometown" });
+    }
   });
 
   app.post("/api/logout", (req, res, next) => {

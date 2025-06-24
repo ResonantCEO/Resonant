@@ -90,7 +90,7 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { email, password, firstName, lastName } = req.body;
+      const { email, password, firstName, lastName, birthdate } = req.body;
       
       // Normalize email to lowercase for consistency
       const normalizedEmail = email.toLowerCase();
@@ -105,6 +105,7 @@ export function setupAuth(app: Express) {
         password: await hashPassword(password),
         firstName,
         lastName,
+        birthdate: birthdate ? new Date(birthdate) : null,
       });
 
       req.login(user, async (err) => {

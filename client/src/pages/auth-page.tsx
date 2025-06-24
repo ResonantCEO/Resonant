@@ -29,6 +29,7 @@ export default function AuthPage() {
     password: "",
     firstName: "",
     lastName: "",
+    birthdate: "",
   });
 
   const loginMutation = useMutation({
@@ -189,6 +190,17 @@ export default function AuthPage() {
                           placeholder="Last name"
                         />
                       </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="birthdate">Date of Birth</Label>
+                      <Input
+                        id="birthdate"
+                        type="date"
+                        value={registerForm.birthdate}
+                        onChange={(e) => setRegisterForm(prev => ({ ...prev, birthdate: e.target.value }))}
+                        placeholder="Select your date of birth"
+                      />
                     </div>
 
                     <div>

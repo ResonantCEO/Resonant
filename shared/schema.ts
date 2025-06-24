@@ -37,6 +37,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   coverImageUrl: varchar("cover_image_url"),
   backgroundImageUrl: varchar("background_image_url"),
+  birthdate: timestamp("birthdate"),
   showOnlineStatus: boolean("show_online_status").default(true),
   allowFriendRequests: boolean("allow_friend_requests").default(true),
   showActivityStatus: boolean("show_activity_status").default(true),
@@ -355,6 +356,8 @@ export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  birthdate: z.string().optional().transform((str) => str ? new Date(str) : null),
 });
 
 export const loginUserSchema = z.object({

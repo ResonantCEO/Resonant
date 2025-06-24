@@ -41,7 +41,7 @@ import crypto from "crypto";
 
 export class Storage {
   // User operations
-  async createUser(userData: InsertUser): Promise<User> {
+  async createUser(userData: { email: string; password: string; firstName?: string; lastName?: string; birthdate?: Date | null }): Promise<User> {
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     const [user] = await db
       .insert(users)
@@ -914,7 +914,7 @@ export class Storage {
   async createBookingRequest(requestData: any): Promise<any> {
     try {
       console.log('Storage: Creating booking request with data:', requestData);
-      
+
       // Ensure all required fields are present
       const sanitizedData = {
         artistProfileId: requestData.artistProfileId,
@@ -1043,7 +1043,8 @@ export class Storage {
             FROM conversation_participants cp2
             JOIN profiles p2 ON cp2.profile_id = p2.id
             WHERE cp2.profile_id != ${profileId}
-            ORDER BY cp2.conversation_id, cp2.joined_at
+            ORDER BY cp2.conversation_id,```text
+ cp2.joined_at
           ) other_profile`,
           sql`other_profile.conversation_id = ${conversations.id}`
         )

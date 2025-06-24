@@ -439,68 +439,70 @@ function SettingsContent() {
                     <Input
                       id="birthdate"
                       type="text"
-                      value={user.birthdate ? new Date(user.birthdate).toLocaleDateString('en-US') : ""}
+                      defaultValue={user.birthdate ? new Date(user.birthdate).toLocaleDateString('en-US') : ""}
                       onChange={(e) => {
-                        const inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
+                        let inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
                         
+                        // Handle clearing the field
+                        if (!inputValue) {
+                          handleUpdateSetting('birthdate', null);
+                          return;
+                        }
+                        
+                        // Limit to 8 digits
+                        if (inputValue.length > 8) {
+                          inputValue = inputValue.substring(0, 8);
+                        }
+                        
+                        // Format as user types: MM/DD/YYYY
+                        let formatted = inputValue;
+                        if (inputValue.length >= 2) {
+                          formatted = inputValue.substring(0, 2);
+                          if (inputValue.length >= 4) {
+                            formatted += '/' + inputValue.substring(2, 4);
+                            if (inputValue.length > 4) {
+                              formatted += '/' + inputValue.substring(4, 8);
+                            }
+                          }
+                        }
+                        
+                        // Update the input field to show formatted value
+                        e.target.value = formatted;
+                        
+                        // Only validate and save when we have 8 digits
                         if (inputValue.length === 8) {
-                          // Parse MMDDYYYY format
                           const month = inputValue.substring(0, 2);
                           const day = inputValue.substring(2, 4);
                           const year = inputValue.substring(4, 8);
                           
-                          // Validate the date components
                           const monthNum = parseInt(month, 10);
                           const dayNum = parseInt(day, 10);
                           const yearNum = parseInt(year, 10);
                           
-                          if (monthNum >= 1 && monthNum <= 12 && dayNum >= 1 && dayNum <= 31 && yearNum >= 1900 && yearNum <= new Date().getFullYear()) {
+                          // Validate date components
+                          if (monthNum >= 1 && monthNum <= 12 && 
+                              dayNum >= 1 && dayNum <= 31 && 
+                              yearNum >= 1900 && yearNum <= new Date().getFullYear()) {
+                            
                             const selectedDate = new Date(yearNum, monthNum - 1, dayNum);
+                            
                             // Verify the date is valid (handles leap years, days in month, etc.)
                             if (selectedDate.getFullYear() === yearNum && 
                                 selectedDate.getMonth() === monthNum - 1 && 
                                 selectedDate.getDate() === dayNum) {
                               handleUpdateSetting('birthdate', selectedDate.toISOString());
-                              // Update the input to show formatted date
-                              e.target.value = selectedDate.toLocaleDateString('en-US');
-                              return;
                             }
                           }
-                        }
-                        
-                        // For incomplete input or invalid dates, don't update the setting
-                        // but allow the user to continue typing
-                        if (inputValue.length <= 8) {
-                          // Format as user types: MM/DD/YYYY
-                          let formatted = inputValue;
-                          if (inputValue.length >= 2) {
-                            formatted = inputValue.substring(0, 2);
-                            if (inputValue.length >= 4) {
-                              formatted += '/' + inputValue.substring(2, 4);
-                              if (inputValue.length > 4) {
-                                formatted += '/' + inputValue.substring(4, 8);
-                              }
-                            }
-                          }
-                          e.target.value = formatted;
-                        }
-                        
-                        // Clear birthdate if input is empty
-                        if (!inputValue) {
-                          handleUpdateSetting('birthdate', null);
                         }
                       }}
                       onKeyDown={(e) => {
-                        // Allow backspace, delete, tab, escape, enter
-                        if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
-                            // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                            (e.keyCode === 65 && e.ctrlKey) ||
-                            (e.keyCode === 67 && e.ctrlKey) ||
-                            (e.keyCode === 86 && e.ctrlKey) ||
-                            (e.keyCode === 88 && e.ctrlKey)) {
+                        // Allow backspace, delete, tab, escape, enter, arrow keys
+                        if ([8, 9, 27, 13, 46, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+                            // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z
+                            (e.ctrlKey && [65, 67, 86, 88, 90].indexOf(e.keyCode) !== -1)) {
                           return;
                         }
-                        // Ensure that it is a number and stop the keypress
+                        // Only allow numbers
                         if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
                           e.preventDefault();
                         }

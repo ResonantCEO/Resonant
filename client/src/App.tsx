@@ -64,19 +64,40 @@ function Router() {
   // If authenticated and not loading, show main app routes
   console.log("Authenticated, showing main routes");
   return (
-    <Switch>
-      <Route path="/" component={Profile} />
-      <Route path="/home" component={Home} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/profile" component={Profile} />
-      <Route path="/profile/:id" component={Profile} />
-      <Route path="/friends" component={Friends} />
-      <Route path="/discover" component={Discover} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/notifications" component={NotificationsPage} />
-      <Route path="/messages" component={Messages} />
-      <Route path="/*" component={Profile} />
-    </Switch>
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
+      <div className="lg:hidden mobile-content">
+        <Switch>
+          <Route path="/" component={Profile} />
+          <Route path="/home" component={Home} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/profile/:id" component={Profile} />
+          <Route path="/friends" component={Friends} />
+          <Route path="/discover" component={Discover} />
+          <Route path="/settings" component={Settings} />
+          <Route path="/notifications" component={NotificationsPage} />
+          <Route path="/messages" component={Messages} />
+          <Route path="/*" component={Profile} />
+        </Switch>
+        <BottomNav />
+      </div>
+      
+      <div className="hidden lg:block">
+        <Switch>
+          <Route path="/" component={Profile} />
+          <Route path="/home" component={Home} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/profile/:id" component={Profile} />
+          <Route path="/friends" component={Friends} />
+          <Route path="/discover" component={Discover} />
+          <Route path="/settings" component={Settings} />
+          <Route path="/notifications" component={NotificationsPage} />
+          <Route path="/messages" component={Messages} />
+          <Route path="/*" component={Profile} />
+        </Switch>
+      </div>
+    </div>
   );
 }
 

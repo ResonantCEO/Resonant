@@ -441,14 +441,17 @@ function SettingsContent() {
                       type="date"
                       value={user.birthdate ? new Date(user.birthdate).toISOString().split('T')[0] : ""}
                       onChange={(e) => {
-                        if (e.target.value) {
-                          // Create date in local timezone to avoid timezone conversion issues
-                          const selectedDate = new Date(e.target.value + 'T00:00:00');
+                        const dateValue = e.target.value;
+                        if (dateValue && dateValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                          // Only accept properly formatted YYYY-MM-DD dates
+                          const [year, month, day] = dateValue.split('-');
+                          const selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                           handleUpdateSetting('birthdate', selectedDate.toISOString());
-                        } else {
+                        } else if (!dateValue) {
                           handleUpdateSetting('birthdate', null);
                         }
                       }}
+                      placeholder="YYYY-MM-DD"
                     />
                     <p className="text-sm text-muted-foreground mt-1">Your birthday will only show the month and day on your profile</p>
                   </div>

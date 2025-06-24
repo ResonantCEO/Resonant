@@ -446,6 +446,7 @@ function SettingsContent() {
                         // Handle clearing the field
                         if (!inputValue) {
                           handleUpdateSetting('birthdate', null);
+                          e.target.value = '';
                           return;
                         }
                         
@@ -502,13 +503,20 @@ function SettingsContent() {
                             (e.ctrlKey && [65, 67, 86, 88, 90].indexOf(e.keyCode) !== -1)) {
                           return;
                         }
+                        
+                        // Check if input would exceed 8 digits
+                        const currentDigits = e.target.value.replace(/\D/g, '').length;
+                        if (currentDigits >= 8 && ![8, 9, 27, 13, 46, 37, 38, 39, 40].includes(e.keyCode)) {
+                          e.preventDefault();
+                          return;
+                        }
+                        
                         // Only allow numbers
                         if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
                           e.preventDefault();
                         }
                       }}
                       placeholder="Type: 04261991 for 04/26/1991"
-                      maxLength={10}
                     />
                     <p className="text-sm text-muted-foreground mt-1">Type your birthdate as MMDDYYYY (e.g., 04261991). Your birthday will only show the month and day on your profile</p>
                   </div>

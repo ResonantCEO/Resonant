@@ -47,6 +47,22 @@ function SettingsContent() {
     }
   }, [user.birthdate]);
 
+  // Format birthday input for display as MM/DD/YYYY
+  const formatBirthdateDisplay = (input: string) => {
+    const digitsOnly = input.replace(/\D/g, '');
+    if (digitsOnly.length >= 2) {
+      let formatted = digitsOnly.substring(0, 2);
+      if (digitsOnly.length >= 4) {
+        formatted += '/' + digitsOnly.substring(2, 4);
+        if (digitsOnly.length >= 6) {
+          formatted += '/' + digitsOnly.substring(4, 8);
+        }
+      }
+      return formatted;
+    }
+    return digitsOnly;
+  };
+
   // Fetch user profiles
   const { data: profiles = [] } = useQuery({
     queryKey: ['/api/profiles'],
@@ -451,7 +467,7 @@ function SettingsContent() {
                     <Input
                       id="birthdate"
                       type="text"
-                      value={birthdateInput}
+                      value={formatBirthdateDisplay(birthdateInput)}
                       onChange={(e) => {
                         const inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
                         
@@ -460,7 +476,7 @@ function SettingsContent() {
                           return;
                         }
 
-                        // Update the input state to show raw digits as user types
+                        // Update the input state to store raw digits
                         setBirthdateInput(inputValue);
 
                         // Handle clearing the field
@@ -514,8 +530,8 @@ function SettingsContent() {
                             return;
                           }
                         }}
-                      placeholder="Type your birthdate as MMDDYYYY (e.g., 04261991)"
-                      maxLength={8}
+                      placeholder="Type your birthdate as MMDDYYYY (e.g., 04261991 shows as 04/26/1991)"
+                      maxLength={10}
                     />
                     <p className="text-sm text-muted-foreground mt-1">Type your birthdate as MMDDYYYY (e.g., 04261991). Your birthday will only show the month and day on your profile</p>
                   </div>

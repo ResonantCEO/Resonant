@@ -312,7 +312,7 @@
     color: hsl(var(--foreground));
     min-height: 64px;
     width: 100%;
-    padding: 0;
+    padding: 8px;
     font-weight: 400;
     font-family: inherit;
   }

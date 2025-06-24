@@ -244,7 +244,7 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
                     value={newPost}
                     onChange={(e) => setNewPost(e.target.value)}
                     placeholder={`What's on your mind, ${getDisplayName(activeProfile)}?`}
-                    className="w-full border border-neutral-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-neutral-200 rounded-xl resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent p-4"
                     rows={3}
                   />
                   <div className="flex items-center justify-between mt-4">

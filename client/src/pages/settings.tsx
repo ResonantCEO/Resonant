@@ -435,12 +435,12 @@ function SettingsContent() {
                   </div>
 
                   <div>
-                    <Label htmlFor="birthday">Birthday</Label>
+                    <Label htmlFor="birthdate">Birthday</Label>
                     <Input
-                      id="birthday"
+                      id="birthdate"
                       type="date"
-                      value={user.birthday ? new Date(user.birthday).toISOString().split('T')[0] : ""}
-                      onChange={(e) => handleUpdateSetting('birthday', e.target.value)}
+                      value={user.birthdate ? new Date(user.birthdate).toISOString().split('T')[0] : ""}
+                      onChange={(e) => handleUpdateSetting('birthdate', e.target.value)}
                     />
                     <p className="text-sm text-muted-foreground mt-1">Your birthday will only show the month and day on your profile</p>
                   </div>

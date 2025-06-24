@@ -106,6 +106,7 @@ export function registerRoutes(app: Express): Server {
         location,
         website,
         coverImageUrl,
+        birthdate,
         compactMode,
         autoplayVideos,
         theme,
@@ -129,6 +130,7 @@ export function registerRoutes(app: Express): Server {
       if (location !== undefined) updateData.location = location;
       if (website !== undefined) updateData.website = website;
       if (coverImageUrl !== undefined) updateData.coverImageUrl = coverImageUrl;
+      if (birthdate !== undefined) updateData.birthdate = birthdate ? new Date(birthdate) : null;
       if (compactMode !== undefined) updateData.compactMode = compactMode;
       if (autoplayVideos !== undefined) updateData.autoplayVideos = autoplayVideos;
       if (theme !== undefined) updateData.theme = theme;
@@ -142,8 +144,16 @@ export function registerRoutes(app: Express): Server {
       if (notifyMessages !== undefined) updateData.notifyMessages = notifyMessages;
       if (notifyPostLikes !== undefined) updateData.notifyPostLikes = notifyPostLikes;
       if (notifyComments !== undefined) updateData.notifyComments = notifyComments;
-      const updatedUser = await storage.updateUser(req.user.id, updateData);
-      res.json(updatedUser);
+      
+      // Only call updateUser if there are actually fields to update
+      if (Object.keys(updateData).length > 0) {
+        const updatedUser = await storage.updateUser(req.user.id, updateData);
+        res.json(updatedUser);
+      } else {
+        // If no fields to update, just return the current user
+        const currentUser = await storage.getUser(req.user.id);
+        res.json(currentUser);
+      }
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Failed to update user" });

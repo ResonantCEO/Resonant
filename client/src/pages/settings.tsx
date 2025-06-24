@@ -442,19 +442,19 @@ function SettingsContent() {
                       defaultValue={user.birthdate ? new Date(user.birthdate).toLocaleDateString('en-US') : ""}
                       onChange={(e) => {
                         let inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
-                        
+
                         // Handle clearing the field
                         if (!inputValue) {
                           handleUpdateSetting('birthdate', null);
                           e.target.value = '';
                           return;
                         }
-                        
+
                         // Limit to 8 digits
                         if (inputValue.length > 8) {
                           inputValue = inputValue.substring(0, 8);
                         }
-                        
+
                         // Format as user types: MM/DD/YYYY
                         let formatted = inputValue;
                         if (inputValue.length >= 2) {
@@ -466,27 +466,27 @@ function SettingsContent() {
                             }
                           }
                         }
-                        
+
                         // Update the input field to show formatted value
                         e.target.value = formatted;
-                        
+
                         // Only validate and save when we have 8 digits
                         if (inputValue.length === 8) {
                           const month = inputValue.substring(0, 2);
                           const day = inputValue.substring(2, 4);
                           const year = inputValue.substring(4, 8);
-                          
+
                           const monthNum = parseInt(month, 10);
                           const dayNum = parseInt(day, 10);
                           const yearNum = parseInt(year, 10);
-                          
+
                           // Validate date components
                           if (monthNum >= 1 && monthNum <= 12 && 
                               dayNum >= 1 && dayNum <= 31 && 
                               yearNum >= 1900 && yearNum <= new Date().getFullYear()) {
-                            
+
                             const selectedDate = new Date(yearNum, monthNum - 1, dayNum);
-                            
+
                             // Verify the date is valid (handles leap years, days in month, etc.)
                             if (selectedDate.getFullYear() === yearNum && 
                                 selectedDate.getMonth() === monthNum - 1 && 
@@ -497,25 +497,27 @@ function SettingsContent() {
                         }
                       }}
                       onKeyDown={(e) => {
-                        // Allow backspace, delete, tab, escape, enter, arrow keys
-                        if ([8, 9, 27, 13, 46, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
-                            // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z
-                            (e.ctrlKey && [65, 67, 86, 88, 90].indexOf(e.keyCode) !== -1)) {
-                          return;
-                        }
-                        
-                        // Check if input would exceed 8 digits
-                        const currentDigits = e.target.value.replace(/\D/g, '').length;
-                        if (currentDigits >= 8 && ![8, 9, 27, 13, 46, 37, 38, 39, 40].includes(e.keyCode)) {
-                          e.preventDefault();
-                          return;
-                        }
-                        
-                        // Only allow numbers
-                        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
-                          e.preventDefault();
-                        }
-                      }}
+                          // Allow backspace, delete, tab, escape, enter, arrow keys
+                          if ([8, 9, 27, 13, 46, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+                              // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z
+                              (e.ctrlKey && [65, 67, 86, 88, 90].indexOf(e.keyCode) !== -1)) {
+                            return;
+                          }
+
+                          // Check if input would exceed 8 digits (only for number keys)
+                          const currentDigits = e.target.value.replace(/\D/g, '').length;
+                          const isNumberKey = (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105);
+
+                          if (currentDigits >= 8 && isNumberKey) {
+                            e.preventDefault();
+                            return;
+                          }
+
+                          // Only allow numbers
+                          if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                            e.preventDefault();
+                          }
+                        }}
                       placeholder="Type: 04261991 for 04/26/1991"
                     />
                     <p className="text-sm text-muted-foreground mt-1">Type your birthdate as MMDDYYYY (e.g., 04261991). Your birthday will only show the month and day on your profile</p>
@@ -900,8 +902,7 @@ function SettingsContent() {
                         <div>
                           <h3 className="font-medium">{profile.name}</h3>
                           <p className="text-sm text-muted-foreground">Artist Profile</p>
-                        </div>
-                      </div>
+                        </div>                      </div>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="destructive" size="sm">

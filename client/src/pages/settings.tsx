@@ -454,26 +454,14 @@ function SettingsContent() {
                       value={birthdateInput}
                       onChange={(e) => {
                         const inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
-
+                        
                         // Limit to 8 digits maximum
                         if (inputValue.length > 8) {
                           return;
                         }
 
-                        // Format the display value as MM/DD/YYYY
-                        let formattedValue = inputValue;
-                        if (inputValue.length >= 2) {
-                          formattedValue = inputValue.substring(0, 2);
-                          if (inputValue.length >= 4) {
-                            formattedValue += '/' + inputValue.substring(2, 4);
-                            if (inputValue.length > 4) {
-                              formattedValue += '/' + inputValue.substring(4, 8);
-                            }
-                          }
-                        }
-
-                        // Update the input state to show formatted value
-                        setBirthdateInput(formattedValue);
+                        // Update the input state to show raw digits as user types
+                        setBirthdateInput(inputValue);
 
                         // Handle clearing the field
                         if (!inputValue) {
@@ -511,7 +499,7 @@ function SettingsContent() {
 
                           // Only allow number keys
                           const isNumberKey = (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105);
-
+                          
                           if (!isNumberKey) {
                             e.preventDefault();
                             return;
@@ -527,7 +515,7 @@ function SettingsContent() {
                           }
                         }}
                       placeholder="Type your birthdate as MMDDYYYY (e.g., 04261991)"
-                      maxLength={10}
+                      maxLength={8}
                     />
                     <p className="text-sm text-muted-foreground mt-1">Type your birthdate as MMDDYYYY (e.g., 04261991). Your birthday will only show the month and day on your profile</p>
                   </div>

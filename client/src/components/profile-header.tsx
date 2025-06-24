@@ -78,7 +78,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const coverContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // Profile picture positioning states
   const [isProfilePositioningMode, setIsProfilePositioningMode] = useState(false);
   const [profilePhotoPosition, setProfilePhotoPosition] = useState({ x: 50, y: 50 });
@@ -1151,7 +1151,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
 
           {/* Social Media Buttons - Absolutely positioned */}
-          <div className="absolute flex items-center justify-center space-x-1 sm:space-x-2 bottom-8 sm:bottom-4 left-0 right-0">
+          <div className="absolute flex items-center justify-center space-x-1 sm:space-x-2 bottom-2 sm:bottom-4 left-0 right-0 md:bottom-4 md:left-0 md:right-0">
             {/* Facebook */}
             {(isOwn || profile?.facebookUrl) && (
               <Button

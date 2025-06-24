@@ -182,10 +182,8 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
       {/* Create Post (only show when showCreatePost is true and on own profile or feed) */}
       {showCreatePost && (!profileId || profileId === activeProfile?.id) && activeProfile && (
         <div className="lg:hidden">
-          {/* Mobile Post Composer */}
           <div className="mobile-post-composer">
             <form onSubmit={handleCreatePost}>
-              {/* Header with avatar and user info */}
               <div className="mobile-post-header">
                 <Avatar className="mobile-avatar-composer">
                   <AvatarImage src={activeProfile?.profileImageUrl || ""} />
@@ -197,7 +195,6 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
                 </div>
               </div>
 
-              {/* Post input */}
               <div className="mobile-post-input-container">
                 <Textarea
                   value={newPost}
@@ -208,7 +205,6 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
                 />
               </div>
 
-              {/* Actions bar */}
               <div className="mobile-post-actions">
                 <div className="mobile-post-buttons">
                   <button type="button" className="mobile-post-button photo-button">

@@ -842,7 +842,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
 
         {/* Profile Info */}
-        <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 pb-16 pl-32 sm:pl-52' : 'pt-4 pb-20'} relative h-20 sm:min-h-[168px] md:min-h-[192px]`}>
+        <div className={`p-4 sm:p-6 ${profile?.type === 'artist' ? 'pt-6 pb-16 pl-32 sm:pl-52' : 'pt-4 pb-20'} relative h-32 sm:min-h-[168px] md:min-h-[192px]`}>
           {/* Profile Type & Visibility - Absolutely positioned */}
           <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
             <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
@@ -1151,7 +1151,132 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           )}
 
           {/* Social Media Buttons - Absolutely positioned */}
-          <div className="absolute flex items-center justify-center space-x-1 sm:space-x-2 bottom-8 sm:bottom-4 left-0 right-0">
+          <div className="absolute flex items-center justify-center space-x-1 sm:space-x-2 bottom-12 sm:bottom-4 left-0 right-0"></div>
+        </div>
+      </div>
+
+      {/* Content Tabs */}
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6">
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+          <div className="border-b border-neutral-200">
+            <TabsList className="w-full justify-start rounded-none border-0 bg-transparent px-6">
+              {/* EPK tab - first tab for artist profiles */}
+              {profile?.type === "artist" && (
+                <TabsTrigger value="epk" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  EPK
+                </TabsTrigger>
+              )}
+              {/* Posts tab - only for non-artist profiles */}
+              {profile?.type !== "artist" && (
+                <TabsTrigger value="posts" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Posts
+                </TabsTrigger>
+              )}
+              {/* About tab - hidden for artist profiles */}
+              {profile?.type !== "artist" && (
+                <TabsTrigger value="about" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  About
+                </TabsTrigger>
+              )}
+              {/* Friends tab - only for non-artist profiles */}
+              {profile?.type !== "artist" && (
+                <TabsTrigger value="friends" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Friends
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="photos" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                Gallery
+              </TabsTrigger>
+              {/* Community tab - only visible for artist profiles              */}
+              {profile?.type === "artist" && (
+                <TabsTrigger value="community" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Community
+                </TabsTrigger>
+              )}
+              {/* Stats tab - only visible for artist profiles and only to artist/venue viewers */}
+              {profile?.type === "artist" && viewerProfile && (viewerProfile.type === "artist" || viewerProfile.type === "venue") && (
+                <TabsTrigger value="stats" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Stats
+                </TabsTrigger>
+              )}
+              {/* Management tab - visible only for venue profiles (artist members moved to dashboard) */}
+              {profile?.type === "venue" && (
+                <TabsTrigger value="management" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Staff
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </div>
+
+          {/* Management tab content - only show for venue profiles */}
+          {profile?.type === "venue" && (
+            <TabsContent value="management" className="p-6">
+              <ProfileManagement 
+                profileId={profile?.id || 0}
+                profileType={profile?.type || 'audience'}
+                isOwner={isOwn}
+                canManageMembers={canManageMembers || false}
+              />
+            </TabsContent>
+          )}
+        </Tabs>
+      </div>
+
+      {/* Booking Confirmation Dialog */}
+      <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Booking Request</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to send a booking request to <span className="font-semibold">{profile?.name}</span>? 
+              Your artist profile will be sent to the venue for review and they will contact you if they're interested in booking you.
+            </p>
+          </div>
+          <DialogFooter className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowBookingDialog(false)}
+              disabled={sendBookingRequestMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirmBooking}
+              disabled={sendBookingRequestMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {sendBookingRequestMutation.isPending ? "Sending..." : "Send Request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Hidden file inputs for uploads */}
+      {isOwn && (
+        <>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+          <input
+            type="file"
+            ref={coverFileInputRef}
+            onChange={handleCoverUpload}
+            accept="image/*"
+            className="hidden"
+          />
+        </>
+      )}
+    </>
+  );
+}</old_str>
+<new_str>          {/* Social Media Buttons - Absolutely positioned */}
+          <div className="absolute flex items-center justify-center space-x-1 sm:space-x-2 bottom-12 sm:bottom-4 left-0 right-0">
             {/* Facebook */}
             {(isOwn || profile?.facebookUrl) && (
               <Button

@@ -64,8 +64,8 @@ function Router() {
   // If authenticated and not loading, show main app routes
   console.log("Authenticated, showing main routes");
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
-      <div className="lg:hidden mobile-content">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 mobile-viewport-fix">
+      <div className="lg:hidden mobile-content mobile-bottom-safe">
         <Switch>
           <Route path="/" component={Profile} />
           <Route path="/home" component={Home} />

@@ -62,7 +62,7 @@ export default function BottomNav() {
   return (
     <>
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/98 dark:bg-neutral-900/98 backdrop-blur-lg border-t border-neutral-200 dark:border-neutral-700 z-50 shadow-xl mobile-safe-area">
-        <div className="flex items-center justify-around px-1 py-2">
+        <div className="flex items-center justify-around px-2 py-2 pb-safe">
           {/* Main navigation items */}
           
           <Sheet>
@@ -70,7 +70,7 @@ export default function BottomNav() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="touch-button flex flex-col items-center justify-center h-14 min-w-[56px] flex-1 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 px-2 rounded-xl"
+                className="touch-button flex flex-col items-center justify-center h-16 min-w-[60px] flex-1 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 px-3 rounded-2xl"
               >
                 <Menu className="w-5 h-5 mb-1" />
                 <span className="text-xs font-medium leading-tight">Menu</span>
@@ -86,10 +86,10 @@ export default function BottomNav() {
               key={item.path}
               variant="ghost"
               size="sm"
-              className={`touch-button flex flex-col items-center justify-center h-14 min-w-[56px] flex-1 relative px-2 transition-all duration-200 ${
+              className={`touch-button flex flex-col items-center justify-center h-16 min-w-[60px] flex-1 relative px-3 transition-all duration-200 ${
                 isActivePath(item.path)
-                  ? "bg-blue-500 !text-white hover:bg-blue-600 rounded-xl shadow-md transform scale-105"
-                  : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl"
+                  ? "bg-blue-500 !text-white hover:bg-blue-600 rounded-2xl shadow-lg transform scale-105"
+                  : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-2xl"
               }`}
               onClick={() => setLocation(item.path)}
             >

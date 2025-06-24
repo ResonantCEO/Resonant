@@ -505,7 +505,7 @@ function SettingsContent() {
                           }
 
                           // Check if input would exceed 8 digits (only for number keys)
-                          const currentDigits = e.target.value.replace(/\D/g, '').length;
+                          const currentDigits = (e.target as HTMLInputElement).value.replace(/\D/g, '').length;
                           const isNumberKey = (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105);
 
                           if (currentDigits >= 8 && isNumberKey) {

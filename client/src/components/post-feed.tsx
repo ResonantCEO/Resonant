@@ -181,7 +181,7 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
     <div className="space-y-6">
       {/* Create Post (only show when showCreatePost is true and on own profile or feed) */}
       {showCreatePost && (!profileId || profileId === activeProfile?.id) && activeProfile && (
-        <div className="mb-6">
+        <div>
           <div className="lg:hidden">
             <div className="mobile-post-composer">
               <form onSubmit={handleCreatePost}>

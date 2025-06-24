@@ -16,7 +16,7 @@ export default function AuthPage() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
-  
+
   // Login form state
   const [loginForm, setLoginForm] = useState({
     email: "",
@@ -200,52 +200,46 @@ export default function AuthPage() {
                         value={registerForm.birthdate}
                         onChange={(e) => {
                           const inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digits
-                          
+
+                          // Format as user types: MM/DD/YYYY
+                          let formatted = inputValue;
+                          if (inputValue.length >= 2) {
+                            formatted = inputValue.substring(0, 2);
+                            if (inputValue.length >= 4) {
+                              formatted += '/' + inputValue.substring(2, 4);
+                              if (inputValue.length > 4) {
+                                formatted += '/' + inputValue.substring(4, 8);
+                              }
+                            }
+                          }
+                          e.target.value = formatted;
+
                           if (inputValue.length === 8) {
                             // Parse MMDDYYYY format
                             const month = inputValue.substring(0, 2);
                             const day = inputValue.substring(2, 4);
                             const year = inputValue.substring(4, 8);
-                            
+
                             // Validate the date components
                             const monthNum = parseInt(month, 10);
                             const dayNum = parseInt(day, 10);
                             const yearNum = parseInt(year, 10);
-                            
+
                             if (monthNum >= 1 && monthNum <= 12 && dayNum >= 1 && dayNum <= 31 && yearNum >= 1900 && yearNum <= new Date().getFullYear()) {
                               const selectedDate = new Date(yearNum, monthNum - 1, dayNum);
                               // Verify the date is valid (handles leap years, days in month, etc.)
-                              if (selectedDate.getFullYear() === yearNum && 
+                              if (selectedDate.getFullYear() === yearNum &&
                                   selectedDate.getMonth() === monthNum - 1 && 
                                   selectedDate.getDate() === dayNum) {
                                 const isoString = selectedDate.toISOString().split('T')[0]; // YYYY-MM-DD format for backend
                                 setRegisterForm(prev => ({ ...prev, birthdate: isoString }));
-                                // Update the input to show formatted date
-                                e.target.value = selectedDate.toLocaleDateString('en-US');
                                 return;
                               }
                             }
                           }
-                          
-                          // For incomplete input or invalid dates, store the current input
-                          if (inputValue.length <= 8) {
-                            // Format as user types: MM/DD/YYYY
-                            let formatted = inputValue;
-                            if (inputValue.length >= 2) {
-                              formatted = inputValue.substring(0, 2);
-                              if (inputValue.length >= 4) {
-                                formatted += '/' + inputValue.substring(2, 4);
-                                if (inputValue.length > 4) {
-                                  formatted += '/' + inputValue.substring(4, 8);
-                                }
-                              }
-                            }
-                            e.target.value = formatted;
-                            setRegisterForm(prev => ({ ...prev, birthdate: '' })); // Clear until valid
-                          }
-                          
-                          // Clear birthdate if input is empty
-                          if (!inputValue) {
+
+                          // Clear birthdate if input is empty or incomplete/invalid
+                          if (!inputValue || inputValue.length < 8) {
                             setRegisterForm(prev => ({ ...prev, birthdate: '' }));
                           }
                         }}
@@ -325,7 +319,7 @@ export default function AuthPage() {
             Connect as an audience member, showcase as an artist, or promote as a venue. 
             One account, multiple identities.
           </p>
-          
+
           <div className="space-y-6">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
@@ -336,7 +330,7 @@ export default function AuthPage() {
                 <p className="text-blue-200 text-sm">Discover music and connect with friends</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
                 <Music className="w-6 h-6" />
@@ -346,7 +340,7 @@ export default function AuthPage() {
                 <p className="text-blue-200 text-sm">Showcase your music and connect with fans</p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
                 <Building className="w-6 h-6" />

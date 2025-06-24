@@ -521,8 +521,8 @@ function SettingsContent() {
                             return;
                           }
 
-                          // Check if input would exceed 8 digits
-                          const currentDigits = birthdateInput.length;
+                          // Check if input would exceed 8 digits - use raw digit count
+                          const currentDigits = birthdateInput.replace(/\D/g, '').length;
 
                           // Prevent typing more numbers if we already have 8 digits
                           if (currentDigits >= 8) {

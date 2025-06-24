@@ -543,6 +543,18 @@ export default function Profile() {
                           </div>
                         )}
 
+                        {profile.birthday && (
+                          <div className="flex items-center">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Birthday:</span>
+                            <span className="text-gray-900 dark:text-white">
+                              {new Date(profile.birthday).toLocaleDateString('en-US', { 
+                                month: 'long', 
+                                day: 'numeric'
+                              })}
+                            </span>
+                          </div>
+                        )}
+
                         <div className="flex items-center">
                           <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Joined:</span>
                           <span className="text-gray-900 dark:text-white">

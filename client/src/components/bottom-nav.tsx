@@ -66,14 +66,20 @@ export default function BottomNav() {
         <div className="flex items-center justify-between p-4">
           <img src="/resonant-logo.png" alt="Resonant" className="h-8 block dark:hidden" />
           <img src="/resonant-logo-white.png" alt="Resonant" className="h-8 hidden dark:block" />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-neutral-600 dark:text-neutral-300"
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-neutral-600 dark:text-neutral-300"
+              >
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 p-0">
+              <Sidebar />
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 

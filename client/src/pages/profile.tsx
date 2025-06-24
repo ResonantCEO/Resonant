@@ -582,17 +582,34 @@ export default function Profile() {
                   </div>
 
                   {/* Bio Section */}
-                  {profile.bio && (
-                    <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                        <FileText className="w-5 h-5 mr-2 text-purple-500" />
-                        About Me
-                      </h4>
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <FileText className="w-5 h-5 mr-2 text-purple-500" />
+                      About Me
+                    </h4>
+                    {profile.bio ? (
                       <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                         {profile.bio}
                       </p>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="text-gray-400 dark:text-gray-500 mb-3">
+                          <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                        </div>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                          {isOwn 
+                            ? "You haven't added a bio yet. Share something about yourself in your profile settings."
+                            : `${profile.name} hasn't added a bio yet.`
+                          }
+                        </p>
+                        {isOwn && (
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                            Go to Settings → Profile to add your bio
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
                   {/* Activity Stats */}
                   <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">

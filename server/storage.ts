@@ -56,7 +56,7 @@ export class Storage {
     }
 
     return user;
-  },
+  }
 
   async getUserByEmail(email: string): Promise<User | null> {
     const [user] = await db.select().from(users).where(eq(users.email, email));

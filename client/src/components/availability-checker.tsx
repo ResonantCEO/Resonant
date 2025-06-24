@@ -1,4 +1,4 @@
-
+typescript
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -160,12 +160,12 @@ export default function AvailabilityChecker({
     const dayEvents = getDayEvents(date);
     const artistEvents = dayEvents.filter(e => e.profileId === artistProfileId);
     const venueEvents = dayEvents.filter(e => e.profileId === venueProfileId);
-    
+
     const artistUnavailable = artistEvents.some(e => 
       e.type === 'unavailable' || 
       (e.status === 'confirmed' && (e.type === 'booking' || e.type === 'event'))
     );
-    
+
     const venueUnavailable = venueEvents.some(e => 
       e.type === 'unavailable' || 
       (e.status === 'confirmed' && (e.type === 'booking' || e.type === 'event'))
@@ -201,6 +201,14 @@ export default function AvailabilityChecker({
       case 'cancelled': return 'border-red-500 text-red-700';
       default: return 'border-gray-500 text-gray-700';
     }
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    });
   };
 
   const currentDate = new Date(currentYear, currentMonth);
@@ -325,13 +333,13 @@ export default function AvailabilityChecker({
                         }`}>
                           {day.getDate()}
                         </div>
-                        
+
                         {/* Availability indicator - always show for current month */}
                         {isCurrentMonth && (
                           <div className={`w-2 h-2 rounded-full ${availability.color}`}></div>
                         )}
                       </div>
-                      
+
                       {/* Event indicators */}
                       <div className="space-y-1 mt-1">
                         {dayEvents.slice(0, 2).map((event, i) => (

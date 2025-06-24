@@ -450,7 +450,7 @@ function SettingsContent() {
                           return;
                         }
 
-                        // Limit to 8 digits
+                        // Limit to 8 digits maximum
                         if (inputValue.length > 8) {
                           inputValue = inputValue.substring(0, 8);
                         }
@@ -470,7 +470,7 @@ function SettingsContent() {
                         // Update the input field to show formatted value
                         e.target.value = formatted;
 
-                        // Only validate and save when we have 8 digits
+                        // Only validate and save when we have exactly 8 digits
                         if (inputValue.length === 8) {
                           const month = inputValue.substring(0, 2);
                           const day = inputValue.substring(2, 4);
@@ -480,19 +480,13 @@ function SettingsContent() {
                           const dayNum = parseInt(day, 10);
                           const yearNum = parseInt(year, 10);
 
-                          // Validate date components
+                          // Basic validation - allow any reasonable date
                           if (monthNum >= 1 && monthNum <= 12 && 
                               dayNum >= 1 && dayNum <= 31 && 
                               yearNum >= 1900 && yearNum <= new Date().getFullYear()) {
 
                             const selectedDate = new Date(yearNum, monthNum - 1, dayNum);
-
-                            // Verify the date is valid (handles leap years, days in month, etc.)
-                            if (selectedDate.getFullYear() === yearNum && 
-                                selectedDate.getMonth() === monthNum - 1 && 
-                                selectedDate.getDate() === dayNum) {
-                              handleUpdateSetting('birthdate', selectedDate.toISOString());
-                            }
+                            handleUpdateSetting('birthdate', selectedDate.toISOString());
                           }
                         }
                       }}
@@ -504,22 +498,24 @@ function SettingsContent() {
                             return;
                           }
 
-                          // Check if input would exceed 8 digits (only for number keys)
+                          // Check if input would exceed 8 digits
                           const currentValue = (e.target as HTMLInputElement).value;
                           const currentDigits = currentValue.replace(/\D/g, '').length;
                           const isNumberKey = (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105);
 
+                          // Prevent typing more numbers if we already have 8 digits
                           if (currentDigits >= 8 && isNumberKey) {
                             e.preventDefault();
                             return;
                           }
 
-                          // Only allow numbers
+                          // Only allow numbers (no other restrictions)
                           if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
                             e.preventDefault();
                           }
                         }}
                       placeholder="Type: 04261991 for 04/26/1991"
+                      maxLength={10}
                     />
                     <p className="text-sm text-muted-foreground mt-1">Type your birthdate as MMDDYYYY (e.g., 04261991). Your birthday will only show the month and day on your profile</p>
                   </div>

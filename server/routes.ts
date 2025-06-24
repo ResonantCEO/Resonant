@@ -1447,7 +1447,6 @@ export function registerRoutes(app: Express): Server {
           profileImageUrl: profiles.profileImageUrl,
           bio: profiles.bio,
           location: profiles.location,
-          genre: profiles.genre,
           type: profiles.type
         })
         .from(friendships)
@@ -1465,7 +1464,6 @@ export function registerRoutes(app: Express): Server {
               profileImageUrl: profiles.profileImageUrl,
               bio: profiles.bio,
               location: profiles.location,
-              genre: profiles.genre,
               type: profiles.type
             })
             .from(friendships)

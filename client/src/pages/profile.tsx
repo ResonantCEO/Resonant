@@ -123,7 +123,7 @@ export default function Profile() {
         const validTabs = profile.type === 'artist' 
           ? ['epk', 'community', 'stats', 'photos', 'members', 'management']
           : ['posts', 'about', 'music-discovery', 'friends', 'photos', 'members', 'management'];
-        
+
         if (validTabs.includes(storedTab)) {
           setActiveTab(storedTab);
         } else {

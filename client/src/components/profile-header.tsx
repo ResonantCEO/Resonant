@@ -1236,7 +1236,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       </div>
 
       {/* Content Tabs */}
-      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6"></div></div>
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6">
         <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
           <div className="border-b border-neutral-200">
             <TabsList className="w-full justify-start rounded-none border-0 bg-transparent px-6">

@@ -181,7 +181,7 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
     <div className="space-y-6">
       {/* Create Post (only show when showCreatePost is true and on own profile or feed) */}
       {showCreatePost && (!profileId || profileId === activeProfile?.id) && activeProfile && (
-        <div>
+        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 mb-6">
           <div className="lg:hidden">
             <div className="mobile-post-composer">
               <form onSubmit={handleCreatePost}>
@@ -231,8 +231,7 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
             </div>
           </div>
 
-          <Card className="hidden lg:block backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
-          <CardContent className="p-6">
+          <div className="hidden lg:block p-6">
             <form onSubmit={handleCreatePost}>
               <div className="flex items-start space-x-4">
                 <Avatar>
@@ -270,8 +269,7 @@ export default function PostFeed({ profileId, showCreatePost }: PostFeedProps) {
                 </div>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </div>
         </div>
       )}
 

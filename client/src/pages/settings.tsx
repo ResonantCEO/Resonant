@@ -24,6 +24,7 @@ import {
 } from '../components/ui/alert-dialog';
 import Sidebar from '../components/sidebar';
 import { useSidebar } from '../hooks/useSidebar';
+import { useZipcodeLookup } from '../hooks/useZipcodeLookup';
 
 function SettingsContent() {
   const { user, updateUser } = useAuth();
@@ -50,7 +51,7 @@ function SettingsContent() {
   // Format display value
   const getDisplayValue = () => {
     if (!birthdateInput) return '';
-    
+
     if (birthdateInput.length <= 2) {
       return birthdateInput;
     } else if (birthdateInput.length <= 4) {
@@ -467,21 +468,21 @@ function SettingsContent() {
                       value={getDisplayValue()}
                       onChange={(e) => {
                         const digitsOnly = e.target.value.replace(/\D/g, '');
-                        
+
                         if (digitsOnly.length <= 8) {
                           setBirthdateInput(digitsOnly);
-                          
+
                           if (digitsOnly.length === 0) {
                             handleUpdateSetting('birthdate', null);
                           } else if (digitsOnly.length === 8) {
                             const month = digitsOnly.substring(0, 2);
                             const day = digitsOnly.substring(2, 4);
                             const year = digitsOnly.substring(4, 8);
-                            
+
                             const monthNum = parseInt(month, 10);
                             const dayNum = parseInt(day, 10);
                             const yearNum = parseInt(year, 10);
-                            
+
                             if (monthNum >= 1 && monthNum <= 12 && 
                                 dayNum >= 1 && dayNum <= 31 && 
                                 yearNum >= 1900 && yearNum <= new Date().getFullYear()) {
@@ -907,7 +908,7 @@ function SettingsContent() {
                 </div>
               ) : (
                 <p className="text-muted-foreground">No artist profiles found.</p>
-              )}
+                            )}
             </CardContent>
           </Card>
 

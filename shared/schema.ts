@@ -38,6 +38,7 @@ export const users = pgTable("users", {
   coverImageUrl: varchar("cover_image_url"),
   backgroundImageUrl: varchar("background_image_url"),
   birthdate: timestamp("birthdate"),
+  hometown: varchar("hometown"), // Now stores zipcode
   showOnlineStatus: boolean("show_online_status").default(true),
   allowFriendRequests: boolean("allow_friend_requests").default(true),
   showActivityStatus: boolean("show_activity_status").default(true),

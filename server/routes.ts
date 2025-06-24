@@ -11,6 +11,7 @@ import { z } from "zod";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { lookupZipcode, formatCityState } from "./zipcode-lookup";
 
 // Auth middleware function
 export function isAuthenticated(req: any, res: any, next: any) {
@@ -63,6 +64,28 @@ export function registerRoutes(app: Express): Server {
   // Serve uploaded files statically
   app.use('/uploads', express.static(uploadsDir));
 
+  // Zipcode lookup route
+  app.get('/api/zipcode/:zipcode', async (req, res) => {
+    try {
+      const { zipcode } = req.params;
+      const result = lookupZipcode(zipcode);
+      
+      if (result) {
+        res.json({
+          zipcode,
+          city: result.city,
+          state: result.state,
+          formatted: formatCityState(result.city, result.state)
+        });
+      } else {
+        res.status(404).json({ message: "Zipcode not found" });
+      }
+    } catch (error) {
+      console.error("Error looking up zipcode:", error);
+      res.status(500).json({ message: "Failed to lookup zipcode" });
+    }
+  });
+
   // Auth routes
   app.get('/api/user', isAuthenticated, async (req: any, res) => {
     try {
@@ -107,6 +130,7 @@ export function registerRoutes(app: Express): Server {
         website,
         coverImageUrl,
         birthdate,
+        hometown,
         compactMode,
         autoplayVideos,
         theme,
@@ -139,6 +163,7 @@ export function registerRoutes(app: Express): Server {
           updateData.birthdate = null;
         }
       }
+      if (hometown !== undefined) updateData.hometown = hometown;
       if (compactMode !== undefined) updateData.compactMode = compactMode;
       if (autoplayVideos !== undefined) updateData.autoplayVideos = autoplayVideos;
       if (theme !== undefined) updateData.theme = theme;

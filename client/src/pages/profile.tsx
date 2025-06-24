@@ -536,10 +536,10 @@ export default function Profile() {
                           </div>
                         )}
 
-                        {profile.hometown && (
+                        {user?.hometownDisplay && (
                           <div className="flex items-center">
                             <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Hometown:</span>
-                            <span className="text-gray-900 dark:text-white">{profile.hometown}</span>
+                            <span className="text-gray-900 dark:text-white">{user.hometownDisplay}</span>
                           </div>
                         )}
 

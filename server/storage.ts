@@ -1,43 +1,10 @@
-import { eq, and, or, desc, asc, sql, like, ilike, ne, isNull, isNotNull, inArray, lt, gt } from "drizzle-orm";
 import { db } from "./db";
-import {
-  users,
-  profiles,
-  posts,
-  friendships,
-  comments,
-  postLikes,
-  profileMemberships,
-  profileInvitations,
-  notifications,
-  userNotificationSettings,
-  bookingRequests,
-  photos,
-  albums,
-  photoComments,
-  type User,
-  type Profile,
-  type Post,
-  type Friendship,
-  type Comment,
-  type InsertUser,
-  type InsertProfile,
-  type InsertPost,
-  type InsertComment,
-  type InsertFriendship,
-  type InsertProfileMembership,
-  type InsertProfileInvitation,
-  type InsertNotification,
-  type InsertUserNotificationSettings,
-  type Photo,
-  type Album,
-  conversations,
-  conversationParticipants,
-  messages,
-  messageReads
-} from "@shared/schema";
+import { users, profiles, posts, comments, postLikes, friendships, profileMemberships, profileInvitations, albums, photos, photoComments, notifications, bookingRequests, conversationParticipants, conversations, messages, messageReads } from "@shared/schema";
+import { eq, and, or, sql, desc, asc, not, isNull, inArray } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { lookupZipcode, formatCityState } from "./zipcode-lookup";
 
 export class Storage {
   // User operations
@@ -60,10 +27,36 @@ export class Storage {
     return user;
   }
 
-  async getUser(id: number): Promise<User | null> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || null;
-  }
+  async getUser(id: number) {
+    console.log("Storage - getUser called with ID:", id);
+
+    const result = await db.select().from(users).where(eq(users.id, id));
+    console.log("Storage - Raw database result:", JSON.stringify(result, null, 2));
+
+    if (result.length === 0) {
+      console.log("Storage - No user found");
+      return null;
+    }
+
+    const user = result[0];
+    console.log("Storage - User found:", JSON.stringify(user, null, 2));
+    console.log("Storage - User coverImageUrl exists:", 'coverImageUrl' in user);
+    console.log("Storage - User coverImageUrl value:", user.coverImageUrl);
+
+    // Format hometown if it's a zipcode
+    if (user.hometown) {
+      const zipcodeInfo = lookupZipcode(user.hometown);
+      if (zipcodeInfo) {
+        return {
+          ...user,
+          hometownDisplay: formatCityState(zipcodeInfo.city, zipcodeInfo.state),
+          hometownZipcode: user.hometown
+        };
+      }
+    }
+
+    return user;
+  },
 
   async getUserByEmail(email: string): Promise<User | null> {
     const [user] = await db.select().from(users).where(eq(users.email, email));

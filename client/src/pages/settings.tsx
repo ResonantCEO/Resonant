@@ -424,6 +424,26 @@ function SettingsContent() {
                       onChange={(e) => handleUpdateSetting('email', e.target.value)}
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="hometown">Hometown</Label>
+                    <Input
+                      id="hometown"
+                      value={user.hometown || ""}
+                      onChange={(e) => handleUpdateSetting('hometown', e.target.value)}
+                      placeholder="Enter your hometown"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="birthday">Birthday</Label>
+                    <Input
+                      id="birthday"
+                      type="date"
+                      value={user.birthday ? new Date(user.birthday).toISOString().split('T')[0] : ""}
+                      onChange={(e) => handleUpdateSetting('birthday', e.target.value)}
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">Your birthday will only show the month and day on your profile</p>
+                  </div>
                 </>
               ) : (
                 <>

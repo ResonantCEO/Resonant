@@ -440,7 +440,15 @@ function SettingsContent() {
                       id="birthdate"
                       type="date"
                       value={user.birthdate ? new Date(user.birthdate).toISOString().split('T')[0] : ""}
-                      onChange={(e) => handleUpdateSetting('birthdate', e.target.value)}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          // Create date in local timezone to avoid timezone conversion issues
+                          const selectedDate = new Date(e.target.value + 'T00:00:00');
+                          handleUpdateSetting('birthdate', selectedDate.toISOString());
+                        } else {
+                          handleUpdateSetting('birthdate', null);
+                        }
+                      }}
                     />
                     <p className="text-sm text-muted-foreground mt-1">Your birthday will only show the month and day on your profile</p>
                   </div>

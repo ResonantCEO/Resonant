@@ -130,7 +130,15 @@ export function registerRoutes(app: Express): Server {
       if (location !== undefined) updateData.location = location;
       if (website !== undefined) updateData.website = website;
       if (coverImageUrl !== undefined) updateData.coverImageUrl = coverImageUrl;
-      if (birthdate !== undefined) updateData.birthdate = birthdate ? new Date(birthdate) : null;
+      if (birthdate !== undefined) {
+        if (birthdate) {
+          // Ensure we're creating a proper date object
+          const date = new Date(birthdate);
+          updateData.birthdate = isNaN(date.getTime()) ? null : date;
+        } else {
+          updateData.birthdate = null;
+        }
+      }
       if (compactMode !== undefined) updateData.compactMode = compactMode;
       if (autoplayVideos !== undefined) updateData.autoplayVideos = autoplayVideos;
       if (theme !== undefined) updateData.theme = theme;

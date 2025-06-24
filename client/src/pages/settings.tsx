@@ -498,20 +498,22 @@ function SettingsContent() {
                             return;
                           }
 
-                          // Check if input would exceed 8 digits
-                          const currentValue = (e.target as HTMLInputElement).value;
-                          const currentDigits = currentValue.replace(/\D/g, '').length;
+                          // Only allow number keys
                           const isNumberKey = (e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105);
-
-                          // Prevent typing more numbers if we already have 8 digits
-                          if (currentDigits >= 8 && isNumberKey) {
+                          
+                          if (!isNumberKey) {
                             e.preventDefault();
                             return;
                           }
 
-                          // Only allow numbers (no other restrictions)
-                          if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                          // Check if input would exceed 8 digits
+                          const currentValue = (e.target as HTMLInputElement).value;
+                          const currentDigits = currentValue.replace(/\D/g, '').length;
+
+                          // Prevent typing more numbers if we already have 8 digits
+                          if (currentDigits >= 8) {
                             e.preventDefault();
+                            return;
                           }
                         }}
                       placeholder="Type: 04261991 for 04/26/1991"

@@ -1043,8 +1043,7 @@ export class Storage {
             FROM conversation_participants cp2
             JOIN profiles p2 ON cp2.profile_id = p2.id
             WHERE cp2.profile_id != ${profileId}
-            ORDER BY cp2.conversation_id,```text
- cp2.joined_at
+            ORDER BY cp2.conversation_id, cp2.joined_at
           ) other_profile`,
           sql`other_profile.conversation_id = ${conversations.id}`
         )

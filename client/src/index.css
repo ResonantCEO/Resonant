@@ -222,188 +222,201 @@
     padding: 16px;
   }
   
-  /* Enhanced mobile post composer */
+  /* Enhanced mobile post composer - Completely rebuilt */
   .mobile-post-composer {
-    margin: 12px 16px;
-    padding: 20px;
-    border-radius: 20px;
+    margin: 16px 12px;
+    padding: 0;
+    border-radius: 16px;
     background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px);
     border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
+    overflow: hidden;
   }
   
   .mobile-post-composer:focus-within {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border-color: hsl(var(--primary) / 0.3);
   }
   
   .dark .mobile-post-composer {
-    background: rgba(30, 30, 35, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    background: rgba(22, 25, 33, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   }
   
   .dark .mobile-post-composer:focus-within {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border-color: hsl(var(--primary) / 0.4);
   }
   
-  /* Mobile post composer elements */
-  .mobile-post-input {
-    background: transparent;
-    border: none;
-    resize: none;
-    outline: none;
-    font-size: 17px;
-    line-height: 1.6;
-    color: hsl(var(--foreground));
-    placeholder-color: hsl(var(--muted-foreground));
-    min-height: 80px;
-    width: 100%;
-    padding: 12px 0;
-    font-weight: 400;
-  }
-  
-  .mobile-post-input::placeholder {
-    color: hsl(var(--muted-foreground) / 0.7);
-    font-weight: 400;
-  }
-  
-  /* Mobile post composer header */
+  /* Mobile post composer header - Improved spacing */
   .mobile-post-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  }
-  
-  .dark .mobile-post-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 16px 20px 0 20px;
+    margin-bottom: 0;
   }
   
   .mobile-avatar-composer {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
-    border: 2px solid rgba(0, 0, 0, 0.08);
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.06);
     overflow: hidden;
+    flex-shrink: 0;
   }
   
   .dark .mobile-avatar-composer {
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.08);
   }
   
   .mobile-user-info {
     flex: 1;
+    min-width: 0;
   }
   
   .mobile-username {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: hsl(var(--foreground));
     margin: 0;
     line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .mobile-user-subtitle {
-    font-size: 13px;
+    font-size: 12px;
     color: hsl(var(--muted-foreground));
     margin: 2px 0 0 0;
     line-height: 1.2;
   }
   
+  /* Mobile post input - Better spacing and typography */
+  .mobile-post-input-container {
+    padding: 12px 20px 16px 20px;
+  }
+  
+  .mobile-post-input {
+    background: transparent;
+    border: none;
+    resize: none;
+    outline: none;
+    font-size: 16px;
+    line-height: 1.5;
+    color: hsl(var(--foreground));
+    min-height: 64px;
+    width: 100%;
+    padding: 0;
+    font-weight: 400;
+    font-family: inherit;
+  }
+  
+  .mobile-post-input::placeholder {
+    color: hsl(var(--muted-foreground) / 0.6);
+    font-weight: 400;
+  }
+  
+  /* Mobile post actions - Completely redesigned */
   .mobile-post-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 20px;
-    padding-top: 16px;
+    padding: 12px 20px 16px 20px;
     border-top: 1px solid rgba(0, 0, 0, 0.06);
+    margin-top: 0;
+    background: rgba(0, 0, 0, 0.01);
   }
   
   .dark .mobile-post-actions {
-    border-color: rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
   }
   
   .mobile-post-buttons {
     display: flex;
-    gap: 12px;
+    gap: 4px;
+    flex: 1;
   }
   
   .mobile-post-button {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    border-radius: 14px;
-    background: rgba(0, 0, 0, 0.04);
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: transparent;
     border: none;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 500;
     color: hsl(var(--muted-foreground));
     cursor: pointer;
-    transition: all 0.25s ease;
-    min-height: 44px;
+    transition: all 0.2s ease;
+    min-height: 36px;
     position: relative;
-    overflow: hidden;
-  }
-  
-  .mobile-post-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
-  
-  .mobile-post-button:hover::before {
-    opacity: 1;
+    white-space: nowrap;
+    flex: 1;
+    max-width: 80px;
   }
   
   .mobile-post-button:hover {
-    background: rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.06);
+    color: hsl(var(--foreground));
   }
   
   .mobile-post-button:active {
-    transform: translateY(0);
+    background: rgba(0, 0, 0, 0.08);
+    transform: scale(0.98);
   }
   
   .dark .mobile-post-button {
-    background: rgba(255, 255, 255, 0.08);
     color: hsl(var(--muted-foreground));
   }
   
   .dark .mobile-post-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: hsl(var(--foreground));
+  }
+  
+  .dark .mobile-post-button:active {
     background: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Mobile post submit button - Improved positioning */
+  .mobile-post-submit-container {
+    margin-left: 12px;
+    flex-shrink: 0;
   }
   
   .mobile-post-submit {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.9)) !important;
+    background: hsl(var(--primary)) !important;
     color: white !important;
     font-weight: 600;
-    padding: 12px 24px;
-    border-radius: 16px;
-    min-width: 80px;
-    box-shadow: 0 4px 16px hsl(var(--primary) / 0.3);
+    padding: 8px 20px;
+    border-radius: 18px;
+    min-width: 64px;
+    height: 36px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
-  .mobile-post-submit:hover {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.95), hsl(var(--primary) / 0.85)) !important;
-    box-shadow: 0 6px 20px hsl(var(--primary) / 0.4);
+  .mobile-post-submit:hover:not(:disabled) {
+    background: hsl(var(--primary) / 0.9) !important;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
   }
   
-  .mobile-post-submit:active {
+  .mobile-post-submit:active:not(:disabled) {
     transform: translateY(0);
   }
   
@@ -413,32 +426,57 @@
     cursor: not-allowed;
     box-shadow: none;
     transform: none;
+    opacity: 0.5;
   }
   
-  /* Icon styling for post buttons */
+  /* Icon styling for post buttons - Improved sizing */
   .mobile-post-button svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     stroke-width: 2;
+    flex-shrink: 0;
+  }
+  
+  /* Button text - Hidden on very small screens */
+  .mobile-post-button-text {
+    display: inline;
+  }
+  
+  @media (max-width: 360px) {
+    .mobile-post-button-text {
+      display: none;
+    }
+    
+    .mobile-post-button {
+      padding: 8px;
+      min-width: 36px;
+      max-width: 36px;
+    }
+    
+    .mobile-post-buttons {
+      gap: 6px;
+    }
   }
   
   /* Special styling for different button types */
   .mobile-post-button.photo-button:hover {
-    background: rgba(34, 197, 94, 0.1);
+    background: rgba(34, 197, 94, 0.08);
     color: rgb(34, 197, 94);
   }
   
   .mobile-post-button.location-button:hover {
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.08);
     color: rgb(239, 68, 68);
   }
   
   .dark .mobile-post-button.photo-button:hover {
-    background: rgba(34, 197, 94, 0.15);
+    background: rgba(34, 197, 94, 0.12);
+    color: rgb(52, 211, 153);
   }
   
   .dark .mobile-post-button.location-button:hover {
-    background: rgba(239, 68, 68, 0.15);
+    background: rgba(239, 68, 68, 0.12);
+    color: rgb(248, 113, 113);
   }
   
   /* Mobile tab improvements */

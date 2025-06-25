@@ -83,11 +83,11 @@ function BioEditor({ currentBio, profileId, profileType }: { currentBio: string;
           onChange={(e) => setBioText(e.target.value)}
           placeholder="Tell people about yourself..."
           className="min-h-32"
-          maxLength={500}
+          maxLength={1500}
         />
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-500">
-            {bioText.length}/500 characters
+            {bioText.length}/1500 characters
           </span>
           <div className="flex gap-2">
             <Button

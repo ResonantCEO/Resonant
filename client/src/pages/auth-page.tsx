@@ -316,39 +316,9 @@ export default function AuthPage() {
         </div>
 
         {/* Right Column - Auth Forms & Phone Mockup */}
-        <div className="hidden lg:flex lg:w-2/5 items-center justify-center p-8 relative">
-          {/* Phone Mockup */}
-          <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
-            <div className="relative">
-              {/* Main phone */}
-              <div className="w-64 h-[500px] bg-green-500 rounded-3xl flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-4 bg-black rounded-2xl flex items-center justify-center">
-                  <div className="text-green-400 text-6xl font-bold">R</div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-32 h-32 border-4 border-green-400 rounded-full animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Secondary phone */}
-              <div className="absolute -left-16 top-8 w-48 h-96 bg-gray-800 rounded-2xl overflow-hidden shadow-2xl">
-                <div className="p-4 space-y-2">
-                  <div className="h-2 bg-green-400 rounded"></div>
-                  <div className="h-20 bg-gray-700 rounded"></div>
-                  <div className="h-8 bg-green-500 rounded"></div>
-                  <div className="h-8 bg-gray-600 rounded"></div>
-                  <div className="space-y-1">
-                    <div className="h-12 bg-gray-700 rounded"></div>
-                    <div className="h-12 bg-gray-700 rounded"></div>
-                    <div className="h-12 bg-gray-700 rounded"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Auth Form */}
-          <div className="w-full max-w-md z-20">
+        <div className="hidden lg:flex lg:w-2/5 items-center justify-end p-8 relative">
+          {/* Auth Form - positioned on the left side of right column */}
+          <div className="w-full max-w-sm z-20 mr-8">
             <Card className="bg-white/95 backdrop-blur-sm shadow-xl border-0">
               <CardContent className="p-6">
                 <div className="text-center mb-6">
@@ -544,6 +514,36 @@ export default function AuthPage() {
                 </Tabs>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Phone Mockup - positioned on the far right */}
+          <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+            <div className="relative">
+              {/* Main phone */}
+              <div className="w-48 h-96 bg-green-500 rounded-3xl flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-3 bg-black rounded-2xl flex items-center justify-center">
+                  <div className="text-green-400 text-4xl font-bold">R</div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-24 h-24 border-3 border-green-400 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Secondary phone */}
+              <div className="absolute -left-12 top-6 w-36 h-72 bg-gray-800 rounded-xl overflow-hidden shadow-2xl">
+                <div className="p-3 space-y-2">
+                  <div className="h-1.5 bg-green-400 rounded"></div>
+                  <div className="h-16 bg-gray-700 rounded"></div>
+                  <div className="h-6 bg-green-500 rounded"></div>
+                  <div className="h-6 bg-gray-600 rounded"></div>
+                  <div className="space-y-1">
+                    <div className="h-8 bg-gray-700 rounded"></div>
+                    <div className="h-8 bg-gray-700 rounded"></div>
+                    <div className="h-8 bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

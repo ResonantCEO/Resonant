@@ -9,7 +9,6 @@ import { SidebarProvider } from "@/hooks/useSidebar";
 import Sidebar from "@/components/sidebar";
 import BottomNav from "@/components/bottom-nav";
 import AuthPage from "@/pages/auth-page";
-import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Profile from "@/pages/profile";
 import Settings from "@/pages/settings";
@@ -56,15 +55,10 @@ function Router() {
     return <LoadingScreen />;
   }
 
-  // If not authenticated after loading is complete, show landing page
+  // If not authenticated after loading is complete, show auth page
   if (!isAuthenticated && !isLoading) {
-    console.log("Not authenticated, showing landing page");
-    return (
-      <Switch>
-        <Route path="/auth" component={AuthPage} />
-        <Route path="/*" component={Landing} />
-      </Switch>
-    );
+    console.log("Not authenticated, showing auth page");
+    return <AuthPage />;
   }
 
   // If authenticated and not loading, show main app routes

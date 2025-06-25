@@ -634,7 +634,71 @@ export default function Profile() {
                     <p className="text-gray-600 dark:text-gray-400">Get to know this music enthusiast</p>
                   </div>
 
-                  {/* About Me Section - Moved to top */}
+                  {/* Personal Information - Moved to top */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <Users className="w-5 h-5 mr-2 text-blue-500" />
+                      Personal Information
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        {user?.firstName || user?.lastName ? (
+                          <div className="flex items-center">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Name:</span>
+                            <span className="text-gray-900 dark:text-white">{user.firstName} {user.lastName}</span>
+                          </div>
+                        ) : null}
+
+                        {profile.location && (
+                          <div className="flex items-center">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Location:</span>
+                            <span className="text-gray-900 dark:text-white">{profile.location}</span>
+                          </div>
+                        )}
+
+                        {user?.hometown && (
+                          <div className="flex items-center">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Hometown:</span>
+                            <span className="text-gray-900 dark:text-white">{user.hometown}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {user?.birthdate && (
+                          <div className="flex items-center">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Birthday:</span>
+                            <span className="text-gray-900 dark:text-white">
+                              {new Date(user.birthdate).toLocaleDateString('en-US', { 
+                                month: 'long', 
+                                day: 'numeric'
+                              })}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center">
+                          <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Joined:</span>
+                          <span className="text-gray-900 dark:text-white">
+                            {new Date(profile.createdAt).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center">
+                          <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Profile:</span>
+                          <Badge className="bg-fb-blue text-white text-xs">
+                            Audience Member
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* About Me Section */}
                   <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
                     <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                       <FileText className="w-5 h-5 mr-2 text-purple-500" />
@@ -663,191 +727,135 @@ export default function Profile() {
                     )}
                   </div>
 
-                  {/* Basic Information */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Personal Info */}
-                    <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                        <Users className="w-5 h-5 mr-2 text-blue-500" />
-                        Personal Information
-                      </h4>
-                      <div className="space-y-3">
-                        {user?.firstName || user?.lastName ? (
-                          <div className="flex items-center">
-                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Name:</span>
-                            <span className="text-gray-900 dark:text-white">{user.firstName} {user.lastName}</span>
-                          </div>
-                        ) : null}
+                  {/* Music Interests */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <Music className="w-5 h-5 mr-2 text-green-500" />
+                      Music Interests
+                    </h4>
+                    <div className="space-y-4">
+                      {/* Favorite Genres */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Favorite Genres</h5>
+                        <div className="flex flex-wrap gap-2">
+                          {followedArtists.length > 0 ? (
+                            // Extract unique genres from followed artists
+                            [...new Set(followedArtists.filter(artist => artist.genre).map(artist => artist.genre))].slice(0, 5).map((genre, index) => (
+                              <span 
+                                key={index}
+                                className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full"
+                              >
+                                {genre}
+                              </span>
+                            ))
+                          ) : (
+                            // Default interests for users without followed artists
+                            ['Alternative Rock', 'Electronic', 'Indie Pop'].map((genre, index) => (
+                              <span 
+                                key={index}
+                                className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full opacity-50"
+                              >
+                                {genre}
+                              </span>
+                            ))
+                          )}
+                        </div>
+                      </div>
 
-                        {profile.location && (
-                          <div className="flex items-center">
-                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Location:</span>
-                            <span className="text-gray-900 dark:text-white">{profile.location}</span>
-                          </div>
-                        )}
-
-                        {user?.hometown && (
-                          <div className="flex items-center">
-                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Hometown:</span>
-                            <span className="text-gray-900 dark:text-white">{user.hometown}</span>
-                          </div>
-                        )}
-
-                        {user?.birthdate && (
-                          <div className="flex items-center">
-                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Birthday:</span>
-                            <span className="text-gray-900 dark:text-white">
-                              {new Date(user.birthdate).toLocaleDateString('en-US', { 
-                                month: 'long', 
-                                day: 'numeric'
-                              })}
+                      {/* Music Activity */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Music Activity</h5>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="flex items-center space-x-2 text-sm">
+                            <Users className="w-4 h-4 text-purple-500" />
+                            <span className="text-gray-600 dark:text-gray-400">Following:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {followedArtists.length} artists
                             </span>
                           </div>
-                        )}
+                          <div className="flex items-center space-x-2 text-sm">
+                            <Calendar className="w-4 h-4 text-orange-500" />
+                            <span className="text-gray-600 dark:text-gray-400">Member since:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {new Date(profile.createdAt).getFullYear()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
 
-                        <div className="flex items-center">
-                          <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Joined:</span>
-                          <span className="text-gray-900 dark:text-white">
-                            {new Date(profile.createdAt).toLocaleDateString('en-US', { 
-                              year: 'numeric', 
-                              month: 'long', 
-                              day: 'numeric' 
-                            })}
+                      {/* Music Discovery Preferences */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Discovery Style</h5>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full flex items-center">
+                            <Search className="w-3 h-3 mr-1" />
+                            Explorer
+                          </span>
+                          {followedArtists.length > 5 && (
+                            <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full flex items-center">
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              Trendsetter
+                            </span>
+                          )}
+                          <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full flex items-center">
+                            <Heart className="w-3 h-3 mr-1" />
+                            Community Member
                           </span>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Music Interests */}
-                    <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                        <Music className="w-5 h-5 mr-2 text-green-500" />
-                        Music Interests
-                      </h4>
-                      <div className="space-y-4">
-                        {/* Favorite Genres */}
-                        <div>
-                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Favorite Genres</h5>
-                          <div className="flex flex-wrap gap-2">
-                            {followedArtists.length > 0 ? (
-                              // Extract unique genres from followed artists
-                              [...new Set(followedArtists.filter(artist => artist.genre).map(artist => artist.genre))].slice(0, 5).map((genre, index) => (
-                                <span 
-                                  key={index}
-                                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full"
-                                >
-                                  {genre}
-                                </span>
-                              ))
-                            ) : (
-                              // Default interests for users without followed artists
-                              ['Alternative Rock', 'Electronic', 'Indie Pop'].map((genre, index) => (
-                                <span 
-                                  key={index}
-                                  className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full opacity-50"
-                                >
-                                  {genre}
-                                </span>
-                              ))
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Music Activity */}
-                        <div>
-                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Music Activity</h5>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="flex items-center space-x-2 text-sm">
-                              <Users className="w-4 h-4 text-purple-500" />
-                              <span className="text-gray-600 dark:text-gray-400">Following:</span>
-                              <span className="font-semibold text-gray-900 dark:text-white">
-                                {followedArtists.length} artists
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-sm">
-                              <Calendar className="w-4 h-4 text-orange-500" />
-                              <span className="text-gray-600 dark:text-gray-400">Member since:</span>
-                              <span className="font-semibold text-gray-900 dark:text-white">
-                                {new Date(profile.createdAt).getFullYear()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Music Discovery Preferences */}
-                        <div>
-                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Discovery Style</h5>
-                          <div className="flex flex-wrap gap-2">
-                            <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full flex items-center">
-                              <Search className="w-3 h-3 mr-1" />
-                              Explorer
-                            </span>
-                            {followedArtists.length > 5 && (
-                              <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full flex items-center">
-                                <TrendingUp className="w-3 h-3 mr-1" />
-                                Trendsetter
-                              </span>
-                            )}
-                            <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full flex items-center">
-                              <Heart className="w-3 h-3 mr-1" />
-                              Community Member
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Quick Actions */}
-                        {followedArtists.length > 0 && (
-                          <div className="pt-3 border-t border-gray-200 dark:border-gray-600">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
-                                {isOwn 
-                                  ? "Discover more artists in your Music Discovery tab"
-                                  : `See more of ${profile.name}'s music taste`
-                                }
-                              </span>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setActiveTab('music-discovery');
-                                  // Scroll to top after tab change
-                                  setTimeout(() => {
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                  }, 100);
-                                }}
-                                className="text-xs"
-                              >
-                                <Music className="w-3 h-3 mr-1" />
-                                View Music Discovery
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* No Activity State */}
-                        {followedArtists.length === 0 && (
-                          <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                            <Music className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">
+                      {/* Quick Actions */}
+                      {followedArtists.length > 0 && (
+                        <div className="pt-3 border-t border-gray-200 dark:border-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
                               {isOwn 
-                                ? "Start following artists to build your music profile!"
-                                : `${profile.name} hasn't started their music discovery journey yet.`
+                                ? "Discover more artists in your Music Discovery tab"
+                                : `See more of ${profile.name}'s music taste`
                               }
-                            </p>
-                            {isOwn && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setActiveTab('music-discovery')}
-                                className="mt-2"
-                              >
-                                <Search className="w-3 h-3 mr-1" />
-                                Explore Music
-                              </Button>
-                            )}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setActiveTab('music-discovery');
+                                // Scroll to top after tab change
+                                setTimeout(() => {
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }, 100);
+                              }}
+                              className="text-xs"
+                            >
+                              <Music className="w-3 h-3 mr-1" />
+                              View Music Discovery
+                            </Button>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
+
+                      {/* No Activity State */}
+                      {followedArtists.length === 0 && (
+                        <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                          <Music className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">
+                            {isOwn 
+                              ? "Start following artists to build your music profile!"
+                              : `${profile.name} hasn't started their music discovery journey yet.`
+                            }
+                          </p>
+                          {isOwn && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setActiveTab('music-discovery')}
+                              className="mt-2"
+                            >
+                              <Search className="w-3 h-3 mr-1" />
+                              Explore Music
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 

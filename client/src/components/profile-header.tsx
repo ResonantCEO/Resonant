@@ -1070,11 +1070,14 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
                   {friends.length} friends
                 </span>
-                {/* Unified location display for all profile types */}
+                {/* Profile-specific location display */}
                 <span className="flex items-center text-xs sm:text-sm">
                   <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
                   <span className="truncate">
-                    {profile?.location || user?.hometown || "Location not specified"}
+                    {profile?.type === 'audience' 
+                      ? (user?.hometown || "Location not specified")
+                      : (profile?.location || "Location not specified")
+                    }
                   </span>
                 </span>
               </div>

@@ -418,7 +418,7 @@ export default function AuthPage() {
       {/* Right Column - Hero Section */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 items-center justify-center p-8">
         <div className="text-center text-white max-w-md">
-          <h2 className="text-4xl font-bold mb-6">Create Your Layered Social Presence</h2>
+          <h2 className="text-4xl font-bold mb-6">Where Audiences, Artists and Venues Meet</h2>
           <p className="text-xl mb-8 text-blue-100">
             Connect as an audience member, showcase as an artist, or promote as a venue. 
             One account, multiple identities.

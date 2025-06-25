@@ -10,11 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Music, Building, X } from "lucide-react";
+import { Music, Building, X, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useZipcodeLookup } from "@/hooks/useZipcodeLookup";
 
 interface CreateProfileModalProps {
   open: boolean;
@@ -25,10 +25,13 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
   const { toast } = useToast();
   const [profileType, setProfileType] = useState<string>("artist");
   const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
+  const [zipcode, setZipcode] = useState("");
+  const [address, setAddress] = useState("");
+  
+  const { result: zipcodeResult, isLoading: zipcodeLoading, error: zipcodeError } = useZipcodeLookup(zipcode);
 
   const createProfileMutation = useMutation({
-    mutationFn: async (data: { type: string; name: string; bio: string }) => {
+    mutationFn: async (data: { type: string; name: string; location: string }) => {
       return await apiRequest("POST", "/api/profiles", data);
     },
     onSuccess: () => {
@@ -52,12 +55,15 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
   const handleClose = () => {
     setProfileType("artist");
     setName("");
-    setBio("");
+    setZipcode("");
+    setAddress("");
     onOpenChange(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
     if (!profileType || !name.trim()) {
       toast({
         title: "Error",
@@ -67,10 +73,50 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
       return;
     }
 
+    // Validate location based on profile type
+    let location = "";
+    if (profileType === "artist") {
+      if (!zipcode.trim() || zipcode.length !== 5) {
+        toast({
+          title: "Error",
+          description: "Please enter a valid 5-digit zip code",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (zipcodeError) {
+        toast({
+          title: "Error",
+          description: "Invalid zip code. Please enter a valid zip code.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!zipcodeResult) {
+        toast({
+          title: "Error",
+          description: "Unable to find location for the provided zip code",
+          variant: "destructive",
+        });
+        return;
+      }
+      location = zipcodeResult.formatted;
+    } else if (profileType === "venue") {
+      if (!address.trim()) {
+        toast({
+          title: "Error",
+          description: "Please enter a physical address for the venue",
+          variant: "destructive",
+        });
+        return;
+      }
+      location = address.trim();
+    }
+
     createProfileMutation.mutate({
       type: profileType,
       name: name.trim(),
-      bio: bio.trim(),
+      location,
     });
   };
 
@@ -147,20 +193,46 @@ export default function CreateProfileModal({ open, onOpenChange }: CreateProfile
           </div>
 
           <div>
-            <Label htmlFor="bio" className="text-sm font-medium text-neutral-700 mb-2 block">
-              Bio
+            <Label className="text-sm font-medium text-neutral-700 mb-2 block flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              Location *
             </Label>
-            <Textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder={profileType === "artist" 
-                ? "Tell us about your music, style, and what makes you unique..." 
-                : "Describe your venue, capacity, location, and what events you host..."
-              }
-              rows={3}
-              className="w-full resize-none"
-            />
+            
+            {profileType === "artist" ? (
+              <div className="space-y-2">
+                <Input
+                  id="zipcode"
+                  value={zipcode}
+                  onChange={(e) => setZipcode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                  placeholder="Enter your zip code (e.g., 12345)"
+                  className="w-full"
+                  maxLength={5}
+                  required
+                />
+                {zipcodeLoading && zipcode.length === 5 && (
+                  <p className="text-sm text-blue-600">Looking up location...</p>
+                )}
+                {zipcodeResult && (
+                  <p className="text-sm text-green-600">
+                    📍 {zipcodeResult.formatted}
+                  </p>
+                )}
+                {zipcodeError && zipcode.length === 5 && (
+                  <p className="text-sm text-red-600">
+                    ❌ {zipcodeError}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <Input
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Enter full venue address (e.g., 123 Main St, City, State 12345)"
+                className="w-full"
+                required
+              />
+            )}
           </div>
 
           <div className="flex space-x-3">

@@ -799,31 +799,56 @@ export default function Profile() {
                         </div>
                       </div>
 
-                      {/* Quick Actions */}
+                      {/* Following Artists */}
                       {followedArtists.length > 0 && (
-                        <div className="pt-3 border-t border-gray-200 dark:border-gray-600">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                        <div>
+                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Following Artists ({followedArtists.length})</h5>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {followedArtists.map((artist: any) => (
+                              <div 
+                                key={artist.id} 
+                                className="bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer"
+                                onClick={() => setLocation(`/profile/${artist.id}`)}
+                              >
+                                <div className="flex items-center space-x-3 mb-3">
+                                  <Avatar className="w-12 h-12 ring-2 ring-pink-200 dark:ring-pink-800">
+                                    <AvatarImage src={artist.profileImageUrl} alt={artist.name} />
+                                    <AvatarFallback className="bg-pink-100 dark:bg-pink-900 text-pink-600 dark:text-pink-300">
+                                      {artist.name.charAt(0)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-gray-900 dark:text-white truncate text-sm">
+                                      {artist.name}
+                                    </p>
+                                    {artist.genre && (
+                                      <p className="text-xs text-pink-600 dark:text-pink-400 font-medium">
+                                        {artist.genre}
+                                      </p>
+                                    )}
+                                    {artist.location && (
+                                      <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center mt-1">
+                                        <MapPin className="w-3 h-3 mr-1" />
+                                        {artist.location}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                {artist.bio && (
+                                  <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
+                                    {artist.bio}
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-4 text-center">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                               {isOwn 
-                                ? "Discover more artists in your Music Discovery tab"
-                                : `See more of ${profile.name}'s music taste`
+                                ? "These are the artists you're connected with on Resonant"
+                                : `${profile.name} is connected with ${followedArtists.length} artist${followedArtists.length !== 1 ? 's' : ''}`
                               }
-                            </span>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setActiveTab('music-discovery');
-                                // Scroll to top after tab change
-                                setTimeout(() => {
-                                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }, 100);
-                              }}
-                              className="text-xs"
-                            >
-                              <Music className="w-3 h-3 mr-1" />
-                              View Music Discovery
-                            </Button>
+                            </p>
                           </div>
                         </div>
                       )}
@@ -922,62 +947,7 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* Followed Artists */}
-                  {followedArtists.length > 0 && (
-                    <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                        <Music className="w-5 h-5 mr-2 text-pink-500" />
-                        Following Artists ({followedArtists.length})
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {followedArtists.map((artist: any) => (
-                          <div 
-                            key={artist.id} 
-                            className="bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer"
-                            onClick={() => setLocation(`/profile/${artist.id}`)}
-                          >
-                            <div className="flex items-center space-x-3 mb-3">
-                              <Avatar className="w-12 h-12 ring-2 ring-pink-200 dark:ring-pink-800">
-                                <AvatarImage src={artist.profileImageUrl} alt={artist.name} />
-                                <AvatarFallback className="bg-pink-100 dark:bg-pink-900 text-pink-600 dark:text-pink-300">
-                                  {artist.name.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-gray-900 dark:text-white truncate">
-                                  {artist.name}
-                                </p>
-                                {artist.genre && (
-                                  <p className="text-xs text-pink-600 dark:text-pink-400 font-medium">
-                                    {artist.genre}
-                                  </p>
-                                )}
-                                {artist.location && (
-                                  <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center mt-1">
-                                    <MapPin className="w-3 h-3 mr-1" />
-                                    {artist.location}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                            {artist.bio && (
-                              <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">
-                                {artist.bio}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-4 text-center">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {isOwn 
-                            ? "These are the artists you're connected with on Resonant"
-                            : `${profile.name} is connected with ${followedArtists.length} artist${followedArtists.length !== 1 ? 's' : ''}`
-                          }
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                  
 
                   {/* Contact & Social */}
                   {profile.website && (

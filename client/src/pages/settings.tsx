@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
@@ -37,6 +37,24 @@ function SettingsContent() {
   const coverFileInputRef = useRef<HTMLInputElement>(null);
   const backgroundFileInputRef = useRef<HTMLInputElement>(null);
 
+  // Local state for profile fields to enable debouncing
+  const [localProfileName, setLocalProfileName] = useState('');
+  const [localProfileBio, setLocalProfileBio] = useState('');
+  const [localProfileLocation, setLocalProfileLocation] = useState('');
+  const [localFirstName, setLocalFirstName] = useState('');
+  const [localLastName, setLocalLastName] = useState('');
+  const [localEmail, setLocalEmail] = useState('');
+  const [localHometown, setLocalHometown] = useState('');
+
+  // Debounce timer refs
+  const profileNameTimerRef = useRef<NodeJS.Timeout>();
+  const profileBioTimerRef = useRef<NodeJS.Timeout>();
+  const profileLocationTimerRef = useRef<NodeJS.Timeout>();
+  const firstNameTimerRef = useRef<NodeJS.Timeout>();
+  const lastNameTimerRef = useRef<NodeJS.Timeout>();
+  const emailTimerRef = useRef<NodeJS.Timeout>();
+  const hometownTimerRef = useRef<NodeJS.Timeout>();
+
   // Initialize birthday input from existing user data
   useEffect(() => {
     if (user.birthdate) {
@@ -47,6 +65,22 @@ function SettingsContent() {
       setBirthdateInput(month + day + year);
     }
   }, [user.birthdate]);
+
+  // Initialize local state from user/profile data
+  useEffect(() => {
+    setLocalFirstName(user.firstName || '');
+    setLocalLastName(user.lastName || '');
+    setLocalEmail(user.email || '');
+    setLocalHometown(user.hometown || '');
+  }, [user]);
+
+  useEffect(() => {
+    if (activeProfile) {
+      setLocalProfileName(activeProfile.name || '');
+      setLocalProfileBio(activeProfile.bio || '');
+      setLocalProfileLocation(activeProfile.location || user?.hometown || '');
+    }
+  }, [activeProfile, user]);
 
   // Format display value
   const getDisplayValue = () => {
@@ -237,6 +271,61 @@ function SettingsContent() {
     updateUserMutation.mutate({ [key]: value });
   };
 
+  // Debounced update functions
+  const debouncedUpdateProfile = useCallback((key: string, value: any, timerRef: React.MutableRefObject<NodeJS.Timeout | undefined>) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => {
+      updateProfileMutation.mutate({ [key]: value });
+    }, 1000); // 1 second delay
+  }, []);
+
+  const debouncedUpdateUser = useCallback((key: string, value: any, timerRef: React.MutableRefObject<NodeJS.Timeout | undefined>) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => {
+      updateUserMutation.mutate({ [key]: value });
+    }, 1000); // 1 second delay
+  }, []);
+
+  // Handle local state changes with debouncing
+  const handleProfileNameChange = (value: string) => {
+    setLocalProfileName(value);
+    debouncedUpdateProfile('name', value, profileNameTimerRef);
+  };
+
+  const handleProfileBioChange = (value: string) => {
+    setLocalProfileBio(value);
+    debouncedUpdateProfile('bio', value, profileBioTimerRef);
+  };
+
+  const handleProfileLocationChange = (value: string) => {
+    setLocalProfileLocation(value);
+    debouncedUpdateProfile('location', value, profileLocationTimerRef);
+  };
+
+  const handleFirstNameChange = (value: string) => {
+    setLocalFirstName(value);
+    debouncedUpdateUser('firstName', value, firstNameTimerRef);
+  };
+
+  const handleLastNameChange = (value: string) => {
+    setLocalLastName(value);
+    debouncedUpdateUser('lastName', value, lastNameTimerRef);
+  };
+
+  const handleEmailChange = (value: string) => {
+    setLocalEmail(value);
+    debouncedUpdateUser('email', value, emailTimerRef);
+  };
+
+  const handleHometownChange = (value: string) => {
+    setLocalHometown(value);
+    debouncedUpdateUser('hometown', value, hometownTimerRef);
+  };
+
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (updates: any) => {
@@ -377,6 +466,19 @@ function SettingsContent() {
   const artistProfiles = profiles.filter((p: any) => p.type === 'artist');
   const venueProfiles = profiles.filter((p: any) => p.type === 'venue');
 
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (profileNameTimerRef.current) clearTimeout(profileNameTimerRef.current);
+      if (profileBioTimerRef.current) clearTimeout(profileBioTimerRef.current);
+      if (profileLocationTimerRef.current) clearTimeout(profileLocationTimerRef.current);
+      if (firstNameTimerRef.current) clearTimeout(firstNameTimerRef.current);
+      if (lastNameTimerRef.current) clearTimeout(lastNameTimerRef.current);
+      if (emailTimerRef.current) clearTimeout(emailTimerRef.current);
+      if (hometownTimerRef.current) clearTimeout(hometownTimerRef.current);
+    };
+  }, []);
+
   // Determine if we should show profile-specific settings
   const isAudienceProfile = activeProfile?.type === 'audience';
   const currentProfileData = isAudienceProfile ? user : activeProfile;
@@ -427,16 +529,16 @@ function SettingsContent() {
                       <Label htmlFor="firstName">First Name</Label>
                       <Input
                         id="firstName"
-                        value={user.firstName || ''}
-                        onChange={(e) => handleUpdateSetting('firstName', e.target.value)}
+                        value={localFirstName}
+                        onChange={(e) => handleFirstNameChange(e.target.value)}
                       />
                     </div>
                     <div>
                       <Label htmlFor="lastName">Last Name</Label>
                       <Input
                         id="lastName"
-                        value={user.lastName || ''}
-                        onChange={(e) => handleUpdateSetting('lastName', e.target.value)}
+                        value={localLastName}
+                        onChange={(e) => handleLastNameChange(e.target.value)}
                       />
                     </div>
                   </div>
@@ -446,16 +548,16 @@ function SettingsContent() {
                     <Input
                       id="email"
                       type="email"
-                      value={user.email || ''}
-                      onChange={(e) => handleUpdateSetting('email', e.target.value)}
+                      value={localEmail}
+                      onChange={(e) => handleEmailChange(e.target.value)}
                     />
                   </div>
                   <div>
                     <Label htmlFor="hometown">Hometown</Label>
                     <Input
                       id="hometown"
-                      value={user.hometown || ""}
-                      onChange={(e) => handleUpdateSetting('hometown', e.target.value)}
+                      value={localHometown}
+                      onChange={(e) => handleHometownChange(e.target.value)}
                       placeholder="Enter your hometown"
                     />
                   </div>
@@ -504,24 +606,24 @@ function SettingsContent() {
                     <Label htmlFor="profileName">Profile Name</Label>
                     <Input
                       id="profileName"
-                      value={activeProfile?.name || ''}
-                      onChange={(e) => handleUpdateProfileSetting('name', e.target.value)}
+                      value={localProfileName}
+                      onChange={(e) => handleProfileNameChange(e.target.value)}
                     />
                   </div>
                   <div>
                     <Label htmlFor="profileBio">Bio</Label>
                     <Input
                       id="profileBio"
-                      value={activeProfile?.bio || ''}
-                      onChange={(e) => handleUpdateProfileSetting('bio', e.target.value)}
+                      value={localProfileBio}
+                      onChange={(e) => handleProfileBioChange(e.target.value)}
                     />
                   </div>
                   <div>
                     <Label htmlFor="profileLocation">Location</Label>
                     <Input
                       id="profileLocation"
-                      value={activeProfile?.location || user?.hometown || ''}
-                      onChange={(e) => handleUpdateProfileSetting('location', e.target.value)}
+                      value={localProfileLocation}
+                      onChange={(e) => handleProfileLocationChange(e.target.value)}
                       placeholder="Enter your location"
                     />
                   </div>

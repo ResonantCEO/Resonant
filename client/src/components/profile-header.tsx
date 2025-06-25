@@ -1070,30 +1070,21 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
                   {friends.length} friends
                 </span>
-                {profile?.type === "audience" && (
-                  <span className="flex items-center text-xs sm:text-sm">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
-                    <span className="truncate">{profile?.hometown || user?.hometown || profile?.location || "Location not specified"}</span>
+                {/* Unified location display for all profile types */}
+                <span className="flex items-center text-xs sm:text-sm">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
+                  <span className="truncate">
+                    {profile?.location || profile?.hometown || user?.hometown || "Location not specified"}
                   </span>
-                )}
-                {(profile?.location || user?.hometown) && profile?.type !== "audience" && (
-                  <span className="flex items-center text-xs sm:text-sm">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
-                    <span className="truncate">{profile?.location || user?.hometown || "Location not specified"}</span>
-                  </span>
-                )}
+                </span>
               </div>
 
-              {/* Genre and Hometown for Artist profiles */}
-              {profile?.type === "artist" && (
+              {/* Genre for Artist profiles */}
+              {profile?.type === "artist" && profile?.genre && (
                 <div className="space-y-0.5 sm:space-y-1 text-neutral-600 mb-2">
                   <span className="flex items-center text-xs sm:text-sm">
                     <Music className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
-                    <span className="truncate">{profile?.genre || "Genre not specified"}</span>
-                  </span>
-                  <span className="flex items-center text-xs sm:text-sm">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
-                    <span className="truncate">{profile?.hometown || user?.hometown || "Hometown not specified"}</span>
+                    <span className="truncate">{profile.genre}</span>
                   </span>
                 </div>
               )}

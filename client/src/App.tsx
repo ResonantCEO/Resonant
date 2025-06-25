@@ -18,6 +18,7 @@ import Friends from "@/pages/friends";
 import NotFound from "@/pages/not-found";
 import NotificationsPage from "./pages/notifications";
 import Messages from "./pages/messages";
+import { useWebSocket } from "./hooks/useWebSocket";
 
 function LoadingScreen() {
   return (
@@ -101,14 +102,25 @@ function Router() {
   );
 }
 
+function AppContent() {
+  // Initialize WebSocket connection
+  useWebSocket();
+
+  return (
+    <>
+      <Router />
+      <Toaster />
+    </>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <SidebarProvider>
           <TooltipProvider>
-            <Toaster />
-            <Router />
+            <AppContent />
           </TooltipProvider>
         </SidebarProvider>
       </ThemeProvider>

@@ -24,27 +24,12 @@ export interface NotificationData {
 export class NotificationService {
   // Create a notification
   async createNotification(notificationData: NotificationData): Promise<Notification> {
-    const [notification] = await db
-      .insert(notifications)
-      .values({
-        recipientId: notificationData.recipientId,
-        senderId: notificationData.senderId,
-        type: notificationData.type,
-        title: notificationData.title,
-        message: notificationData.message,
-        data: notificationData.data,
-      })
-      .returning();
+    const [notification] = await db.insert(notifications).values(notificationData).returning();
 
-    // Check if user wants email notifications for this type
-    const shouldSendEmail = await this.shouldSendEmailNotification(
-      notificationData.recipientId,
-      notificationData.type
-    );
+    console.log(`Created notification: ${JSON.stringify(notification, null, 2)}`);
 
-    if (shouldSendEmail) {
-      await this.sendEmailNotification(notification);
-    }
+    // Emit real-time notification
+    emitNotification(notificationData.recipientId, notification);
 
     return notification;
   }
@@ -678,6 +663,12 @@ export class NotificationService {
       data
     });
   }
+}
+
+// Dummy emitNotification function - replace with your actual WebSocket emission logic
+function emitNotification(userId: number, notification: any) {
+  console.log(`Emitting notification to user ${userId}:`, notification);
+  // Add your WebSocket emission logic here (e.g., using Socket.io)
 }
 
 export const notificationService = new NotificationService();

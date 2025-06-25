@@ -66,6 +66,30 @@ function SettingsContent() {
     }
   }, [user.birthdate]);
 
+  // Fetch user profiles
+  const { data: profiles = [] } = useQuery({
+    queryKey: ['/api/profiles'],
+    queryFn: async () => {
+      const response = await fetch('/api/profiles', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch profiles');
+      return response.json();
+    }
+  });
+
+  // Fetch active profile
+  const { data: activeProfile } = useQuery({
+    queryKey: ['/api/profiles/active'],
+    queryFn: async () => {
+      const response = await fetch('/api/profiles/active', {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch active profile');
+      return response.json();
+    }
+  });
+
   // Initialize local state from user/profile data
   useEffect(() => {
     setLocalFirstName(user.firstName || '');
@@ -94,30 +118,6 @@ function SettingsContent() {
       return birthdateInput.substring(0, 2) + '/' + birthdateInput.substring(2, 4) + '/' + birthdateInput.substring(4);
     }
   };
-
-  // Fetch user profiles
-  const { data: profiles = [] } = useQuery({
-    queryKey: ['/api/profiles'],
-    queryFn: async () => {
-      const response = await fetch('/api/profiles', {
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to fetch profiles');
-      return response.json();
-    }
-  });
-
-  // Fetch active profile
-  const { data: activeProfile } = useQuery({
-    queryKey: ['/api/profiles/active'],
-    queryFn: async () => {
-      const response = await fetch('/api/profiles/active', {
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to fetch active profile');
-      return response.json();
-    }
-  });
 
   // Delete profile mutation
   const deleteProfileMutation = useMutation({
@@ -487,8 +487,7 @@ function SettingsContent() {
     return <div>Loading...</div>;
   }
 
-  // Only access activeProfile after it's been initialized
-  const notificationCount = activeProfile && profileNotificationCounts?.[activeProfile.id]?.total || 0;
+  
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">

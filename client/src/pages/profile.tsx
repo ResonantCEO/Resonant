@@ -44,13 +44,8 @@ function BioEditor({ currentBio, profileId, profileType }: { currentBio: string;
 
   const updateBioMutation = useMutation({
     mutationFn: async (newBio: string) => {
-      if (profileType === 'audience') {
-        // For audience profiles, update the user bio
-        return await apiRequest("PUT", "/api/user", { bio: newBio });
-      } else {
-        // For artist/venue profiles, update the profile bio
-        return await apiRequest("PUT", `/api/profiles/${profileId}`, { bio: newBio });
-      }
+      // All profile types use the same profile update endpoint
+      return await apiRequest("PUT", `/api/profiles/${profileId}`, { bio: newBio });
     },
     onSuccess: () => {
       toast({
@@ -61,7 +56,6 @@ function BioEditor({ currentBio, profileId, profileType }: { currentBio: string;
       // Invalidate relevant queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
     onError: (error: any) => {
       toast({

@@ -55,7 +55,7 @@ export default function Landing() {
                 Join our community and create your layered social music experience.
               </p>
               <Button 
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => window.location.href = '/auth'}
                 size="lg"
                 className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 text-lg"
               >

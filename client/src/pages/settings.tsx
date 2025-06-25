@@ -487,6 +487,9 @@ function SettingsContent() {
     return <div>Loading...</div>;
   }
 
+  // Only access activeProfile after it's been initialized
+  const notificationCount = activeProfile && profileNotificationCounts?.[activeProfile.id]?.total || 0;
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold mb-8">Settings</h1>
@@ -897,7 +900,8 @@ function SettingsContent() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center```cpp
+ justify-between">
                 <div>
                   <Label htmlFor="notifyComments">Comments</Label>
                   <p className="text-sm text-muted-foreground">Get notified of new comments on your posts</p>

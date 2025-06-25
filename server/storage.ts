@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { users, profiles, posts, comments, postLikes, friendships, profileMemberships, profileInvitations, albums, photos, photoComments, notifications, bookingRequests, conversationParticipants, conversations, messages, messageReads } from "@shared/schema";
-import { eq, and, or, sql, desc, asc, not, isNull, inArray } from "drizzle-orm";
+import { eq, and, or, sql, desc, asc, not, isNull, inArray, ne, lt, ilike, gt, isNotNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";

@@ -688,12 +688,7 @@ export default function Profile() {
                           </span>
                         </div>
 
-                        <div className="flex items-center">
-                          <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Profile:</span>
-                          <Badge className="bg-fb-blue text-white text-xs">
-                            Audience Member
-                          </Badge>
-                        </div>
+                        
                       </div>
                     </div>
                   </div>

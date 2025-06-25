@@ -1074,7 +1074,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 <span className="flex items-center text-xs sm:text-sm">
                   <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
                   <span className="truncate">
-                    {profile?.location || profile?.hometown || user?.hometown || "Location not specified"}
+                    {profile?.location || user?.hometown || "Location not specified"}
                   </span>
                 </span>
               </div>

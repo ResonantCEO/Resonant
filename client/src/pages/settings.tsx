@@ -520,8 +520,9 @@ function SettingsContent() {
                     <Label htmlFor="profileLocation">Location</Label>
                     <Input
                       id="profileLocation"
-                      value={activeProfile?.location || ''}
+                      value={activeProfile?.location || user?.hometown || ''}
                       onChange={(e) => handleUpdateProfileSetting('location', e.target.value)}
+                      placeholder="Enter your location"
                     />
                   </div>
                   <p className="text-sm text-muted-foreground">

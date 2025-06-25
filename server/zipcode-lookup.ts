@@ -1,179 +1,95 @@
-// Simple zipcode lookup data - in a real app, you'd use a proper API or database
-const zipcodeData: Record<string, { city: string; state: string }> = {
+import fetch from 'node-fetch';
+
+interface ZipcodeApiResponse {
+  'post code': string;
+  country: string;
+  'country abbreviation': string;
+  places: Array<{
+    'place name': string;
+    longitude: string;
+    state: string;
+    'state abbreviation': string;
+    latitude: string;
+  }>;
+}
+
+export async function lookupZipcode(zipcode: string): Promise<{ city: string; state: string } | null> {
+  try {
+    const normalizedZip = zipcode.trim().padStart(5, '0');
+
+    // Validate US zipcode format
+    if (!/^\d{5}$/.test(normalizedZip)) {
+      return null;
+    }
+
+    // Use Zippopotam.us API (free, no API key required)
+    const response = await fetch(`http://api.zippopotam.us/us/${normalizedZip}`);
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data: ZipcodeApiResponse = await response.json();
+
+    if (data.places && data.places.length > 0) {
+      const place = data.places[0];
+      return {
+        city: place['place name'],
+        state: place['state abbreviation']
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error looking up zipcode:', error);
+    // Fallback to hardcoded data for development
+    return lookupZipcodeLocal(zipcode);
+  }
+}
+
+// Keep a small fallback dataset for development/testing
+const fallbackData: Record<string, { city: string; state: string }> = {
   '10001': { city: 'New York', state: 'NY' },
   '90210': { city: 'Beverly Hills', state: 'CA' },
   '02101': { city: 'Boston', state: 'MA' },
   '60601': { city: 'Chicago', state: 'IL' },
   '33101': { city: 'Miami', state: 'FL' },
-  '77001': { city: 'Houston', state: 'TX' },
-  '80201': { city: 'Denver', state: 'CO' },
-  '98101': { city: 'Seattle', state: 'WA' },
-  '85001': { city: 'Phoenix', state: 'AZ' },
-  '30301': { city: 'Atlanta', state: 'GA' },
-  '97201': { city: 'Portland', state: 'OR' },
-  '89101': { city: 'Las Vegas', state: 'NV' },
-  '37201': { city: 'Nashville', state: 'TN' },
-  '75201': { city: 'Dallas', state: 'TX' },
-  '19101': { city: 'Philadelphia', state: 'PA' },
-  '55401': { city: 'Minneapolis', state: 'MN' },
-  '63101': { city: 'St. Louis', state: 'MO' },
-  '21201': { city: 'Baltimore', state: 'MD' },
-  '53201': { city: 'Milwaukee', state: 'WI' },
-  '45201': { city: 'Cincinnati', state: 'OH' },
-  '80525': { city: 'Fort Collins', state: 'CO' },
-  '80526': { city: 'Fort Collins', state: 'CO' },
-  '80527': { city: 'Fort Collins', state: 'CO' },
-  '80528': { city: 'Fort Collins', state: 'CO' },
-  '12345': { city: 'Schenectady', state: 'NY' },
-  '90001': { city: 'Los Angeles', state: 'CA' },
-  '94102': { city: 'San Francisco', state: 'CA' },
-  '78701': { city: 'Austin', state: 'TX' },
-  '20001': { city: 'Washington', state: 'DC' },
-  '43215': { city: 'Columbus', state: 'OH' },
-  '46201': { city: 'Indianapolis', state: 'IN' },
-  '28201': { city: 'Charlotte', state: 'NC' },
-  '32801': { city: 'Orlando', state: 'FL' },
-  '84101': { city: 'Salt Lake City', state: 'UT' },
-  '73101': { city: 'Oklahoma City', state: 'OK' },
-  '67201': { city: 'Wichita', state: 'KS' },
-  '68101': { city: 'Omaha', state: 'NE' },
-  '40201': { city: 'Louisville', state: 'KY' },
-  '50301': { city: 'Des Moines', state: 'IA' },
-  '59101': { city: 'Billings', state: 'MT' },
-  '58501': { city: 'Bismarck', state: 'ND' },
-  '57101': { city: 'Sioux Falls', state: 'SD' },
-  '82001': { city: 'Cheyenne', state: 'WY' },
-  '83201': { city: 'Pocatello', state: 'ID' },
-  '99501': { city: 'Anchorage', state: 'AK' },
-  '96801': { city: 'Honolulu', state: 'HI' },
-  '03101': { city: 'Manchester', state: 'NH' },
-  '05401': { city: 'Burlington', state: 'VT' },
-  '04101': { city: 'Portland', state: 'ME' },
-  '29401': { city: 'Charleston', state: 'SC' },
-  '70112': { city: 'New Orleans', state: 'LA' },
-  '72201': { city: 'Little Rock', state: 'AR' },
-  '39201': { city: 'Jackson', state: 'MS' },
-  '35201': { city: 'Birmingham', state: 'AL' },
-  '88001': { city: 'Las Cruces', state: 'NM' },
-  '87101': { city: 'Albuquerque', state: 'NM' },
-  '86001': { city: 'Flagstaff', state: 'AZ' },
-  '89001': { city: 'Henderson', state: 'NV' },
-  '84601': { city: 'Provo', state: 'UT' },
-  '81601': { city: 'Aspen', state: 'CO' },
-  '59718': { city: 'Bozeman', state: 'MT' },
-  '83025': { city: 'Jackson', state: 'WY' },
-
-  // Virginia zipcodes including 23188
   '23188': { city: 'West Point', state: 'VA' },
-  '23060': { city: 'Glen Allen', state: 'VA' },
-  '23113': { city: 'Midlothian', state: 'VA' },
-  '23173': { city: 'Sandston', state: 'VA' },
-  '23219': { city: 'Richmond', state: 'VA' },
-  '23220': { city: 'Richmond', state: 'VA' },
-  '23221': { city: 'Richmond', state: 'VA' },
-  '23222': { city: 'Richmond', state: 'VA' },
-  '23223': { city: 'Richmond', state: 'VA' },
-  '23224': { city: 'Richmond', state: 'VA' },
-  '23225': { city: 'Richmond', state: 'VA' },
-  '23226': { city: 'Richmond', state: 'VA' },
-  '23227': { city: 'Richmond', state: 'VA' },
-  '23228': { city: 'Richmond', state: 'VA' },
-  '23229': { city: 'Richmond', state: 'VA' },
-  '23230': { city: 'Richmond', state: 'VA' },
-  '23231': { city: 'Richmond', state: 'VA' },
-  '23233': { city: 'Richmond', state: 'VA' },
-  '23234': { city: 'Richmond', state: 'VA' },
-  '23235': { city: 'Richmond', state: 'VA' },
-  '23236': { city: 'Richmond', state: 'VA' },
-  '23237': { city: 'Richmond', state: 'VA' },
-  '23238': { city: 'Richmond', state: 'VA' },
-  '23294': { city: 'Richmond', state: 'VA' },
-  '23295': { city: 'Richmond', state: 'VA' },
-  '22301': { city: 'Alexandria', state: 'VA' },
-  '22302': { city: 'Alexandria', state: 'VA' },
-  '22303': { city: 'Alexandria', state: 'VA' },
-  '22304': { city: 'Alexandria', state: 'VA' },
-  '22305': { city: 'Alexandria', state: 'VA' },
-  '22306': { city: 'Alexandria', state: 'VA' },
-  '22307': { city: 'Alexandria', state: 'VA' },
-  '22308': { city: 'Alexandria', state: 'VA' },
-  '22309': { city: 'Alexandria', state: 'VA' },
-  '22310': { city: 'Alexandria', state: 'VA' },
-  '22311': { city: 'Alexandria', state: 'VA' },
-  '22312': { city: 'Alexandria', state: 'VA' },
-  '22314': { city: 'Alexandria', state: 'VA' },
-  '22315': { city: 'Alexandria', state: 'VA' },
-  '22401': { city: 'Fredericksburg', state: 'VA' },
-  '22402': { city: 'Fredericksburg', state: 'VA' },
-  '22403': { city: 'Fredericksburg', state: 'VA' },
-  '22404': { city: 'Fredericksburg', state: 'VA' },
-  '23451': { city: 'Virginia Beach', state: 'VA' },
-  '23452': { city: 'Virginia Beach', state: 'VA' },
-  '23453': { city: 'Virginia Beach', state: 'VA' },
-  '23454': { city: 'Virginia Beach', state: 'VA' },
-  '23455': { city: 'Virginia Beach', state: 'VA' },
-  '23456': { city: 'Virginia Beach', state: 'VA' },
-  '23457': { city: 'Virginia Beach', state: 'VA' },
-  '23458': { city: 'Virginia Beach', state: 'VA' },
-  '23459': { city: 'Virginia Beach', state: 'VA' },
-  '23460': { city: 'Virginia Beach', state: 'VA' },
-  '23461': { city: 'Virginia Beach', state: 'VA' },
-  '23462': { city: 'Virginia Beach', state: 'VA' },
-  '23464': { city: 'Virginia Beach', state: 'VA' },
-  '23501': { city: 'Norfolk', state: 'VA' },
-  '23502': { city: 'Norfolk', state: 'VA' },
-  '23503': { city: 'Norfolk', state: 'VA' },
-  '23504': { city: 'Norfolk', state: 'VA' },
-  '23505': { city: 'Norfolk', state: 'VA' },
-  '23506': { city: 'Norfolk', state: 'VA' },
-  '23507': { city: 'Norfolk', state: 'VA' },
-  '23508': { city: 'Norfolk', state: 'VA' },
-  '23509': { city: 'Norfolk', state: 'VA' },
-  '23510': { city: 'Norfolk', state: 'VA' },
-  '23511': { city: 'Norfolk', state: 'VA' },
-  '23513': { city: 'Norfolk', state: 'VA' },
-  '23514': { city: 'Norfolk', state: 'VA' },
-  '23515': { city: 'Norfolk', state: 'VA' },
-  '23517': { city: 'Norfolk', state: 'VA' },
-  '23518': { city: 'Norfolk', state: 'VA' },
-  '23551': { city: 'Norfolk', state: 'VA' },
-  '23601': { city: 'Newport News', state: 'VA' },
-  '23602': { city: 'Newport News', state: 'VA' },
-  '23603': { city: 'Newport News', state: 'VA' },
-  '23604': { city: 'Newport News', state: 'VA' },
-  '23605': { city: 'Newport News', state: 'VA' },
-  '23606': { city: 'Newport News', state: 'VA' },
-  '23607': { city: 'Newport News', state: 'VA' },
-  '23608': { city: 'Newport News', state: 'VA' },
-  '23609': { city: 'Newport News', state: 'VA' },
-  '23701': { city: 'Portsmouth', state: 'VA' },
-  '23702': { city: 'Portsmouth', state: 'VA' },
-  '23703': { city: 'Portsmouth', state: 'VA' },
-  '23704': { city: 'Portsmouth', state: 'VA' },
-  '23707': { city: 'Portsmouth', state: 'VA' },
-  '23801': { city: 'Petersburg', state: 'VA' },
-  '23803': { city: 'Petersburg', state: 'VA' },
-  '23805': { city: 'Petersburg', state: 'VA' },
-  '24501': { city: 'Lynchburg', state: 'VA' },
-  '24502': { city: 'Lynchburg', state: 'VA' },
-  '24503': { city: 'Lynchburg', state: 'VA' },
-  '24504': { city: 'Lynchburg', state: 'VA' },
-  '24011': { city: 'Roanoke', state: 'VA' },
-  '24012': { city: 'Roanoke', state: 'VA' },
-  '24013': { city: 'Roanoke', state: 'VA' },
-  '24014': { city: 'Roanoke', state: 'VA' },
-  '24015': { city: 'Roanoke', state: 'VA' },
-  '24016': { city: 'Roanoke', state: 'VA' },
-  '24017': { city: 'Roanoke', state: 'VA' },
-  '24018': { city: 'Roanoke', state: 'VA' },
-  '24019': { city: 'Roanoke', state: 'VA' }
+  '80525': { city: 'Fort Collins', state: 'CO' },
 };
 
-export function lookupZipcode(zipcode: string): { city: string; state: string } | null {
+function lookupZipcodeLocal(zipcode: string): { city: string; state: string } | null {
   const normalizedZip = zipcode.trim().padStart(5, '0');
-  return zipcodeData[normalizedZip] || null;
+  return fallbackData[normalizedZip] || null;
 }
 
 export function formatCityState(city: string, state: string): string {
   return `${city}, ${state}`;
+}
+
+// Add caching for frequently looked up zipcodes
+const zipcodeCache = new Map<string, { city: string; state: string } | null>();
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const cacheTimestamps = new Map<string, number>();
+
+export async function lookupZipcodeWithCache(zipcode: string): Promise<{ city: string; state: string } | null> {
+  const normalizedZip = zipcode.trim().padStart(5, '0');
+  const now = Date.now();
+
+  // Check if we have a cached result that's still valid
+  if (zipcodeCache.has(normalizedZip)) {
+    const timestamp = cacheTimestamps.get(normalizedZip);
+    if (timestamp && now - timestamp < CACHE_TTL) {
+      return zipcodeCache.get(normalizedZip) || null;
+    }
+  }
+
+  // Fetch fresh data
+  const result = await lookupZipcode(normalizedZip);
+
+  // Cache the result
+  zipcodeCache.set(normalizedZip, result);
+  cacheTimestamps.set(normalizedZip, now);
+
+  return result;
 }

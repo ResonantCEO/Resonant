@@ -68,7 +68,7 @@ export function registerRoutes(app: Express): Server {
   app.get('/api/zipcode/:zipcode', async (req, res) => {
     try {
       const { zipcode } = req.params;
-      const result = lookupZipcode(zipcode);
+      const result = await lookupZipcodeWithCache(zipcode);
       
       if (result) {
         res.json({

@@ -11,7 +11,7 @@ export default function Landing() {
           <img src="/resonant-logo.png" alt="Resonant" className="h-40 mx-auto mb-4 block dark:hidden" />
           <img src="/resonant-logo-white.png" alt="Resonant" className="h-48 mx-auto mb-4 hidden dark:block" />
           <p className="text-xl text-gray-600 mb-8">
-            Connect as an audience member, artist, or venue. Build your layered social presence.
+            WHERE ARTISTS, VENUES, AND FANS MEET
           </p>
         </div>
 

@@ -81,7 +81,7 @@ function Router() {
         </Switch>
         <BottomNav />
       </div>
-      
+
       <div className="hidden lg:block">
         <Switch>
           <Route path="/" component={Profile} />

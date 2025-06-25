@@ -634,6 +634,35 @@ export default function Profile() {
                     <p className="text-gray-600 dark:text-gray-400">Get to know this music enthusiast</p>
                   </div>
 
+                  {/* About Me Section - Moved to top */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <FileText className="w-5 h-5 mr-2 text-purple-500" />
+                      About Me
+                    </h4>
+                    
+                    {isOwn ? (
+                      <BioEditor 
+                        currentBio={profile.bio || ""} 
+                        profileId={profileId}
+                        profileType={profile.type}
+                      />
+                    ) : profile.bio ? (
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                        {profile.bio}
+                      </p>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="text-gray-400 dark:text-gray-500 mb-3">
+                          <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                        </div>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                          {`${profile.name} hasn't added a bio yet.`}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Basic Information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Personal Info */}
@@ -822,34 +851,7 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* Bio Section */}
-                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                      <FileText className="w-5 h-5 mr-2 text-purple-500" />
-                      About Me
-                    </h4>
-                    
-                    {isOwn ? (
-                      <BioEditor 
-                        currentBio={profile.bio || ""} 
-                        profileId={profileId}
-                        profileType={profile.type}
-                      />
-                    ) : profile.bio ? (
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                        {profile.bio}
-                      </p>
-                    ) : (
-                      <div className="text-center py-8">
-                        <div className="text-gray-400 dark:text-gray-500 mb-3">
-                          <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                        </div>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm">
-                          {`${profile.name} hasn't added a bio yet.`}
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  
 
                   {/* Activity Stats */}
                   <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">

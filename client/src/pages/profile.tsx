@@ -5,6 +5,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,7 +29,133 @@ import StatsTab from "@/components/stats-tab";
 import GalleryTab from "@/components/gallery-tab";
 import MusicDiscoveryTab from "@/components/music-discovery-tab";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings, ChevronDown, UserPlus, Globe, MapPin, Music } from "lucide-react";
+import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings, ChevronDown, UserPlus, Globe, MapPin, Music, Edit, Save, X } from "lucide-react";
+
+// Bio Editor Component
+function BioEditor({ currentBio, profileId, profileType }: { currentBio: string; profileId: number; profileType: string }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [bioText, setBioText] = useState(currentBio);
+  const { toast } = useToast();
+
+  // Update local state when currentBio changes
+  React.useEffect(() => {
+    setBioText(currentBio);
+  }, [currentBio]);
+
+  const updateBioMutation = useMutation({
+    mutationFn: async (newBio: string) => {
+      if (profileType === 'audience') {
+        // For audience profiles, update the user bio
+        return await apiRequest("PUT", "/api/user", { bio: newBio });
+      } else {
+        // For artist/venue profiles, update the profile bio
+        return await apiRequest("PUT", `/api/profiles/${profileId}`, { bio: newBio });
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Bio updated",
+        description: "Your bio has been saved successfully.",
+      });
+      setIsEditing(false);
+      // Invalidate relevant queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profileId}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update bio",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSave = () => {
+    updateBioMutation.mutate(bioText);
+  };
+
+  const handleCancel = () => {
+    setBioText(currentBio);
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="space-y-4">
+        <Textarea
+          value={bioText}
+          onChange={(e) => setBioText(e.target.value)}
+          placeholder="Tell people about yourself..."
+          className="min-h-32"
+          maxLength={500}
+        />
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-500">
+            {bioText.length}/500 characters
+          </span>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleCancel}
+              disabled={updateBioMutation.isPending}
+            >
+              <X className="w-4 h-4 mr-1" />
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={updateBioMutation.isPending}
+            >
+              <Save className="w-4 h-4 mr-1" />
+              {updateBioMutation.isPending ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {currentBio ? (
+        <div className="relative group">
+          <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+            {currentBio}
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsEditing(true)}
+            className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Edit className="w-3 h-3 mr-1" />
+            Edit
+          </Button>
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <div className="text-gray-400 dark:text-gray-500 mb-3">
+            <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+            You haven't added a bio yet. Click the button below to add one!
+          </p>
+          <Button
+            size="sm"
+            onClick={() => setIsEditing(true)}
+          >
+            <Edit className="w-4 h-4 mr-1" />
+            Add Bio
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Profile() {
   const { id } = useParams<{ id: string }>();
@@ -599,7 +726,14 @@ export default function Profile() {
                       <FileText className="w-5 h-5 mr-2 text-purple-500" />
                       About Me
                     </h4>
-                    {profile.bio ? (
+                    
+                    {isOwn ? (
+                      <BioEditor 
+                        currentBio={profile.bio || ""} 
+                        profileId={profileId}
+                        profileType={profile.type}
+                      />
+                    ) : profile.bio ? (
                       <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                         {profile.bio}
                       </p>
@@ -609,16 +743,8 @@ export default function Profile() {
                           <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
                         </div>
                         <p className="text-gray-500 dark:text-gray-400 text-sm">
-                          {isOwn 
-                            ? "You haven't added a bio yet. Share something about yourself in your profile settings."
-                            : `${profile.name} hasn't added a bio yet.`
-                          }
+                          {`${profile.name} hasn't added a bio yet.`}
                         </p>
-                        {isOwn && (
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                            Go to Settings → Profile to add your bio
-                          </p>
-                        )}
                       </div>
                     )}
                   </div>

@@ -209,7 +209,7 @@ export default function AuthPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <img src="/resonant-logo-login-new.png" alt="Resonant" className="h-20 mx-auto mb-4" />
-            <p className="text-gray-800 font-bold text-lg">Connect with your community</p>
+            <p className="text-black font-bold text-xl mb-2">Connect with your community</p>
           </div>
 
           <Card>

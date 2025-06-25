@@ -641,33 +641,33 @@ export default function Profile() {
                       Personal Information
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {user?.firstName || user?.lastName ? (
-                          <div className="flex items-center">
-                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Name:</span>
+                          <div className="flex items-center space-x-3">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[80px]">Name:</span>
                             <span className="text-gray-900 dark:text-white">{user.firstName} {user.lastName}</span>
                           </div>
                         ) : null}
 
                         {profile.location && (
-                          <div className="flex items-center">
-                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Location:</span>
+                          <div className="flex items-center space-x-3">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[80px]">Location:</span>
                             <span className="text-gray-900 dark:text-white">{profile.location}</span>
                           </div>
                         )}
 
                         {user?.hometown && (
-                          <div className="flex items-center">
-                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Hometown:</span>
+                          <div className="flex items-center space-x-3">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[80px]">Hometown:</span>
                             <span className="text-gray-900 dark:text-white">{user.hometown}</span>
                           </div>
                         )}
                       </div>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {user?.birthdate && (
-                          <div className="flex items-center">
-                            <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Birthday:</span>
+                          <div className="flex items-center space-x-3">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[80px]">Birthday:</span>
                             <span className="text-gray-900 dark:text-white">
                               {new Date(user.birthdate).toLocaleDateString('en-US', { 
                                 month: 'long', 
@@ -677,8 +677,8 @@ export default function Profile() {
                           </div>
                         )}
 
-                        <div className="flex items-center">
-                          <span className="text-gray-600 dark:text-gray-400 font-medium w-20">Joined:</span>
+                        <div className="flex items-center space-x-3">
+                          <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[80px]">Joined:</span>
                           <span className="text-gray-900 dark:text-white">
                             {new Date(profile.createdAt).toLocaleDateString('en-US', { 
                               year: 'numeric', 

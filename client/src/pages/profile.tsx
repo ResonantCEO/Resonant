@@ -738,7 +738,7 @@ export default function Profile() {
                             [...new Set(followedArtists.filter(artist => artist.genre).map(artist => artist.genre))].slice(0, 5).map((genre, index) => (
                               <span 
                                 key={index}
-                                className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full"
+                                className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
                               >
                                 {genre}
                               </span>
@@ -748,7 +748,7 @@ export default function Profile() {
                             ['Alternative Rock', 'Electronic', 'Indie Pop'].map((genre, index) => (
                               <span 
                                 key={index}
-                                className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full opacity-50"
+                                className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-full opacity-50"
                               >
                                 {genre}
                               </span>
@@ -761,17 +761,17 @@ export default function Profile() {
                       <div>
                         <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Music Activity</h5>
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="flex items-center space-x-2 text-sm">
+                          <div className="flex items-center space-x-2">
                             <Users className="w-4 h-4 text-purple-500" />
-                            <span className="text-gray-600 dark:text-gray-400">Following:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white">
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Following:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
                               {followedArtists.length} artists
                             </span>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm">
+                          <div className="flex items-center space-x-2">
                             <Calendar className="w-4 h-4 text-orange-500" />
-                            <span className="text-gray-600 dark:text-gray-400">Member since:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white">
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Member since:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
                               {new Date(profile.createdAt).getFullYear()}
                             </span>
                           </div>
@@ -782,17 +782,17 @@ export default function Profile() {
                       <div>
                         <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Discovery Style</h5>
                         <div className="flex flex-wrap gap-2">
-                          <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full flex items-center">
+                          <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full flex items-center">
                             <Search className="w-3 h-3 mr-1" />
                             Explorer
                           </span>
                           {followedArtists.length > 5 && (
-                            <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs rounded-full flex items-center">
+                            <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm rounded-full flex items-center">
                               <TrendingUp className="w-3 h-3 mr-1" />
                               Trendsetter
                             </span>
                           )}
-                          <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full flex items-center">
+                          <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full flex items-center">
                             <Heart className="w-3 h-3 mr-1" />
                             Community Member
                           </span>

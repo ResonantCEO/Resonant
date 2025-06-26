@@ -1858,7 +1858,7 @@ export class Storage {
     // Implementation for reporting profiles would go here
     // For now, just log the report
     console.log(`Profile ${reportedProfileId} reported by ${reporterId} for: ${reason}`);
-  },
+  }
 
   async trackProfileView(viewerId: number, viewerProfileId: number, viewedProfileId: number, sessionId?: string, ipAddress?: string, userAgent?: string) {
     // Don't track self-views

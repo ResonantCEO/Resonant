@@ -211,6 +211,11 @@ export default function Profile() {
     enabled: !!profileId && profile?.type === 'audience',
   });
 
+  const { data: mostViewedArtist } = useQuery({
+    queryKey: [`/api/profiles/${profileId}/most-viewed-artist`],
+    enabled: !!profileId && profile?.type === 'audience' && isOwn,
+  });
+
   const sendFriendRequestMutation = useMutation({
     mutationFn: async (profileId: number) => {
       return await apiRequest("POST", "/api/friend-requests", { addresseeId: profileId });
@@ -799,8 +804,61 @@ export default function Profile() {
                         </div>
                       </div>
 
-                      {/* Following Artists */}
-                      {followedArtists.length > 0 && (
+                      {/* Most Viewed Artist (for own profile) or Following Artists (for others) */}
+                      {isOwn && mostViewedArtist ? (
+                        <div>
+                          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Most Viewed Artist (Last 30 Days)</h5>
+                          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-6 border-2 border-blue-200 dark:border-blue-700/30">
+                            <div 
+                              className="cursor-pointer hover:scale-105 transition-transform"
+                              onClick={() => setLocation(`/profile/${mostViewedArtist.profile.id}`)}
+                            >
+                              <div className="flex items-center space-x-4 mb-4">
+                                <Avatar className="w-16 h-16 ring-3 ring-blue-300 dark:ring-blue-600">
+                                  <AvatarImage src={mostViewedArtist.profile.profileImageUrl} alt={mostViewedArtist.profile.name} />
+                                  <AvatarFallback className="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-lg font-bold">
+                                    {mostViewedArtist.profile.name.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                  <h6 className="font-bold text-lg text-gray-900 dark:text-white truncate">
+                                    {mostViewedArtist.profile.name}
+                                  </h6>
+                                  {mostViewedArtist.profile.genre && (
+                                    <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                                      {mostViewedArtist.profile.genre}
+                                    </p>
+                                  )}
+                                  {mostViewedArtist.profile.location && (
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+                                      <MapPin className="w-4 h-4 mr-1" />
+                                      {mostViewedArtist.profile.location}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center mt-2">
+                                    <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
+                                    <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                                      {mostViewedArtist.viewCount} profile visits
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              {mostViewedArtist.profile.bio && (
+                                <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 bg-white/50 dark:bg-gray-800/50 rounded-lg p-3">
+                                  {mostViewedArtist.profile.bio}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="mt-4 text-center">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              This is the artist profile you've visited most frequently in the past 30 days. 
+                              <br />
+                              Visit counts reset monthly to show your current music interests.
+                            </p>
+                          </div>
+                        </div>
+                      ) : !isOwn && followedArtists.length > 0 ? (
                         <div>
                           <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Following Artists ({followedArtists.length})</h5>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -844,14 +902,11 @@ export default function Profile() {
                           </div>
                           <div className="mt-4 text-center">
                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                              {isOwn 
-                                ? "These are the artists you're connected with on Resonant"
-                                : `${profile.name} is connected with ${followedArtists.length} artist${followedArtists.length !== 1 ? 's' : ''}`
-                              }
+                              {`${profile.name} is connected with ${followedArtists.length} artist${followedArtists.length !== 1 ? 's' : ''}`}
                             </p>
                           </div>
                         </div>
-                      )}
+                      ) : null}
 
                       {/* No Activity State */}
                       {followedArtists.length === 0 && (

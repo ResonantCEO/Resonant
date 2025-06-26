@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles, bookingRequests, contractProposals, contractNegotiations, contractSignatures } from "@shared/schema";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles, bookingRequests, contractProposals, contractNegotiations, contractSignatures, profileViews } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -985,6 +985,21 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "Profile not found" });
       }
 
+      // Track profile view if user is authenticated
+      if (req.user) {
+        const activeProfile = await storage.getActiveProfile(req.user.id);
+        if (activeProfile) {
+          await storage.trackProfileView(
+            req.user.id,
+            activeProfile.id,
+            profileId,
+            req.sessionID,
+            req.ip,
+            req.get('User-Agent')
+          );
+        }
+      }
+
       res.json(profile);
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -1522,6 +1537,30 @@ export function registerRoutes(app: Express): Server {
     } catch (error) {
       console.error("Error fetching followed artists:", error);
       res.status(500).json({ message: "Failed to fetch followed artists" });
+    }
+  });
+
+  // Get most viewed artist profile for a user
+  app.get('/api/profiles/:id/most-viewed-artist', isAuthenticated, async (req: any, res) => {
+    try {
+      const profileId = parseInt(req.params.id);
+      
+      // Verify the profile belongs to the authenticated user or allow if public
+      const profile = await storage.getProfile(profileId);
+      if (!profile) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+
+      // Only allow the profile owner to view their most viewed data
+      if (profile.userId !== req.user.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const mostViewedArtist = await storage.getMostViewedArtistProfile(req.user.id, profileId);
+      res.json(mostViewedArtist);
+    } catch (error) {
+      console.error("Error fetching most viewed artist:", error);
+      res.status(500).json({ message: "Failed to fetch most viewed artist" });
     }
   });
 

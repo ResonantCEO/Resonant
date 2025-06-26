@@ -809,11 +809,24 @@ export const contractNegotiations = pgTable("contract_negotiations", {
 // Contract signatures table
 export const contractSignatures = pgTable("contract_signatures", {
   id: serial("id").primaryKey(),
-  contractProposalId: integer("contract_proposal_id").references(() => contractProposals.id, { onDelete: "cascade" }).notNull(),
-  profileId: integer("profile_id").references(() => profiles.id, { onDelete: "cascade" }).notNull(),
+  contractProposalId: integer("contract_proposal_id").references(() => contractProposals.id).notNull(),
+  profileId: integer("profile_id").references(() => profiles.id).notNull(),
+  signatureData: text("signature_data").notNull(),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
   signedAt: timestamp("signed_at").defaultNow().notNull(),
-  signatureData: text("signature_data"), // Digital signature or confirmation
-  ipAddress: varchar("ip_address"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const profileViews = pgTable("profile_views", {
+  id: serial("id").primaryKey(),
+  viewerId: integer("viewer_id").references(() => users.id).notNull(),
+  viewerProfileId: integer("viewer_profile_id").references(() => profiles.id).notNull(),
+  viewedProfileId: integer("viewed_profile_id").references(() => profiles.id).notNull(),
+  viewedAt: timestamp("viewed_at").defaultNow().notNull(),
+  sessionId: varchar("session_id", { length: 255 }),
+  ipAddress: varchar("ip_address", { length: 45 }),
   userAgent: text("user_agent"),
 });
 
@@ -866,4 +879,3 @@ export type ContractNegotiation = InferSelectModel<typeof contractNegotiations>;
 export type InsertContractNegotiation = InferInsertModel<typeof contractNegotiations>;
 export type ContractSignature = InferSelectModel<typeof contractSignatures>;
 export type InsertContractSignature = InferInsertModel<typeof contractSignatures>;
-

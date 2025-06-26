@@ -1858,7 +1858,7 @@ export class Storage {
     // Implementation for reporting profiles would go here
     // For now, just log the report
     console.log(`Profile ${reportedProfileId} reported by ${reporterId} for: ${reason}`);
-  },
+  }
 
   async trackProfileView(viewerId: number, viewerProfileId: number, viewedProfileId: number, sessionId?: string, ipAddress?: string, userAgent?: string) {
     // Don't track self-views
@@ -1889,7 +1889,7 @@ export class Storage {
         viewedAt: new Date()
       });
     }
-  },
+  }
 
   async getMostViewedArtistProfile(viewerId: number, viewerProfileId: number) {
     // Get the most viewed artist profile in the last 30 days
@@ -1923,7 +1923,7 @@ export class Storage {
       .limit(1);
 
     return mostViewed[0] || null;
-  },
+  }
 
   async getProfilePhotos(profileId: number) {
     const result = await db

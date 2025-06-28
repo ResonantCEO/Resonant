@@ -202,12 +202,12 @@ export default function Profile() {
     enabled: !!profileId, // Only run query when we have a profile ID
   });
 
+  // Define isOwn early to avoid temporal dead zone
+  const isOwn = user && profile && user.id === profile.userId;
+
   const { data: user } = useQuery({
     queryKey: ["/api/user"],
   });
-
-  // Define isOwn early to avoid temporal dead zone
-  const isOwn = user && profile && user.id === profile.userId;
 
   const { data: followedArtists = [] } = useQuery({
     queryKey: [`/api/profiles/${profileId}/following-artists`],
@@ -644,7 +644,6 @@ export default function Profile() {
                   </div>
 
                   {/* Personal Information - Moved to top */}
-                  ```python
                   <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
                     <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                       <Users className="w-5 h-5 mr-2 text-blue-500" />
@@ -1145,7 +1144,7 @@ export default function Profile() {
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
                       <div className="flex items-center mb-4">
                         <div className="bg-green-100 dark:bg-green-900 p-2 rounded-lg">
-                          <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="This commit modifies the Profile component to correctly display custom background images by using the user's background image URL when the custom photo option is selected.none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                           </svg>
                         </div>
@@ -1212,8 +1211,7 @@ export default function Profile() {
                       <div className="flex items-center mb-4">
                         <div className="bg-yellow-100 dark:bg-yellow-900 p-2 rounded-lg">
                           <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}```python
- d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 002 2h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a2 2 0 00-2-2z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 002 2h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a2 2 0 00-2-2z" />
                           </svg>
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white ml-3">

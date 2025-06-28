@@ -72,7 +72,12 @@ import {
   PlayCircle,
   Pause,
   Volume2,
-  Star
+  Star,
+  Menu,
+  ChevronDown,
+  FileText,
+  Save,
+  X
 } from "lucide-react";
 
 // Bio Editor Component

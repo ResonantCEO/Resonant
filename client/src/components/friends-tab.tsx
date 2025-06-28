@@ -362,47 +362,7 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
         </div>
       </div>
 
-      {/* Friend Requests Section (for own profiles) */}
-      {isOwn && friendRequests && friendRequests.length > 0 && (
-        <Card className="border-gray-800 bg-gray-900 shadow-2xl">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg border-b border-gray-700">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center">
-                <UserPlus className="w-5 h-5 mr-2" />
-                <span className="text-lg font-semibold">Friend Requests</span>
-              </div>
-              <Badge className="bg-gray-800 text-white font-bold border border-gray-600 px-3 py-1 rounded-full">
-                {friendRequests.length}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 bg-gray-900">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {friendRequests.map((request: any) => {
-                console.log('Rendering friend request:', request);
-                return (
-                  <FriendRequestCard key={request.id || request.friendship?.id} request={request} />
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Empty Friend Requests State (for own profiles) */}
-      {isOwn && (!friendRequests || friendRequests.length === 0) && (
-        <Card className="border-dashed border-2 border-gray-600 bg-gray-900/50">
-          <CardContent className="p-6 text-center">
-            <UserPlus className="w-8 h-8 mx-auto text-gray-500 mb-3" />
-            <p className="text-sm text-gray-400 mb-2">
-              No pending friend requests
-            </p>
-            <p className="text-xs text-gray-500">
-              When someone sends you a friend request, it will appear here
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      
 
       {/* Friends List */}
       <Card>

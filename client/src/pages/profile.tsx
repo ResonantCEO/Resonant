@@ -593,7 +593,7 @@ export default function Profile() {
                       ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
                       : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                   }`}
-                  onClick={()={() => {
+                  onClick={() => {
                     setLocation("/friends");
                     setIsMobileMenuOpen(false);
                   }}

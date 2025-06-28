@@ -830,42 +830,112 @@ export default function Profile() {
                             <Star className="w-4 h-4 text-yellow-500" />
                             <span className="text-gray-600 dark:text-gray-400 text-sm">Top Genre:</span>
                             <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              {followedArtists.length > 0 ? [...new Set(followedArtists.filter(artist => artist.genre).map(artist => artist.genre))][0] : 'N/A'}
+                              {followedArtists.length > 0 ? [...new Set(followedArtists.filter(artist => artist.genre).map(artist => artist.genre))][0] : 'Alternative Rock'}
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
                             <Heart className="w-4 h-4 text-red-500" />
                             <span className="text-gray-600 dark:text-gray-400 text-sm">Favorite Artist:</span>
                              <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              {followedArtists.length > 0 ? followedArtists[0].name : 'N/A'}
+                              {followedArtists.length > 0 ? followedArtists[0].name : 'Arctic Monkeys'}
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
                             <Headphones className="w-4 h-4 text-blue-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Listening To:</span>
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Currently Playing:</span>
                             <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              Indie Rock
+                              Indie Rock Playlist
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Mic className="w-4 h-4 text-green-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Latest Release:</span>
+                            <Volume2 className="w-4 h-4 text-green-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Daily Listen Time:</span>
                             <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              New Single
-                            </span>
-                          </div>
-                           <div className="flex items-center space-x-2">
-                            <Music className="w-4 h-4 text-purple-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Music Score:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              85
+                              4.2 hours
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Calendar className="w-4 h-4 text-orange-500" />
+                            <PlayCircle className="w-4 h-4 text-purple-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Playlists Created:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              12
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Music className="w-4 h-4 text-pink-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Songs Discovered:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              247 this month
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Users className="w-4 h-4 text-indigo-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Concerts Attended:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              8 this year
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <TrendingUp className="w-4 h-4 text-emerald-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Music Discovery:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              Explorer Level
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Bookmark className="w-4 h-4 text-orange-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Saved Albums:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              34
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Share2 className="w-4 h-4 text-teal-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Music Shared:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              156 tracks
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Award className="w-4 h-4 text-amber-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Top Fan Badge:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              Local Scene Supporter
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4 text-cyan-500" />
                             <span className="text-gray-600 dark:text-gray-400 text-sm">Member since:</span>
                             <span className="font-semibold text-gray-900 dark:text-white text-sm">
                               {new Date(profile.createdAt).getFullYear()}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Target className="w-4 h-4 text-rose-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Listening Streak:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              42 days
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Zap className="w-4 h-4 text-yellow-600" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Music Energy:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              High Tempo Lover
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <MapPin className="w-4 h-4 text-violet-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Local Scene:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              Active Participant
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <MessageCircle className="w-4 h-4 text-sky-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Music Reviews:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              23 written
                             </span>
                           </div>
                         </div>

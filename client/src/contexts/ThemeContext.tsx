@@ -13,35 +13,57 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Initialize theme state first (before any conditional logic)
+  // Always call useAuth first
+  const { user } = useAuth();
+  
+  // Initialize theme state with proper fallback logic
   const [theme, setTheme] = useState<Theme>(() => {
+    // First check if user has a theme preference
+    if (user?.theme) {
+      return user.theme as Theme;
+    }
+    // Then check localStorage
     const saved = localStorage.getItem('app-theme');
-    return saved as Theme || "light";
+    return (saved as Theme) || "light";
   });
   
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
   const [hasInitialized, setHasInitialized] = useState(false);
-  
-  // Always call useAuth after state initialization
-  const { user } = useAuth();
 
-  // Handle user theme initialization only once
+  // Handle user theme initialization
   useEffect(() => {
-    if (!hasInitialized && user?.theme) {
-      setTheme(user.theme as Theme);
-      localStorage.setItem('app-theme', user.theme);
+    if (user?.theme && !hasInitialized) {
+      const userTheme = user.theme as Theme;
+      setTheme(userTheme);
+      localStorage.setItem('app-theme', userTheme);
+      setHasInitialized(true);
+    } else if (!user && !hasInitialized) {
+      // If no user, check localStorage
+      const saved = localStorage.getItem('app-theme');
+      if (saved) {
+        setTheme(saved as Theme);
+      }
       setHasInitialized(true);
     }
-  }, [user?.theme, hasInitialized]);
+  }, [user, hasInitialized]);
 
   // Handle theme changes and system theme detection
   useEffect(() => {
     const root = window.document.documentElement;
     
     const updateTheme = (newTheme: "light" | "dark") => {
+      // Remove both classes first
       root.classList.remove("light", "dark");
+      // Add the new theme class
       root.classList.add(newTheme);
       setResolvedTheme(newTheme);
+      
+      // Debug logging
+      console.log(`Theme updated to: ${newTheme}`, {
+        themeState: theme,
+        rootClasses: root.className,
+        resolvedTheme: newTheme
+      });
     };
 
     if (theme === "system") {
@@ -56,7 +78,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       mediaQuery.addEventListener("change", handleChange);
       return () => mediaQuery.removeEventListener("change", handleChange);
     } else {
-      updateTheme(theme);
+      updateTheme(theme as "light" | "dark");
     }
   }, [theme]);
 

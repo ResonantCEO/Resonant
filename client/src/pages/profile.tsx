@@ -197,17 +197,17 @@ export default function Profile() {
   // If no ID is provided, use the active profile ID
   const profileId = id ? parseInt(id) : activeProfile?.id;
 
+  const { data: user } = useQuery({
+    queryKey: ["/api/user"],
+  });
+
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: [`/api/profiles/${profileId}`],
     enabled: !!profileId, // Only run query when we have a profile ID
   });
 
-  // Define isOwn early to avoid temporal dead zone
+  // Define isOwn after both user and profile are declared
   const isOwn = user && profile && user.id === profile.userId;
-
-  const { data: user } = useQuery({
-    queryKey: ["/api/user"],
-  });
 
   const { data: followedArtists = [] } = useQuery({
     queryKey: [`/api/profiles/${profileId}/following-artists`],

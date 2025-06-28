@@ -29,7 +29,51 @@ import StatsTab from "@/components/stats-tab";
 import GalleryTab from "@/components/gallery-tab";
 import MusicDiscoveryTab from "@/components/music-discovery-tab";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, BarChart3, FileText, MessageSquare, Menu, Home, Search, Settings, ChevronDown, UserPlus, Globe, MapPin, Music, Edit, Save, X, Calendar, Heart, TrendingUp } from "lucide-react";
+import {
+  Heart,
+  MapPin,
+  Calendar,
+  Users,
+  Search,
+  Music,
+  TrendingUp,
+  Mail,
+  UserPlus,
+  UserMinus,
+  MessageCircle,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Upload,
+  Camera,
+  Settings,
+  Download,
+  Eye,
+  EyeOff,
+  Share2,
+  MoreHorizontal,
+  Bookmark,
+  Flag,
+  Edit,
+  Trash2,
+  AlertTriangle,
+  Loader2,
+  ArrowLeft,
+  ExternalLink,
+  Zap,
+  Award,
+  Target,
+  Globe,
+  Home,
+  Building,
+  Mic,
+  Headphones,
+  BarChart3,
+  PlayCircle,
+  Pause,
+  Volume2,
+  Star
+} from "lucide-react";
 
 // Bio Editor Component
 function BioEditor({ currentBio, profileId, profileType }: { currentBio: string; profileId: number; profileType: string }) {
@@ -191,6 +235,13 @@ export default function Profile() {
       queryClient.invalidateQueries(["/api/profiles"]);
       // Navigate to profile page instead of reloading
       setLocation("/profile");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update bio",
+        variant: "destructive",
+      });
     },
   });
 
@@ -542,7 +593,7 @@ export default function Profile() {
                       ? "bg-blue-500 !text-white hover:bg-blue-600 font-medium" 
                       : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                   }`}
-                  onClick={() => {
+                  onClick={()={() => {
                     setLocation("/friends");
                     setIsMobileMenuOpen(false);
                   }}
@@ -770,11 +821,39 @@ export default function Profile() {
                       <div>
                         <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Music Activity</h5>
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="flex items-center space-x-2">
-                            <Users className="w-4 h-4 text-purple-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Following:</span>
+                           <div className="flex items-center space-x-2">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Top Genre:</span>
                             <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              {followedArtists.length} artists
+                              {followedArtists.length > 0 ? [...new Set(followedArtists.filter(artist => artist.genre).map(artist => artist.genre))][0] : 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Heart className="w-4 h-4 text-red-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Favorite Artist:</span>
+                             <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              {followedArtists.length > 0 ? followedArtists[0].name : 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Headphones className="w-4 h-4 text-blue-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Listening To:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              Indie Rock
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Mic className="w-4 h-4 text-green-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Latest Release:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              New Single
+                            </span>
+                          </div>
+                           <div className="flex items-center space-x-2">
+                            <Music className="w-4 h-4 text-purple-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Music Score:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              85
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">

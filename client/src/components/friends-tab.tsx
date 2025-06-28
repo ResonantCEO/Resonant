@@ -339,13 +339,10 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header - simplified for embedded view */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Friends
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 dark:text-gray-400">
             {friends?.length || 0} connections
           </p>
         </div>

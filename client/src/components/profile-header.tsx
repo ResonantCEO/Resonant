@@ -1252,12 +1252,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   About
                 </TabsTrigger>
               )}
-              {/* Friends tab - only for non-artist profiles */}
-              {profile?.type !== "artist" && (
-                <TabsTrigger value="friends" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
-                  Friends
-                </TabsTrigger>
-              )}
+              
               <TabsTrigger value="photos" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                 Gallery
               </TabsTrigger>

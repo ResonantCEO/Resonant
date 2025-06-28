@@ -30,10 +30,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
   const [hasInitialized, setHasInitialized] = useState(false);
 
-  // Handle user theme initialization
+  // Handle user theme changes and initialization
   useEffect(() => {
-    if (user?.theme && !hasInitialized) {
+    if (user?.theme) {
       const userTheme = user.theme as Theme;
+      // Always update theme when user data changes
       setTheme(userTheme);
       localStorage.setItem('app-theme', userTheme);
       setHasInitialized(true);
@@ -45,7 +46,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       }
       setHasInitialized(true);
     }
-  }, [user, hasInitialized]);
+  }, [user?.theme, hasInitialized]);
 
   // Handle theme changes and system theme detection
   useEffect(() => {
@@ -83,6 +84,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   const handleSetTheme = (newTheme: Theme) => {
+    console.log('ThemeContext: Setting theme to', newTheme);
     setTheme(newTheme);
     localStorage.setItem('app-theme', newTheme);
   };

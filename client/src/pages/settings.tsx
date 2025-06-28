@@ -10,6 +10,7 @@ import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useToast } from '../hooks/use-toast';
+import { useTheme } from '../contexts/ThemeContext';
 import { Trash2, User, Palette, Bell, Shield, Globe, Camera } from 'lucide-react';
 import {
   AlertDialog,
@@ -28,6 +29,7 @@ import { useZipcodeLookup } from '../hooks/useZipcodeLookup';
 
 function SettingsContent() {
   const { user, updateUser } = useAuth();
+  const { setTheme } = useTheme();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
@@ -268,7 +270,14 @@ function SettingsContent() {
   });
 
   const handleUpdateSetting = (key: string, value: any) => {
+    console.log('Settings: Updating setting', key, 'to', value);
     updateUserMutation.mutate({ [key]: value });
+    
+    // If theme is being updated, also update the ThemeContext
+    if (key === 'theme') {
+      console.log('Settings: Also updating ThemeContext to', value);
+      setTheme(value);
+    }
   };
 
   // Debounced update functions

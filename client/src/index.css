@@ -6,7 +6,7 @@
   --background: 0 0% 100%;
   --foreground: 20 14.3% 4.1%;
   --muted: 60 4.8% 95.9%;
-  --muted-foreground: 25 5.3% 44.7%;
+  --muted-foreground: 25 5.3% 35%; /* Darker for better contrast */
   --popover: 0 0% 100%;
   --popover-foreground: 20 14.3% 4.1%;
   --card: 0 0% 100%;
@@ -672,6 +672,29 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-family: 'Inter', sans-serif;
+  }
+
+  /* Light mode text visibility fixes */
+  .text-neutral-600 {
+    color: rgb(75 85 99); /* Darker gray for better contrast in light mode */
+  }
+  
+  .text-neutral-500 {
+    color: rgb(107 114 128); /* Medium gray with good contrast */
+  }
+  
+  .text-neutral-400 {
+    color: rgb(156 163 175); /* Light gray but still visible */
+  }
+  
+  /* Ensure profile metadata is visible in light mode */
+  .profile-metadata {
+    color: rgb(75 85 99) !important;
+  }
+  
+  .profile-location,
+  .profile-friends-count {
+    color: rgb(75 85 99) !important;
   }
 
   /* Smooth transitions for theme switching */

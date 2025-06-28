@@ -49,12 +49,14 @@
 
 /* Enhanced light mode visibility for tabs and content */
 .light .bg-white {
-  background-color: hsl(0 0% 100%) !important;
-  border: 1px solid hsl(214.3 31.8% 91.4%) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(8px) !important;
 }
 
 .light .bg-muted {
-  background-color: hsl(210 40% 98%) !important;
+  background-color: rgba(248, 250, 252, 0.9) !important;
+  backdrop-filter: blur(8px) !important;
 }
 
 .light .text-muted-foreground {
@@ -62,15 +64,42 @@
 }
 
 .light .border {
-  border-color: hsl(214.3 31.8% 91.4%) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
 }
 
 .light .border-neutral-200 {
-  border-color: hsl(214.3 31.8% 91.4%) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
 }
 
 .light .shadow-sm {
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Force visibility for main content containers in light mode */
+.light [data-tabs-content] {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.light .rounded-xl,
+.light .rounded-lg {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Ensure tab triggers are visible */
+.light [role="tablist"] button {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: hsl(222.2 84% 4.9%) !important;
+}
+
+.light [role="tablist"] button[data-state="active"] {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  color: hsl(222.2 84% 4.9%) !important;
 }
 
 /* Ensure proper contrast for tabs and content */

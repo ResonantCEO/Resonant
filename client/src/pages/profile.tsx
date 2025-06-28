@@ -206,6 +206,9 @@ export default function Profile() {
     queryKey: ["/api/user"],
   });
 
+  // Define isOwn early to avoid temporal dead zone
+  const isOwn = user && profile && user.id === profile.userId;
+
   const { data: followedArtists = [] } = useQuery({
     queryKey: [`/api/profiles/${profileId}/following-artists`],
     enabled: !!profileId && profile?.type === 'audience',
@@ -289,7 +292,8 @@ export default function Profile() {
     );
   }
 
-  const isOwn = activeProfile?.id === profile?.id;
+  // isOwn is now defined earlier to avoid temporal dead zone issues
+
   const isSharedProfile = profile?.type === "artist" || profile?.type === "venue";
 
   // For shared profiles, always show management if user owns the profile
@@ -640,6 +644,7 @@ export default function Profile() {
                   </div>
 
                   {/* Personal Information - Moved to top */}
+                  ```python
                   <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
                     <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                       <Users className="w-5 h-5 mr-2 text-blue-500" />
@@ -668,7 +673,7 @@ export default function Profile() {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="space-y-4">
                         {user?.birthdate && (
                           <div className="flex items-center space-x-3">
@@ -693,7 +698,7 @@ export default function Profile() {
                           </span>
                         </div>
 
-                        
+
                       </div>
                     </div>
                   </div>
@@ -704,7 +709,7 @@ export default function Profile() {
                       <FileText className="w-5 h-5 mr-2 text-purple-500" />
                       About Me
                     </h4>
-                    
+
                     {isOwn ? (
                       <BioEditor 
                         currentBio={profile.bio || ""} 
@@ -934,7 +939,7 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  
+
 
                   {/* Activity Stats */}
                   <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
@@ -1002,7 +1007,7 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  
+
 
                   {/* Contact & Social */}
                   {profile.website && (
@@ -1207,7 +1212,8 @@ export default function Profile() {
                       <div className="flex items-center mb-4">
                         <div className="bg-yellow-100 dark:bg-yellow-900 p-2 rounded-lg">
                           <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 002 2h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a2 2 0 00-2-2z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}```python
+ d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 002 2h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a2 2 0 00-2-2z" />
                           </svg>
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white ml-3">

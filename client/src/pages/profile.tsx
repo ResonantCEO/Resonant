@@ -27,7 +27,7 @@ import EPKTab from "@/components/epk-tab";
 import FriendsTab from "@/components/friends-tab";
 import StatsTab from "@/components/stats-tab";
 import GalleryTab from "@/components/gallery-tab";
-import MusicDiscoveryTab from "@/components/music-discovery-tab";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Heart,
@@ -309,7 +309,7 @@ export default function Profile() {
         // Validate that the stored tab is valid for this profile type
         const validTabs = profile.type === 'artist' 
           ? ['epk', 'community', 'stats', 'photos', 'members', 'management']
-          : ['posts', 'about', 'music-discovery', 'friends', 'photos', 'members', 'management'];
+          : ['posts', 'about', 'friends', 'photos', 'members', 'management'];
 
         if (validTabs.includes(storedTab)) {
           setActiveTab(storedTab);
@@ -1053,17 +1053,7 @@ export default function Profile() {
                               : `${profile.name} hasn't started their music discovery journey yet.`
                             }
                           </p>
-                          {isOwn && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setActiveTab('music-discovery')}
-                              className="mt-2"
-                            >
-                              <Search className="w-3 h-3 mr-1" />
-                              Explore Music
-                            </Button>
-                          )}
+                          
                         </div>
                       )}
                     </div>
@@ -1189,22 +1179,7 @@ export default function Profile() {
               )}
             </div>
           )}
-          {activeTab === "music-discovery" && (
-            <div className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 p-6">
-              {profile?.type === "audience" ? (
-                <MusicDiscoveryTab 
-                  profile={profile} 
-                  isOwn={isOwn} 
-                  followedArtists={followedArtists}
-                />
-              ) : (
-                <div className="text-center text-gray-500 dark:text-gray-400">
-                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Music Discovery</h3>
-                  <p>Music discovery functionality coming soon...</p>
-                </div>
-              )}
-            </div>
-          )}
+          
 
           
 

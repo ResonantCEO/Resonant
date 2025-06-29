@@ -37,8 +37,11 @@ export default function Discover() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { isCollapsed } = useSidebar();
   const [, setLocation] = useLocation();
+    const [navigatingToProfile, setNavigatingToProfile] = useState<number | null>(null);
+
 
   const handleViewProfile = (profileId: number) => {
+      setNavigatingToProfile(profileId);
     setLocation(`/profile/${profileId}`);
   };
 
@@ -346,7 +349,7 @@ export default function Discover() {
                         </div>
                       )}
 
-                      
+
 
                       {/* Rating Badge */}
                       {item.rating && (
@@ -416,12 +419,20 @@ export default function Discover() {
                       </div>
 
                       {/* Action Button */}
-                      <Button 
-                        className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold shadow-lg border-0"
-                        onClick={() => handleViewProfile(item.id)}
-                      >
-                        <span className="drop-shadow-sm">View Profile</span>
-                      </Button>
+                          <Button 
+                            className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold shadow-lg border-0"
+                            onClick={() => handleViewProfile(item.id)}
+                            disabled={navigatingToProfile === item.id}
+                          >
+                            {navigatingToProfile === item.id ? (
+                              <div className="flex items-center">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                <span className="drop-shadow-sm">Loading...</span>
+                              </div>
+                            ) : (
+                              <span className="drop-shadow-sm">View Profile</span>
+                            )}
+                          </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -474,7 +485,7 @@ export default function Discover() {
                             </div>
                           )}
 
-                          
+
 
                           {/* Rating Badge */}
                           {item.rating && (
@@ -547,8 +558,16 @@ export default function Discover() {
                           <Button 
                             className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold shadow-lg border-0"
                             onClick={() => handleViewProfile(item.id)}
+                            disabled={navigatingToProfile === item.id}
                           >
-                            <span className="drop-shadow-sm">View Profile</span>
+                            {navigatingToProfile === item.id ? (
+                              <div className="flex items-center">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                <span className="drop-shadow-sm">Loading...</span>
+                              </div>
+                            ) : (
+                              <span className="drop-shadow-sm">View Profile</span>
+                            )}
                           </Button>
                         </div>
                       </CardContent>
@@ -599,7 +618,7 @@ export default function Discover() {
                             </div>
                           )}
 
-                          
+
                         </div>
 
                         {/* Enhanced Content */}
@@ -632,8 +651,16 @@ export default function Discover() {
                           <Button 
                             className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold shadow-lg border-0"
                             onClick={() => handleViewProfile(item.id)}
+                            disabled={navigatingToProfile === item.id}
                           >
-                            <span className="drop-shadow-sm">View Profile</span>
+                            {navigatingToProfile === item.id ? (
+                              <div className="flex items-center">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                <span className="drop-shadow-sm">Loading...</span>
+                              </div>
+                            ) : (
+                              <span className="drop-shadow-sm">View Profile</span>
+                            )}
                           </Button>
                         </div>
                       </CardContent>
@@ -721,8 +748,16 @@ export default function Discover() {
                           <Button 
                             className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold shadow-lg border-0 text-sm sm:text-base py-2 sm:py-2.5"
                             onClick={() => handleViewProfile(item.id)}
+                            disabled={navigatingToProfile === item.id}
                           >
-                            <span className="drop-shadow-sm">View Profile</span>
+                            {navigatingToProfile === item.id ? (
+                              <div className="flex items-center">
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                <span className="drop-shadow-sm">Loading...</span>
+                              </div>
+                            ) : (
+                              <span className="drop-shadow-sm">View Profile</span>
+                            )}
                           </Button>
                         </div>
                       </div>

@@ -261,6 +261,7 @@ export default function Profile() {
     queryKey: [`/api/profiles/${profileId}`],
     enabled: !!profileId, // Only run query when we have a profile ID
     retry: false, // Don't retry failed requests to avoid infinite loading
+    staleTime: 30000, // Cache profile data for 30 seconds
   });
 
   // Define isOwn after both user and profile are declared
@@ -322,7 +323,8 @@ export default function Profile() {
     }
   }, [profile?.id, profile?.type]);
 
-  if (profileLoading || (id && !profile)) {
+  // Show loading state when profile is loading OR when we have an ID but no profile yet
+  if (profileLoading || (profileId && !profile && !profileLoading)) {
     return (
       <div className="min-h-screen flex">
         <Sidebar />

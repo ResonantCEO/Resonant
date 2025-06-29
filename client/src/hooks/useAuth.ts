@@ -27,9 +27,8 @@ interface User {
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const [loadingStartTime, setLoadingStartTime] = useState<number>(() => Date.now());
+  const [initialLoad, setInitialLoad] = useState(true);
   const [showLoading, setShowLoading] = useState(true);
-  const [hasReceivedData, setHasReceivedData] = useState(false);
 
   const { data: user, isLoading, isError } = useQuery<User>({
     queryKey: ["/api/user"],
@@ -42,36 +41,22 @@ export function useAuth() {
     },
   });
 
-  // Track when we receive data (success or error)
+  // Only show loading screen on initial app load or when there's no cached data
   useEffect(() => {
-    if ((user !== undefined || isError) && !hasReceivedData) {
-      setHasReceivedData(true);
-    }
-  }, [user, isError, hasReceivedData]);
-
-  // Handle minimum 2-second loading period
-  useEffect(() => {
-    if (hasReceivedData) {
-      const elapsed = Date.now() - loadingStartTime;
-      const remainingTime = Math.max(0, 2000 - elapsed);
-
-      const timer = setTimeout(() => {
+    if (!isLoading && (user !== undefined || isError)) {
+      if (initialLoad) {
+        // Small delay only on initial load for smooth UX
+        const timer = setTimeout(() => {
+          setShowLoading(false);
+          setInitialLoad(false);
+        }, 500);
+        return () => clearTimeout(timer);
+      } else {
+        // For subsequent auth checks, show immediately
         setShowLoading(false);
-      }, remainingTime);
-
-      return () => clearTimeout(timer);
+      }
     }
-  }, [hasReceivedData, loadingStartTime]);
-
-  // Reset loading state when authentication changes (logout/login cycles)
-  useEffect(() => {
-    if (isLoading && hasReceivedData) {
-      // New auth cycle started, reset everything
-      setLoadingStartTime(Date.now());
-      setShowLoading(true);
-      setHasReceivedData(false);
-    }
-  }, [isLoading, hasReceivedData]);
+  }, [isLoading, user, isError, initialLoad]);
 
   const updateUser = (updatedUser: User) => {
     queryClient.setQueryData(["/api/user"], updatedUser);

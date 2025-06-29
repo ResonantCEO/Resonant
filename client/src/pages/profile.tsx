@@ -860,31 +860,17 @@ export default function Profile() {
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Headphones className="w-4 h-4 text-blue-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Currently Playing:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              Indie Rock Playlist
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Volume2 className="w-4 h-4 text-green-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Daily Listen Time:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              4.2 hours
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <PlayCircle className="w-4 h-4 text-purple-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Playlists Created:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              12
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
                             <Music className="w-4 h-4 text-pink-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Songs Discovered:</span>
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Artists Discovered:</span>
                             <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              247 this month
+                              {followedArtists.length > 0 ? followedArtists.length : '0'} this year
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Building className="w-4 h-4 text-purple-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Venues Discovered:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              15 this year
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -895,6 +881,13 @@ export default function Profile() {
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
+                            <Share2 className="w-4 h-4 text-teal-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Events Shared:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                              42 this year
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
                             <TrendingUp className="w-4 h-4 text-emerald-500" />
                             <span className="text-gray-600 dark:text-gray-400 text-sm">Music Discovery:</span>
                             <span className="font-semibold text-gray-900 dark:text-white text-sm">
@@ -902,17 +895,10 @@ export default function Profile() {
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Bookmark className="w-4 h-4 text-orange-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Saved Albums:</span>
+                            <MessageCircle className="w-4 h-4 text-sky-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Events Reviewed:</span>
                             <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              34
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Share2 className="w-4 h-4 text-teal-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Music Shared:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              156 tracks
+                              12 written
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -923,38 +909,10 @@ export default function Profile() {
                             </span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Calendar className="w-4 h-4 text-cyan-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Member since:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              {new Date(profile.createdAt).getFullYear()}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Target className="w-4 h-4 text-rose-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Listening Streak:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              42 days
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Zap className="w-4 h-4 text-yellow-600" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Music Energy:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              High Tempo Lover
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
                             <MapPin className="w-4 h-4 text-violet-500" />
                             <span className="text-gray-600 dark:text-gray-400 text-sm">Local Scene:</span>
                             <span className="font-semibold text-gray-900 dark:text-white text-sm">
                               Active Participant
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <MessageCircle className="w-4 h-4 text-sky-500" />
-                            <span className="text-gray-600 dark:text-gray-400 text-sm">Music Reviews:</span>
-                            <span className="font-semibold text-gray-900 dark:text-white text-sm">
-                              23 written
                             </span>
                           </div>
                         </div>

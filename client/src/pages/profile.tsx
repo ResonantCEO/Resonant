@@ -260,6 +260,7 @@ export default function Profile() {
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: [`/api/profiles/${profileId}`],
     enabled: !!profileId, // Only run query when we have a profile ID
+    retry: false, // Don't retry failed requests to avoid infinite loading
   });
 
   // Define isOwn after both user and profile are declared
@@ -321,28 +322,44 @@ export default function Profile() {
     }
   }, [profile?.id, profile?.type]);
 
-  if (profileLoading) {
+  if (profileLoading || (id && !profile)) {
     return (
       <div className="min-h-screen flex">
-        <div className="w-80 bg-white shadow-lg border-r border-neutral-200 hidden lg:block">
-          <Skeleton className="h-full" />
-        </div>
-        <div className="flex-1">
-          <Skeleton className="h-full" />
+        <Sidebar />
+        <div className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0`}>
+          <div className="min-h-screen flex items-center justify-center bg-white dark:bg-neutral-900">
+            <div className="text-center">
+              <img src="/resonant-logo.png" alt="Resonant" className="h-20 mx-auto mb-4 animate-pulse block dark:hidden" />
+              <img src="/resonant-logo-white.png" alt="Resonant" className="h-20 mx-auto mb-4 animate-pulse hidden dark:block" />
+              <div className="w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="text-gray-500 dark:text-gray-400 mt-4">Loading profile...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Only show "Profile Not Found" if we have a specific profile ID that doesn't exist
-  // Don't show it during auth transitions or when using active profile
+  // Show error if we have a specific profile ID that doesn't exist
   if (!profile && profileId && !profileLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-neutral-900">
-        <div className="text-center">
-          <img src="/resonant-logo.png" alt="Resonant" className="h-20 mx-auto mb-4 animate-pulse block dark:hidden" />
-          <img src="/resonant-logo-white.png" alt="Resonant" className="h-20 mx-auto mb-4 animate-pulse hidden dark:block" />
-          <div className="w-8 h-8 border-4 border-neutral-300 dark:border-neutral-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <div className="min-h-screen flex">
+        <Sidebar />
+        <div className={`flex-1 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-80'} pt-16 lg:pt-0`}>
+          <div className="min-h-screen flex items-center justify-center bg-white dark:bg-neutral-900">
+            <div className="text-center">
+              <img src="/resonant-logo.png" alt="Resonant" className="h-20 mx-auto mb-4 block dark:hidden" />
+              <img src="/resonant-logo-white.png" alt="Resonant" className="h-20 mx-auto mb-4 hidden dark:block" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Profile Not Found</h2>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                The profile you're looking for doesn't exist or may have been removed.
+              </p>
+              <Button onClick={() => setLocation("/discover")}>
+                <Search className="w-4 h-4 mr-2" />
+                Discover Profiles
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     );

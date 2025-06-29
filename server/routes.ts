@@ -969,6 +969,10 @@ export function registerRoutes(app: Express): Server {
       const excludeProfileId = activeProfile?.id;
 
       const profiles = await storage.discoverProfiles(type, location, genre, limit, offset, excludeProfileId);
+      
+      // Debug logging to understand what profiles are being returned
+      console.log("Discover profiles returned:", profiles.map(p => ({ id: p.id, name: p.name, type: p.type })));
+      
       res.json(profiles);
     } catch (error) {
       console.error("Error fetching discover profiles:", error);
@@ -985,18 +989,23 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "Profile not found" });
       }
 
-      // Track profile view if user is authenticated
+      // Track profile view if user is authenticated (with error handling)
       if (req.user) {
-        const activeProfile = await storage.getActiveProfile(req.user.id);
-        if (activeProfile) {
-          await storage.trackProfileView(
-            req.user.id,
-            activeProfile.id,
-            profileId,
-            req.sessionID,
-            req.ip,
-            req.get('User-Agent')
-          );
+        try {
+          const activeProfile = await storage.getActiveProfile(req.user.id);
+          if (activeProfile) {
+            await storage.trackProfileView(
+              req.user.id,
+              activeProfile.id,
+              profileId,
+              req.sessionID,
+              req.ip,
+              req.get('User-Agent')
+            );
+          }
+        } catch (viewError) {
+          // Don't fail the entire request if profile view tracking fails
+          console.warn("Failed to track profile view:", viewError);
         }
       }
 

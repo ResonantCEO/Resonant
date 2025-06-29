@@ -236,8 +236,8 @@ export default function Profile() {
     },
     onSuccess: () => {
       // Invalidate relevant queries to refetch data
-      queryClient.invalidateQueries(["/api/profiles/active"]);
-      queryClient.invalidateQueries(["/api/profiles"]);
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
       // Navigate to profile page instead of reloading
       setLocation("/profile");
     },
@@ -257,7 +257,7 @@ export default function Profile() {
     queryKey: ["/api/user"],
   });
 
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: [`/api/profiles/${profileId}`],
     enabled: !!profileId, // Only run query when we have a profile ID
     retry: false, // Don't retry failed requests to avoid infinite loading

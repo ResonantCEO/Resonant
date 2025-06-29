@@ -13,6 +13,13 @@ The application is fully functional with:
 - Image upload and profile customization
 
 ## Recent Changes
+### June 29, 2025
+- ✓ Fixed profile navigation issue from discovery page
+- ✓ Resolved database error caused by missing `profile_views` table
+- ✓ Added proper error handling for profile view tracking to prevent endpoint crashes
+- ✓ Profile API endpoints now return correct data without 500 errors
+- ✓ Navigation from discovery page to individual profiles confirmed working
+
 ### December 24, 2025
 - ✓ Fixed critical app crashes caused by JSX syntax errors in post-feed.tsx
 - ✓ Resolved database query error for following-artists endpoint by removing non-existent `genre` field
@@ -44,7 +51,8 @@ Key tables:
 - Profile switching: Seamless switching between multiple profile types
 
 ## Known Issues
-- None currently - application is stable and functional
+- TypeScript errors in profile.tsx component due to untyped API responses (non-critical - functionality works)
+- Minor LSP errors in routes.ts for error handling and type definitions (non-critical)
 
 ## Deployment
 - Ready for deployment on Replit

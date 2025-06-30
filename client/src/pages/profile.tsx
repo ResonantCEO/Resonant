@@ -5,10 +5,15 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
@@ -217,6 +222,15 @@ export default function Profile() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { isCollapsed } = useSidebar();
   const { toast } = useToast();
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const [sendingBookingRequest, setSendingBookingRequest] = useState(false);
+  const [bookingRequestData, setBookingRequestData] = useState({
+    eventDate: '',
+    eventTime: '',
+    budget: '',
+    requirements: '',
+    message: ''
+  });
 
   const { data: profiles = [] } = useQuery({
     queryKey: ["/api/profiles"],
@@ -322,6 +336,52 @@ export default function Profile() {
       }
     }
   }, [profile?.id, profile?.type]);
+
+  const handleSendBookingRequest = async () => {
+    if (!activeProfile || !profile) return;
+
+    setSendingBookingRequest(true);
+    try {
+      const response = await fetch("/api/booking-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          venueId: profile.id,
+          eventDate: bookingRequestData.eventDate || null,
+          eventTime: bookingRequestData.eventTime || null,
+          budget: bookingRequestData.budget || null,
+          requirements: bookingRequestData.requirements || null,
+          message: bookingRequestData.message || null,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send booking request");
+      }
+
+      toast({
+        title: "Success",
+        description: "Booking request sent successfully",
+      });
+
+      setShowBookingDialog(false);
+      setBookingRequestData({
+        eventDate: '',
+        eventTime: '',
+        budget: '',
+        requirements: '',
+        message: ''
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send booking request",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingBookingRequest(false);
+    }
+  };
 
   // Show loading state when profile is loading OR when we have an ID but no profile yet
   if (profileLoading || (profileId && !profile && !profileLoading)) {
@@ -721,6 +781,87 @@ export default function Profile() {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
+
+          {showBookingDialog && (
+          <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Send Booking Request</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <p>
+                  Send a booking request to <strong>{profile?.name}</strong>. 
+                  Include details about your event and any special requirements.
+                </p>
+
+                <div>
+                  <Label htmlFor="eventDate">Event Date</Label>
+                  <Input
+                    id="eventDate"
+                    type="date"
+                    value={bookingRequestData.eventDate}
+                    onChange={(e) => setBookingRequestData({...bookingRequestData, eventDate: e.target.value})}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="eventTime">Event Time</Label>
+                  <Input
+                    id="eventTime"
+                    type="time"
+                    value={bookingRequestData.eventTime}
+                    onChange={(e) => setBookingRequestData({...bookingRequestData, eventTime: e.target.value})}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="budget">Budget</Label>
+                  <Input
+                    id="budget"
+                    type="number"
+                    placeholder="Enter budget amount"
+                    value={bookingRequestData.budget}
+                    onChange={(e) => setBookingRequestData({...bookingRequestData, budget: e.target.value})}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="requirements">Technical Requirements</Label>
+                  <Textarea
+                    id="requirements"
+                    placeholder="Sound system, lighting, staging requirements..."
+                    value={bookingRequestData.requirements}
+                    onChange={(e) => setBookingRequestData({...bookingRequestData, requirements: e.target.value})}
+                    rows={2}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="message">Message to Venue</Label>
+                  <Textarea
+                    id="message"
+                    placeholder="Tell the venue about your event, performance details, or any special requests..."
+                    value={bookingRequestData.message}
+                    onChange={(e) => setBookingRequestData({...bookingRequestData, message: e.target.value})}
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2 mt-4">
+                <Button variant="outline" onClick={() => setShowBookingDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSendBookingRequest}
+                  disabled={sendingBookingRequest}
+                >
+                  {sendingBookingRequest ? "Sending..." : "Send Request"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
 
           {/* Tab Content */}
           {/* Posts Tab - only for non-artist profiles */}
@@ -1193,6 +1334,8 @@ export default function Profile() {
                       }
                     </p>
                   </div>
+                ```text
+
                 </div>
               ) : (
                 <div className="text-center text-gray-500 dark:text-gray-400">

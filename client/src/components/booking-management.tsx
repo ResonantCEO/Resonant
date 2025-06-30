@@ -294,10 +294,10 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                   <Label htmlFor="message">Message to Venue</Label>
                   <Textarea
                     id="message"
-                    placeholder="Tell the venue about your event..."
+                    placeholder="Tell the venue about your event, performance details, or any special requests..."
                     value={newRequest.message}
                     onChange={(e) => setNewRequest({...newRequest, message: e.target.value})}
-                    rows={3}
+                    rows={4}
                   />
                 </div>
 

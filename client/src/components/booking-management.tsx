@@ -25,6 +25,7 @@ interface BookingRequest {
   eventTime?: string;
   budget?: number;
   requirements?: string;
+  message?: string;
   artistProfile: {
     id: number;
     name: string;
@@ -386,8 +387,17 @@ export default function BookingManagement({ profileType }: BookingManagementProp
 
                       {request.requirements && (
                         <div className="mt-2">
-                          <p className="text-sm font-medium text-gray-700">Requirements:</p>
+                          <p className="text-sm font-medium text-gray-700">Technical Requirements:</p>
                           <p className="text-sm text-gray-600">{request.requirements}</p>
+                        </div>
+                      )}
+
+                      {request.message && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium text-gray-700">Message:</p>
+                          <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded border-l-4 border-blue-400">
+                            "{request.message}"
+                          </p>
                         </div>
                       )}
 

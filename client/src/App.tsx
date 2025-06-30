@@ -15,9 +15,10 @@ import Settings from "@/pages/settings";
 import Discover from "@/pages/discover";
 import Dashboard from "@/pages/dashboard";
 import Friends from "@/pages/friends";
+import Messages from "@/pages/messages";
+import Tickets from "@/pages/tickets";
 import NotFound from "@/pages/not-found";
 import NotificationsPage from "./pages/notifications";
-import Messages from "./pages/messages";
 import { useWebSocket } from "./hooks/useWebSocket";
 
 function LoadingScreen() {
@@ -78,6 +79,7 @@ function Router() {
           <Route path="/settings" component={Settings} />
           <Route path="/notifications" component={NotificationsPage} />
           <Route path="/messages" component={Messages} />
+          <Route path="/tickets" component={Tickets} />
           <Route path="/*" component={Profile} />
         </Switch>
         <BottomNav />
@@ -95,6 +97,7 @@ function Router() {
           <Route path="/settings" component={Settings} />
           <Route path="/notifications" component={NotificationsPage} />
           <Route path="/messages" component={Messages} />
+          <Route path="/tickets" component={Tickets} />
           <Route path="/*" component={Profile} />
         </Switch>
       </div>

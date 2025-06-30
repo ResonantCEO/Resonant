@@ -13,6 +13,16 @@ The application is fully functional with:
 - Image upload and profile customization
 
 ## Recent Changes
+### June 30, 2025 - Version 0.5.0
+- ✓ Fixed critical JSX syntax errors in sidebar component that caused complete app failure
+- ✓ Resolved "Expected corresponding JSX closing tag" compilation errors
+- ✓ Rebuilt sidebar component with proper JSX structure and error handling
+- ✓ Application now starts reliably on port 5000 without compilation errors
+- ✓ Maintained all existing functionality while fixing critical stability issues
+- ✓ Enhanced error handling for database operations to prevent crashes
+- ✓ Confirmed profile navigation and real-time notifications continue working
+- ✓ Published comprehensive changelog documenting all critical fixes
+
 ### June 29, 2025
 - ✓ Fixed profile navigation issue from discovery page
 - ✓ Resolved database error caused by missing `profile_views` table

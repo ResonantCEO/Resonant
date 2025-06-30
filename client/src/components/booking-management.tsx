@@ -25,7 +25,6 @@ interface BookingRequest {
   eventTime?: string;
   budget?: number;
   requirements?: string;
-  message?: string;
   artistProfile: {
     id: number;
     name: string;
@@ -294,10 +293,10 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                   <Label htmlFor="message">Message to Venue</Label>
                   <Textarea
                     id="message"
-                    placeholder="Tell the venue about your event, performance details, or any special requests..."
+                    placeholder="Tell the venue about your event..."
                     value={newRequest.message}
                     onChange={(e) => setNewRequest({...newRequest, message: e.target.value})}
-                    rows={4}
+                    rows={3}
                   />
                 </div>
 
@@ -310,11 +309,11 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                     disabled={createBookingRequestMutation.isPending}
                     className="bg-blue-600 hover:bg-blue-700 !text-white"
                   >
-                    {createBookingRequestMutation.isPending ? "Sending..." : "Send Request"}
+                    Send Request
                   </Button>
                 </div>
               </div>
-            </DialogContent></old_str>
+            </DialogContent>
           </Dialog>
           )}
           <Button 
@@ -387,17 +386,8 @@ export default function BookingManagement({ profileType }: BookingManagementProp
 
                       {request.requirements && (
                         <div className="mt-2">
-                          <p className="text-sm font-medium text-gray-700">Technical Requirements:</p>
+                          <p className="text-sm font-medium text-gray-700">Requirements:</p>
                           <p className="text-sm text-gray-600">{request.requirements}</p>
-                        </div>
-                      )}
-
-                      {request.message && (
-                        <div className="mt-2">
-                          <p className="text-sm font-medium text-gray-700">Message:</p>
-                          <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded border-l-4 border-blue-400">
-                            "{request.message}"
-                          </p>
                         </div>
                       )}
 

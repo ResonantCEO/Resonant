@@ -207,9 +207,10 @@ export default function Tickets() {
       enabled: isOpen,
     });
 
-    // Filter friends based on search term
+    // Filter friends based on search term and audience type only
     const filteredFriends = friends?.filter((friend: any) =>
-      friend.name?.toLowerCase().includes(friendSearchTerm.toLowerCase())
+      friend.name?.toLowerCase().includes(friendSearchTerm.toLowerCase()) &&
+      friend.type === 'audience'
     ) || [];
 
     const transferMutation = useMutation({
@@ -321,9 +322,12 @@ export default function Tickets() {
                 id="recipient"
                 value={friendSearchTerm}
                 onChange={(e) => handleFriendSearchChange(e.target.value)}
-                placeholder="Search for a friend..."
+                placeholder="Search for an audience friend..."
                 onFocus={() => setShowFriendDropdown(friendSearchTerm.length > 0)}
               />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Tickets can only be transferred to audience accounts
+              </p>
               {showFriendDropdown && filteredFriends.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-40 overflow-y-auto">
                   {filteredFriends.map((friend: any) => (

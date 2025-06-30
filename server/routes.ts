@@ -3526,6 +3526,11 @@ export function registerRoutes(app: Express): Server {
         return res.status(404).json({ message: "Recipient profile not found" });
       }
 
+      // Restrict transfers to audience accounts only
+      if (toProfile.type !== 'audience') {
+        return res.status(400).json({ message: "Tickets can only be transferred to audience accounts" });
+      }
+
       // Verify ticket ownership
       const [ticket] = await db
         .select()

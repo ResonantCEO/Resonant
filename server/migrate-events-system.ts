@@ -130,8 +130,11 @@ async function migrateEventsSystem() {
   }
 }
 
+// Check if this is the main module (ES module way)
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+
 // Run migration if this file is executed directly
-if (require.main === module) {
+if (isMainModule) {
   migrateEventsSystem()
     .then(() => {
       console.log("Migration completed");

@@ -421,7 +421,7 @@ export default function Discover() {
   const displayEventsData = eventsData && eventsData.length > 0 ? eventsData : mockEventsData;
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-800"></div>
+    <div className="min-h-screen flex bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-800">
       <Sidebar />
 
       {/* Mobile Header */}

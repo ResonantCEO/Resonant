@@ -754,7 +754,126 @@ export const profileReportsRelations = relations(profileReports, ({ one }) => ({
   }),
 }));
 
+// Tickets table
+export const tickets = pgTable("tickets", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull(), // Reference to event
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  originalPurchaserId: integer("original_purchaser_id").notNull().references(() => profiles.id),
+  ticketType: varchar("ticket_type").notNull(), // 'general', 'vip', 'early_bird', 'student'
+  sectionName: varchar("section_name"),
+  rowName: varchar("row_name"),
+  seatNumber: varchar("seat_number"),
+  price: real("price").notNull(),
+  qrCode: varchar("qr_code").notNull().unique(),
+  orderNumber: varchar("order_number").notNull(),
+  status: varchar("status").notNull().default("active"), // 'active', 'used', 'transferred', 'returned', 'cancelled'
+  purchaseDate: timestamp("purchase_date").notNull(),
+  eventDate: timestamp("event_date").notNull(),
+  eventTime: varchar("event_time"),
+  venue: varchar("venue").notNull(),
+  eventName: varchar("event_name").notNull(),
+  artistName: varchar("artist_name"),
+  artistImageUrl: varchar("artist_image_url"),
+  venueImageUrl: varchar("venue_image_url"),
+  transferable: boolean("transferable").default(true),
+  returnable: boolean("returnable").default(true),
+  returnDeadline: timestamp("return_deadline"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Ticket transfers table
+export const ticketTransfers = pgTable("ticket_transfers", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").notNull().references(() => tickets.id, { onDelete: "cascade" }),
+  fromProfileId: integer("from_profile_id").notNull().references(() => profiles.id),
+  toProfileId: integer("to_profile_id").references(() => profiles.id),
+  toEmail: varchar("to_email"), // For transfers to non-users
+  transferType: varchar("transfer_type").notNull(), // 'free', 'sale'
+  salePrice: real("sale_price"), // If transferType is 'sale'
+  message: text("message"),
+  status: varchar("status").notNull().default("pending"), // 'pending', 'accepted', 'declined', 'expired'
+  token: varchar("token").notNull().unique(), // Unique transfer token
+  expiresAt: timestamp("expires_at").notNull(),
+  acceptedAt: timestamp("accepted_at"),
+  declinedAt: timestamp("declined_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Ticket returns table
+export const ticketReturns = pgTable("ticket_returns", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").notNull().references(() => tickets.id, { onDelete: "cascade" }),
+  profileId: integer("profile_id").notNull().references(() => profiles.id),
+  reason: varchar("reason").notNull(), // 'cant_attend', 'event_cancelled', 'other'
+  reasonDetails: text("reason_details"),
+  refundAmount: real("refund_amount").notNull(),
+  processingFee: real("processing_fee").default(0),
+  status: varchar("status").notNull().default("pending"), // 'pending', 'approved', 'denied', 'processed'
+  adminNotes: text("admin_notes"),
+  processedBy: integer("processed_by").references(() => users.id),
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations for tickets
+export const ticketsRelations = relations(tickets, ({ one, many }) => ({
+  profile: one(profiles, {
+    fields: [tickets.profileId],
+    references: [profiles.id],
+  }),
+  originalPurchaser: one(profiles, {
+    fields: [tickets.originalPurchaserId],
+    references: [profiles.id],
+    relationName: "originalPurchaser",
+  }),
+  transfers: many(ticketTransfers),
+  returns: many(ticketReturns),
+}));
+
+export const ticketTransfersRelations = relations(ticketTransfers, ({ one }) => ({
+  ticket: one(tickets, {
+    fields: [ticketTransfers.ticketId],
+    references: [tickets.id],
+  }),
+  fromProfile: one(profiles, {
+    fields: [ticketTransfers.fromProfileId],
+    references: [profiles.id],
+    relationName: "fromProfile",
+  }),
+  toProfile: one(profiles, {
+    fields: [ticketTransfers.toProfileId],
+    references: [profiles.id],
+    relationName: "toProfile",
+  }),
+}));
+
+export const ticketReturnsRelations = relations(ticketReturns, ({ one }) => ({
+  ticket: one(tickets, {
+    fields: [ticketReturns.ticketId],
+    references: [tickets.id],
+  }),
+  profile: one(profiles, {
+    fields: [ticketReturns.profileId],
+    references: [profiles.id],
+  }),
+  processedByUser: one(users, {
+    fields: [ticketReturns.processedBy],
+    references: [users.id],
+  }),
+}));
+
 // Type exports
+export type Ticket = InferSelectModel<typeof tickets>;
+export type InsertTicket = InferInsertModel<typeof tickets>;
+export type TicketTransfer = InferSelectModel<typeof ticketTransfers>;
+export type InsertTicketTransfer = InferInsertModel<typeof ticketTransfers>;
+export type TicketReturn = InferSelectModel<typeof ticketReturns>;
+export type InsertTicketReturn = InferInsertModel<typeof ticketReturns>;
+
 export type Conversation = InferSelectModel<typeof conversations>;
 export type InsertConversation = InferInsertModel<typeof conversations>;
 export type ConversationParticipant = InferSelectModel<typeof conversationParticipants>;

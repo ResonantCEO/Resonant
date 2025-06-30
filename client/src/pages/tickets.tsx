@@ -1,12 +1,18 @@
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useSidebar } from "@/hooks/useSidebar";
 import Sidebar from "@/components/sidebar";
 import { 
@@ -23,10 +29,15 @@ import {
   Star,
   Share2,
   Filter,
-  Search
+  Search,
+  Send,
+  RotateCcw,
+  DollarSign,
+  Gift
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+import { toast } from "@/hooks/use-toast";
 
 export default function Tickets() {
   const { isCollapsed } = useSidebar();
@@ -173,6 +184,236 @@ export default function Tickets() {
     return filtered;
   };
 
+  // Transfer Dialog Component
+  const TransferDialog = ({ ticket }: { ticket: any }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [transferType, setTransferType] = useState("free");
+    const [recipient, setRecipient] = useState("");
+    const [salePrice, setSalePrice] = useState("");
+    const [message, setMessage] = useState("");
+    const queryClient = useQueryClient();
+
+    const transferMutation = useMutation({
+      mutationFn: async (data: any) => {
+        const response = await fetch(`/api/tickets/${ticket.id}/transfer`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Transfer failed');
+        return response.json();
+      },
+      onSuccess: () => {
+        toast({ title: "Transfer initiated", description: "The recipient will be notified." });
+        setIsOpen(false);
+        queryClient.invalidateQueries({ queryKey: ["tickets"] });
+      },
+      onError: (error: any) => {
+        toast({ title: "Transfer failed", description: error.message, variant: "destructive" });
+      }
+    });
+
+    const handleTransfer = () => {
+      const data: any = {
+        toEmail: recipient,
+        transferType,
+        message,
+      };
+      
+      if (transferType === "sale") {
+        data.salePrice = parseFloat(salePrice);
+      }
+
+      transferMutation.mutate(data);
+    };
+
+    return (
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button size="sm" variant="outline">
+            <Send className="w-4 h-4 mr-1" />
+            Transfer
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Transfer Ticket</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Transfer Type</Label>
+              <RadioGroup value={transferType} onValueChange={setTransferType} className="mt-2">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="free" id="free" />
+                  <Label htmlFor="free" className="flex items-center">
+                    <Gift className="w-4 h-4 mr-1" />
+                    Send for free
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="sale" id="sale" />
+                  <Label htmlFor="sale" className="flex items-center">
+                    <DollarSign className="w-4 h-4 mr-1" />
+                    Sell ticket
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div>
+              <Label htmlFor="recipient">Recipient Email</Label>
+              <Input
+                id="recipient"
+                type="email"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder="friend@example.com"
+              />
+            </div>
+
+            {transferType === "sale" && (
+              <div>
+                <Label htmlFor="price">Sale Price ($)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  value={salePrice}
+                  onChange={(e) => setSalePrice(e.target.value)}
+                  placeholder="0.00"
+                />
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="message">Message (optional)</Label>
+              <Textarea
+                id="message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Add a personal message..."
+                rows={3}
+              />
+            </div>
+
+            <div className="flex space-x-2">
+              <Button onClick={() => setIsOpen(false)} variant="outline" className="flex-1">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleTransfer} 
+                disabled={!recipient || (transferType === "sale" && !salePrice) || transferMutation.isPending}
+                className="flex-1"
+              >
+                {transferMutation.isPending ? "Sending..." : "Send Transfer"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  // Return Dialog Component
+  const ReturnDialog = ({ ticket }: { ticket: any }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [reason, setReason] = useState("");
+    const [reasonDetails, setReasonDetails] = useState("");
+    const queryClient = useQueryClient();
+
+    const returnMutation = useMutation({
+      mutationFn: async (data: any) => {
+        const response = await fetch(`/api/tickets/${ticket.id}/return`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Return request failed');
+        return response.json();
+      },
+      onSuccess: () => {
+        toast({ title: "Return request submitted", description: "We'll process your request within 3-5 business days." });
+        setIsOpen(false);
+        queryClient.invalidateQueries({ queryKey: ["tickets"] });
+      },
+      onError: (error: any) => {
+        toast({ title: "Return failed", description: error.message, variant: "destructive" });
+      }
+    });
+
+    const handleReturn = () => {
+      returnMutation.mutate({ reason, reasonDetails });
+    };
+
+    // Calculate estimated refund (5% processing fee)
+    const processingFee = ticket.price * 0.05;
+    const estimatedRefund = ticket.price - processingFee;
+
+    return (
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <Button size="sm" variant="outline">
+            <RotateCcw className="w-4 h-4 mr-1" />
+            Return
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Return Ticket</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                <strong>Estimated Refund:</strong> ${estimatedRefund.toFixed(2)}
+                <br />
+                <span className="text-xs">Processing fee: ${processingFee.toFixed(2)} (5%)</span>
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="reason">Reason for return</Label>
+              <Select value={reason} onValueChange={setReason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cant_attend">Can't attend</SelectItem>
+                  <SelectItem value="event_cancelled">Event cancelled</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="details">Additional details (optional)</Label>
+              <Textarea
+                id="details"
+                value={reasonDetails}
+                onChange={(e) => setReasonDetails(e.target.value)}
+                placeholder="Provide more details about your return request..."
+                rows={3}
+              />
+            </div>
+
+            <div className="flex space-x-2">
+              <Button onClick={() => setIsOpen(false)} variant="outline" className="flex-1">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleReturn} 
+                disabled={!reason || returnMutation.isPending}
+                className="flex-1"
+                variant="destructive"
+              >
+                {returnMutation.isPending ? "Processing..." : "Submit Return"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   const TicketCard = ({ ticket }: { ticket: any }) => (
     <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30 hover:shadow-lg transition-all duration-200">
       <CardHeader className="pb-3">
@@ -260,6 +501,12 @@ export default function Tickets() {
                 <Download className="w-4 h-4 mr-1" />
                 Download
               </Button>
+              {ticket.status === "confirmed" && (
+                <>
+                  <TransferDialog ticket={ticket} />
+                  <ReturnDialog ticket={ticket} />
+                </>
+              )}
               <Button size="sm" variant="outline">
                 <Share2 className="w-4 h-4 mr-1" />
                 Share

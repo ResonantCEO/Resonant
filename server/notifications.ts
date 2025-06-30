@@ -645,22 +645,53 @@ export class NotificationService {
   }
 
   async notifyContractNegotiation(recipientId: number, senderId: number, senderName: string, contractTitle: string) {
-    const settings = await this.getUserNotificationSettings(recipientId);
-    if (!settings.contract_negotiation?.inApp) return;
-
-    const data = {
-      senderId,
-      senderName,
-      contractTitle
-    };
-
     await this.createNotification({
       recipientId,
       senderId,
       type: 'contract_negotiation',
-      title: 'Contract Discussion',
-      message: `${senderName} has added a message to contract: ${contractTitle}`,
-      data
+      title: 'Contract Negotiation Update',
+      message: `${senderName} added a negotiation message to "${contractTitle}"`,
+      data: {
+        senderId,
+        senderName,
+        contractTitle
+      }
+    });
+  }
+
+  async notifyTicketTransfer(recipientId: number, senderId: number, senderName: string, eventName: string, transferType: string, salePrice?: number) {
+    const message = transferType === 'sale' 
+      ? `${senderName} wants to sell you a ticket to "${eventName}" for $${salePrice}`
+      : `${senderName} wants to transfer a ticket to "${eventName}" to you`;
+
+    await this.createNotification({
+      recipientId,
+      senderId,
+      type: 'ticket_transfer',
+      title: 'Ticket Transfer',
+      message,
+      data: {
+        senderId,
+        senderName,
+        eventName,
+        transferType,
+        salePrice
+      }
+    });
+  }
+
+  async notifyTransferAccepted(recipientId: number, senderId: number, senderName: string, ticketId: number) {
+    await this.createNotification({
+      recipientId,
+      senderId,
+      type: 'transfer_accepted',
+      title: 'Ticket Transfer Accepted',
+      message: `${senderName} accepted your ticket transfer`,
+      data: {
+        senderId,
+        senderName,
+        ticketId
+      }
     });
   }
 }

@@ -3503,6 +3503,327 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Ticket transfer routes
+  
+  // Create ticket transfer
+  app.post('/api/tickets/:id/transfer', isAuthenticated, async (req: any, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const { toEmail, toProfileId, transferType, salePrice, message } = req.body;
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Verify ticket ownership
+      const [ticket] = await db
+        .select()
+        .from(tickets)
+        .where(and(eq(tickets.id, ticketId), eq(tickets.profileId, activeProfile.id)));
+
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket not found or not owned by you" });
+      }
+
+      if (!ticket.transferable) {
+        return res.status(400).json({ message: "This ticket is not transferable" });
+      }
+
+      if (ticket.status !== 'active') {
+        return res.status(400).json({ message: "Only active tickets can be transferred" });
+      }
+
+      // Check if transfer type is sale and price is provided
+      if (transferType === 'sale' && (!salePrice || salePrice <= 0)) {
+        return res.status(400).json({ message: "Sale price is required for paid transfers" });
+      }
+
+      // Generate unique transfer token
+      const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+      
+      // Create transfer record
+      const [transfer] = await db.insert(ticketTransfers).values({
+        ticketId,
+        fromProfileId: activeProfile.id,
+        toProfileId: toProfileId || null,
+        toEmail: toEmail || null,
+        transferType,
+        salePrice: transferType === 'sale' ? salePrice : null,
+        message: message || null,
+        token,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      }).returning();
+
+      // Send notification
+      const { notificationService } = await import('./notifications');
+      if (toProfileId) {
+        const toProfile = await storage.getProfile(toProfileId);
+        if (toProfile?.userId) {
+          const fromUser = await storage.getUser(req.user.id);
+          const fromName = `${fromUser?.firstName} ${fromUser?.lastName}`;
+          await notificationService.notifyTicketTransfer(
+            toProfile.userId,
+            req.user.id,
+            fromName,
+            ticket.eventName,
+            transferType,
+            salePrice
+          );
+        }
+      }
+
+      res.json(transfer);
+    } catch (error) {
+      console.error("Error creating ticket transfer:", error);
+      res.status(500).json({ message: "Failed to create ticket transfer" });
+    }
+  });
+
+  // Accept ticket transfer
+  app.post('/api/ticket-transfers/:token/accept', isAuthenticated, async (req: any, res) => {
+    try {
+      const { token } = req.params;
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Get transfer
+      const [transfer] = await db
+        .select()
+        .from(ticketTransfers)
+        .where(eq(ticketTransfers.token, token));
+
+      if (!transfer) {
+        return res.status(404).json({ message: "Transfer not found" });
+      }
+
+      if (transfer.status !== 'pending') {
+        return res.status(400).json({ message: "Transfer has already been processed" });
+      }
+
+      if (new Date() > transfer.expiresAt) {
+        return res.status(400).json({ message: "Transfer has expired" });
+      }
+
+      // Verify the recipient
+      if (transfer.toProfileId && transfer.toProfileId !== activeProfile.id) {
+        return res.status(403).json({ message: "This transfer is not for you" });
+      }
+
+      // Update transfer status
+      await db
+        .update(ticketTransfers)
+        .set({
+          status: 'accepted',
+          acceptedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(ticketTransfers.id, transfer.id));
+
+      // Transfer ticket ownership
+      await db
+        .update(tickets)
+        .set({
+          profileId: activeProfile.id,
+          status: 'active',
+          updatedAt: new Date()
+        })
+        .where(eq(tickets.id, transfer.ticketId));
+
+      // Send confirmation notification to sender
+      const { notificationService } = await import('./notifications');
+      const fromProfile = await storage.getProfile(transfer.fromProfileId);
+      if (fromProfile?.userId) {
+        const toUser = await storage.getUser(req.user.id);
+        const toName = `${toUser?.firstName} ${toUser?.lastName}`;
+        await notificationService.notifyTransferAccepted(
+          fromProfile.userId,
+          req.user.id,
+          toName,
+          transfer.ticketId
+        );
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error accepting ticket transfer:", error);
+      res.status(500).json({ message: "Failed to accept ticket transfer" });
+    }
+  });
+
+  // Decline ticket transfer
+  app.post('/api/ticket-transfers/:token/decline', isAuthenticated, async (req: any, res) => {
+    try {
+      const { token } = req.params;
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Get transfer
+      const [transfer] = await db
+        .select()
+        .from(ticketTransfers)
+        .where(eq(ticketTransfers.token, token));
+
+      if (!transfer) {
+        return res.status(404).json({ message: "Transfer not found" });
+      }
+
+      if (transfer.status !== 'pending') {
+        return res.status(400).json({ message: "Transfer has already been processed" });
+      }
+
+      // Update transfer status
+      await db
+        .update(ticketTransfers)
+        .set({
+          status: 'declined',
+          declinedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(ticketTransfers.id, transfer.id));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error declining ticket transfer:", error);
+      res.status(500).json({ message: "Failed to decline ticket transfer" });
+    }
+  });
+
+  // Get ticket transfers
+  app.get('/api/tickets/:id/transfers', isAuthenticated, async (req: any, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const transfers = await db
+        .select({
+          id: ticketTransfers.id,
+          ticketId: ticketTransfers.ticketId,
+          transferType: ticketTransfers.transferType,
+          salePrice: ticketTransfers.salePrice,
+          message: ticketTransfers.message,
+          status: ticketTransfers.status,
+          expiresAt: ticketTransfers.expiresAt,
+          acceptedAt: ticketTransfers.acceptedAt,
+          declinedAt: ticketTransfers.declinedAt,
+          createdAt: ticketTransfers.createdAt,
+          fromProfile: {
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl
+          }
+        })
+        .from(ticketTransfers)
+        .leftJoin(profiles, eq(ticketTransfers.fromProfileId, profiles.id))
+        .where(eq(ticketTransfers.ticketId, ticketId))
+        .orderBy(sql`${ticketTransfers.createdAt} DESC`);
+
+      res.json(transfers);
+    } catch (error) {
+      console.error("Error fetching ticket transfers:", error);
+      res.status(500).json({ message: "Failed to fetch ticket transfers" });
+    }
+  });
+
+  // Ticket return routes
+
+  // Create ticket return request
+  app.post('/api/tickets/:id/return', isAuthenticated, async (req: any, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const { reason, reasonDetails } = req.body;
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Verify ticket ownership
+      const [ticket] = await db
+        .select()
+        .from(tickets)
+        .where(and(eq(tickets.id, ticketId), eq(tickets.profileId, activeProfile.id)));
+
+      if (!ticket) {
+        return res.status(404).json({ message: "Ticket not found or not owned by you" });
+      }
+
+      if (!ticket.returnable) {
+        return res.status(400).json({ message: "This ticket is not returnable" });
+      }
+
+      if (ticket.status !== 'active') {
+        return res.status(400).json({ message: "Only active tickets can be returned" });
+      }
+
+      // Check return deadline
+      if (ticket.returnDeadline && new Date() > ticket.returnDeadline) {
+        return res.status(400).json({ message: "Return deadline has passed" });
+      }
+
+      // Calculate refund amount (you can implement your own logic here)
+      const processingFee = ticket.price * 0.05; // 5% processing fee
+      const refundAmount = ticket.price - processingFee;
+
+      // Create return request
+      const [returnRequest] = await db.insert(ticketReturns).values({
+        ticketId,
+        profileId: activeProfile.id,
+        reason,
+        reasonDetails: reasonDetails || null,
+        refundAmount,
+        processingFee,
+      }).returning();
+
+      // Update ticket status
+      await db
+        .update(tickets)
+        .set({
+          status: 'returned',
+          updatedAt: new Date()
+        })
+        .where(eq(tickets.id, ticketId));
+
+      res.json(returnRequest);
+    } catch (error) {
+      console.error("Error creating ticket return:", error);
+      res.status(500).json({ message: "Failed to create ticket return" });
+    }
+  });
+
+  // Get ticket returns
+  app.get('/api/tickets/:id/returns', isAuthenticated, async (req: any, res) => {
+    try {
+      const ticketId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const returns = await db
+        .select()
+        .from(ticketReturns)
+        .where(eq(ticketReturns.ticketId, ticketId))
+        .orderBy(sql`${ticketReturns.createdAt} DESC`);
+
+      res.json(returns);
+    } catch (error) {
+      console.error("Error fetching ticket returns:", error);
+      res.status(500).json({ message: "Failed to fetch ticket returns" });
+    }
+  });
+
   // Update profile image
   app.post("/api/profiles/:profileId/image", requireAuth, upload.single('profileImage'), async (req, res) => {
     try {

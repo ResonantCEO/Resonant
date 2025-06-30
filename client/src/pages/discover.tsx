@@ -41,7 +41,7 @@ export default function Discover() {
   const [, setLocation] = useLocation();
   const [navigatingToProfile, setNavigatingToProfile] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("profiles");
+  const [activeTab, setActiveTab] = useState("events");
 
   const handleViewProfile = (profileId: number) => {
     setNavigatingToProfile(profileId);
@@ -196,13 +196,13 @@ export default function Discover() {
           {/* Content */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2">
-              <TabsTrigger value="profiles" className="flex items-center">
-                <Users className="w-4 h-4 mr-2" />
-                Profiles
-              </TabsTrigger>
               <TabsTrigger value="events" className="flex items-center">
                 <Calendar className="w-4 h-4 mr-2" />
                 Events
+              </TabsTrigger>
+              <TabsTrigger value="profiles" className="flex items-center">
+                <Users className="w-4 h-4 mr-2" />
+                Profiles
               </TabsTrigger>
             </TabsList>
 

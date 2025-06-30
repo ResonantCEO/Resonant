@@ -30,43 +30,39 @@ export default function Sidebar() {
   // Helper function to format user's display name
   const getUserDisplayName = () => {
     if (!user) return "";
-    const firstName = user.firstName || "";
-    const lastName = user.lastName || "";
-    return `${firstName} ${lastName}`.trim() || user.email;
+    const firstName = (user as any).firstName || "";
+    const lastName = (user as any).lastName || "";
+    return `${firstName} ${lastName}`.trim() || (user as any).email;
   };
 
   // Helper function to get user initials
   const getUserInitials = () => {
     if (!user) return "";
-    const firstName = user.firstName || "";
-    const lastName = user.lastName || "";
+    const firstName = (user as any).firstName || "";
+    const lastName = (user as any).lastName || "";
     if (firstName && lastName) {
       return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
     }
-    return user.email ? user.email.charAt(0).toUpperCase() : "";
+    return (user as any).email ? (user as any).email.charAt(0).toUpperCase() : "";
   };
 
   // Helper function to check if a path is active
   const isActivePath = (path: string) => {
-    if (path === "/" && (location === "/" || location === "/profile")) return true;
-    return location === path;
+    return location === path || location.startsWith(path + "/");
   };
 
-  const { data: profiles = [] } = useQuery({
+  // Fetch user profiles
+  const { data: profiles = [], isLoading: profilesLoading } = useQuery({
     queryKey: ["/api/profiles"],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  const { data: activeProfile } = useQuery({
+  // Fetch active profile
+  const { data: activeProfile, isLoading: activeProfileLoading } = useQuery({
     queryKey: ["/api/profiles/active"],
-  });
-
-  const { data: friendRequests = [] } = useQuery({
-    queryKey: ["/api/friend-requests"],
-    enabled: !!user && !!activeProfile,
-    refetchInterval: 3000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    staleTime: 0,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 2 * 60 * 1000, // 2 minutes
   });
 
   // Fetch profile-specific notification counts
@@ -109,7 +105,7 @@ export default function Sidebar() {
       }
     },
     refetchInterval: 5000,
-    enabled: !!user && profiles.length > 0,
+    enabled: !!user && (profiles as any[]).length > 0,
     retry: 3,
     retryDelay: 1000,
     staleTime: 0,
@@ -127,8 +123,8 @@ export default function Sidebar() {
   const getActiveProfileNotificationCount = () => {
     if (!activeProfile || !profileNotificationCounts) return 0;
     const counts = profileNotificationCounts || {};
-    const stringKey = String(activeProfile.id);
-    const numberKey = Number(activeProfile.id);
+    const stringKey = String((activeProfile as any).id);
+    const numberKey = Number((activeProfile as any).id);
 
     let countData = null;
     if (counts.hasOwnProperty(stringKey)) {
@@ -141,7 +137,7 @@ export default function Sidebar() {
     if (typeof countData === 'number') {
       return countData;
     } else if (countData && typeof countData === 'object') {
-      return (countData.notifications || 0);
+      return ((countData as any).notifications || 0);
     }
 
     return 0;
@@ -207,13 +203,13 @@ export default function Sidebar() {
 
   const getDisplayName = (profile: any) => {
     if (profile.type === 'audience' && user) {
-      return `${user.firstName || ''} ${user.lastName || ''}`.trim() || profile.name;
+      return `${(user as any).firstName || ''} ${(user as any).lastName || ''}`.trim() || profile.name;
     }
     return profile.name;
   };
 
   const handleProfileSwitch = (profileId: number) => {
-    if (profileId !== activeProfile?.id) {
+    if (profileId !== (activeProfile as any)?.id) {
       activateProfileMutation.mutate(profileId, {
         onSuccess: () => {
           // Navigate to the profile page after successful profile switch
@@ -247,14 +243,12 @@ export default function Sidebar() {
         finalCount = countData;
       } else if (countData && typeof countData === 'object') {
         // Use total count which includes both notifications and friend requests
-        finalCount = countData.total || 0;
+        finalCount = (countData as any).total || 0;
       }
 
       console.log(`Final count for profile ${profile.id} (${profile.name}):`, finalCount);
       return finalCount;
   };
-
-
 
   return (
     <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white dark:bg-neutral-900 shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block transition-all duration-300 fixed top-0 left-0 h-screen overflow-hidden z-40`}>
@@ -290,7 +284,7 @@ export default function Sidebar() {
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 cursor-pointer hover:bg-blue-100 transition-colors">
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-12 h-12 border-2 border-blue-500">
-                    <AvatarImage src={activeProfile.profileImageUrl || ""} />
+                    <AvatarImage src={(activeProfile as any).profileImageUrl || ""} />
                     <AvatarFallback>{getDisplayName(activeProfile).slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
@@ -298,31 +292,49 @@ export default function Sidebar() {
                       <span className="font-semibold text-neutral-900">{getDisplayName(activeProfile)}</span>
                     </div>
                     <div className="flex items-center space-x-2 whitespace-nowrap">
-                      <p className="text-sm text-neutral-600">Active Profile</p>
-                      <Badge className={`${getProfileTypeColor(activeProfile.type)} text-white text-xs flex-shrink-0`}>
-                        {getProfileTypeName(activeProfile.type)}
-                      </Badge>
+                      {getTypeIcon((activeProfile as any).type)}
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getProfileTypeColor((activeProfile as any).type)} text-white`}>
+                        {getProfileTypeName((activeProfile as any).type)}
+                      </span>
+                      {getVisibilityIcon((activeProfile as any).visibility)}
                     </div>
                   </div>
-                  <ChevronDown className="w-4 h-4 text-neutral-500" />
+                  <div className="flex items-center">
+                    <ChevronDown className="w-4 h-4 text-neutral-600" />
+                    {(() => {
+                      // Get notification count for active profile from profile notification counts
+                      let count = 0;
+                      if (profileNotificationCounts && activeProfile) {
+                        const counts = profileNotificationCounts || {};
+                        console.log(`Getting notification count for profile ${(activeProfile as any).id} (${(activeProfile as any).name})`);
+                        console.log("Available counts data:", counts);
+                        console.log("Available keys:", Object.keys(counts));
+
+                        const countData = counts[String((activeProfile as any).id)] || counts[Number((activeProfile as any).id)];
+                        if (countData && typeof countData === 'object') {
+                          count = (countData as any).total || 0;
+                        }
+                        console.log(`Final count for profile ${(activeProfile as any).id} (${(activeProfile as any).name}):`, count);
+                        console.log(`Profile ${(activeProfile as any).id} (${(activeProfile as any).name}) notification count:`, count);
+                      }
+
+                      return count > 0 ? (
+                        <Badge className="ml-2 bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
+                          {count > 99 ? '99+' : count}
+                        </Badge>
+                      ) : null;
+                    })()}
+                  </div>
                 </div>
               </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-80">
+            <DropdownMenuContent side="right" className="w-80">
               <DropdownMenuLabel>Switch Profile</DropdownMenuLabel>
               <DropdownMenuSeparator />
-
-              {Array.isArray(profiles) && profiles
-                .sort((a: any, b: any) => {
-                  // Put active profile first
-                  if (a.id === activeProfile?.id) return -1;
-                  if (b.id === activeProfile?.id) return 1;
-                  return 0;
-                })
-                .map((profile: any) => (
+              {(profiles as any[]).map((profile: any) => (
                 <DropdownMenuItem
                   key={profile.id}
-                  className={`p-3 ${profile.id === activeProfile?.id ? "bg-blue-50" : ""}`}
+                  className="p-3"
                   onClick={() => handleProfileSwitch(profile.id)}
                 >
                   <div className="flex items-center space-x-3 w-full">
@@ -331,22 +343,13 @@ export default function Sidebar() {
                       <AvatarFallback>{getDisplayName(profile).slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <div className="flex items-start justify-between mb-1">
-                        <span className="font-medium text-neutral-900">{getDisplayName(profile)}</span>
-                        <Badge className={`${getProfileTypeColor(profile.type)} text-white text-xs shrink-0`}>
-                          {getTypeIcon(profile.type)} {getProfileTypeName(profile.type)}
-                        </Badge>
-                      </div>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          {getVisibilityIcon(profile.visibility)}
-                          <span className="text-xs text-neutral-600 capitalize">{profile.visibility}</span>
-                        </div>
+                        <span className="font-medium">{getDisplayName(profile)}</span>
                         {(() => {
+                          // Get notification count for this profile from profile notification counts
                           const count = getProfileNotificationCount(profile);
-                          console.log(`Profile ${profile.id} (${profile.name}) notification count:`, count);
                           return count > 0 ? (
-                            <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center shrink-0">
+                            <Badge className="bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
                               {count > 99 ? "99+" : count}
                             </Badge>
                           ) : null;
@@ -374,8 +377,6 @@ export default function Sidebar() {
         )}
       </div>
 
-
-
       {/* Navigation Menu */}
       <nav className={`${isCollapsed ? 'p-2' : 'p-6'}`}>
         <ul className="space-y-2">
@@ -395,7 +396,7 @@ export default function Sidebar() {
           </li>
 
           {/* Dashboard - Only visible for Artist and Venue accounts */}
-          {activeProfile && (activeProfile.type === "artist" || activeProfile.type === "venue") && (
+          {activeProfile && ((activeProfile as any).type === "artist" || (activeProfile as any).type === "venue") && (
             <li>
               <Button
                 variant="ghost"
@@ -431,7 +432,7 @@ export default function Sidebar() {
           </li>
 
           {/* Tickets - Only visible for Audience accounts */}
-          {activeProfile && activeProfile.type === "audience" && (
+          {activeProfile && (activeProfile as any).type === "audience" && (
             <li>
               <Button
                 variant="ghost"
@@ -446,9 +447,8 @@ export default function Sidebar() {
                 {!isCollapsed && "Tickets"}
               </Button>
             </li>
-          )}</old_str>
-            </li>
-          )}</li></old_str>
+          )}
+
           <li>
             <Button
               variant="ghost"
@@ -466,9 +466,9 @@ export default function Sidebar() {
                 let friendRequestCount = 0;
                 if (profileNotificationCounts && activeProfile) {
                   const counts = profileNotificationCounts || {};
-                  const countData = counts[String(activeProfile.id)] || counts[Number(activeProfile.id)];
+                  const countData = counts[String((activeProfile as any).id)] || counts[Number((activeProfile as any).id)];
                   if (countData && typeof countData === 'object') {
-                    friendRequestCount = countData.friendRequests || 0;
+                    friendRequestCount = (countData as any).friendRequests || 0;
                   }
                 }
 
@@ -483,9 +483,9 @@ export default function Sidebar() {
                 let friendRequestCount = 0;
                 if (profileNotificationCounts && activeProfile) {
                   const counts = profileNotificationCounts || {};
-                  const countData = counts[String(activeProfile.id)] || counts[Number(activeProfile.id)];
+                  const countData = counts[String((activeProfile as any).id)] || counts[Number((activeProfile as any).id)];
                   if (countData && typeof countData === 'object') {
-                    friendRequestCount = countData.friendRequests || 0;
+                    friendRequestCount = (countData as any).friendRequests || 0;
                   }
                 }
 
@@ -553,8 +553,6 @@ export default function Sidebar() {
             </Button>
           </li>
         </ul>
-
-
 
         {/* Logout Button */}
         <div className={`mt-6 pt-6 border-t border-neutral-200 ${isCollapsed ? 'border-neutral-700' : ''}`}>

@@ -190,17 +190,33 @@ export default function Tickets() {
   };
 
   // Transfer Dialog Component
-  const TransferDialog = ({ ticket }: { ticket: any }) => {
+  const TransferDialog = ({ tickets }: { tickets: any[] }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [transferType, setTransferType] = useState("free");
-    const [recipient, setRecipient] = useState("");
+    const [selectedFriend, setSelectedFriend] = useState<any>(null);
+    const [friendSearchTerm, setFriendSearchTerm] = useState("");
+    const [numberOfTickets, setNumberOfTickets] = useState(1);
     const [salePrice, setSalePrice] = useState("");
     const [message, setMessage] = useState("");
+    const [showFriendDropdown, setShowFriendDropdown] = useState(false);
     const queryClient = useQueryClient();
+
+    // Get friends list
+    const { data: friends } = useQuery({
+      queryKey: ["/api/friends"],
+      enabled: isOpen,
+    });
+
+    // Filter friends based on search term
+    const filteredFriends = friends?.filter((friend: any) =>
+      friend.profile.name.toLowerCase().includes(friendSearchTerm.toLowerCase())
+    ) || [];
 
     const transferMutation = useMutation({
       mutationFn: async (data: any) => {
-        const response = await fetch(`/api/tickets/${ticket.id}/transfer`, {
+        // For now, transfer the first ticket - in a real implementation,
+        // you'd handle multiple ticket transfers
+        const response = await fetch(`/api/tickets/${tickets[0].id}/transfer`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
@@ -211,6 +227,9 @@ export default function Tickets() {
       onSuccess: () => {
         toast({ title: "Transfer initiated", description: "The recipient will be notified." });
         setIsOpen(false);
+        setSelectedFriend(null);
+        setFriendSearchTerm("");
+        setNumberOfTickets(1);
         queryClient.invalidateQueries({ queryKey: ["tickets"] });
       },
       onError: (error: any) => {
@@ -219,10 +238,13 @@ export default function Tickets() {
     });
 
     const handleTransfer = () => {
+      if (!selectedFriend) return;
+
       const data: any = {
-        toEmail: recipient,
+        toProfileId: selectedFriend.profile.id,
         transferType,
         message,
+        numberOfTickets,
       };
       
       if (transferType === "sale") {
@@ -230,6 +252,18 @@ export default function Tickets() {
       }
 
       transferMutation.mutate(data);
+    };
+
+    const handleFriendSelect = (friend: any) => {
+      setSelectedFriend(friend);
+      setFriendSearchTerm(friend.profile.name);
+      setShowFriendDropdown(false);
+    };
+
+    const handleFriendSearchChange = (value: string) => {
+      setFriendSearchTerm(value);
+      setSelectedFriend(null);
+      setShowFriendDropdown(value.length > 0);
     };
 
     return (
@@ -242,7 +276,7 @@ export default function Tickets() {
         </DialogTrigger>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Transfer Ticket</DialogTitle>
+            <DialogTitle>Transfer Tickets</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -266,19 +300,52 @@ export default function Tickets() {
             </div>
 
             <div>
-              <Label htmlFor="recipient">Recipient Email</Label>
+              <Label htmlFor="numberOfTickets">Number of Tickets</Label>
+              <Select value={numberOfTickets.toString()} onValueChange={(value) => setNumberOfTickets(parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select number of tickets" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: tickets.length }, (_, i) => i + 1).map((num) => (
+                    <SelectItem key={num} value={num.toString()}>
+                      {num} ticket{num > 1 ? 's' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="relative">
+              <Label htmlFor="recipient">Recipient</Label>
               <Input
                 id="recipient"
-                type="email"
-                value={recipient}
-                onChange={(e) => setRecipient(e.target.value)}
-                placeholder="friend@example.com"
+                value={friendSearchTerm}
+                onChange={(e) => handleFriendSearchChange(e.target.value)}
+                placeholder="Search for a friend..."
+                onFocus={() => setShowFriendDropdown(friendSearchTerm.length > 0)}
               />
+              {showFriendDropdown && filteredFriends.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                  {filteredFriends.map((friend: any) => (
+                    <div
+                      key={friend.profile.id}
+                      className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                      onClick={() => handleFriendSelect(friend)}
+                    >
+                      <Avatar className="w-6 h-6">
+                        <AvatarImage src={friend.profile.profileImageUrl} />
+                        <AvatarFallback>{friend.profile.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-gray-900 dark:text-white">{friend.profile.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {transferType === "sale" && (
               <div>
-                <Label htmlFor="price">Sale Price ($)</Label>
+                <Label htmlFor="price">Sale Price ($) per ticket</Label>
                 <Input
                   id="price"
                   type="number"
@@ -287,6 +354,11 @@ export default function Tickets() {
                   onChange={(e) => setSalePrice(e.target.value)}
                   placeholder="0.00"
                 />
+                {salePrice && numberOfTickets > 1 && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Total: ${(parseFloat(salePrice) * numberOfTickets).toFixed(2)}
+                  </p>
+                )}
               </div>
             )}
 
@@ -307,7 +379,7 @@ export default function Tickets() {
               </Button>
               <Button 
                 onClick={handleTransfer} 
-                disabled={!recipient || (transferType === "sale" && !salePrice) || transferMutation.isPending}
+                disabled={!selectedFriend || (transferType === "sale" && !salePrice) || transferMutation.isPending}
                 className="flex-1"
               >
                 {transferMutation.isPending ? "Sending..." : "Send Transfer"}
@@ -508,7 +580,7 @@ export default function Tickets() {
               </Button>
               {ticket.status === "confirmed" && (
                 <>
-                  <TransferDialog ticket={ticket} />
+                  <TransferDialog tickets={[ticket]} />
                   <ReturnDialog ticket={ticket} />
                 </>
               )}

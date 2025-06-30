@@ -3509,11 +3509,21 @@ export function registerRoutes(app: Express): Server {
   app.post('/api/tickets/:id/transfer', isAuthenticated, async (req: any, res) => {
     try {
       const ticketId = parseInt(req.params.id);
-      const { toEmail, toProfileId, transferType, salePrice, message } = req.body;
+      const { toProfileId, transferType, salePrice, message, numberOfTickets = 1 } = req.body;
       const activeProfile = await storage.getActiveProfile(req.user.id);
       
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Verify recipient profile exists
+      if (!toProfileId) {
+        return res.status(400).json({ message: "Recipient is required" });
+      }
+
+      const toProfile = await storage.getProfile(toProfileId);
+      if (!toProfile) {
+        return res.status(404).json({ message: "Recipient profile not found" });
       }
 
       // Verify ticket ownership
@@ -3546,8 +3556,8 @@ export function registerRoutes(app: Express): Server {
       const [transfer] = await db.insert(ticketTransfers).values({
         ticketId,
         fromProfileId: activeProfile.id,
-        toProfileId: toProfileId || null,
-        toEmail: toEmail || null,
+        toProfileId: toProfileId,
+        toEmail: null, // No longer using email
         transferType,
         salePrice: transferType === 'sale' ? salePrice : null,
         message: message || null,
@@ -3557,20 +3567,18 @@ export function registerRoutes(app: Express): Server {
 
       // Send notification
       const { notificationService } = await import('./notifications');
-      if (toProfileId) {
-        const toProfile = await storage.getProfile(toProfileId);
-        if (toProfile?.userId) {
-          const fromUser = await storage.getUser(req.user.id);
-          const fromName = `${fromUser?.firstName} ${fromUser?.lastName}`;
-          await notificationService.notifyTicketTransfer(
-            toProfile.userId,
-            req.user.id,
-            fromName,
-            ticket.eventName,
-            transferType,
-            salePrice
-          );
-        }
+      if (toProfile?.userId) {
+        const fromUser = await storage.getUser(req.user.id);
+        const fromName = `${fromUser?.firstName} ${fromUser?.lastName}`;
+        const ticketText = numberOfTickets > 1 ? `${numberOfTickets} tickets` : 'a ticket';
+        await notificationService.notifyTicketTransfer(
+          toProfile.userId,
+          req.user.id,
+          fromName,
+          ticket.eventName,
+          transferType,
+          salePrice
+        );
       }
 
       res.json(transfer);

@@ -292,11 +292,9 @@ export default function Sidebar() {
                       <span className="font-semibold text-neutral-900">{getDisplayName(activeProfile)}</span>
                     </div>
                     <div className="flex items-center space-x-2 whitespace-nowrap">
-                      {getTypeIcon((activeProfile as any).type)}
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getProfileTypeColor((activeProfile as any).type)} text-white`}>
                         {getProfileTypeName((activeProfile as any).type)}
                       </span>
-                      {getVisibilityIcon((activeProfile as any).visibility)}
                     </div>
                   </div>
                   <div className="flex items-center">

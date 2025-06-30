@@ -102,11 +102,11 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
   const getAgeRestrictionBadge = () => {
     switch (event.ageRestriction) {
       case 'all_ages':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">All Ages</Badge>;
+        return <Badge variant="secondary" className="bg-green-500 text-white font-semibold border-green-600 shadow-sm">All Ages</Badge>;
       case '18+':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">18+</Badge>;
+        return <Badge variant="secondary" className="bg-orange-500 text-white font-semibold border-orange-600 shadow-sm">18+</Badge>;
       case '21+':
-        return <Badge variant="secondary" className="bg-red-100 text-red-800">21+</Badge>;
+        return <Badge variant="secondary" className="bg-red-500 text-white font-semibold border-red-600 shadow-sm">21+</Badge>;
       default:
         return null;
     }

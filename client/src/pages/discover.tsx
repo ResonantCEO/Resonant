@@ -122,10 +122,303 @@ export default function Discover() {
     }
   };
 
+  // Mock event data for placeholder cards
+  const mockEventsData = [
+    {
+      id: 1,
+      name: "Summer Music Festival 2024",
+      description: "Join us for an unforgettable night of live music featuring top local and national artists. Experience the magic of summer with food trucks, craft beer, and amazing performances under the stars.",
+      eventDate: "2024-07-15T19:00:00.000Z",
+      eventTime: "7:00 PM",
+      genre: "Pop/Rock",
+      ageRestriction: "all_ages",
+      status: "published",
+      capacity: 5000,
+      ticketsAvailable: true,
+      eventImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=400&fit=crop",
+      tags: ["festival", "outdoor", "live-music", "summer"],
+      organizer: {
+        id: 1,
+        name: "City Events Co.",
+        profileImageUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop",
+        type: "organizer"
+      },
+      venue: {
+        id: 1,
+        name: "Central Park Amphitheater",
+        profileImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=100&h=100&fit=crop",
+        location: "Downtown, NY"
+      },
+      artists: [
+        {
+          id: 1,
+          name: "The Electric Waves",
+          profileImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=50&h=50&fit=crop"
+        },
+        {
+          id: 2,
+          name: "Sunset Riders",
+          profileImageUrl: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=50&h=50&fit=crop"
+        }
+      ],
+      ticketTypes: [
+        {
+          id: 1,
+          name: "General Admission",
+          price: 45,
+          quantity: 2500,
+          quantitySold: 1200
+        },
+        {
+          id: 2,
+          name: "VIP Package",
+          price: 125,
+          quantity: 500,
+          quantitySold: 350
+        }
+      ]
+    },
+    {
+      id: 2,
+      name: "Jazz in the Park",
+      description: "Intimate evening of smooth jazz with renowned local musicians. Bring a blanket and enjoy cocktails and light bites while listening to soulful melodies.",
+      eventDate: "2024-07-20T20:00:00.000Z",
+      eventTime: "8:00 PM",
+      genre: "Jazz",
+      ageRestriction: "21+",
+      status: "published",
+      capacity: 300,
+      ticketsAvailable: true,
+      eventImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=400&fit=crop",
+      tags: ["jazz", "intimate", "cocktails", "evening"],
+      organizer: {
+        id: 2,
+        name: "Jazz Society",
+        profileImageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop",
+        type: "organizer"
+      },
+      venue: {
+        id: 2,
+        name: "Riverside Gardens",
+        profileImageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100&h=100&fit=crop",
+        location: "Riverside District"
+      },
+      artists: [
+        {
+          id: 3,
+          name: "Sarah Mitchell Quartet",
+          profileImageUrl: "https://images.unsplash.com/photo-1494790108755-2616c638d50c?w=50&h=50&fit=crop"
+        }
+      ],
+      ticketTypes: [
+        {
+          id: 3,
+          name: "Standard",
+          price: 35,
+          quantity: 300,
+          quantitySold: 85
+        }
+      ]
+    },
+    {
+      id: 3,
+      name: "Electronic Dance Night",
+      description: "Get ready to dance the night away with the hottest DJs in the city. State-of-the-art sound system and lighting will create an unforgettable experience.",
+      eventDate: "2024-07-25T22:00:00.000Z",
+      eventTime: "10:00 PM",
+      genre: "Electronic/EDM",
+      ageRestriction: "18+",
+      status: "published",
+      capacity: 1500,
+      ticketsAvailable: true,
+      eventImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=800&h=400&fit=crop",
+      tags: ["edm", "dance", "nightlife", "dj"],
+      organizer: {
+        id: 3,
+        name: "Nightlife Productions",
+        profileImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=100&h=100&fit=crop",
+        type: "organizer"
+      },
+      venue: {
+        id: 3,
+        name: "The Underground",
+        profileImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=100&h=100&fit=crop",
+        location: "Metro District"
+      },
+      artists: [
+        {
+          id: 4,
+          name: "DJ Pulse",
+          profileImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=50&h=50&fit=crop"
+        },
+        {
+          id: 5,
+          name: "Bass Drop",
+          profileImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=50&h=50&fit=crop"
+        }
+      ],
+      ticketTypes: [
+        {
+          id: 4,
+          name: "Early Bird",
+          price: 25,
+          quantity: 500,
+          quantitySold: 500
+        },
+        {
+          id: 5,
+          name: "General Admission",
+          price: 40,
+          quantity: 1000,
+          quantitySold: 600
+        }
+      ]
+    },
+    {
+      id: 4,
+      name: "Acoustic Sunday Sessions",
+      description: "Relax and unwind with beautiful acoustic performances in our cozy venue. Perfect for a Sunday afternoon with coffee and light snacks available.",
+      eventDate: "2024-07-28T15:00:00.000Z",
+      eventTime: "3:00 PM",
+      genre: "Acoustic/Folk",
+      ageRestriction: "all_ages",
+      status: "published",
+      capacity: 150,
+      ticketsAvailable: true,
+      eventImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=400&fit=crop",
+      tags: ["acoustic", "sunday", "coffee", "intimate"],
+      organizer: {
+        id: 4,
+        name: "Coffeehouse Concerts",
+        profileImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop",
+        type: "organizer"
+      },
+      venue: {
+        id: 4,
+        name: "The Bean Counter Café",
+        profileImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop",
+        location: "Arts Quarter"
+      },
+      artists: [
+        {
+          id: 6,
+          name: "Emma Stone & Guitar",
+          profileImageUrl: "https://images.unsplash.com/photo-1494790108755-2616c638d50c?w=50&h=50&fit=crop"
+        }
+      ],
+      ticketTypes: [
+        {
+          id: 6,
+          name: "General Seating",
+          price: 15,
+          quantity: 150,
+          quantitySold: 45
+        }
+      ]
+    },
+    {
+      id: 5,
+      name: "Rock Revival Concert",
+      description: "Classic rock tribute bands perform your favorite hits from the 70s, 80s, and 90s. Sing along to the greatest rock anthems of all time!",
+      eventDate: "2024-08-02T19:30:00.000Z",
+      eventTime: "7:30 PM",
+      genre: "Rock/Classic Rock",
+      ageRestriction: "all_ages",
+      status: "published",
+      capacity: 800,
+      ticketsAvailable: false,
+      eventImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=400&fit=crop",
+      tags: ["rock", "tribute", "classic", "sold-out"],
+      organizer: {
+        id: 5,
+        name: "Rock Revival Productions",
+        profileImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop",
+        type: "organizer"
+      },
+      venue: {
+        id: 5,
+        name: "The Rock House",
+        profileImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop",
+        location: "Music District"
+      },
+      artists: [
+        {
+          id: 7,
+          name: "LedEppelin (Tribute)",
+          profileImageUrl: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=50&h=50&fit=crop"
+        },
+        {
+          id: 8,
+          name: "The Rolling Scones",
+          profileImageUrl: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=50&h=50&fit=crop"
+        }
+      ],
+      ticketTypes: [
+        {
+          id: 7,
+          name: "General Admission",
+          price: 55,
+          quantity: 800,
+          quantitySold: 800
+        }
+      ]
+    },
+    {
+      id: 6,
+      name: "Hip-Hop Showcase",
+      description: "Discover the next generation of hip-hop talent at our monthly showcase. Local artists compete for prizes and recognition in this high-energy event.",
+      eventDate: "2024-08-10T21:00:00.000Z",
+      eventTime: "9:00 PM",
+      genre: "Hip-Hop/Rap",
+      ageRestriction: "18+",
+      status: "published",
+      capacity: 400,
+      ticketsAvailable: true,
+      eventImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=800&h=400&fit=crop",
+      tags: ["hip-hop", "showcase", "competition", "local"],
+      organizer: {
+        id: 6,
+        name: "Urban Beats Collective",
+        profileImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=100&h=100&fit=crop",
+        type: "organizer"
+      },
+      venue: {
+        id: 6,
+        name: "The Cipher Club",
+        profileImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=100&h=100&fit=crop",
+        location: "Urban District"
+      },
+      artists: [
+        {
+          id: 9,
+          name: "MC Flow",
+          profileImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=50&h=50&fit=crop"
+        },
+        {
+          id: 10,
+          name: "Beats by Nova",
+          profileImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=50&h=50&fit=crop"
+        }
+      ],
+      ticketTypes: [
+        {
+          id: 8,
+          name: "Standard Entry",
+          price: 20,
+          quantity: 400,
+          quantitySold: 120
+        }
+      ]
+    }
+  ];
+
   const { data: eventsData, isLoading: eventsLoading } = useQuery({
     queryKey: ["/api/events", { search: searchTerm, limit: 20, offset: 0 }],
     enabled: activeTab === "events",
   });
+
+  // Use mock data if API data is not available or empty
+  const displayEventsData = eventsData && eventsData.length > 0 ? eventsData : mockEventsData;
 
   return (
     <div className="min-h-screen flex bg-neutral-50 dark:bg-neutral-950">
@@ -225,9 +518,17 @@ export default function Discover() {
                     </Card>
                   ))}
                 </div>
-              ) : eventsData && eventsData.length > 0 ? (
+              ) : displayEventsData && displayEventsData.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {eventsData.map((event: any) => (
+                  {displayEventsData
+                    .filter((event: any) => {
+                      if (!searchTerm) return true;
+                      return event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             event.genre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             event.tags?.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+                    })
+                    .map((event: any) => (
                     <EventCard 
                       key={event.id} 
                       event={event}

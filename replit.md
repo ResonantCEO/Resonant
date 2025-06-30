@@ -13,6 +13,14 @@ The application is fully functional with:
 - Image upload and profile customization
 
 ## Recent Changes
+### June 30, 2025 - Version 0.5.1
+- ✓ Fixed critical JSX syntax error in friends.tsx that caused app crash
+- ✓ Resolved "Unterminated JSX contents" compilation error by adding missing closing div tag
+- ✓ Updated discover page to display Events tab first by default as requested
+- ✓ Reordered tab navigation so Events appears before Profiles
+- ✓ Application stability restored with all functionality preserved
+- ✓ Discover page now shows Events tab selected on initial load
+
 ### June 30, 2025 - Version 0.5.0
 - ✓ Fixed critical JSX syntax errors in sidebar component that caused complete app failure
 - ✓ Resolved "Expected corresponding JSX closing tag" compilation errors

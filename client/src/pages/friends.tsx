@@ -60,6 +60,6 @@ export default function Friends() {
           </div>
         </div>
       </div>
-    
+    </div>
   );
 }

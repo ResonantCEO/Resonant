@@ -209,7 +209,7 @@ export default function Tickets() {
 
     // Filter friends based on search term
     const filteredFriends = friends?.filter((friend: any) =>
-      friend.profile.name.toLowerCase().includes(friendSearchTerm.toLowerCase())
+      friend.name?.toLowerCase().includes(friendSearchTerm.toLowerCase())
     ) || [];
 
     const transferMutation = useMutation({
@@ -241,7 +241,7 @@ export default function Tickets() {
       if (!selectedFriend) return;
 
       const data: any = {
-        toProfileId: selectedFriend.profile.id,
+        toProfileId: selectedFriend.id,
         transferType,
         message,
         numberOfTickets,
@@ -256,7 +256,7 @@ export default function Tickets() {
 
     const handleFriendSelect = (friend: any) => {
       setSelectedFriend(friend);
-      setFriendSearchTerm(friend.profile.name);
+      setFriendSearchTerm(friend.name);
       setShowFriendDropdown(false);
     };
 
@@ -328,15 +328,15 @@ export default function Tickets() {
                 <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-40 overflow-y-auto">
                   {filteredFriends.map((friend: any) => (
                     <div
-                      key={friend.profile.id}
+                      key={friend.id}
                       className="flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                       onClick={() => handleFriendSelect(friend)}
                     >
                       <Avatar className="w-6 h-6">
-                        <AvatarImage src={friend.profile.profileImageUrl} />
-                        <AvatarFallback>{friend.profile.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={friend.profileImageUrl} />
+                        <AvatarFallback>{friend.name?.charAt(0) || '?'}</AvatarFallback>
                       </Avatar>
-                      <span className="text-sm text-gray-900 dark:text-white">{friend.profile.name}</span>
+                      <span className="text-sm text-gray-900 dark:text-white">{friend.name}</span>
                     </div>
                   ))}
                 </div>

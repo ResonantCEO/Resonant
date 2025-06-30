@@ -444,7 +444,9 @@ export default function Sidebar() {
               >
                 <Ticket className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
                 {!isCollapsed && "Tickets"}
-              </Button></old_str>
+              </Button>
+            </li>
+          )}</old_str>
             </li>
           )}</li></old_str>
           <li>

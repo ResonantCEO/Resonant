@@ -843,7 +843,7 @@ export default function Profile() {
                     placeholder="Tell the venue about your event, performance details, or any special requests..."
                     value={bookingRequestData.message}
                     onChange={(e) => setBookingRequestData({...bookingRequestData, message: e.target.value})}
-                    rows={3}
+                    rows={4}
                   />
                 </div>
               </div>

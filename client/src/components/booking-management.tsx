@@ -310,11 +310,11 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                     disabled={createBookingRequestMutation.isPending}
                     className="bg-blue-600 hover:bg-blue-700 !text-white"
                   >
-                    Send Request
+                    {createBookingRequestMutation.isPending ? "Sending..." : "Send Request"}
                   </Button>
                 </div>
               </div>
-            </DialogContent>
+            </DialogContent></old_str>
           </Dialog>
           )}
           <Button 

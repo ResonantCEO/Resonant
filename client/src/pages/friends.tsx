@@ -37,7 +37,7 @@ export default function Friends() {
   console.log('Friends page - activeProfile:', activeProfile);
 
   return (
-    <div className="min-h-screen flex bg-neutral-50">
+    <div className="min-h-screen flex bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-800"></div>
       <Sidebar />
 
       {/* Mobile Header */}
@@ -60,6 +60,6 @@ export default function Friends() {
           </div>
         </div>
       </div>
-    </div>
+    
   );
 }

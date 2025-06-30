@@ -15,6 +15,7 @@ interface ContractProposalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   bookingRequest: any;
+  venues?: any[]; // Optional venues list for direct proposals
 }
 
 interface ContractTerms {
@@ -43,7 +44,8 @@ interface PaymentTerms {
 export default function ContractProposalDialog({ 
   open, 
   onOpenChange, 
-  bookingRequest 
+  bookingRequest,
+  venues = []
 }: ContractProposalDialogProps) {
   const [formData, setFormData] = useState({
     title: "",
@@ -51,6 +53,7 @@ export default function ContractProposalDialog({
     requirements: "",
     expiresAt: "",
   });
+  const [selectedVenueForContract, setSelectedVenueForContract] = useState<any>(null);
 
   const [terms, setTerms] = useState<ContractTerms>({
     performanceDuration: "",
@@ -154,8 +157,19 @@ export default function ContractProposalDialog({
       return;
     }
 
+    // For direct proposals, we need a venue selected
+    if (!bookingRequest?.venueProfile?.name && !selectedVenueForContract) {
+      toast({
+        title: "Error",
+        description: "Please select a venue",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const proposalData = {
       bookingRequestId: bookingRequest.id,
+      venueId: selectedVenueForContract?.id || bookingRequest.venueProfileId,
       title: formData.title,
       description: formData.description,
       terms,
@@ -178,6 +192,33 @@ export default function ContractProposalDialog({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Venue Selection (only for direct proposals) */}
+          {!bookingRequest?.venueProfile?.name && venues.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Select Venue</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="venue">Choose Venue *</Label>
+                <Select onValueChange={(value) => {
+                  const venue = venues.find(v => v.id.toString() === value);
+                  setSelectedVenueForContract(venue);
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a venue" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {venues.map((venue: any) => (
+                      <SelectItem key={venue.id} value={venue.id.toString()}>
+                        {venue.name} {venue.location && `- ${venue.location}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Basic Information */}
           <Card>
             <CardHeader>

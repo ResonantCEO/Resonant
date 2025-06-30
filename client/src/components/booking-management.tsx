@@ -45,6 +45,7 @@ interface BookingManagementProps {
 
 export default function BookingManagement({ profileType }: BookingManagementProps) {
   const [showRequestDialog, setShowRequestDialog] = useState(false);
+  const [showRequestTypeDialog, setShowRequestTypeDialog] = useState(false);
   const [selectedVenue, setSelectedVenue] = useState<any>(null);
   const [newRequest, setNewRequest] = useState({
     eventDate: '',
@@ -215,15 +216,83 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         </h2>
         <div className="flex space-x-2">
           {profileType === 'artist' && (
-            <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700 !text-white">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Request Booking
-                </Button>
-              </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <Button 
+              onClick={() => setShowRequestTypeDialog(true)}
+              className="bg-blue-600 hover:bg-blue-700 !text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Request Booking
+            </Button>
+          )}
+          
+          {/* Request Type Selection Dialog */}
+          <Dialog open={showRequestTypeDialog} onOpenChange={setShowRequestTypeDialog}>
+            <DialogContent className="max-w-md">
               <DialogHeader>
+                <DialogTitle>Choose Request Type</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <p className="text-gray-600">
+                  How would you like to approach this venue?
+                </p>
+                <div className="space-y-3">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start h-auto p-4"
+                    onClick={() => {
+                      setShowRequestTypeDialog(false);
+                      setShowRequestDialog(true);
+                    }}
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">Simple Booking Request</div>
+                      <div className="text-sm text-gray-500">
+                        Send a basic booking inquiry with event details
+                      </div>
+                    </div>
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start h-auto p-4"
+                    onClick={() => {
+                      setShowRequestTypeDialog(false);
+                      // Create a mock booking request for contract proposal
+                      const mockBookingRequest = {
+                        id: Date.now(), // Temporary ID
+                        artistProfileId: activeProfile?.id,
+                        venueProfileId: null, // Will be set when venue is selected
+                        artistProfile: {
+                          id: activeProfile?.id,
+                          name: activeProfile?.name,
+                          profileImageUrl: activeProfile?.profileImageUrl
+                        },
+                        venueProfile: {
+                          id: null,
+                          name: '',
+                          profileImageUrl: null,
+                          location: ''
+                        }
+                      };
+                      setSelectedBookingForContract(mockBookingRequest);
+                      setShowContractDialog(true);
+                    }}
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">Propose Contract</div>
+                      <div className="text-sm text-gray-500">
+                        Send a detailed contract proposal with terms and payment
+                      </div>
+                    </div>
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Simple Booking Request Dialog */}
+          <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
+            <DialogContent className="max-w-lg">
+            <DialogHeader>
                 <DialogTitle>Request Venue Booking</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
@@ -315,7 +384,6 @@ export default function BookingManagement({ profileType }: BookingManagementProp
               </div>
             </DialogContent>
           </Dialog>
-          )}
           <Button 
             variant="outline"
             onClick={() => {
@@ -539,7 +607,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
             </p>
             {profileType === 'artist' && (
               <Button 
-                onClick={() => setShowRequestDialog(true)}
+                onClick={() => setShowRequestTypeDialog(true)}
                 className="bg-blue-600 hover:bg-blue-700 !text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -555,6 +623,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         open={showContractDialog}
         onOpenChange={setShowContractDialog}
         bookingRequest={selectedBookingForContract}
+        venues={venues}
       />
 
       {/* Availability Checker Dialog */}

@@ -2640,6 +2640,7 @@ export function registerRoutes(app: Express): Server {
     try {
       const {
         bookingRequestId,
+        venueId,
         title,
         description,
         terms,
@@ -2654,21 +2655,55 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      // Verify the booking request exists and user has permission
-      const bookingRequest = await storage.getBookingRequestById(bookingRequestId);
-      if (!bookingRequest) {
-        return res.status(404).json({ message: "Booking request not found" });
-      }
+      let targetProfileId;
+      let bookingRequest;
 
-      // Only venue can propose contracts to artists
-      if (activeProfile.type !== 'venue' || bookingRequest.venueProfileId !== activeProfile.id) {
-        return res.status(403).json({ message: "Only venues can propose contracts for their booking requests" });
+      if (bookingRequestId) {
+        // Existing booking request flow
+        bookingRequest = await storage.getBookingRequestById(bookingRequestId);
+        if (!bookingRequest) {
+          return res.status(404).json({ message: "Booking request not found" });
+        }
+
+        // Only venue can propose contracts to artists for existing booking requests
+        if (activeProfile.type !== 'venue' || bookingRequest.venueProfileId !== activeProfile.id) {
+          return res.status(403).json({ message: "Only venues can propose contracts for their booking requests" });
+        }
+        targetProfileId = bookingRequest.artistProfileId;
+      } else if (venueId) {
+        // Direct contract proposal from artist to venue
+        if (activeProfile.type !== 'artist') {
+          return res.status(403).json({ message: "Only artists can send direct contract proposals" });
+        }
+
+        const venueProfile = await storage.getProfile(venueId);
+        if (!venueProfile || venueProfile.type !== 'venue') {
+          return res.status(404).json({ message: "Venue not found" });
+        }
+        targetProfileId = venueId;
+
+        // Create a basic booking request for the contract
+        const basicBookingData = {
+          artistProfileId: activeProfile.id,
+          venueProfileId: venueId,
+          status: 'pending',
+          requestedAt: new Date(),
+          eventDate: null,
+          eventTime: null,
+          budget: null,
+          requirements: null,
+          message: 'Contract proposal submission'
+        };
+
+        bookingRequest = await storage.createBookingRequest(basicBookingData);
+      } else {
+        return res.status(400).json({ message: "Either bookingRequestId or venueId is required" });
       }
 
       const proposalData = {
-        bookingRequestId,
+        bookingRequestId: bookingRequest.id,
         proposedBy: activeProfile.id,
-        proposedTo: bookingRequest.artistProfileId,
+        proposedTo: targetProfileId,
         title,
         description,
         terms,
@@ -2680,16 +2715,16 @@ export function registerRoutes(app: Express): Server {
 
       const [proposal] = await db.insert(contractProposals).values(proposalData).returning();
 
-      // Send notification to artist
+      // Send notification to the target profile
       const { notificationService } = await import('./notifications');
-      const artistProfile = await storage.getProfile(bookingRequest.artistProfileId);
-      if (artistProfile?.userId) {
-        const venueUser = await storage.getUser(req.user.id);
-        const venueName = `${venueUser?.firstName} ${venueUser?.lastName}`;
+      const targetProfile = await storage.getProfile(targetProfileId);
+      if (targetProfile?.userId) {
+        const senderUser = await storage.getUser(req.user.id);
+        const senderName = `${senderUser?.firstName} ${senderUser?.lastName}`;
         await notificationService.notifyContractProposal(
-          artistProfile.userId,
+          targetProfile.userId,
           req.user.id,
-          venueName,
+          senderName,
           activeProfile.name,
           title
         );

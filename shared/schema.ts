@@ -866,7 +866,160 @@ export const ticketReturnsRelations = relations(ticketReturns, ({ one }) => ({
   }),
 }));
 
+// Events table
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  organizerProfileId: integer("organizer_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  venueProfileId: integer("venue_profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  artistProfileIds: integer("artist_profile_ids").array().notNull().default([]),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  eventDate: timestamp("event_date").notNull(),
+  eventTime: varchar("event_time"),
+  duration: integer("duration"), // in minutes
+  genre: varchar("genre"),
+  ageRestriction: varchar("age_restriction"), // 'all_ages', '18+', '21+'
+  status: varchar("status").notNull().default("draft"), // 'draft', 'published', 'cancelled', 'postponed', 'completed'
+  capacity: integer("capacity"),
+  ticketsAvailable: boolean("tickets_available").default(true),
+  ticketSalesStart: timestamp("ticket_sales_start"),
+  ticketSalesEnd: timestamp("ticket_sales_end"),
+  eventImageUrl: varchar("event_image_url"),
+  tags: varchar("tags").array().default([]),
+  socialLinks: jsonb("social_links").default({}),
+  requiresApproval: boolean("requires_approval").default(false),
+  isPrivate: boolean("is_private").default(false),
+  bookingRequestId: integer("booking_request_id").references(() => bookingRequests.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Event ticket types table
+export const eventTicketTypes = pgTable("event_ticket_types", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(), // 'General Admission', 'VIP', 'Early Bird'
+  description: text("description"),
+  price: real("price").notNull(),
+  quantity: integer("quantity"), // null for unlimited
+  quantitySold: integer("quantity_sold").default(0),
+  saleStart: timestamp("sale_start"),
+  saleEnd: timestamp("sale_end"),
+  isActive: boolean("is_active").default(true),
+  benefits: varchar("benefits").array().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Event attendance table
+export const eventAttendance = pgTable("event_attendance", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  status: varchar("status").notNull().default("interested"), // 'interested', 'going', 'attended', 'no_show'
+  ticketId: integer("ticket_id").references(() => tickets.id),
+  checkInTime: timestamp("check_in_time"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Update tickets table to reference events
+export const ticketsUpdated = pgTable("tickets", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  ticketTypeId: integer("ticket_type_id").references(() => eventTicketTypes.id),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  originalPurchaserId: integer("original_purchaser_id").notNull().references(() => profiles.id),
+  ticketType: varchar("ticket_type").notNull(), // 'general', 'vip', 'early_bird', 'student'
+  sectionName: varchar("section_name"),
+  rowName: varchar("row_name"),
+  seatNumber: varchar("seat_number"),
+  price: real("price").notNull(),
+  qrCode: varchar("qr_code").notNull().unique(),
+  orderNumber: varchar("order_number").notNull(),
+  status: varchar("status").notNull().default("active"), // 'active', 'used', 'transferred', 'returned', 'cancelled'
+  purchaseDate: timestamp("purchase_date").notNull(),
+  transferable: boolean("transferable").default(true),
+  returnable: boolean("returnable").default(true),
+  returnDeadline: timestamp("return_deadline"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations for events
+export const eventsRelations = relations(events, ({ one, many }) => ({
+  organizer: one(profiles, {
+    fields: [events.organizerProfileId],
+    references: [profiles.id],
+    relationName: "organizer",
+  }),
+  venue: one(profiles, {
+    fields: [events.venueProfileId],
+    references: [profiles.id],
+    relationName: "venue",
+  }),
+  bookingRequest: one(bookingRequests, {
+    fields: [events.bookingRequestId],
+    references: [bookingRequests.id],
+  }),
+  ticketTypes: many(eventTicketTypes),
+  attendance: many(eventAttendance),
+  tickets: many(ticketsUpdated),
+}));
+
+export const eventTicketTypesRelations = relations(eventTicketTypes, ({ one, many }) => ({
+  event: one(events, {
+    fields: [eventTicketTypes.eventId],
+    references: [events.id],
+  }),
+  tickets: many(ticketsUpdated),
+}));
+
+export const eventAttendanceRelations = relations(eventAttendance, ({ one }) => ({
+  event: one(events, {
+    fields: [eventAttendance.eventId],
+    references: [events.id],
+  }),
+  profile: one(profiles, {
+    fields: [eventAttendance.profileId],
+    references: [profiles.id],
+  }),
+  ticket: one(ticketsUpdated, {
+    fields: [eventAttendance.ticketId],
+    references: [ticketsUpdated.id],
+  }),
+}));
+
+// Update tickets relations
+export const ticketsUpdatedRelations = relations(ticketsUpdated, ({ one, many }) => ({
+  event: one(events, {
+    fields: [ticketsUpdated.eventId],
+    references: [events.id],
+  }),
+  ticketType: one(eventTicketTypes, {
+    fields: [ticketsUpdated.ticketTypeId],
+    references: [eventTicketTypes.id],
+  }),
+  profile: one(profiles, {
+    fields: [ticketsUpdated.profileId],
+    references: [profiles.id],
+  }),
+  originalPurchaser: one(profiles, {
+    fields: [ticketsUpdated.originalPurchaserId],
+    references: [profiles.id],
+    relationName: "originalPurchaser",
+  }),
+  transfers: many(ticketTransfers),
+  returns: many(ticketReturns),
+}));
+
 // Type exports
+export type Event = InferSelectModel<typeof events>;
+export type InsertEvent = InferInsertModel<typeof events>;
+export type EventTicketType = InferSelectModel<typeof eventTicketTypes>;
+export type InsertEventTicketType = InferInsertModel<typeof eventTicketTypes>;
+export type EventAttendance = InferSelectModel<typeof eventAttendance>;
+export type InsertEventAttendance = InferInsertModel<typeof eventAttendance>;
 export type Ticket = InferSelectModel<typeof tickets>;
 export type InsertTicket = InferInsertModel<typeof tickets>;
 export type TicketTransfer = InferSelectModel<typeof ticketTransfers>;

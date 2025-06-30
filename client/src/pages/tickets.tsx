@@ -76,8 +76,13 @@ export default function Tickets() {
     );
   }
 
-  // Mock ticket data - in real implementation, this would come from API
-  const mockTickets = [
+  const { data: userTickets } = useQuery({
+    queryKey: ["/api/tickets"],
+    enabled: !!activeProfile,
+  });
+
+  // Mock ticket data - will be replaced by real API data
+  const mockTickets = userTickets || [
     {
       id: 1,
       eventName: "Arctic Monkeys Live",

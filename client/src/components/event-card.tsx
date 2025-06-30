@@ -1,0 +1,305 @@
+
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Users, 
+  Music, 
+  Ticket,
+  Heart,
+  Share2,
+  ExternalLink
+} from "lucide-react";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
+
+interface EventCardProps {
+  event: {
+    id: number;
+    name: string;
+    description: string;
+    eventDate: string;
+    eventTime?: string;
+    genre?: string;
+    ageRestriction?: string;
+    status: string;
+    capacity?: number;
+    ticketsAvailable: boolean;
+    eventImageUrl?: string;
+    tags: string[];
+    organizer?: {
+      id: number;
+      name: string;
+      profileImageUrl?: string;
+      type: string;
+    };
+    venue?: {
+      id: number;
+      name: string;
+      profileImageUrl?: string;
+      location?: string;
+    };
+    artists?: Array<{
+      id: number;
+      name: string;
+      profileImageUrl?: string;
+    }>;
+    ticketTypes?: Array<{
+      id: number;
+      name: string;
+      price: number;
+      quantity?: number;
+      quantitySold: number;
+    }>;
+  };
+  showActions?: boolean;
+  onEventClick?: (eventId: number) => void;
+}
+
+export default function EventCard({ event, showActions = true, onEventClick }: EventCardProps) {
+  const [isInterested, setIsInterested] = useState(false);
+  const queryClient = useQueryClient();
+
+  const attendMutation = useMutation({
+    mutationFn: async (status: string) => {
+      const response = await fetch(`/api/events/${event.id}/attend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) throw new Error('Failed to update attendance');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      toast({ title: "Attendance updated", description: "Your interest has been recorded." });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const getLowestPrice = () => {
+    if (!event.ticketTypes || event.ticketTypes.length === 0) return null;
+    return Math.min(...event.ticketTypes.map(t => t.price));
+  };
+
+  const getAgeRestrictionBadge = () => {
+    switch (event.ageRestriction) {
+      case 'all_ages':
+        return <Badge variant="secondary" className="bg-green-100 text-green-800">All Ages</Badge>;
+      case '18+':
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">18+</Badge>;
+      case '21+':
+        return <Badge variant="secondary" className="bg-red-100 text-red-800">21+</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  const handleInterested = () => {
+    const newStatus = isInterested ? 'interested' : 'going';
+    setIsInterested(!isInterested);
+    attendMutation.mutate(newStatus);
+  };
+
+  const handleCardClick = () => {
+    if (onEventClick) {
+      onEventClick(event.id);
+    }
+  };
+
+  const lowestPrice = getLowestPrice();
+
+  return (
+    <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={handleCardClick}>
+      <CardHeader className="pb-3">
+        {/* Event Image */}
+        {event.eventImageUrl && (
+          <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
+            <img 
+              src={event.eventImageUrl} 
+              alt={event.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            />
+            {event.status === 'published' && (
+              <div className="absolute top-3 right-3">
+                <Badge className="bg-blue-500 text-white">Live</Badge>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Event Header */}
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
+              {event.name}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+              {event.description}
+            </p>
+          </div>
+          {showActions && (
+            <div className="flex space-x-2 ml-4">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleInterested();
+                }}
+                className={isInterested ? "text-red-500 border-red-500" : ""}
+              >
+                <Heart className={`w-4 h-4 ${isInterested ? "fill-current" : ""}`} />
+              </Button>
+              <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>
+                <Share2 className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        {/* Event Details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+            <Calendar className="w-4 h-4 mr-2 text-blue-500" />
+            {formatDate(event.eventDate)}
+          </div>
+          
+          {event.eventTime && (
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+              <Clock className="w-4 h-4 mr-2 text-blue-500" />
+              {event.eventTime}
+            </div>
+          )}
+
+          {event.venue && (
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+              <MapPin className="w-4 h-4 mr-2 text-blue-500" />
+              {event.venue.name}
+              {event.venue.location && (
+                <span className="ml-1">• {event.venue.location}</span>
+              )}
+            </div>
+          )}
+
+          {event.capacity && (
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+              <Users className="w-4 h-4 mr-2 text-blue-500" />
+              Capacity: {event.capacity}
+            </div>
+          )}
+        </div>
+
+        {/* Genre and Age Restriction */}
+        <div className="flex items-center space-x-2">
+          {event.genre && (
+            <Badge variant="outline" className="flex items-center">
+              <Music className="w-3 h-3 mr-1" />
+              {event.genre}
+            </Badge>
+          )}
+          {getAgeRestrictionBadge()}
+        </div>
+
+        {/* Artists */}
+        {event.artists && event.artists.length > 0 && (
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Artists:</span>
+            <div className="flex -space-x-2">
+              {event.artists.slice(0, 3).map((artist) => (
+                <Avatar key={artist.id} className="w-6 h-6 border-2 border-white">
+                  <AvatarImage src={artist.profileImageUrl} />
+                  <AvatarFallback className="text-xs">{artist.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+              ))}
+              {event.artists.length > 3 && (
+                <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white flex items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-400">
+                  +{event.artists.length - 3}
+                </div>
+              )}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {event.artists.map(a => a.name).join(', ')}
+            </div>
+          </div>
+        )}
+
+        {/* Tags */}
+        {event.tags && event.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {event.tags.slice(0, 4).map((tag) => (
+              <Badge key={tag} variant="secondary" className="text-xs">
+                #{tag}
+              </Badge>
+            ))}
+            {event.tags.length > 4 && (
+              <Badge variant="secondary" className="text-xs">
+                +{event.tags.length - 4} more
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Pricing and Actions */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+          <div>
+            {lowestPrice && (
+              <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                From ${lowestPrice}
+              </div>
+            )}
+            {!event.ticketsAvailable && (
+              <div className="text-sm text-red-500 font-medium">Sold Out</div>
+            )}
+          </div>
+
+          {showActions && event.ticketsAvailable && (
+            <Button 
+              size="sm" 
+              className="flex items-center"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Handle ticket purchase
+              }}
+            >
+              <Ticket className="w-4 h-4 mr-1" />
+              Get Tickets
+            </Button>
+          )}
+        </div>
+
+        {/* Organizer */}
+        {event.organizer && (
+          <div className="flex items-center space-x-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+            <Avatar className="w-5 h-5">
+              <AvatarImage src={event.organizer.profileImageUrl} />
+              <AvatarFallback className="text-xs">{event.organizer.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              Organized by {event.organizer.name}
+            </span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

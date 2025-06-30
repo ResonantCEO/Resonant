@@ -630,7 +630,7 @@ export default function Profile() {
                     Tickets
                   </Button>
                 </li>
-              )}</li>
+              )}
 
               <li>
                 <Button
@@ -1076,7 +1076,7 @@ export default function Profile() {
                               : `${profile.name} hasn't started their music discovery journey yet.`
                             }
                           </p>
-                          
+
                         </div>
                       )}
                     </div>
@@ -1202,9 +1202,9 @@ export default function Profile() {
               )}
             </div>
           )}
-          
 
-          
+
+
 
           {/* Gallery Tab */}
           {activeTab === "photos" && (

@@ -329,24 +329,15 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
 
         {/* Back of card */}
         <Card 
-          className="absolute inset-0 w-full h-full backface-hidden hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex flex-col" 
+          className="absolute inset-0 w-full h-full backface-hidden hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex flex-col cursor-pointer" 
           style={{ transform: 'rotateY(180deg)' }}
+          onClick={() => setIsFlipped(false)}
         >
           <CardHeader className="pb-3 flex-shrink-0">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 flex-1 mr-3">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 flex-1">
                 {event.name}
               </h3>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsFlipped(false);
-                }}
-              >
-                ← Back
-              </Button>
             </div>
           </CardHeader>
 

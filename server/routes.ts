@@ -1038,13 +1038,31 @@ export function registerRoutes(app: Express): Server {
   // Friend routes
   app.get('/api/friends', isAuthenticated, async (req: any, res) => {
     try {
-      const activeProfile = await storage.getActiveProfile(req.user.id);
-      if (!activeProfile) {
-        return res.status(400).json({ message: "No active profile" });
+      // Get all user profiles and combine their friends
+      const userProfiles = await storage.getProfilesByUserId(req.user.id);
+      console.log(`Found ${userProfiles.length} profiles for user ${req.user.id}:`, userProfiles.map(p => `${p.id} (${p.name}, ${p.type})`));
+      
+      const allFriends = [];
+      const seenFriendIds = new Set();
+      
+      for (const profile of userProfiles) {
+        if (profile.deletedAt) continue; // Skip deleted profiles
+        
+        console.log(`Fetching friends for profile ${profile.id} (${profile.name})`);
+        const friends = await storage.getFriends(profile.id);
+        console.log(`Found ${friends.length} friends for profile ${profile.id}:`, friends.map(f => `${f.id} (${f.name})`));
+        
+        // Add friends to the list, avoiding duplicates
+        for (const friend of friends) {
+          if (!seenFriendIds.has(friend.id)) {
+            seenFriendIds.add(friend.id);
+            allFriends.push(friend);
+          }
+        }
       }
-
-      const friends = await storage.getFriends(activeProfile.id);
-      res.json(friends);
+      
+      console.log(`Total unique friends found: ${allFriends.length}`);
+      res.json(allFriends);
     } catch (error) {
       console.error("Error fetching friends:", error);
       res.status(500).json({ message: "Failed to fetch friends" });

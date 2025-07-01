@@ -680,10 +680,11 @@ export default function MessagesPage() {
       return matchesSearch && matchesArchiveFilter;
     });
 
-  const filteredFriends = friends.filter((friend: any) =>
-    friend.name.toLowerCase().includes(friendSearchQuery.toLowerCase()) &&
-    friend.id !== activeProfile?.id // Exclude current user's active profile
-  );
+  const filteredFriends = friends.filter((friend: any) => {
+    const nameMatch = friend.name.toLowerCase().includes(friendSearchQuery.toLowerCase());
+    const notCurrentUser = friend.id !== activeProfile?.id;
+    return nameMatch && notCurrentUser;
+  });
 
   const filteredMessages = messages.filter((message: Message) => {
     if (!messageSearchQuery) return true;

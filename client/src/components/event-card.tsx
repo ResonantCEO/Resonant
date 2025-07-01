@@ -272,16 +272,11 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
             )}
 
             {/* Pricing Info */}
-            {(lowestPrice && !event.ticketTypes) || !event.ticketsAvailable ? (
+            {lowestPrice && !event.ticketTypes && event.ticketsAvailable ? (
               <div className="pt-3 border-t border-gray-200 dark:border-gray-700 mt-auto">
-                {lowestPrice && !event.ticketTypes && (
-                  <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                    From ${lowestPrice}
-                  </div>
-                )}
-                {!event.ticketsAvailable && (
-                  <div className="text-sm text-red-500 font-medium">Sold Out</div>
-                )}
+                <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                  From ${lowestPrice}
+                </div>
               </div>
             ) : null}
 
@@ -289,7 +284,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
             {showActions && (
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-auto">
                 <div className="flex space-x-2">
-                  {event.ticketsAvailable && (
+                  {event.ticketsAvailable ? (
                     <Button 
                       size="sm"
                       className="flex-1"
@@ -300,6 +295,15 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                     >
                       <Ticket className="w-4 h-4 mr-1" />
                       Get Tickets
+                    </Button>
+                  ) : (
+                    <Button 
+                      size="sm"
+                      className="flex-1 bg-red-500 hover:bg-red-600 text-white"
+                      disabled
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Sold Out
                     </Button>
                   )}
                   <Button 
@@ -420,7 +424,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
             {showActions && (
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-auto flex-shrink-0">
                 <div className="flex space-x-2">
-                  {event.ticketsAvailable && (
+                  {event.ticketsAvailable ? (
                     <Button 
                       size="sm"
                       className="flex-1"
@@ -431,6 +435,15 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                     >
                       <Ticket className="w-4 h-4 mr-1" />
                       Get Tickets
+                    </Button>
+                  ) : (
+                    <Button 
+                      size="sm"
+                      className="flex-1 bg-red-500 hover:bg-red-600 text-white"
+                      disabled
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Sold Out
                     </Button>
                   )}
                   <Button 

@@ -225,17 +225,17 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                   onMouseDown={(e) => {
                     const startY = e.pageY - e.currentTarget.offsetTop;
                     const scrollTop = e.currentTarget.scrollTop;
-                    
+
                     const handleMouseMove = (e: MouseEvent) => {
                       const y = e.pageY - e.currentTarget.offsetTop;
                       e.currentTarget.scrollTop = scrollTop - (y - startY);
                     };
-                    
+
                     const handleMouseUp = () => {
                       document.removeEventListener('mousemove', handleMouseMove);
                       document.removeEventListener('mouseup', handleMouseUp);
                     };
-                    
+
                     document.addEventListener('mousemove', handleMouseMove);
                     document.addEventListener('mouseup', handleMouseUp);
                   }}
@@ -357,7 +357,8 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
 
                 {event.venue && (
                   <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                    <div className="flex items-center space-x-2 flex-1 min-w-0 ml-6">
+                    <MapPin className="w-4 h-4 mr-2 text-blue-500 flex-shrink-0" />
+                    <div className="flex items-center space-x-2 flex-1 min-w-0">
                       <Avatar className="w-6 h-6">
                         <AvatarImage src={event.venue.profileImageUrl} />
                         <AvatarFallback className="text-xs">{event.venue.name.charAt(0)}</AvatarFallback>

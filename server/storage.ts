@@ -1401,7 +1401,7 @@ export class Storage {
         throw new Error("Not authorized to view this conversation");
       }
 
-      const messages = await db
+      const messageList = await db
         .select({
           message: messages,
           sender: {
@@ -1436,10 +1436,10 @@ export class Storage {
         .offset(offset);
 
       // Get read receipts for these messages
-      const messageIds = messages.map(m => m.message.id);
+      const messageIds = messageList.map(m => m.message.id);
       const readReceipts = await this.getReadReceipts(messageIds);
 
-      return messages.reverse().map(msg => ({
+      return messageList.reverse().map(msg => ({
         id: msg.message.id,
         content: msg.message.content,
         messageType: msg.messageType,

@@ -97,53 +97,18 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Friends Widget */}
-      <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Friends</CardTitle>
-            <Button variant="link" size="sm" className="text-blue-500 p-0">
-              See all
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {friends.length === 0 ? (
-            <p className="text-center text-neutral-600 py-4">No friends yet.</p>
-          ) : (
-            <>
-              <div className="grid grid-cols-3 gap-3">
-                {friends.slice(0, 9).map((friend: any) => (
-                  <div key={friend.id} className="text-center">
-                    <Avatar className="w-full aspect-square mb-2">
-                      <AvatarImage src={friend.profileImageUrl || ""} />
-                      <AvatarFallback>{friend.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <p className="text-xs font-medium text-neutral-900 truncate">
-                      {friend.name}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              <p className="text-sm text-neutral-600 mt-4 text-center">
-                {friends.length} friends
-              </p>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
+    <div className="space-y-4">
       {/* Friend Requests (only show if user has pending requests) */}
       {friendRequests.length > 0 && (
-        <Card className="backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-gray-700/30">
-          <CardHeader>
-            <CardTitle className="text-lg">Friend Requests</CardTitle>
+        <Card className="border border-neutral-200 dark:border-neutral-700">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg text-blue-600 dark:text-blue-400">
+              Friend Requests ({friendRequests.length})
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {friendRequests.map((request: any) => (
-            <div key={request.id || request.friendship?.id} className="flex items-center space-x-3">
+            <div key={request.id || request.friendship?.id} className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <Avatar className="w-12 h-12">
                 <AvatarImage src={request.profileImageUrl || ""} />
                 <AvatarFallback>
@@ -151,13 +116,17 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h4 className="font-medium">{request.name || "Unknown User"}</h4>
-                <p className="text-sm text-muted-foreground">Friend request</p>
+                <h4 className="font-medium text-neutral-900 dark:text-neutral-100">
+                  {request.name || "Unknown User"}
+                </h4>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  Wants to connect with you
+                </p>
               </div>
               <div className="flex space-x-2">
                 <Button
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-green-600 hover:bg-green-700 text-white font-medium"
                   onClick={() => handleAcceptRequest(request.friendship?.id)}
                   disabled={isAccepting || !request.friendship?.id}
                 >
@@ -166,7 +135,7 @@ export default function FriendsWidget({ profileId }: FriendsWidgetProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-white border-white hover:bg-white hover:text-black"
+                  className="border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                   onClick={() => handleRejectRequest(request.friendship?.id)}
                   disabled={isRejecting || !request.friendship?.id}
                 >

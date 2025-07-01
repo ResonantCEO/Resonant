@@ -76,11 +76,11 @@ interface ConversationSettings {
   muted: boolean;
 }
 
-async function apiRequest(method: string, url: string, requestBody?: Record<string, any>) {
+async function apiRequest(method: string, url: string, data?: Record<string, any>) {
   const response = await fetch(url, {
     method,
-    headers: requestBody ? { "Content-Type": "application/json" } : undefined,
-    body: requestBody ? JSON.stringify(requestBody) : undefined,
+    headers: data ? { "Content-Type": "application/json" } : undefined,
+    body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
 
@@ -210,7 +210,6 @@ export default function MessagesPage() {
     queryKey: ["/api/friends"],
     queryFn: () => apiRequest("GET", "/api/friends"),
     select: (data) => {
-      console.log("Friends API raw response:", data);
       if (!data || !Array.isArray(data)) return [];
       return data.map((item: any) => {
         if (item.friend) {
@@ -221,10 +220,12 @@ export default function MessagesPage() {
     }
   });
 
-  // Debug logging
-  console.log("Friends data:", friends);
-  console.log("Friends loading:", loadingFriends);
-  console.log("Friends error:", friendsError);
+  // Get active profile to filter out current user from friends list
+  const { data: activeProfile } = useQuery({
+    queryKey: ["/api/profiles/active"],
+  });
+
+
 
   // Send message using WebSocket (fallback to HTTP if socket unavailable)
   const sendMessageMutation = useMutation({
@@ -680,7 +681,8 @@ export default function MessagesPage() {
     });
 
   const filteredFriends = friends.filter((friend: any) =>
-    friend.name.toLowerCase().includes(friendSearchQuery.toLowerCase())
+    friend.name.toLowerCase().includes(friendSearchQuery.toLowerCase()) &&
+    friend.id !== activeProfile?.id // Exclude current user's active profile
   );
 
   const filteredMessages = messages.filter((message: Message) => {

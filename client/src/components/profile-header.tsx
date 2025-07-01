@@ -145,12 +145,20 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
         addresseeId: profile.id,
       });
     },
-    onSuccess: async () => {
+    onSuccess: async (data: any) => {
       await queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile.id}`] });
       await refetchFriendshipStatus();
+      
+      const isOwnProfile = profile?.userId === user?.id;
+      const message = data.autoAccepted 
+        ? "Profiles connected successfully!" 
+        : isOwnProfile 
+          ? "Your profiles have been connected!"
+          : "Your friend request has been sent successfully.";
+      
       toast({
-        title: "Friend Request Sent",
-        description: "Your friend request has been sent successfully.",
+        title: data.autoAccepted || isOwnProfile ? "Profiles Connected" : "Friend Request Sent",
+        description: message,
       });
     },
     onError: (error: any) => {
@@ -1094,8 +1102,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </div>
           </div>
 
-          {/* Friend Button - Aligned vertically with share button, horizontally centered with profile picture */}
-          {!isOwn && (
+          {/* Friend Button - Show for both own and other profiles to allow cross-profile connections */}
+          {(
             <div className="absolute left-2 sm:left-4 md:left-6 bottom-2 sm:bottom-4 z-10 flex justify-center w-16 sm:w-24 md:w-40">
               {friendshipStatus?.status === 'accepted' ? (
                 <Button 
@@ -1118,9 +1126,18 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
                   <span className="hidden sm:inline">Pending</span>
                 </Button>
-              ) : (
+              ) : !isOwn || (isOwn && user && profile?.userId === user.id && profile?.id !== activeProfile?.id) ? (
                 <Button 
                   onClick={() => sendFriendRequestMutation.mutate()}
+                  disabled={sendFriendRequestMutation.isPending}
+                  variant="outline"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
+                >
+                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
+                  <span className="hidden sm:inline">{isOwn ? "Connect" : "Add Friend"}</span>
+                </Button>
+              ) : null}tation.mutate()}
                   disabled={sendFriendRequestMutation.isPending}
                   variant="outline"
                   size="sm"

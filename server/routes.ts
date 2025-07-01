@@ -1143,10 +1143,19 @@ export function registerRoutes(app: Express): Server {
         const senderName = senderProfile.name; // Use profile name instead of user name
         console.log(`Creating friend request notification for user ${targetProfile.userId} from profile ${senderProfile.name} (ID: ${senderProfile.id}) to profile ${targetProfile.name} (ID: ${targetProfile.id})`);
         console.log(`Sender profile image URL: ${senderProfile.profileImageUrl}`);
-        await notificationService.notifyFriendRequest(targetProfile.userId, req.user.id, senderName, friendship.id, targetProfile.id, senderProfile.id);
+        
+        // For same-user cross-profile requests, auto-accept to create connection
+        if (targetProfile.userId === req.user.id) {
+          console.log(`Auto-accepting friend request between user's own profiles`);
+          await storage.acceptFriendRequest(friendship.id);
+          res.json({ ...friendship, status: 'accepted', autoAccepted: true });
+        } else {
+          await notificationService.notifyFriendRequest(targetProfile.userId, req.user.id, senderName, friendship.id, targetProfile.id, senderProfile.id);
+          res.json(friendship);
+        }
+      } else {
+        res.json(friendship);
       }
-
-      res.json(friendship);
     } catch (error) {
       console.error("Error sending friend request:", error);
       res.status(500).json({ message: "Failed to send friend request" });

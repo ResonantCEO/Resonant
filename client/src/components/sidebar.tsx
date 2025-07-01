@@ -19,6 +19,8 @@ import { Settings, Home, UserPlus, Search, Users, Globe, UserCheck, Lock, Chevro
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useSidebar } from "@/hooks/useSidebar";
+import { useNotificationSocket } from "@/hooks/useNotificationSocket";
+import { useDebounce } from "@/hooks/useDebounce";
 import NotificationsPanel from "./notifications-panel";
 
 export default function Sidebar() {
@@ -26,6 +28,9 @@ export default function Sidebar() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { user } = useAuth();
+  
+  // Initialize WebSocket notifications for real-time updates
+  const { isConnected } = useNotificationSocket();
 
   // Helper function to format user's display name
   const getUserDisplayName = () => {
@@ -104,14 +109,14 @@ export default function Sidebar() {
         return {};
       }
     },
-    refetchInterval: 5000,
+    refetchInterval: 30000, // Reduced to 30 seconds instead of 5
     enabled: !!user && (profiles as any[]).length > 0,
-    retry: 3,
-    retryDelay: 1000,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    retry: 2, // Reduced retries
+    retryDelay: 2000,
+    staleTime: 25000, // Cache for 25 seconds
+    gcTime: 300000, // Keep in cache for 5 minutes
+    refetchOnMount: false, // Don't refetch on every mount
+    refetchOnWindowFocus: false, // Don't refetch on focus
   });
 
   // Log any errors
@@ -145,13 +150,19 @@ export default function Sidebar() {
 
   const unreadNotificationCount = getActiveProfileNotificationCount();
 
+  // Debounced profile activation to prevent rapid-fire API calls
+  const rawActivateProfile = async (profileId: number) => {
+    await apiRequest("POST", `/api/profiles/${profileId}/activate`);
+    queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+  };
+  
+  const debouncedActivateProfile = useDebounce(rawActivateProfile, 300);
+
   const activateProfileMutation = useMutation({
-    mutationFn: async (profileId: number) => {
-      await apiRequest("POST", `/api/profiles/${profileId}/activate`);
-    },
+    mutationFn: debouncedActivateProfile,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      // Additional success logic can go here if needed
     },
   });
 

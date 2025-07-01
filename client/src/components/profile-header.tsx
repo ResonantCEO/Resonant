@@ -70,75 +70,45 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const { data: activeProfile } = useQuery({
-    queryKey: ["/api/profiles/active"],
-  });
+  // Always call ALL hooks at the top level, before any conditional logic
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [isPositioningMode, setIsPositioningMode] = useState(false);
   const [coverPhotoPosition, setCoverPhotoPosition] = useState({ x: 50, y: 50 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const coverContainerRef = useRef<HTMLDivElement>(null);
-
-  // Profile picture positioning states
   const [isProfilePositioningMode, setIsProfilePositioningMode] = useState(false);
   const [profilePhotoPosition, setProfilePhotoPosition] = useState({ x: 50, y: 50 });
   const [isProfileDragging, setIsProfileDragging] = useState(false);
   const [profileDragStart, setProfileDragStart] = useState({ x: 0, y: 0 });
+  
+  const coverContainerRef = useRef<HTMLDivElement>(null);
   const profileContainerRef = useRef<HTMLDivElement>(null);
-
-  // Don't render if profile is not loaded
-  if (!profile) {
-    return null;
-  }
-
-  // Get viewer's active profile to check their type
-  const { data: viewerProfile, isLoading: viewerProfileLoading } = useQuery({
-    queryKey: ["/api/profiles/active"],
-  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Helper function to format user's display name
-  const getUserDisplayName = () => {
-    if (!user) return profile.name || "";
-    const firstName = user.firstName || "";
-    const lastName = user.lastName || "";
-    return `${firstName} ${lastName}`.trim() || user.email || profile.name;
-  };
+  // ALL useQuery hooks must be called unconditionally at the top
+  const { data: activeProfile } = useQuery({
+    queryKey: ["/api/profiles/active"],
+  });
 
-  // Helper function to get user initials
-  const getUserInitials = () => {
-    if (!user) return profile.name?.slice(0, 2).toUpperCase() || "";
-    const firstName = user.firstName || "";
-    const lastName = user.lastName || "";
-    if (firstName && lastName) {
-      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-    }
-    return user.email ? user.email.charAt(0).toUpperCase() : profile.name?.slice(0, 2).toUpperCase() || "";
-  };
+  const { data: viewerProfile, isLoading: viewerProfileLoading } = useQuery({
+    queryKey: ["/api/profiles/active"],
+  });
 
-  // Helper function to get display name for profile
-  const getDisplayName = () => {
-    if (profile.type === 'audience' && user) {
-      return `${user.firstName || ''} ${user.lastName || ''}`.trim() || profile.name;
-    }
-    return profile.name;
-  };
-
-  // Always call all hooks at the top level - move all useQuery and useMutation calls here
   const { data: friendshipStatus, refetch: refetchFriendshipStatus } = useQuery({
     queryKey: [`/api/friendship-status/${profile?.id}`],
     enabled: !isOwn && !!profile?.id,
-    staleTime: 0, // Always fetch fresh data
-    cacheTime: 0, // Don't cache the result
+    staleTime: 30000, // Cache for 30 seconds
+    gcTime: 60000, // Keep in cache for 1 minute
   });
 
   const { data: friends = [] } = useQuery<any[]>({
     queryKey: [`/api/profiles/${profile?.id}/friends`],
     enabled: !!profile?.id,
+    staleTime: 60000, // Cache for 1 minute
   });
 
+  // ALL useMutation hooks must be called unconditionally
   const sendFriendRequestMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest("POST", "/api/friend-requests", {
@@ -214,6 +184,151 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     },
   });
 
+  const uploadProfilePictureMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('profileImage', file);
+      return await apiRequest("POST", `/api/profiles/${profile.id}/profile-image`, formData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      toast({
+        title: "Profile Picture Updated",
+        description: "Your profile picture has been successfully updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload profile picture",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const uploadCoverPhotoMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('coverImage', file);
+      return await apiRequest("POST", `/api/profiles/${profile.id}/cover-image`, formData);
+    },
+    onSuccess: async (data) => {
+      console.log("Cover photo upload response:", data);
+      await queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      await queryClient.refetchQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      toast({
+        title: "Cover Photo Updated",
+        description: "Your cover photo has been successfully updated.",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Cover photo upload error:", error);
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload cover photo",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const removeCoverPhotoMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("DELETE", `/api/profiles/${profile.id}/cover-image`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      toast({
+        title: "Cover Photo Removed",
+        description: "Your cover photo has been removed.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove cover photo",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateCoverPositionMutation = useMutation({
+    mutationFn: async (position: { x: number; y: number }) => {
+      return await apiRequest("PATCH", `/api/profiles/${profile.id}/cover-position`, position);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      setIsPositioningMode(false);
+      toast({
+        title: "Cover Photo Position Updated",
+        description: "Your cover photo position has been saved.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update cover photo position",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateProfilePositionMutation = useMutation({
+    mutationFn: async (position: { x: number; y: number }) => {
+      return await apiRequest("PATCH", `/api/profiles/${profile.id}/profile-position`, position);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      setIsProfilePositioningMode(false);
+      toast({
+        title: "Profile Picture Position Updated",
+        description: "Your profile picture position has been saved.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile picture position",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Early return AFTER all hooks have been called
+  if (!profile) {
+    return null;
+  }
+
+  // Helper function to format user's display name
+  const getUserDisplayName = () => {
+    if (!user) return profile.name || "";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    return `${firstName} ${lastName}`.trim() || user.email || profile.name;
+  };
+
+  // Helper function to get user initials
+  const getUserInitials = () => {
+    if (!user) return profile.name?.slice(0, 2).toUpperCase() || "";
+    const firstName = user.firstName || "";
+    const lastName = user.lastName || "";
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    }
+    return user.email ? user.email.charAt(0).toUpperCase() : profile.name?.slice(0, 2).toUpperCase() || "";
+  };
+
+  // Helper function to get display name for profile
+  const getDisplayName = () => {
+    if (profile.type === 'audience' && user) {
+      return `${user.firstName || ''} ${user.lastName || ''}`.trim() || profile.name;
+    }
+    return profile.name;
+  };
+
   const getProfileTypeColor = (type: string) => {
     switch (type) {
       case "artist":
@@ -258,33 +373,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     }
   };
 
-  // Handle profile picture upload - moved to top level
-  const uploadProfilePictureMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('profileImage', file);
-      return await apiRequest("POST", `/api/profiles/${profile.id}/profile-image`, formData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
-      toast({
-        title: "Profile Picture Updated",
-        description: "Your profile picture has been successfully updated.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload profile picture",
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleProfilePictureClick = () => {
     if (isOwn) {
       fileInputRef.current?.click();
@@ -317,100 +405,6 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       uploadProfilePictureMutation.mutate(file);
     }
   };
-
-  // Handle cover photo upload - moved to top level
-  const uploadCoverPhotoMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('coverImage', file);
-      return await apiRequest("POST", `/api/profiles/${profile.id}/cover-image`, formData);
-    },
-    onSuccess: async (data) => {
-      console.log("Cover photo upload response:", data);
-
-      // Invalidate and refetch profile data to get updated cover photo
-      await queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
-      await queryClient.refetchQueries({ queryKey: [`/api/profiles/${profile.id}`] });
-
-      toast({
-        title: "Cover Photo Updated",
-        description: "Your cover photo has been successfully updated.",
-      });
-    },
-    onError: (error: any) => {
-      console.error("Cover photo upload error:", error);
-      toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload cover photo",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Remove cover photo mutation - moved to top level
-  const removeCoverPhotoMutation = useMutation({
-    mutationFn: async () => {
-      return await apiRequest("DELETE", `/api/profiles/${profile.id}/cover-image`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
-      toast({
-        title: "Cover Photo Removed",
-        description: "Your cover photo has been removed.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to remove cover photo",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Update cover photo position mutation
-  const updateCoverPositionMutation = useMutation({
-    mutationFn: async (position: { x: number; y: number }) => {
-      return await apiRequest("PATCH", `/api/profiles/${profile.id}/cover-position`, position);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
-      setIsPositioningMode(false);
-      toast({
-        title: "Cover Photo Position Updated",
-        description: "Your cover photo position has been saved.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update cover photo position",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Update profile picture position mutation
-  const updateProfilePositionMutation = useMutation({
-    mutationFn: async (position: { x: number; y: number }) => {
-      return await apiRequest("PATCH", `/api/profiles/${profile.id}/profile-position`, position);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
-      setIsProfilePositioningMode(false);
-      toast({
-        title: "Profile Picture Position Updated",
-        description: "Your profile picture position has been saved.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update profile picture position",
-        variant: "destructive",
-      });
-    },
-  });
 
   const handleCoverUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

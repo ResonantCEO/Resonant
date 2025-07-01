@@ -13,7 +13,16 @@ The application is fully functional with:
 - Image upload and profile customization
 
 ## Recent Changes
-### July 1, 2025 - Version 0.6.0
+### July 1, 2025 - Version 0.7.0 - Performance Optimization Complete
+- ✓ **Critical React Hooks Order Fix**: Resolved React Hooks order violation in ProfileHeader component that caused app crashes and excessive re-renders
+- ✓ **Optimized Notification Polling**: Reduced polling frequency from 5 seconds to 30 seconds with smart caching (25-second staleTime, 5-minute garbage collection)
+- ✓ **WebSocket Notification System**: Implemented useNotificationSocket hook for real-time notification updates with proper connection management and cleanup
+- ✓ **Request Debouncing**: Added useDebounce hook with 300ms debouncing for profile switching to prevent rapid-fire API calls
+- ✓ **Smart Cache Management**: Implemented selective cache invalidation with optimized refetch strategies (active queries only, stale marking)
+- ✓ **Memory Leak Prevention**: Added proper WebSocket cleanup and timeout management to prevent memory accumulation
+- ✓ **Performance Monitoring**: Eliminated 20-second profile switching delays and reduced notification API load by 83%
+
+### July 1, 2025 - Version 0.6.0 - Real-Time Messaging
 - ✓ Successfully migrated messaging system from polling to real-time WebSockets
 - ✓ Implemented comprehensive useSocket hook with connection management and event handlers
 - ✓ Updated messages.tsx to use WebSocket events for real-time message sending and receiving

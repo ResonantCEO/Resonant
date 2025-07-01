@@ -206,10 +206,11 @@ export default function MessagesPage() {
   });
 
   // Fetch friends for starting new conversations
-  const { data: friends = [], isLoading: loadingFriends } = useQuery({
+  const { data: friends = [], isLoading: loadingFriends, error: friendsError } = useQuery({
     queryKey: ["/api/friends"],
     queryFn: () => apiRequest("GET", "/api/friends"),
     select: (data) => {
+      console.log("Friends API raw response:", data);
       if (!data || !Array.isArray(data)) return [];
       return data.map((item: any) => {
         if (item.friend) {
@@ -219,6 +220,11 @@ export default function MessagesPage() {
       });
     }
   });
+
+  // Debug logging
+  console.log("Friends data:", friends);
+  console.log("Friends loading:", loadingFriends);
+  console.log("Friends error:", friendsError);
 
   // Send message using WebSocket (fallback to HTTP if socket unavailable)
   const sendMessageMutation = useMutation({

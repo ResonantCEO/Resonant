@@ -35,6 +35,7 @@ export default function Friends() {
   }
 
   console.log('Friends page - activeProfile:', activeProfile);
+  console.log('Friends page - user:', user);
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-800">

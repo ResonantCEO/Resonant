@@ -57,9 +57,15 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
     enabled: isOwn,
     staleTime: 0, // Always fetch fresh data
     cacheTime: 0, // Don't cache the data
-    onSuccess: (data) => {
+    select: (data) => {
+      // Ensure we always return an array
+      if (!data || !Array.isArray(data)) {
+        console.log("Friend requests data is not an array:", data);
+        return [];
+      }
       console.log("Friend requests received:", data);
-      console.log("Friend requests count:", data?.length || 0);
+      console.log("Friend requests count:", data.length);
+      return data;
     },
     onError: (error) => {
       console.error("Error fetching friend requests:", error);
@@ -360,6 +366,30 @@ export default function FriendsTab({ profile, isOwn }: FriendsTabProps) {
       </div>
 
       
+
+      {/* Friend Requests (for own profiles) */}
+      {isOwn && friendRequests && friendRequests.length > 0 && (
+        <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 dark:border-blue-800">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-blue-700 dark:text-blue-300">
+              <div className="flex items-center">
+                <Heart className="w-5 h-5 mr-2" />
+                Friend Requests
+              </div>
+              <Badge className="bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200">
+                {friendRequests.length}
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {friendRequests.map((request: any) => (
+                <FriendRequestCard key={request.id} request={request} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Friends List */}
       <Card>

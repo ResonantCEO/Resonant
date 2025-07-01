@@ -1327,25 +1327,31 @@ export class Storage {
   // Get or create direct conversation
   async getOrCreateDirectConversation(profileId1: number, profileId2: number): Promise<any> {
     try {
-      // Check if conversation already exists
-      const existingConversation = await db
+      // Check if conversation already exists - simplified approach
+      const existingConversations = await db
         .select({
-          conversation: conversations,
-          participants: sql<any>`array_agg(conversation_participants.profile_id)`.as('participants')
+          conversationId: conversationParticipants.conversationId,
+          count: sql<number>`COUNT(*)`.as('count')
         })
-        .from(conversations)
-        .innerJoin(conversationParticipants, eq(conversations.id, conversationParticipants.conversationId))
+        .from(conversationParticipants)
+        .innerJoin(conversations, eq(conversations.id, conversationParticipants.conversationId))
         .where(
           and(
             eq(conversations.type, 'direct'),
-            inArray(conversationParticipants.profileId, [profileId1, profileId2])
+            inArray(conversationParticipants.profileId, [profileId1, profileId2]),
+            isNull(conversationParticipants.leftAt)
           )
         )
-        .groupBy(conversations.id)
-        .having(sql`COUNT(conversation_participants.profile_id) = 2 AND array_agg(conversation_participants.profile_id) @> ARRAY[${profileId1}, ${profileId2}]`);
+        .groupBy(conversationParticipants.conversationId)
+        .having(sql`COUNT(*) = 2`);
 
-      if (existingConversation.length > 0) {
-        return existingConversation[0].conversation;
+      if (existingConversations.length > 0) {
+        // Get the full conversation
+        const [existingConversation] = await db
+          .select()
+          .from(conversations)
+          .where(eq(conversations.id, existingConversations[0].conversationId));
+        return existingConversation;
       }
 
       // Create new conversation

@@ -1103,52 +1103,41 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
           </div>
 
           {/* Friend Button - Show for both own and other profiles to allow cross-profile connections */}
-          {(
-            <div className="absolute left-2 sm:left-4 md:left-6 bottom-2 sm:bottom-4 z-10 flex justify-center w-16 sm:w-24 md:w-40">
-              {friendshipStatus?.status === 'accepted' ? (
-                <Button 
-                  onClick={() => unfriendMutation.mutate()}
-                  disabled={unfriendMutation.isPending}
-                  variant="outline"
-                  size="sm"
-                  className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
-                >
-                  <UserMinus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
-                  <span className="hidden sm:inline">Unfriend</span>
-                </Button>
-              ) : friendshipStatus?.status === 'pending' ? (
-                <Button 
-                  disabled
-                  variant="outline"
-                  size="sm"
-                  className="bg-gray-400 text-white border-gray-400 font-bold cursor-not-allowed text-xs sm:text-sm px-1 sm:px-2 py-1"
-                >
-                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
-                  <span className="hidden sm:inline">Pending</span>
-                </Button>
-              ) : !isOwn || (isOwn && user && profile?.userId === user.id && profile?.id !== activeProfile?.id) ? (
-                <Button 
-                  onClick={() => sendFriendRequestMutation.mutate()}
-                  disabled={sendFriendRequestMutation.isPending}
-                  variant="outline"
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
-                >
-                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
-                  <span className="hidden sm:inline">{isOwn ? "Connect" : "Add Friend"}</span>
-                </Button>
-              ) : null}tation.mutate()}
-                  disabled={sendFriendRequestMutation.isPending}
-                  variant="outline"
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
-                >
-                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
-                  <span className="hidden sm:inline">Add Friend</span>
-                </Button>
-              )}
-            </div>
-          )}
+          <div className="absolute left-2 sm:left-4 md:left-6 bottom-2 sm:bottom-4 z-10 flex justify-center w-16 sm:w-24 md:w-40">
+            {friendshipStatus?.status === 'accepted' ? (
+              <Button 
+                onClick={() => unfriendMutation.mutate()}
+                disabled={unfriendMutation.isPending}
+                variant="outline"
+                size="sm"
+                className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
+              >
+                <UserMinus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
+                <span className="hidden sm:inline">Unfriend</span>
+              </Button>
+            ) : friendshipStatus?.status === 'pending' ? (
+              <Button 
+                disabled
+                variant="outline"
+                size="sm"
+                className="bg-gray-400 text-white border-gray-400 font-bold cursor-not-allowed text-xs sm:text-sm px-1 sm:px-2 py-1"
+              >
+                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
+                <span className="hidden sm:inline">Pending</span>
+              </Button>
+            ) : !isOwn || (isOwn && user && profile?.userId === user.id && profile?.id !== activeProfile?.id) ? (
+              <Button 
+                onClick={() => sendFriendRequestMutation.mutate()}
+                disabled={sendFriendRequestMutation.isPending}
+                variant="outline"
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
+              >
+                <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
+                <span className="hidden sm:inline">{isOwn ? "Connect" : "Add Friend"}</span>
+              </Button>
+            ) : null}
+          </div>
 
           {/* Social Media Buttons - Absolutely positioned */}
           <div className="absolute flex items-center justify-center space-x-1 sm:space-x-2 bottom-2 sm:bottom-4 left-0 right-0">

@@ -76,11 +76,11 @@ interface ConversationSettings {
   muted: boolean;
 }
 
-async function apiRequest(method: string, url: string, body?: Record<string, any>) {
+async function apiRequest(method: string, url: string, requestBody?: Record<string, any>) {
   const response = await fetch(url, {
     method,
-    headers: body ? { "Content-Type": "application/json" } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
+    headers: requestBody ? { "Content-Type": "application/json" } : undefined,
+    body: requestBody ? JSON.stringify(requestBody) : undefined,
     credentials: "include",
   });
 

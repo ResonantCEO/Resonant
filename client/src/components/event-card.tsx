@@ -356,13 +356,19 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                 </div>
 
                 {event.venue && (
-                  <div className="flex items-start text-sm text-gray-700 dark:text-gray-300">
-                    <MapPin className="w-4 h-4 mr-2 mt-0.5 text-blue-500 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{event.venue.name}</div>
-                      {event.venue.location && (
-                        <div className="text-xs text-gray-500 truncate">{event.venue.location}</div>
-                      )}
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+                    <h5 className="font-medium text-gray-900 dark:text-white mb-2 text-sm">Venue</h5>
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="w-6 h-6">
+                        <AvatarImage src={event.venue.profileImageUrl} />
+                        <AvatarFallback className="text-xs">{event.venue.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-700 dark:text-gray-300 truncate text-sm">{event.venue.name}</div>
+                        {event.venue.location && (
+                          <div className="text-xs text-gray-500 truncate">{event.venue.location}</div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}

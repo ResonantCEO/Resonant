@@ -128,7 +128,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
   const lowestPrice = getLowestPrice();
 
   return (
-    <div className="relative group w-full h-full perspective-1000">
+    <div className="event-card-container relative group w-full h-full perspective-1000">
       <div className={`relative w-full h-full transition-all duration-500 transform-style-preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
         {/* Front of card */}
         <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer absolute inset-0 w-full h-full backface-hidden" onClick={handleCardClick}>

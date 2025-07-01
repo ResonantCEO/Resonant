@@ -155,9 +155,6 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
                   {event.name}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                  {event.description}
-                </p>
               </div>
               {showActions && (
                 <div className="flex space-x-2 ml-4">

@@ -191,23 +191,6 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                   {event.eventTime}
                 </div>
               )}
-
-              {event.venue && (
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <MapPin className="w-4 h-4 mr-2 text-blue-500" />
-                  {event.venue.name}
-                  {event.venue.location && (
-                    <span className="ml-1">• {event.venue.location}</span>
-                  )}
-                </div>
-              )}
-
-              {event.capacity && (
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <Users className="w-4 h-4 mr-2 text-blue-500" />
-                  Capacity: {event.capacity}
-                </div>
-              )}
             </div>
 
             {/* Genre and Age Restriction */}

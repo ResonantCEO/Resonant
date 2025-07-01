@@ -156,24 +156,6 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                   {event.name}
                 </h3>
               </div>
-              {showActions && (
-                <div className="flex space-x-2 ml-4">
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleInterested();
-                    }}
-                    className={isInterested ? "text-red-500 border-red-500" : ""}
-                  >
-                    <Heart className={`w-4 h-4 ${isInterested ? "fill-current" : ""}`} />
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>
-                    <Share2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
             </div>
           </CardHeader>
 
@@ -270,9 +252,9 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
               </div>
             )}
 
-            {/* Pricing and Actions */}
-            <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-              <div>
+            {/* Pricing Info */}
+            {(lowestPrice && !event.ticketTypes) || !event.ticketsAvailable ? (
+              <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
                 {lowestPrice && !event.ticketTypes && (
                   <div className="text-lg font-bold text-green-600 dark:text-green-400">
                     From ${lowestPrice}
@@ -282,21 +264,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                   <div className="text-sm text-red-500 font-medium">Sold Out</div>
                 )}
               </div>
-
-              {showActions && event.ticketsAvailable && (
-                <Button 
-                  size="sm" 
-                  className="flex items-center"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Handle ticket purchase
-                  }}
-                >
-                  <Ticket className="w-4 h-4 mr-1" />
-                  Get Tickets
-                </Button>
-              )}
-            </div>
+            ) : null}
 
             </CardContent>
         </Card>

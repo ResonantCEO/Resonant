@@ -193,14 +193,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Artists:</span>
                   <div className="flex -space-x-2">
                     {event.artists.slice(0, 3).map((artist) => (
-                      <Avatar 
-                        key={artist.id} 
-                        className="w-6 h-6 border-2 border-white cursor-pointer hover:scale-110 transition-transform"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.location.href = `/profile/${artist.id}`;
-                        }}
-                      >
+                      <Avatar key={artist.id} className="w-6 h-6 border-2 border-white">
                         <AvatarImage src={artist.profileImageUrl} />
                         <AvatarFallback className="text-xs">{artist.name.charAt(0)}</AvatarFallback>
                       </Avatar>
@@ -212,20 +205,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                     )}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                    {event.artists.map((artist, index) => (
-                      <span key={artist.id}>
-                        <span 
-                          className="cursor-pointer hover:text-blue-600 hover:underline transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.location.href = `/profile/${artist.id}`;
-                          }}
-                        >
-                          {artist.name}
-                        </span>
-                        {index < event.artists.length - 1 && ', '}
-                      </span>
-                    ))}
+                    {event.artists.map(a => a.name).join(', ')}
                   </div>
                 </div>
               )}
@@ -376,13 +356,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                 </div>
 
                 {event.venue && (
-                  <div 
-                    className="flex items-center text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md p-1 -m-1 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.location.href = `/profile/${event.venue.id}`;
-                    }}
-                  >
+                  <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
                     <div className="w-4 h-4 mr-2 flex items-center justify-center flex-shrink-0">
                       <Avatar className="w-6 h-6">
                         <AvatarImage src={event.venue.profileImageUrl} />
@@ -390,7 +364,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                       </Avatar>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-700 dark:text-gray-300 truncate hover:text-blue-600 transition-colors">{event.venue.name}</div>
+                      <div className="font-medium text-gray-700 dark:text-gray-300 truncate">{event.venue.name}</div>
                       {event.venue.location && (
                         <div className="text-xs text-gray-500 truncate">{event.venue.location}</div>
                       )}
@@ -429,19 +403,12 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                   <h5 className="font-medium text-gray-900 dark:text-white mb-2 text-sm">Performing Artists</h5>
                   <div className="space-y-2 max-h-24 overflow-y-auto">
                     {event.artists.map((artist) => (
-                      <div 
-                        key={artist.id} 
-                        className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md p-1 -m-1 transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.location.href = `/profile/${artist.id}`;
-                        }}
-                      >
+                      <div key={artist.id} className="flex items-center space-x-2">
                         <Avatar className="w-6 h-6">
                           <AvatarImage src={artist.profileImageUrl} />
                           <AvatarFallback className="text-xs">{artist.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate hover:text-blue-600 transition-colors">{artist.name}</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{artist.name}</span>
                       </div>
                     ))}
                   </div>

@@ -189,7 +189,7 @@ export default function Discover() {
       status: "published",
       capacity: 300,
       ticketsAvailable: true,
-      eventImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=400&fit=crop",
+      eventImageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=400&fit=crop",
       tags: ["jazz", "intimate", "cocktails", "evening"],
       organizer: {
         id: 2,
@@ -231,7 +231,7 @@ export default function Discover() {
       status: "published",
       capacity: 1500,
       ticketsAvailable: true,
-      eventImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=800&h=400&fit=crop",
+      eventImageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=400&fit=crop",
       tags: ["edm", "dance", "nightlife", "dj"],
       organizer: {
         id: 3,
@@ -285,18 +285,18 @@ export default function Discover() {
       status: "published",
       capacity: 150,
       ticketsAvailable: true,
-      eventImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=400&fit=crop",
+      eventImageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=400&fit=crop",
       tags: ["acoustic", "sunday", "coffee", "intimate"],
       organizer: {
         id: 4,
         name: "Coffeehouse Concerts",
-        profileImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop",
+        profileImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=100&h=100&fit=crop",
         type: "organizer"
       },
       venue: {
         id: 4,
         name: "The Bean Counter Café",
-        profileImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop",
+        profileImageUrl: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=100&h=100&fit=crop",
         location: "Arts Quarter"
       },
       artists: [
@@ -327,7 +327,7 @@ export default function Discover() {
       status: "published",
       capacity: 800,
       ticketsAvailable: false,
-      eventImageUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=400&fit=crop",
+      eventImageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=400&fit=crop",
       tags: ["rock", "tribute", "classic", "sold-out"],
       organizer: {
         id: 5,
@@ -374,7 +374,7 @@ export default function Discover() {
       status: "published",
       capacity: 400,
       ticketsAvailable: true,
-      eventImageUrl: "https://images.unsplash.com/photo-1571266028243-c4e5d0e3d0c0?w=800&h=400&fit=crop",
+      eventImageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&h=400&fit=crop",
       tags: ["hip-hop", "showcase", "competition", "local"],
       organizer: {
         id: 6,

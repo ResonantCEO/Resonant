@@ -397,20 +397,6 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
               </div>
             )}
 
-            {/* Tags */}
-            {event.tags && event.tags.length > 0 && (
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                <h5 className="font-medium text-gray-900 dark:text-white mb-2">Tags</h5>
-                <div className="flex flex-wrap gap-2">
-                  {event.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      #{tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Action Buttons */}
             {showActions && (
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4">

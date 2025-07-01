@@ -243,10 +243,37 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
               </div>
             )}
 
+            {/* Ticket Information */}
+            {event.ticketTypes && event.ticketTypes.length > 0 && (
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+                <h5 className="font-medium text-gray-900 dark:text-white mb-2">Ticket Options</h5>
+                <div className="space-y-2">
+                  {event.ticketTypes.slice(0, 2).map((ticket) => (
+                    <div key={ticket.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                      <div>
+                        <div className="font-medium text-sm">{ticket.name}</div>
+                        <div className="text-xs text-gray-500">
+                          {ticket.quantity ? `${ticket.quantity - ticket.quantitySold} available` : 'Limited availability'}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-green-600 dark:text-green-400">${ticket.price}</div>
+                      </div>
+                    </div>
+                  ))}
+                  {event.ticketTypes.length > 2 && (
+                    <div className="text-xs text-center text-gray-500">
+                      +{event.ticketTypes.length - 2} more options available
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Pricing and Actions */}
             <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
               <div>
-                {lowestPrice && (
+                {lowestPrice && !event.ticketTypes && (
                   <div className="text-lg font-bold text-green-600 dark:text-green-400">
                     From ${lowestPrice}
                   </div>
@@ -362,27 +389,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
               </p>
             </div>
 
-            {/* Ticket Information */}
-            {event.ticketTypes && event.ticketTypes.length > 0 && (
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                <h5 className="font-medium text-gray-900 dark:text-white mb-2">Ticket Options</h5>
-                <div className="space-y-2">
-                  {event.ticketTypes.map((ticket) => (
-                    <div key={ticket.id} className="flex items-center justify-between p-2 bg-white/50 dark:bg-gray-800/50 rounded">
-                      <div>
-                        <div className="font-medium text-sm">{ticket.name}</div>
-                        <div className="text-xs text-gray-500">
-                          {ticket.quantity ? `${ticket.quantity - ticket.quantitySold} available` : 'Limited availability'}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-green-600 dark:text-green-400">${ticket.price}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            
 
             {/* Artists */}
             {event.artists && event.artists.length > 0 && (

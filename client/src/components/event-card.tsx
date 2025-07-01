@@ -266,6 +266,42 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
               </div>
             ) : null}
 
+            {/* Action Buttons */}
+            {showActions && (
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div className="flex space-x-2">
+                  {event.ticketsAvailable && (
+                    <Button 
+                      className="flex-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onEventClick) onEventClick(event.id);
+                      }}
+                    >
+                      <Ticket className="w-4 h-4 mr-1" />
+                      Get Tickets
+                    </Button>
+                  )}
+                  <Button 
+                    variant="outline" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleInterested();
+                    }}
+                    className={isInterested ? "text-red-500 border-red-500" : ""}
+                  >
+                    <Heart className={`w-4 h-4 ${isInterested ? "fill-current" : ""}`} />
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
             </CardContent>
         </Card>
 

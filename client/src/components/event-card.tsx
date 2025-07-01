@@ -298,19 +298,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
               )}
             </div>
 
-            {/* Organizer */}
-            {event.organizer && (
-              <div className="flex items-center space-x-2 pt-2 border-t border-gray-100 dark:border-gray-800">
-                <Avatar className="w-5 h-5">
-                  <AvatarImage src={event.organizer.profileImageUrl} />
-                  <AvatarFallback className="text-xs">{event.organizer.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Organized by {event.organizer.name}
-                </span>
-              </div>
-            )}
-          </CardContent>
+            </CardContent>
         </Card>
 
         {/* Back of card */}

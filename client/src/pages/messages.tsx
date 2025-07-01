@@ -193,6 +193,8 @@ export default function MessagesPage() {
   const { data: conversations = [], isLoading: loadingConversations } = useQuery({
     queryKey: ["/api/conversations"],
     queryFn: () => apiRequest("GET", "/api/conversations"),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
     // Remove polling - WebSocket handles real-time updates
   });
 
@@ -201,6 +203,8 @@ export default function MessagesPage() {
     queryKey: ["/api/conversations", selectedConversation, "messages"],
     queryFn: () => apiRequest("GET", `/api/conversations/${selectedConversation}/messages`),
     enabled: !!selectedConversation,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
     // Remove polling - WebSocket handles real-time updates
   });
 
@@ -498,6 +502,33 @@ export default function MessagesPage() {
     }
   }, [selectedConversation, joinConversation, leaveConversation]);
 
+  // Cleanup when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clear typing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+      
+      // Leave current conversation
+      if (selectedConversation && leaveConversation) {
+        console.log('Component unmounting, leaving conversation:', selectedConversation);
+        leaveConversation(selectedConversation);
+      }
+
+      // Stop typing indicators
+      if (selectedConversation && stopTyping) {
+        stopTyping(selectedConversation);
+      }
+
+      // Clear local state
+      setTypingUsers([]);
+      setIsTyping(false);
+      setSelectedConversation(null);
+    };
+  }, []);
+
   // Handle typing indicators
   const handleTyping = useCallback(() => {
     if (selectedConversation && startTyping) {
@@ -578,14 +609,18 @@ export default function MessagesPage() {
 
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
+      if (selectedConversation && stopTyping) {
+        stopTyping(selectedConversation);
+      }
     }, 1000);
 
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
       }
     };
-  }, [newMessage, isTyping]);
+  }, [newMessage, isTyping, selectedConversation, stopTyping]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);

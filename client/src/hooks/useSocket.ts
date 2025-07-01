@@ -91,10 +91,22 @@ export function useSocket(options: UseSocketOptions = {}) {
 
     // Cleanup on unmount or dependency change
     return () => {
-      newSocket.disconnect();
-      socketRef.current = null;
-      setSocket(null);
-      setIsConnected(false);
+      if (socket) {
+        // Clean up all listeners before disconnecting
+        socket.off('connect');
+        socket.off('disconnect');
+        socket.off('new_message');
+        socket.off('message_notification');
+        socket.off('user_typing');
+        socket.off('user_stopped_typing');
+        socket.off('status_update');
+
+        // Disconnect the socket
+        socket.disconnect();
+        socketRef.current = null;
+        setSocket(null);
+        setIsConnected(false);
+      }
     };
   }, [(user as any)?.id, (activeProfile as any)?.id]);
 

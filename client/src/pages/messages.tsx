@@ -1,4 +1,3 @@
-
 import Sidebar from "@/components/sidebar";
 import { useSidebar } from "@/hooks/useSidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,7 +78,7 @@ interface ConversationSettings {
 async function apiRequest(method: string, url: string, data?: Record<string, any>) {
   const response = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : undefined,
+    headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -156,7 +155,7 @@ export default function MessagesPage() {
           return newMessages;
         }
       );
-      
+
       // Update conversations list with latest message
       queryClient.setQueryData(["/api/conversations"], (oldConversations: any[]) => {
         return (oldConversations || []).map((conv: any) => 
@@ -486,10 +485,10 @@ export default function MessagesPage() {
     if (selectedConversation && joinConversation) {
       console.log('Joining conversation:', selectedConversation);
       joinConversation(selectedConversation);
-      
+
       // Mark conversation as read
       markAsReadMutation.mutate(selectedConversation);
-      
+
       return () => {
         if (leaveConversation) {
           console.log('Leaving conversation:', selectedConversation);
@@ -503,12 +502,12 @@ export default function MessagesPage() {
   const handleTyping = useCallback(() => {
     if (selectedConversation && startTyping) {
       startTyping(selectedConversation);
-      
+
       // Clear existing timeout
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-      
+
       // Set new timeout to stop typing after 3 seconds
       typingTimeoutRef.current = setTimeout(() => {
         if (stopTyping && selectedConversation) {
@@ -710,7 +709,7 @@ export default function MessagesPage() {
                 Connect and communicate with your network
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
               {/* Conversations List */}
               <Card className="lg:col-span-1 flex flex-col">
@@ -1246,7 +1245,7 @@ export default function MessagesPage() {
                           ) : (
                             filteredMessages.map((message: Message) => {
                               const isCurrentUser = message.senderId === currentUser.profileId;
-                              
+
                               return (
                                 <div key={message.id} className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
                                   <div className={`max-w-xs lg:max-w-md ${isCurrentUser ? 'order-2' : 'order-1'}`}>
@@ -1257,7 +1256,7 @@ export default function MessagesPage() {
                                         <span>Pinned message</span>
                                       </div>
                                     )}
-                                    
+
                                     {/* Reply indicator */}
                                     {message.replyTo && (
                                       <div className="mb-1 px-3 py-1 text-xs bg-neutral-100 dark:bg-neutral-700 rounded border-l-2 border-blue-500">
@@ -1265,7 +1264,7 @@ export default function MessagesPage() {
                                         <span className="ml-1">{message.replyTo.content.substring(0, 50)}...</span>
                                       </div>
                                     )}
-                                    
+
                                     <div className={`group relative px-4 py-2 rounded-lg ${
                                       isCurrentUser
                                         ? 'bg-blue-500 text-white'
@@ -1303,7 +1302,7 @@ export default function MessagesPage() {
                                             </p>
                                           )}
                                           <p className="text-sm break-words">{message.content}</p>
-                                          
+
                                           {/* Message reactions */}
                                           {message.reactions && Object.keys(message.reactions).length > 0 && (
                                             <div className="flex gap-1 mt-2 flex-wrap">
@@ -1320,7 +1319,7 @@ export default function MessagesPage() {
                                               ))}
                                             </div>
                                           )}
-                                          
+
                                           <div className="flex items-center justify-between mt-1">
                                             <p className={`text-xs ${
                                               isCurrentUser ? 'text-blue-100' : 'text-neutral-500'
@@ -1328,7 +1327,7 @@ export default function MessagesPage() {
                                               {formatTime(message.createdAt)}
                                               {message.editedAt && " (edited)"}
                                             </p>
-                                            
+
                                             {/* Read receipts for current user's messages */}
                                             {isCurrentUser && message.readBy.length > 1 && (
                                               <div className="flex items-center gap-1">
@@ -1403,7 +1402,7 @@ export default function MessagesPage() {
                                       </div>
                                     </div>
                                   </div>
-                                  
+
                                   {/* Avatar for other users */}
                                   {!isCurrentUser && (
                                     <Avatar className="w-6 h-6 mr-2 order-1">
@@ -1439,7 +1438,7 @@ export default function MessagesPage() {
                           </div>
                         </div>
                       )}
-                      
+
                       {/* Reply indicator */}
                       {replyingTo && (
                         <div className="mb-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-700 rounded border-l-2 border-blue-500 flex items-center justify-between">
@@ -1455,7 +1454,7 @@ export default function MessagesPage() {
                           </Button>
                         </div>
                       )}
-                      
+
                       <div className="flex gap-2 items-end">
                         <div className="flex gap-1">
                           <Button size="sm" variant="outline" className="h-10 w-10 p-0">

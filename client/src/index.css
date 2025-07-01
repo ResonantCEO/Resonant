@@ -35,9 +35,7 @@
 .event-card-container {
   position: relative;
   width: 100%;
-  height: fit-content;
-  min-height: 500px;
-  max-height: 700px;
+  height: 550px;
   contain: layout;
   overflow: visible;
   z-index: 1;

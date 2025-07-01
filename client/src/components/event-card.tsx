@@ -300,9 +300,9 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
           style={{ transform: 'rotateY(180deg)' }}
         >
           <CardHeader className="pb-3 flex-shrink-0">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Event Details
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 flex-1 mr-3">
+                {event.name}
               </h3>
               <Button 
                 size="sm" 
@@ -315,9 +315,6 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                 ← Back
               </Button>
             </div>
-            <h4 className="text-base font-semibold text-gray-800 dark:text-gray-200 line-clamp-2">
-              {event.name}
-            </h4>
           </CardHeader>
 
           <CardContent className="flex-1 flex flex-col space-y-3 overflow-y-auto">

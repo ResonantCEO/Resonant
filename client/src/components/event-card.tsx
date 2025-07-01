@@ -213,22 +213,27 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
 
             {/* Ticket Information */}
             {event.ticketTypes && event.ticketTypes.length > 0 && (
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-auto w-full">
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-auto">
                 <h5 className="font-medium text-gray-900 dark:text-white mb-2 text-sm">Ticket Options</h5>
-                <div className="max-h-32 overflow-y-auto space-y-2 w-full">
-                  {event.ticketTypes.map((ticket) => (
-                    <div key={ticket.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded w-full">
+                <div className="space-y-2">
+                  {event.ticketTypes.slice(0, 2).map((ticket) => (
+                    <div key={ticket.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-sm truncate">{ticket.name}</div>
                         <div className="text-xs text-gray-500">
                           {ticket.quantity ? `${ticket.quantity - ticket.quantitySold} available` : 'Limited availability'}
                         </div>
                       </div>
-                      <div className="text-right ml-2 flex-shrink-0">
+                      <div className="text-right ml-2">
                         <div className="font-bold text-green-600 dark:text-green-400">${ticket.price}</div>
                       </div>
                     </div>
                   ))}
+                  {event.ticketTypes.length > 2 && (
+                    <div className="text-xs text-center text-gray-500">
+                      +{event.ticketTypes.length - 2} more options available
+                    </div>
+                  )}
                 </div>
               </div>
             )}

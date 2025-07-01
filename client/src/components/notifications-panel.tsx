@@ -748,31 +748,49 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
             </span>
 
             <div className="flex space-x-2">
-              {!notification.read && (
+              {notification.type === 'friend_accepted' ? (
+                // For friend accepted notifications, only show check mark that deletes
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleMarkAsRead(notification.id);
+                    handleDelete(notification.id);
                   }}
-                  disabled={markAsReadMutation.isPending}
+                  disabled={deleteNotificationMutation.isPending}
                 >
                   <Check className="w-3 h-3" />
                 </Button>
-              )}
+              ) : (
+                // For all other notifications, show both buttons
+                <>
+                  {!notification.read && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMarkAsRead(notification.id);
+                      }}
+                      disabled={markAsReadMutation.isPending}
+                    >
+                      <Check className="w-3 h-3" />
+                    </Button>
+                  )}
 
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(notification.id);
-                }}
-                disabled={deleteNotificationMutation.isPending}
-              >
-                <Trash2 className="w-3 h-3" />
-              </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(notification.id);
+                    }}
+                    disabled={deleteNotificationMutation.isPending}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

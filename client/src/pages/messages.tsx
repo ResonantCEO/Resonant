@@ -76,7 +76,7 @@ interface ConversationSettings {
   muted: boolean;
 }
 
-async function apiRequest(method: string, url: string, body?: any) {
+async function apiRequest(method: string, url: string, body?: Record<string, any>) {
   const response = await fetch(url, {
     method,
     headers: body ? { "Content-Type": "application/json" } : undefined,

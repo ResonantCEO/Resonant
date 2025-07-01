@@ -112,6 +112,50 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
     }
   };
 
+  const getEventImage = () => {
+    if (event.eventImageUrl) {
+      return event.eventImageUrl;
+    }
+    
+    // Generate different placeholder images based on genre or event ID
+    const placeholderImages = [
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop&crop=center', // Concert stage
+      'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=300&fit=crop&crop=center', // Music venue
+      'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&h=300&fit=crop&crop=center', // Festival crowd
+      'https://images.unsplash.com/photo-1571974599782-87624638275e?w=400&h=300&fit=crop&crop=center', // DJ performance
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=300&fit=crop&crop=center', // Band performance
+      'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=400&h=300&fit=crop&crop=center', // Live music
+      'https://images.unsplash.com/photo-1516223725307-6f76b9a48b97?w=400&h=300&fit=crop&crop=center', // Concert lights
+      'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&h=300&fit=crop&crop=center', // Acoustic performance
+    ];
+
+    // Use genre to select appropriate image if available
+    if (event.genre) {
+      const genreMap: { [key: string]: number } = {
+        'rock': 0,
+        'pop': 1,
+        'electronic': 3,
+        'folk': 7,
+        'acoustic': 7,
+        'indie': 4,
+        'jazz': 5,
+        'classical': 6,
+        'hip-hop': 3,
+        'country': 7,
+        'metal': 0,
+      };
+      
+      const genreIndex = genreMap[event.genre.toLowerCase()];
+      if (genreIndex !== undefined) {
+        return placeholderImages[genreIndex];
+      }
+    }
+
+    // Fallback to using event ID for consistent but varied images
+    const imageIndex = event.id % placeholderImages.length;
+    return placeholderImages[imageIndex];
+  };
+
   const handleInterested = () => {
     const newStatus = isInterested ? 'interested' : 'going';
     setIsInterested(!isInterested);
@@ -134,20 +178,24 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
         <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer absolute inset-0 w-full h-full backface-hidden flex flex-col" onClick={handleCardClick}>
           <CardHeader className="pb-3 flex-shrink-0">
             {/* Event Image */}
-            {event.eventImageUrl && (
-              <div className="relative w-full h-40 mb-3 rounded-lg overflow-hidden">
-                <img 
-                  src={event.eventImageUrl} 
-                  alt={event.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                />
-                {event.status === 'published' && (
-                  <div className="absolute top-3 right-3">
-                    <Badge className="bg-blue-500 text-white">Live</Badge>
-                  </div>
-                )}
-              </div>
-            )}
+            <div className="relative w-full h-40 mb-3 rounded-lg overflow-hidden">
+              <img 
+                src={getEventImage()} 
+                alt={event.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                onError={(e) => {
+                  // Fallback to a solid color gradient if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.parentElement!.style.background = `linear-gradient(135deg, hsl(${event.id * 137.5 % 360}, 70%, 60%), hsl(${(event.id * 137.5 + 60) % 360}, 70%, 40%))`;
+                }}
+              />
+              {event.status === 'published' && (
+                <div className="absolute top-3 right-3">
+                  <Badge className="bg-blue-500 text-white">Live</Badge>
+                </div>
+              )}
+            </div>
 
             {/* Event Header */}
             <div className="flex items-start justify-between">

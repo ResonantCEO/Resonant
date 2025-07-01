@@ -48,11 +48,13 @@ export default function Discover() {
     setLocation(`/profile/${profileId}`);
   };
 
-  // Fetch discover data from API
+  // Fetch discover data from API with optimized caching
   const { data: discoverData = [], isLoading, refetch } = useQuery({
     queryKey: ['discover', searchQuery, selectedType, selectedLocation, selectedGenre],
     queryFn: async () => {
       const params = new URLSearchParams();
+      params.append('limit', '20'); // Limit results for better performance
+      params.append('offset', '0');
 
       if (searchQuery) {
         params.append('q', searchQuery);
@@ -76,7 +78,9 @@ export default function Discover() {
 
       return response.json();
     },
-    staleTime: 30000, // 30 seconds
+    staleTime: 5 * 60 * 1000, // 5 minutes - longer cache
+    gcTime: 10 * 60 * 1000, // 10 minutes cache time
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
   });
 
   // Transform API data to match interface
@@ -94,14 +98,8 @@ export default function Discover() {
     tags: [],
   }));
 
-  // Debounced search effect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      refetch();
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery, selectedType, selectedLocation, selectedGenre, refetch]);
+  // Debounced search effect - removed heavy refetch, React Query handles this automatically
+  // The queryKey change will trigger a new fetch automatically
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -413,8 +411,25 @@ export default function Discover() {
   ];
 
   const { data: eventsData, isLoading: eventsLoading } = useQuery({
-    queryKey: ["/api/events", { search: searchTerm, limit: 20, offset: 0 }],
+    queryKey: ["/api/events", { search: searchTerm, limit: 12, offset: 0 }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append('limit', '12');
+      params.append('offset', '0');
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
+      
+      const response = await fetch(`/api/events?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
+      return response.json();
+    },
     enabled: activeTab === "events",
+    staleTime: 3 * 60 * 1000, // 3 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Use mock data if API data is not available or empty

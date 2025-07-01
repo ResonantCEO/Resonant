@@ -209,22 +209,6 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
               </div>
             )}
 
-            {/* Tags */}
-            {event.tags && event.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {event.tags.slice(0, 4).map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-xs">
-                    #{tag}
-                  </Badge>
-                ))}
-                {event.tags.length > 4 && (
-                  <Badge variant="secondary" className="text-xs">
-                    +{event.tags.length - 4} more
-                  </Badge>
-                )}
-              </div>
-            )}
-
             {/* Ticket Information */}
             {event.ticketTypes && event.ticketTypes.length > 0 && (
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3">

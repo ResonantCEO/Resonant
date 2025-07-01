@@ -357,7 +357,6 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
 
                 {event.venue && (
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                    <h5 className="font-medium text-gray-900 dark:text-white mb-2 text-sm">Venue</h5>
                     <div className="flex items-center space-x-2">
                       <Avatar className="w-6 h-6">
                         <AvatarImage src={event.venue.profileImageUrl} />

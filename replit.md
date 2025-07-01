@@ -13,6 +13,17 @@ The application is fully functional with:
 - Image upload and profile customization
 
 ## Recent Changes
+### July 1, 2025 - Version 0.6.0
+- ✓ Successfully migrated messaging system from polling to real-time WebSockets
+- ✓ Implemented comprehensive useSocket hook with connection management and event handlers
+- ✓ Updated messages.tsx to use WebSocket events for real-time message sending and receiving
+- ✓ Added conversation joining/leaving logic for proper WebSocket room management
+- ✓ Implemented typing indicators with visual animations and automatic timeout
+- ✓ Eliminated all polling queries (previously every 2-5 seconds) for true real-time messaging
+- ✓ Enhanced message input with typing detection and WebSocket fallback to HTTP API
+- ✓ Added real-time cache updates for conversations and messages via WebSocket events
+- ✓ Improved performance by removing unnecessary API calls and leveraging WebSocket infrastructure
+
 ### June 30, 2025 - Version 0.5.1
 - ✓ Fixed critical JSX syntax error in friends.tsx that caused app crash
 - ✓ Resolved "Unterminated JSX contents" compilation error by adding missing closing div tag

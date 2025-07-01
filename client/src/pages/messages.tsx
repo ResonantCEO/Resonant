@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { MessageCircle, Send, Search, Plus, MoreVertical, Reply, Edit, Trash2, Trash, Check, CheckCheck, Archive, Volume2, VolumeX, AlertTriangle, UserX, Pin, Heart, Smile, FileText, Image as ImageIcon, Calendar, Link, Settings, Users } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSocket } from "@/hooks/useSocket";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -123,19 +124,85 @@ export default function MessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch conversations
+  // Real-time WebSocket connection
+  const {
+    socket,
+    isConnected,
+    joinConversation,
+    leaveConversation,
+    sendMessage: sendSocketMessage,
+    startTyping,
+    stopTyping,
+  } = useSocket({
+    onConnect: () => {
+      console.log('Socket connected to messaging');
+    },
+    onDisconnect: () => {
+      console.log('Socket disconnected from messaging');
+    },
+    onNewMessage: (message) => {
+      console.log('Received new message:', message);
+      // Update messages cache with new message
+      queryClient.setQueryData(
+        ["/api/conversations", message.conversationId, "messages"],
+        (oldMessages: any[]) => {
+          const newMessages = oldMessages || [];
+          // Avoid duplicates
+          if (!newMessages.find(m => m.id === message.id)) {
+            return [...newMessages, message].sort((a, b) => 
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
+          }
+          return newMessages;
+        }
+      );
+      
+      // Update conversations list with latest message
+      queryClient.setQueryData(["/api/conversations"], (oldConversations: any[]) => {
+        return (oldConversations || []).map((conv: any) => 
+          conv.id === message.conversationId 
+            ? { ...conv, lastMessage: {
+                id: message.id,
+                content: message.content,
+                senderId: message.senderId,
+                senderName: message.senderName,
+                createdAt: message.createdAt,
+                messageType: message.messageType
+              }, lastActivityAt: message.createdAt }
+            : conv
+        );
+      });
+    },
+    onTyping: ({ profileId, conversationId }) => {
+      if (conversationId === selectedConversation) {
+        setTypingUsers(prev => {
+          if (!prev.includes(`user-${profileId}`)) {
+            return [...prev, `user-${profileId}`];
+          }
+          return prev;
+        });
+      }
+    },
+    onStoppedTyping: ({ profileId, conversationId }) => {
+      if (conversationId === selectedConversation) {
+        setTypingUsers(prev => prev.filter(id => id !== `user-${profileId}`));
+      }
+    },
+  });
+
+  // Fetch conversations (initial load only, updates via WebSocket)
   const { data: conversations = [], isLoading: loadingConversations } = useQuery({
     queryKey: ["/api/conversations"],
     queryFn: () => apiRequest("GET", "/api/conversations"),
-    refetchInterval: 5000, // Refresh every 5 seconds
+    // Remove polling - WebSocket handles real-time updates
   });
 
-  // Fetch messages for selected conversation
+  // Fetch messages for selected conversation (initial load only, updates via WebSocket)
   const { data: messages = [], isLoading: loadingMessages } = useQuery({
     queryKey: ["/api/conversations", selectedConversation, "messages"],
     queryFn: () => apiRequest("GET", `/api/conversations/${selectedConversation}/messages`),
     enabled: !!selectedConversation,
-    refetchInterval: 2000, // Refresh every 2 seconds for real-time feel
+    // Remove polling - WebSocket handles real-time updates
   });
 
   // Fetch friends for starting new conversations
@@ -153,16 +220,27 @@ export default function MessagesPage() {
     }
   });
 
-  // Send message mutation
+  // Send message using WebSocket (fallback to HTTP if socket unavailable)
   const sendMessageMutation = useMutation({
-    mutationFn: (data: { content: string; replyToId?: number }) =>
-      apiRequest("POST", `/api/conversations/${selectedConversation}/messages`, data),
+    mutationFn: async (data: { content: string; replyToId?: number }) => {
+      if (socket && isConnected && selectedConversation) {
+        // Use WebSocket for real-time messaging
+        sendSocketMessage({
+          conversationId: selectedConversation,
+          content: data.content,
+          replyToId: data.replyToId,
+        });
+        return { success: true };
+      } else {
+        // Fallback to HTTP API
+        return apiRequest("POST", `/api/conversations/${selectedConversation}/messages`, data);
+      }
+    },
     onSuccess: () => {
       setNewMessage("");
       setReplyingTo(null);
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations", selectedConversation, "messages"] });
       scrollToBottom();
+      // No need to invalidate queries - WebSocket updates cache in real-time
     },
     onError: (error: Error) => {
       toast({
@@ -396,12 +474,48 @@ export default function MessagesPage() {
     scrollToBottom();
   }, [messages]);
 
-  // Mark conversation as read when selected
+  // Join/leave conversations via WebSocket
   useEffect(() => {
-    if (selectedConversation) {
+    if (selectedConversation && joinConversation) {
+      console.log('Joining conversation:', selectedConversation);
+      joinConversation(selectedConversation);
+      
+      // Mark conversation as read
       markAsReadMutation.mutate(selectedConversation);
+      
+      return () => {
+        if (leaveConversation) {
+          console.log('Leaving conversation:', selectedConversation);
+          leaveConversation(selectedConversation);
+        }
+      };
     }
-  }, [selectedConversation]);
+  }, [selectedConversation, joinConversation, leaveConversation]);
+
+  // Handle typing indicators
+  const handleTyping = useCallback(() => {
+    if (selectedConversation && startTyping) {
+      startTyping(selectedConversation);
+      
+      // Clear existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      
+      // Set new timeout to stop typing after 3 seconds
+      typingTimeoutRef.current = setTimeout(() => {
+        if (stopTyping && selectedConversation) {
+          stopTyping(selectedConversation);
+        }
+      }, 3000);
+    }
+  }, [selectedConversation, startTyping, stopTyping]);
+
+  // Handle message input changes with typing indicators
+  const handleMessageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    handleTyping();
+  };
 
   const handleSendMessage = () => {
     if (newMessage.trim() && selectedConversation) {
@@ -1301,6 +1415,22 @@ export default function MessagesPage() {
 
                     {/* Message Input */}
                     <div className="p-4 border-t">
+                      {/* Typing indicator */}
+                      {typingUsers.length > 0 && (
+                        <div className="mb-2 px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                            </div>
+                            <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                              Someone is typing...
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
                       {/* Reply indicator */}
                       {replyingTo && (
                         <div className="mb-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-700 rounded border-l-2 border-blue-500 flex items-center justify-between">
@@ -1330,7 +1460,7 @@ export default function MessagesPage() {
                           <Input
                             placeholder="Type a message..."
                             value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
+                            onChange={handleMessageInputChange}
                             onKeyPress={(e) => {
                               if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();

@@ -215,9 +215,42 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
             {event.ticketTypes && event.ticketTypes.length > 0 && (
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
                 <h5 className="font-medium text-gray-900 dark:text-white mb-2 text-sm">Ticket Options</h5>
-                <div className="h-16 overflow-y-auto space-y-2">
+                <div 
+                  className="h-16 overflow-y-auto space-y-2 scrollbar-hide hover:scrollbar-show cursor-grab active:cursor-grabbing"
+                  style={{
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    WebkitOverflowScrolling: 'touch'
+                  }}
+                  onMouseDown={(e) => {
+                    const startY = e.pageY - e.currentTarget.offsetTop;
+                    const scrollTop = e.currentTarget.scrollTop;
+                    
+                    const handleMouseMove = (e: MouseEvent) => {
+                      const y = e.pageY - e.currentTarget.offsetTop;
+                      e.currentTarget.scrollTop = scrollTop - (y - startY);
+                    };
+                    
+                    const handleMouseUp = () => {
+                      document.removeEventListener('mousemove', handleMouseMove);
+                      document.removeEventListener('mouseup', handleMouseUp);
+                    };
+                    
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                  }}
+                >
+                  <style jsx>{`
+                    .scrollbar-hide::-webkit-scrollbar {
+                      display: none;
+                    }
+                    .scrollbar-hide {
+                      -ms-overflow-style: none;
+                      scrollbar-width: none;
+                    }
+                  `}</style>
                   {event.ticketTypes.map((ticket) => (
-                    <div key={ticket.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded min-h-[56px]">
+                    <div key={ticket.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded min-h-[56px] select-none">
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-sm truncate">{ticket.name}</div>
                         <div className="text-xs text-gray-500">
@@ -232,7 +265,7 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                 </div>
                 {event.ticketTypes.length > 1 && (
                   <div className="text-xs text-center text-gray-500 mt-1">
-                    Scroll to see all {event.ticketTypes.length} options
+                    Drag to see all {event.ticketTypes.length} options
                   </div>
                 )}
               </div>

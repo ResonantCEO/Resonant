@@ -357,7 +357,6 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
 
                 {event.venue && (
                   <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                    <MapPin className="w-4 h-4 mr-2 text-blue-500 flex-shrink-0" />
                     <div className="flex items-center space-x-2 flex-1 min-w-0">
                       <Avatar className="w-6 h-6">
                         <AvatarImage src={event.venue.profileImageUrl} />

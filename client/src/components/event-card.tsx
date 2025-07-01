@@ -357,10 +357,12 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
 
                 {event.venue && (
                   <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                    <Avatar className="w-6 h-6 mr-2 flex-shrink-0">
-                      <AvatarImage src={event.venue.profileImageUrl} />
-                      <AvatarFallback className="text-xs">{event.venue.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
+                    <div className="w-4 h-4 mr-2 flex items-center justify-center flex-shrink-0">
+                      <Avatar className="w-6 h-6">
+                        <AvatarImage src={event.venue.profileImageUrl} />
+                        <AvatarFallback className="text-xs">{event.venue.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-gray-700 dark:text-gray-300 truncate">{event.venue.name}</div>
                       {event.venue.location && (

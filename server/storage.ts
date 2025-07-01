@@ -1025,7 +1025,7 @@ export class Storage {
   // Messaging functions
   async getConversations(profileId: number): Promise<any[]> {
     try {
-      const conversations = await db
+      const conversationsList = await db
         .select({
           conversation: conversations,
           participant: conversationParticipants,
@@ -1068,10 +1068,10 @@ export class Storage {
         .orderBy(desc(conversations.lastActivityAt));
 
       // Get unread counts for each conversation
-      const conversationIds = conversations.map(c => c.conversation.id);
+      const conversationIds = conversationsList.map(c => c.conversation.id);
       const unreadCounts = await this.getUnreadCounts(profileId, conversationIds);
 
-      return conversations.map(conv => {
+      return conversationsList.map(conv => {
         const isDirectMessage = conv.conversation.type === 'direct';
         const displayName = isDirectMessage 
           ? conv.otherParticipant?.name || 'Unknown User'

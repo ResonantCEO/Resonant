@@ -51,11 +51,11 @@ export default function Dashboard() {
   // Check completion status for getting started tasks
   const hasProfileInfo = activeProfile.bio && activeProfile.bio.trim().length > 0;
   const hasCoverPhoto = activeProfile.coverImageUrl && activeProfile.coverImageUrl.trim().length > 0;
-  
+
   // Get posts for this profile to check if they have created any
   const { data: posts } = useQuery({
-    queryKey: [`/api/profiles/${activeProfile.id}/posts`],
-    enabled: !!activeProfile.id,
+    queryKey: [`/api/profiles/${activeProfile?.id || 0}/posts`],
+    enabled: !!activeProfile?.id,
   });
   const hasCreatedPost = posts && posts.length > 0;
 
@@ -343,7 +343,7 @@ export default function Dashboard() {
                     <Plus className="w-4 h-4 mr-2" />
                     Create a new post
                   </Button>
-                  
+
                   {isArtist && (
                     <>
                       <Button
@@ -364,7 +364,7 @@ export default function Dashboard() {
                       </Button>
                     </>
                   )}
-                  
+
                   {isVenue && (
                     <>
                       <Button
@@ -385,7 +385,7 @@ export default function Dashboard() {
                       </Button>
                     </>
                   )}
-                  
+
                   <Button
                     variant="outline"
                     className="w-full justify-start"

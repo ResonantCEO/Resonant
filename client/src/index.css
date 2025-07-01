@@ -19,6 +19,17 @@
   transform: rotateY(180deg);
 }
 
+/* Ensure proper 3D rendering */
+.group .perspective-1000 > div {
+  transform-style: preserve-3d;
+}
+
+/* Fix for webkit browsers */
+.backface-hidden {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 20 14.3% 4.1%;

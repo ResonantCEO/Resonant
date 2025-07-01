@@ -128,10 +128,10 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
   const lowestPrice = getLowestPrice();
 
   return (
-    <div className="relative group w-full h-full">
-      <div className={`relative w-full h-full transition-all duration-500 transform-style preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+    <div className="relative group w-full h-full perspective-1000">
+      <div className={`relative w-full h-full transition-all duration-500 transform-style-preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
         {/* Front of card */}
-        <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer absolute inset-0 w-full h-full" onClick={handleCardClick}>
+        <Card className="group hover:shadow-lg transition-all duration-200 cursor-pointer absolute inset-0 w-full h-full backface-hidden" onClick={handleCardClick}>
           <CardHeader className="pb-3">
             {/* Event Image */}
             {event.eventImageUrl && (
@@ -308,8 +308,8 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
 
         {/* Back of card */}
         <Card 
-          className="absolute inset-0 w-full backface-hidden hover:shadow-lg transition-all duration-200 rotate-y-180 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900" 
-          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+          className="absolute inset-0 w-full h-full backface-hidden hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900" 
+          style={{ transform: 'rotateY(180deg)' }}
         >
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between mb-4">

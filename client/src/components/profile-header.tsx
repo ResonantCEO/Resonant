@@ -1095,41 +1095,45 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </div>
           </div>
 
-          {/* Friend Button - Show for both own and other profiles to allow cross-profile connections */}
+          {/* Friend Button - Show for cross-profile connections */}
           <div className="absolute left-2 sm:left-4 md:left-6 bottom-2 sm:bottom-4 z-10 flex justify-center w-16 sm:w-24 md:w-40">
-            {friendshipStatus?.status === 'accepted' ? (
-              <Button 
-                onClick={() => unfriendMutation.mutate()}
-                disabled={unfriendMutation.isPending}
-                variant="outline"
-                size="sm"
-                className="bg-red-600 hover:bg-red-700 text-white border-red-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
-              >
-                <UserMinus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
-                <span className="hidden sm:inline">Unfriend</span>
-              </Button>
-            ) : friendshipStatus?.status === 'pending' ? (
-              <Button 
-                disabled
-                variant="outline"
-                size="sm"
-                className="bg-gray-400 text-white border-gray-400 font-bold cursor-not-allowed text-xs sm:text-sm px-1 sm:px-2 py-1"
-              >
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
-                <span className="hidden sm:inline">Pending</span>
-              </Button>
-            ) : !isOwn || (isOwn && user && profile?.userId === user.id && profile?.id !== activeProfile?.id) ? (
-              <Button 
-                onClick={() => sendFriendRequestMutation.mutate()}
-                disabled={sendFriendRequestMutation.isPending}
-                variant="outline"
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
-              >
-                <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
-                <span className="hidden sm:inline">{isOwn ? "Connect" : "Add Friend"}</span>
-              </Button>
-            ) : null}
+            {!isOwn && (
+              <>
+                {friendshipStatus?.status === 'accepted' ? (
+                  <Button 
+                    onClick={() => unfriendMutation.mutate()}
+                    disabled={unfriendMutation.isPending}
+                    variant="outline"
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-white border-green-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
+                  >
+                    <UserCheck className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
+                    <span className="hidden sm:inline">Connected</span>
+                  </Button>
+                ) : friendshipStatus?.status === 'pending' ? (
+                  <Button 
+                    disabled
+                    variant="outline"
+                    size="sm"
+                    className="bg-gray-400 text-white border-gray-400 font-bold cursor-not-allowed text-xs sm:text-sm px-1 sm:px-2 py-1"
+                  >
+                    <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
+                    <span className="hidden sm:inline">Pending</span>
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={() => sendFriendRequestMutation.mutate()}
+                    disabled={sendFriendRequestMutation.isPending}
+                    variant="outline"
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600 font-bold text-xs sm:text-sm px-1 sm:px-2 py-1"
+                  >
+                    <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-0 sm:mr-1" />
+                    <span className="hidden sm:inline">Connect</span>
+                  </Button>
+                )}
+              </>
+            )}
           </div>
 
           {/* Social Media Buttons - Absolutely positioned */}
@@ -1208,21 +1212,18 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </Button>
           </div>
 
-          {/* Button Stack - Absolutely positioned for venue profiles */}
-          {profile?.type === 'venue' && !isOwn && (
-            <div className="absolute right-2 sm:right-4 bottom-16 sm:bottom-16 flex flex-col space-y-2">
-              {/* Booking Button - Only show for artist accounts */}
-              {activeProfile && activeProfile.type === 'artist' && (
+          {/* Booking Button - Show for venue profiles when viewed by artists */}
+          {profile?.type === 'venue' && !isOwn && activeProfile && activeProfile.type === 'artist' && (
+            <div className="absolute right-2 sm:right-4 bottom-12 sm:bottom-14">
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px]"
+                className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600 text-xs sm:text-sm px-2 sm:px-3 min-w-[60px] sm:min-w-[80px] font-bold"
                 onClick={handleBookingRequest}
               >
                 <Book className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Book</span>
               </Button>
-              )}
             </div>
           )}
         </div>

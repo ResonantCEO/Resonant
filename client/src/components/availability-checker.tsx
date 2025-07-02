@@ -90,6 +90,13 @@ export default function AvailabilityChecker({
   useEffect(() => {
     if (!open) return;
 
+    console.log("=== Availability Checker Debug ===");
+    console.log("Artist Calendar Events:", artistCalendarEvents);
+    console.log("Venue Calendar Events:", venueCalendarEvents);
+    console.log("Combined Calendar Events:", calendarEvents);
+    console.log("Artist Profile ID:", artistProfileId);
+    console.log("Venue Profile ID:", venueProfileId);
+
     // Convert booking requests to calendar events for both artist and venue
     const eventsFromBookings: CalendarEvent[] = bookingRequests
       .filter(request => 
@@ -145,11 +152,15 @@ export default function AvailabilityChecker({
       event.profileId === artistProfileId || event.profileId === venueProfileId
     );
 
+    console.log("Events from bookings:", eventsFromBookings);
+    console.log("Relevant calendar events:", relevantCalendarEvents);
+
     // Combine all events and remove duplicates by date
     const allEvents = [...relevantCalendarEvents, ...eventsFromBookings];
 
+    console.log("All combined events:", allEvents);
     setCombinedEvents(allEvents);
-  }, [open, bookingRequests, calendarEvents, artistProfileId, venueProfileId, artistName, venueName]);
+  }, [open, bookingRequests, calendarEvents, artistProfileId, venueProfileId, artistName, venueName, artistCalendarEvents, venueCalendarEvents]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();

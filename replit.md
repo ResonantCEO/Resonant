@@ -21,6 +21,8 @@ The application is fully functional with:
 - ✓ **Smart Cache Management**: Implemented selective cache invalidation with optimized refetch strategies (active queries only, stale marking)
 - ✓ **Memory Leak Prevention**: Added proper WebSocket cleanup and timeout management to prevent memory accumulation
 - ✓ **Performance Monitoring**: Eliminated 20-second profile switching delays and reduced notification API load by 83%
+- ✓ **Message System Optimization**: Fixed WebSocket cleanup blocking in messages page that caused 20-second delays when switching profiles after opening messages
+- ✓ **Cache Management Fix**: Added targeted cache clearing for conversations and friends data during profile switches to prevent stale data blocking
 
 ### July 1, 2025 - Version 0.6.0 - Real-Time Messaging
 - ✓ Successfully migrated messaging system from polling to real-time WebSockets

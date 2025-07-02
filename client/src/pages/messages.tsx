@@ -484,48 +484,52 @@ export default function MessagesPage() {
     scrollToBottom();
   }, [messages]);
 
-  // Join/leave conversations via WebSocket
+  // Join/leave conversations via WebSocket - optimized for fast switching
   useEffect(() => {
     if (selectedConversation && joinConversation) {
       console.log('Joining conversation:', selectedConversation);
       joinConversation(selectedConversation);
 
-      // Mark conversation as read
-      markAsReadMutation.mutate(selectedConversation);
+      // Mark conversation as read (non-blocking)
+      setTimeout(() => {
+        markAsReadMutation.mutate(selectedConversation);
+      }, 0);
 
       return () => {
+        // Non-blocking leave conversation
         if (leaveConversation) {
           console.log('Leaving conversation:', selectedConversation);
-          leaveConversation(selectedConversation);
+          setTimeout(() => {
+            leaveConversation(selectedConversation);
+          }, 0);
         }
       };
     }
   }, [selectedConversation, joinConversation, leaveConversation]);
 
-  // Cleanup when component unmounts
+  // Cleanup when component unmounts - optimized for faster cleanup
   useEffect(() => {
     return () => {
-      // Clear typing timeout
+      // Clear typing timeout immediately
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
         typingTimeoutRef.current = null;
       }
       
-      // Leave current conversation
-      if (selectedConversation && leaveConversation) {
-        console.log('Component unmounting, leaving conversation:', selectedConversation);
-        leaveConversation(selectedConversation);
-      }
-
-      // Stop typing indicators
-      if (selectedConversation && stopTyping) {
-        stopTyping(selectedConversation);
-      }
-
-      // Clear local state
+      // Quick cleanup without waiting for network calls
       setTypingUsers([]);
       setIsTyping(false);
       setSelectedConversation(null);
+      
+      // Async cleanup that doesn't block component unmounting
+      setTimeout(() => {
+        if (selectedConversation && leaveConversation) {
+          leaveConversation(selectedConversation);
+        }
+        if (selectedConversation && stopTyping) {
+          stopTyping(selectedConversation);
+        }
+      }, 0); // Run after component unmounts
     };
   }, []);
 

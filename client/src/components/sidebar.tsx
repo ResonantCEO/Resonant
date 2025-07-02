@@ -153,6 +153,12 @@ export default function Sidebar() {
   // Debounced profile activation to prevent rapid-fire API calls
   const rawActivateProfile = async (profileId: number) => {
     await apiRequest("POST", `/api/profiles/${profileId}/activate`);
+    
+    // Clear message-related caches that might block profile switching
+    queryClient.removeQueries({ queryKey: ["/api/conversations"] });
+    queryClient.removeQueries({ queryKey: ["/api/friends"] });
+    
+    // Invalidate core profile queries
     queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
     queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
   };

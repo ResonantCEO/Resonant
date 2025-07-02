@@ -262,7 +262,14 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
             {/* Ticket Information */}
             {event.ticketTypes && event.ticketTypes.length > 0 && (
               <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-                <h5 className="font-medium text-gray-900 dark:text-white mb-2 text-sm">Ticket Options</h5>
+                <div className="flex items-center justify-between mb-2">
+                  <h5 className="font-medium text-gray-900 dark:text-white text-sm">Ticket Options</h5>
+                  {event.ticketTypes.length > 1 && (
+                    <div className="text-xs text-gray-500">
+                      Drag to see all {event.ticketTypes.length} options
+                    </div>
+                  )}
+                </div>
                 <div 
                   className="h-16 overflow-y-auto space-y-2 scrollbar-hide hover:scrollbar-show cursor-grab active:cursor-grabbing"
                   style={{
@@ -311,11 +318,6 @@ export default function EventCard({ event, showActions = true, onEventClick }: E
                     </div>
                   ))}
                 </div>
-                {event.ticketTypes.length > 1 && (
-                  <div className="text-xs text-center text-gray-500 mt-1">
-                    Drag to see all {event.ticketTypes.length} options
-                  </div>
-                )}
               </div>
             )}
 

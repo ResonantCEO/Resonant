@@ -100,8 +100,78 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
   const { data: storedEvents = [] } = useQuery<CalendarEvent[]>({
     queryKey: ["/api/calendar-events"],
     queryFn: async () => {
-      // For now, return empty array - you can implement actual storage later
-      return [];
+      // Mock calendar data for demonstration
+      if (!activeProfile) return [];
+      
+      const mockEvents: CalendarEvent[] = [
+        // Sample events for artist profiles
+        {
+          id: `mock-${activeProfile.id}-1`,
+          title: profileType === 'artist' ? "Band Rehearsal" : "Sound Check",
+          date: new Date("2025-07-08T19:00:00Z"),
+          startTime: "19:00",
+          endTime: "22:00",
+          type: "rehearsal",
+          status: "confirmed",
+          client: profileType === 'artist' ? "Full Band" : "Evening Concert Setup",
+          location: profileType === 'artist' ? "Rehearsal Studio A" : activeProfile.name,
+          notes: profileType === 'artist' ? "Working on new arrangements for upcoming shows" : "Technical setup for tonight's performance"
+        },
+        {
+          id: `mock-${activeProfile.id}-2`,
+          title: profileType === 'artist' ? "Live Performance" : "Jazz Night",
+          date: new Date("2025-07-15T20:00:00Z"),
+          startTime: "20:00",
+          endTime: "23:30",
+          type: "booking",
+          status: "confirmed",
+          client: profileType === 'artist' ? "The Blue Note Lounge" : "Local Jazz Trio",
+          location: profileType === 'artist' ? "Downtown Music District" : activeProfile.name,
+          notes: profileType === 'artist' ? "Headline show with full production" : "Regular weekly jazz series",
+          budget: profileType === 'artist' ? 1500 : 800
+        },
+        {
+          id: `mock-${activeProfile.id}-3`,
+          title: profileType === 'artist' ? "Recording Session" : "Private Event",
+          date: new Date("2025-07-22T14:00:00Z"),
+          startTime: "14:00",
+          endTime: "18:00",
+          type: profileType === 'artist' ? "event" : "booking",
+          status: "pending",
+          client: profileType === 'artist' ? "Indie Records" : "Corporate Client",
+          location: profileType === 'artist' ? "Soundwave Studios" : activeProfile.name,
+          notes: profileType === 'artist' ? "Recording vocals for new album" : "Company celebration event",
+          budget: profileType === 'artist' ? 800 : 3500
+        },
+        {
+          id: `mock-${activeProfile.id}-4`,
+          title: profileType === 'artist' ? "Photo Shoot" : "Venue Maintenance",
+          date: new Date("2025-07-25T10:00:00Z"),
+          startTime: "10:00",
+          endTime: "15:00",
+          type: profileType === 'artist' ? "meeting" : "unavailable",
+          status: "confirmed",
+          client: profileType === 'artist' ? "Photography Studio" : "Audio Tech Services",
+          location: profileType === 'artist' ? "Urban Photo Studio" : activeProfile.name,
+          notes: profileType === 'artist' ? "Press photos for album promotion" : "Annual sound system maintenance",
+          budget: profileType === 'artist' ? 600 : undefined
+        },
+        {
+          id: `mock-${activeProfile.id}-5`,
+          title: profileType === 'artist' ? "Festival Audition" : "Album Release Party",
+          date: new Date("2025-08-02T16:00:00Z"),
+          startTime: "16:00",
+          endTime: "17:30",
+          type: profileType === 'artist' ? "meeting" : "event",
+          status: profileType === 'artist' ? "pending" : "confirmed",
+          client: profileType === 'artist' ? "Summer Music Festival" : "Luna & The Midnight Collective",
+          location: profileType === 'artist' ? "Festival Grounds" : activeProfile.name,
+          notes: profileType === 'artist' ? "Audition for summer festival slot" : "Exclusive listening party with live performance",
+          budget: profileType === 'artist' ? 3000 : 2500
+        }
+      ];
+      
+      return mockEvents;
     },
   });
 

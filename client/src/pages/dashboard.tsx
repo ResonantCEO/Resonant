@@ -55,7 +55,7 @@ export default function Dashboard() {
   // Get posts for this profile to check if they have created any
   const { data: posts } = useQuery({
     queryKey: [`/api/profiles/${activeProfile?.id || 0}/posts`],
-    enabled: !!activeProfile?.id,
+    enabled: !!activeProfile,
   });
   const hasCreatedPost = posts && posts.length > 0;
 

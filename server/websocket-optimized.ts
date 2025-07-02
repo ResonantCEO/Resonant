@@ -40,7 +40,7 @@ export function setupOptimizedWebSocketHandlers(io: SocketIOServer) {
   io.engine.opts.pingInterval = CONNECTION_LIMITS.pingInterval;
 
   // Middleware for rate limiting
-  const rateLimit = (eventName: string, socket: AuthenticatedSocket) => {
+  const rateLimit = (eventName: keyof typeof RATE_LIMITS, socket: AuthenticatedSocket) => {
     const limit = RATE_LIMITS[eventName];
     if (!limit) return true;
 
@@ -180,7 +180,7 @@ export function setupOptimizedWebSocketHandlers(io: SocketIOServer) {
         
         // Batch notification sending
         const otherParticipants = conversation.participants?.filter(
-          p => p.id !== socket.profileId
+          (p: any) => p.id !== socket.profileId
         ) || [];
         
         if (otherParticipants.length > 0) {
@@ -294,25 +294,26 @@ export function setupOptimizedWebSocketHandlers(io: SocketIOServer) {
     const now = Date.now();
     
     // Clean user cache
-    for (const [key, value] of userCache.entries()) {
+    userCache.forEach((value, key) => {
       if (now - value.timestamp > CACHE_TTL) {
         userCache.delete(key);
       }
-    }
+    });
     
     // Clean conversation cache
-    for (const [key, value] of conversationCache.entries()) {
+    conversationCache.forEach((value, key) => {
       if (now - value.timestamp > CACHE_TTL) {
         conversationCache.delete(key);
       }
-    }
+    });
     
     // Clean rate limiters
-    for (const [key, value] of rateLimiters.entries()) {
-      if (now - value.windowStart > Math.max(...Object.values(RATE_LIMITS).map(r => r.window))) {
+    const maxWindow = Math.max(...Object.values(RATE_LIMITS).map(r => r.window));
+    rateLimiters.forEach((value, key) => {
+      if (now - value.windowStart > maxWindow) {
         rateLimiters.delete(key);
       }
-    }
+    });
   }, 5 * 60 * 1000); // Every 5 minutes
 
   global.io = io;

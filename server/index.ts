@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { setupWebSocketHandlers } from "./websocket";
+import { setupOptimizedWebSocketHandlers } from "./websocket-optimized";
 
 const app = express();
 app.use(express.json());
@@ -53,8 +53,8 @@ app.use((req, res, next) => {
     }
   });
   
-  // Setup WebSocket handlers
-  setupWebSocketHandlers(io);
+  // Setup optimized WebSocket handlers
+  setupOptimizedWebSocketHandlers(io);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

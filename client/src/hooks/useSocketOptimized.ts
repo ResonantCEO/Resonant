@@ -38,7 +38,7 @@ class SocketManager {
   }
 
   connect(userId: number, profileId?: number): void {
-    if (this.socket?.connected && this.socket.auth?.userId === userId && this.socket.auth?.profileId === profileId) {
+    if (this.socket?.connected && (this.socket as any).auth?.userId === userId && (this.socket as any).auth?.profileId === profileId) {
       return; // Already connected with same credentials
     }
 
@@ -52,7 +52,7 @@ class SocketManager {
       reconnection: true,
       reconnectionAttempts: this.maxReconnectAttempts,
       reconnectionDelay: this.reconnectDelay,
-      maxReconnectionDelay: 5000,
+      reconnectionDelayMax: 5000,
     });
 
     this.setupEventHandlers();

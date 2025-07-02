@@ -1427,7 +1427,14 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      const friendship = await storage.getFriendshipStatus(activeProfile.id, targetProfileId);
+      // Check both directions for friendship
+      let friendship = await storage.getFriendshipStatus(activeProfile.id, targetProfileId);
+      
+      // If not found in one direction, check the other direction
+      if (!friendship) {
+        friendship = await storage.getFriendshipStatus(targetProfileId, activeProfile.id);
+      }
+
       res.json(friendship || null);
     } catch (error) {
       console.error("Error fetching friendship status:", error);

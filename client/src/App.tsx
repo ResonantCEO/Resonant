@@ -17,6 +17,8 @@ import Dashboard from "@/pages/dashboard";
 import Friends from "@/pages/friends";
 import Messages from "@/pages/messages";
 import Tickets from "@/pages/tickets";
+import BookingRequestPage from "@/pages/booking-request";
+import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import NotificationsPage from "./pages/notifications";
 import { useWebSocket } from "./hooks/useWebSocket";
@@ -80,6 +82,7 @@ function Router() {
           <Route path="/notifications" component={NotificationsPage} />
           <Route path="/messages" component={Messages} />
           <Route path="/tickets" component={Tickets} />
+          <Route path="/booking-request/:venueId" component={BookingRequestPage} />
           <Route path="/*" component={Profile} />
         </Switch>
         <BottomNav />
@@ -98,6 +101,7 @@ function Router() {
           <Route path="/notifications" component={NotificationsPage} />
           <Route path="/messages" component={Messages} />
           <Route path="/tickets" component={Tickets} />
+          <Route path="/booking-request/:venueId" component={BookingRequestPage} />
           <Route path="/*" component={Profile} />
         </Switch>
       </div>

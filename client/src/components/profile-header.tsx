@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -80,7 +79,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   const [profilePhotoPosition, setProfilePhotoPosition] = useState({ x: 50, y: 50 });
   const [isProfileDragging, setIsProfileDragging] = useState(false);
   const [profileDragStart, setProfileDragStart] = useState({ x: 0, y: 0 });
-  
+
   const coverContainerRef = useRef<HTMLDivElement>(null);
   const profileContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -118,14 +117,14 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     onSuccess: async (data: any) => {
       await queryClient.invalidateQueries({ queryKey: [`/api/friendship-status/${profile.id}`] });
       await refetchFriendshipStatus();
-      
+
       const isOwnProfile = profile?.userId === user?.id;
       const message = data.autoAccepted 
         ? "Profiles connected successfully!" 
         : isOwnProfile 
           ? "Your profiles have been connected!"
           : "Your friend request has been sent successfully.";
-      
+
       toast({
         title: data.autoAccepted || isOwnProfile ? "Profiles Connected" : "Friend Request Sent",
         description: message,
@@ -1252,7 +1251,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   About
                 </TabsTrigger>
               )}
-              
+
               <TabsTrigger value="photos" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
                 Gallery
               </TabsTrigger>

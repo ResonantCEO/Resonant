@@ -366,24 +366,30 @@ export class Storage {
     return requests;
   }
 
-  async getFriendshipStatus(profileId1: number, profileId2: number): Promise<any> {
-    try {
-      const [friendship] = await db
-        .select()
-        .from(friendships)
-        .where(
-          or(
-            and(eq(friendships.requesterId, profileId1), eq(friendships.addresseeId, profileId2)),
-            and(eq(friendships.requesterId, profileId2), eq(friendships.addresseeId, profileId1))
-          )
-        )
-        .limit(1);
+  async getFriendshipStatus(profileId1: number, profileId2: number) {
+    // First check if there's a friendship where profileId1 is the requester
+    let friendship = await db
+      .select()
+      .from(friendships)
+      .where(
+        and(eq(friendships.requesterId, profileId1), eq(friendships.addresseeId, profileId2))
+      )
+      .limit(1);
 
-      return friendship || null;
-    } catch (error) {
-      console.error("Error fetching friendship status:", error);
-      throw error;
+    if (friendship.length > 0) {
+      return friendship[0];
     }
+
+    // If not found, check the reverse direction
+    friendship = await db
+      .select()
+      .from(friendships)
+      .where(
+        and(eq(friendships.requesterId, profileId2), eq(friendships.addresseeId, profileId1))
+      )
+      .limit(1);
+
+    return friendship[0] || null;
   }
 
   async getFriendshipById(friendshipId: number): Promise<any> {

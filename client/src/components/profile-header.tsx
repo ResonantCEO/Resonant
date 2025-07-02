@@ -1212,8 +1212,8 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </Button>
           </div>
 
-          {/* Booking Button - Show for venue profiles when viewed by artists */}
-          {profile?.type === 'venue' && !isOwn && activeProfile && activeProfile.type === 'artist' && (
+          {/* Booking Button - Show for venue profiles when viewed by artists (including own profiles) */}
+          {profile?.type === 'venue' && activeProfile && activeProfile.type === 'artist' && activeProfile.id !== profile.id && (
             <div className="absolute right-2 sm:right-4 bottom-12 sm:bottom-14">
               <Button 
                 variant="outline" 

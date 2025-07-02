@@ -73,11 +73,19 @@ export default function AvailabilityChecker({
     enabled: open,
   });
 
-  // Fetch calendar events (mock for now, you can implement actual storage later)
-  const { data: calendarEvents = [] } = useQuery<CalendarEvent[]>({
-    queryKey: ["/api/calendar-events"],
+  // Fetch calendar events for both artist and venue profiles
+  const { data: artistCalendarEvents = [] } = useQuery<CalendarEvent[]>({
+    queryKey: ["/api/calendar-events", { profileId: artistProfileId }],
     enabled: open,
   });
+
+  const { data: venueCalendarEvents = [] } = useQuery<CalendarEvent[]>({
+    queryKey: ["/api/calendar-events", { profileId: venueProfileId }],
+    enabled: open,
+  });
+
+  // Combine calendar events from both profiles
+  const calendarEvents = [...artistCalendarEvents, ...venueCalendarEvents];
 
   useEffect(() => {
     if (!open) return;

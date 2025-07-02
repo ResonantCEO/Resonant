@@ -4380,6 +4380,67 @@ app.post("/api/bookings/:bookingId/decline", requireAuth, async (req, res) => {
   }
 });
 
+// Get calendar events for a profile to check booking availability
+app.get("/api/calendar-events", requireAuth, async (req, res) => {
+  try {
+    const profileId = parseInt(req.query.profileId as string);
+    
+    if (!profileId) {
+      return res.status(400).json({ error: "Profile ID is required" });
+    }
+
+    // For now, return empty array since events table doesn't exist yet
+    // This will be populated when events table is created and events are added
+    const formattedEvents: any[] = [];
+
+    // TODO: Once events table exists, uncomment and use this code:
+    /*
+    const calendarEvents = await db
+      .select({
+        id: events.id,
+        name: events.name,
+        description: events.description,
+        eventDate: events.eventDate,
+        eventTime: events.eventTime,
+        duration: events.duration,
+        status: events.status,
+        organizerProfileId: events.organizerProfileId,
+        venueProfileId: events.venueProfileId,
+        artistProfileIds: events.artistProfileIds,
+      })
+      .from(events)
+      .where(
+        or(
+          eq(events.venueProfileId, profileId),
+          eq(events.organizerProfileId, profileId),
+          sql`${profileId} = ANY(${events.artistProfileIds})`
+        )
+      )
+      .orderBy(events.eventDate);
+
+    const formattedEvents = calendarEvents.map(event => ({
+      id: event.id,
+      title: event.name,
+      description: event.description,
+      date: event.eventDate,
+      startTime: event.eventTime || '20:00',
+      endTime: '', 
+      type: 'event',
+      status: event.status === 'published' ? 'confirmed' : 'pending',
+      isOccupied: event.status === 'published' || event.status === 'confirmed',
+      profileId: event.venueProfileId,
+      profileName: '',
+      profileType: 'venue'
+    }));
+    */
+
+    res.json(formattedEvents);
+  } catch (error) {
+    console.error("Error fetching calendar events:", error);
+    res.status(500).json({ error: "Failed to fetch calendar events" });
+  }
+});
+
   const httpServer = createServer(app);
   return httpServer;
 }

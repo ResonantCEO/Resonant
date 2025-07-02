@@ -170,6 +170,8 @@ export const bookingRequests = pgTable("booking_requests", {
   respondedAt: timestamp("responded_at"),
 });
 
+
+
 export const albums = pgTable("albums", {
   id: serial("id").primaryKey(),
   profileId: integer("profile_id").references(() => profiles.id).notNull(),
@@ -222,6 +224,7 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   photos: many(photos),
   artistBookingRequests: many(bookingRequests, { relationName: "artistProfile" }),
   venueBookingRequests: many(bookingRequests, { relationName: "venueProfile" }),
+  events: many(events),
 }));
 
 export const albumsRelations = relations(albums, ({ one, many }) => ({
@@ -279,6 +282,8 @@ export const bookingRequestsRelations = relations(bookingRequests, ({ one }) => 
     relationName: "venueProfile",
   }),
 }));
+
+
 
 export const profileMembershipsRelations = relations(profileMemberships, ({ one }) => ({
   profile: one(profiles, {

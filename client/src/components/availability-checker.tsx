@@ -85,35 +85,63 @@ export default function AvailabilityChecker({
     // Convert booking requests to calendar events for both artist and venue
     const eventsFromBookings: CalendarEvent[] = bookingRequests
       .filter(request => 
-        (request.artistProfileId === artistProfileId || request.venueProfileId === venueProfileId) &&
         request.eventDate &&
         (request.status === 'accepted' || request.status === 'pending')
       )
-      .map(request => ({
-        id: `booking-${request.id}`,
-        title: request.artistProfileId === artistProfileId 
-          ? `Booking at ${request.venueProfile.name}` 
-          : `Booking with ${request.artistProfile.name}`,
-        date: new Date(request.eventDate!),
-        startTime: request.eventTime || '20:00',
-        endTime: '', 
-        type: 'booking' as const,
-        status: request.status === 'accepted' ? 'confirmed' as const : 'pending' as const,
-        client: request.artistProfileId === artistProfileId ? request.venueProfile.name : request.artistProfile.name,
-        location: request.venueProfile.location || '',
-        notes: request.message || '',
-        profileId: request.artistProfileId === artistProfileId ? artistProfileId : venueProfileId,
-        profileName: request.artistProfileId === artistProfileId ? artistName : venueName,
-        profileType: request.artistProfileId === artistProfileId ? 'artist' as const : 'venue' as const
-      }));
+      .flatMap(request => {
+        const events: CalendarEvent[] = [];
 
-    // Filter calendar events for both profiles
+        // Add event for artist profile if it matches one of our profiles
+        if (request.artistProfileId === artistProfileId || request.artistProfileId === venueProfileId) {
+          events.push({
+            id: `booking-artist-${request.id}`,
+            title: `Booking at ${request.venueProfile.name}`,
+            date: new Date(request.eventDate!),
+            startTime: request.eventTime || '20:00',
+            endTime: '', 
+            type: 'booking' as const,
+            status: request.status === 'accepted' ? 'confirmed' as const : 'pending' as const,
+            client: request.venueProfile.name,
+            location: request.venueProfile.location || '',
+            notes: request.message || '',
+            profileId: request.artistProfileId,
+            profileName: request.artistProfile.name,
+            profileType: 'artist' as const
+          });
+        }
+
+        // Add event for venue profile if it matches one of our profiles
+        if (request.venueProfileId === artistProfileId || request.venueProfileId === venueProfileId) {
+          events.push({
+            id: `booking-venue-${request.id}`,
+            title: `Booking with ${request.artistProfile.name}`,
+            date: new Date(request.eventDate!),
+            startTime: request.eventTime || '20:00',
+            endTime: '', 
+            type: 'booking' as const,
+            status: request.status === 'accepted' ? 'confirmed' as const : 'pending' as const,
+            client: request.artistProfile.name,
+            location: request.venueProfile.location || '',
+            notes: request.message || '',
+            profileId: request.venueProfileId,
+            profileName: request.venueProfile.name,
+            profileType: 'venue' as const
+          });
+        }
+
+        return events;
+      });
+
+    // Filter calendar events to show events for both profiles
     const relevantCalendarEvents = calendarEvents.filter(event => 
       event.profileId === artistProfileId || event.profileId === venueProfileId
     );
 
-    setCombinedEvents([...eventsFromBookings, ...relevantCalendarEvents]);
-  }, [bookingRequests, calendarEvents, artistProfileId, venueProfileId, artistName, venueName, open]);
+    // Combine all events and remove duplicates by date
+    const allEvents = [...relevantCalendarEvents, ...eventsFromBookings];
+
+    setCombinedEvents(allEvents);
+  }, [open, bookingRequests, calendarEvents, artistProfileId, venueProfileId, artistName, venueName]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -340,22 +368,23 @@ export default function AvailabilityChecker({
                       </div>
 
                       {/* Event indicators */}
-                      <div className="space-y-1 mt-1">
-                        {dayEvents.slice(0, 2).map((event, i) => (
-                          <div
-                            key={i}
-                            className={`text-xs px-1 py-0.5 rounded text-white truncate ${getTypeColor(event.type)}`}
-                            title={`${event.profileName}: ${event.title}`}
-                          >
-                            {event.profileType === 'artist' ? '🎵' : '🏛️'} {event.title.substring(0, 8)}
-                          </div>
-                        ))}
-                        {dayEvents.length > 2 && (
-                          <div className="text-xs text-gray-500">
-                            +{dayEvents.length - 2} more
-                          </div>
-                        )}
-                      </div>
+                      {dayEvents.slice(0, 2).map((event, i) => (
+                        <div
+                          key={i}
+                          className={`text-xs px-1 py-0.5 rounded text-white truncate ${getTypeColor(event.type)} relative`}
+                          title={`${event.profileName} (${event.profileType}): ${event.title} - ${event.status}`}
+                        >
+                          {event.status === 'pending' && (
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full border border-white"></span>
+                          )}
+                          {event.title}
+                        </div>
+                      ))}
+                      {dayEvents.length > 2 && (
+                        <div className="text-xs text-gray-500">
+                          +{dayEvents.length - 2} more
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -378,14 +407,24 @@ export default function AvailabilityChecker({
                   {selectedDate && getSelectedDateEvents().length > 0 ? (
                     <div className="space-y-4">
                       {getSelectedDateEvents().map((event) => (
-                        <div key={event.id} className="bg-white p-3 rounded border">
-                          <div className="flex items-start justify-between mb-2">
+                        <div key={event.id} className={`bg-white p-3 rounded border ${event.status === 'pending' ? 'border-l-4 border-l-yellow-500' : event.status === 'confirmed' ? 'border-l-4 border-l-green-500' : ''}`}>
+                          <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-2">
-                                <span className="text-lg">
-                                  {event.profileType === 'artist' ? '🎵' : '🏛️'}
-                                </span>
-                                <h5 className="font-medium text-sm">{event.title}</h5>
+                                <h5 className="font-medium">
+                                  {event.status === 'pending' ? '⏳ ' : event.status === 'confirmed' ? '✅ ' : ''}{event.title}
+                                </h5>
+                                <Badge variant="outline" className={`${getTypeColor(event.type)} text-white`}>
+                                  {event.type}
+                                </Badge>
+                                <Badge variant="outline" className={getStatusColor(event.status)}>
+                                  {event.status}
+                                </Badge>
+                                {event.profileName && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {event.profileName} ({event.profileType})
+                                  </Badge>
+                                )}
                               </div>
                               <div className="flex items-center space-x-2 text-xs text-gray-600 mb-1">
                                 <User className="w-3 h-3" />

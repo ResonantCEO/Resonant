@@ -228,8 +228,13 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
         budget: request.budget ? parseFloat(request.budget) : undefined
       }));
 
-    // Combine with stored events
-    setCalendarEvents([...storedEvents, ...eventsFromRequests]);
+    // Combine with stored events and ensure no duplicates
+    const combinedEvents = [...storedEvents, ...eventsFromRequests];
+    const uniqueEvents = combinedEvents.filter((event, index, self) => 
+      index === self.findIndex(e => e.id === event.id)
+    );
+    
+    setCalendarEvents(uniqueEvents);
   }, [bookingRequests, storedEvents, profileType]);
 
   const resetForm = () => {

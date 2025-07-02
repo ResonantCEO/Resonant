@@ -109,14 +109,14 @@ export default function Sidebar() {
         return {};
       }
     },
-    refetchInterval: 30000, // Reduced to 30 seconds instead of 5
+    refetchInterval: 5000, // Faster refresh to match real-time updates
     enabled: !!user && (profiles as any[]).length > 0,
-    retry: 2, // Reduced retries
+    retry: 2,
     retryDelay: 2000,
-    staleTime: 25000, // Cache for 25 seconds
-    gcTime: 300000, // Keep in cache for 5 minutes
-    refetchOnMount: false, // Don't refetch on every mount
-    refetchOnWindowFocus: false, // Don't refetch on focus
+    staleTime: 0, // Always consider data stale to get fresh counts
+    gcTime: 60000, // Shorter cache time to prevent stale data
+    refetchOnMount: true, // Always refetch on mount
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   // Log any errors

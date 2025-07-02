@@ -606,50 +606,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
               </div>
             </div>
 
-            {/* Calendar Legend */}
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <h4 className="text-sm font-medium mb-2">Legend</h4>
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                    <span>Booking</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-500 rounded"></div>
-                    <span>Event</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                    <span>Rehearsal</span>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-purple-500 rounded"></div>
-                    <span>Meeting</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-red-500 rounded"></div>
-                    <span>Unavailable</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                    <span>Request</span>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-2 pt-2 border-t border-gray-200 space-y-1">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Confirmed</span>
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full ml-3"></div>
-                  <span>Pending</span>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full ml-3"></div>
-                  <span>Booking Request</span>
-                </div>
-              </div>
-            </div>
+            
 
             {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-1">

@@ -606,6 +606,51 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
               </div>
             </div>
 
+            {/* Calendar Legend */}
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <h4 className="text-sm font-medium mb-2">Legend</h4>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                    <span>Booking</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded"></div>
+                    <span>Event</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                    <span>Rehearsal</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-purple-500 rounded"></div>
+                    <span>Meeting</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded"></div>
+                    <span>Unavailable</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <span>Request</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-2 border-t border-gray-200 space-y-1">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Confirmed</span>
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full ml-3"></div>
+                  <span>Pending</span>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full ml-3"></div>
+                  <span>Booking Request</span>
+                </div>
+              </div>
+            </div>
+
             {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-1">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
@@ -614,17 +659,27 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                 </div>
               ))}
               {days.map((day, index) => {
-                const dayEvents = getDayEvents(day);
+                const dayEvents = getDayEvents(day.getDate());
                 const isToday = day.toDateString() === new Date().toDateString();
                 const isSelected = selectedDate?.toDateString() === day.toDateString();
                 const isUnavailable = isDateUnavailable(day);
                 const isCurrentMonth = day.getMonth() === currentMonth;
 
+                // Group events by type for better indicators
+                const eventsByType = dayEvents.reduce((acc, event) => {
+                  acc[event.type] = (acc[event.type] || 0) + 1;
+                  return acc;
+                }, {} as Record<string, number>);
+
+                const hasConfirmed = dayEvents.some(e => e.status === 'confirmed');
+                const hasPending = dayEvents.some(e => e.status === 'pending');
+                const hasRequests = dayEvents.some(e => e.isRequest);
+
                 return (
                   <div
                     key={index}
                     className={`
-                      min-h-[80px] p-1 border cursor-pointer transition-colors
+                      min-h-[80px] p-1 border cursor-pointer transition-colors relative
                       ${isCurrentMonth ? 'border-gray-200' : 'border-gray-100 text-gray-400'}
                       ${isToday ? 'bg-blue-50 border-blue-200' : ''}
                       ${isSelected ? 'bg-blue-100 border-blue-300' : ''}
@@ -633,24 +688,71 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                     `}
                     onClick={() => setSelectedDate(day)}
                   >
-                    <div className={`text-sm ${isToday ? 'font-bold text-blue-600' : ''}`}>
-                      {day.getDate()}
-                    </div>
-                    <div className="space-y-1 mt-1">
-                      {dayEvents.slice(0, 2).map((event, i) => (
-                        <div
-                          key={i}
-                          className={`text-xs px-1 py-0.5 rounded text-white truncate ${getTypeColor(event.type)}`}
-                        >
-                          {event.title}
-                        </div>
-                      ))}
-                      {dayEvents.length > 2 && (
-                        <div className="text-xs text-gray-500">
-                          +{dayEvents.length - 2} more
+                    {/* Date number */}
+                    <div className={`text-sm flex items-center justify-between ${isToday ? 'font-bold text-blue-600' : ''}`}>
+                      <span>{day.getDate()}</span>
+                      {/* Status indicator dots */}
+                      {dayEvents.length > 0 && (
+                        <div className="flex space-x-1">
+                          {hasConfirmed && (
+                            <div className="w-2 h-2 bg-green-500 rounded-full" title="Confirmed events"></div>
+                          )}
+                          {hasPending && (
+                            <div className="w-2 h-2 bg-yellow-500 rounded-full" title="Pending events"></div>
+                          )}
+                          {hasRequests && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full" title="Booking requests"></div>
+                          )}
                         </div>
                       )}
                     </div>
+
+                    {/* Event indicators */}
+                    <div className="space-y-1 mt-1">
+                      {/* Show first 2 events as bars */}
+                      {dayEvents.slice(0, 2).map((event, i) => (
+                        <div
+                          key={i}
+                          className={`text-xs px-1 py-0.5 rounded text-white truncate ${getTypeColor(event.type)} relative`}
+                        >
+                          {event.isRequest && (
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full border border-white"></span>
+                          )}
+                          {event.title}
+                        </div>
+                      ))}
+                      
+                      {/* Show event type indicators for remaining events */}
+                      {dayEvents.length > 2 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {Object.entries(eventsByType).slice(0, 4).map(([type, count]) => (
+                            <div
+                              key={type}
+                              className={`w-3 h-3 rounded-full ${getTypeColor(type)} flex items-center justify-center`}
+                              title={`${count} ${type} event${count > 1 ? 's' : ''}`}
+                            >
+                              {count > 1 && (
+                                <span className="text-xs text-white font-bold" style={{ fontSize: '8px' }}>
+                                  {count}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                          {dayEvents.length > 6 && (
+                            <div className="text-xs text-gray-500">
+                              +{dayEvents.length - 6}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Event count badge for days with many events */}
+                    {dayEvents.length > 3 && (
+                      <div className="absolute bottom-1 right-1 bg-gray-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {dayEvents.length}
+                      </div>
+                    )}
                   </div>
                 );
               })}

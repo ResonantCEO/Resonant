@@ -2478,7 +2478,8 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      // Check if profileIds query param is provided for multi-profile fetching
+      // Check if profileId query param is provided to fetch events for specific profile
+      const profileIdParam = req.query.profileId as string;
       const profileIdsParam = req.query.profileIds as string;
       
       if (profileIdsParam) {
@@ -2486,7 +2487,13 @@ export function registerRoutes(app: Express): Server {
         console.log('Fetching events for multiple profiles:', profileIds);
         const events = await storage.getCalendarEventsForProfiles(profileIds);
         res.json(events);
+      } else if (profileIdParam) {
+        const profileId = parseInt(profileIdParam);
+        console.log(`Fetching events for specific profile: ${profileId}`);
+        const events = await storage.getCalendarEvents(profileId);
+        res.json(events);
       } else {
+        console.log(`Fetching events for active profile: ${activeProfile.id}`);
         const events = await storage.getCalendarEvents(activeProfile.id);
         res.json(events);
       }

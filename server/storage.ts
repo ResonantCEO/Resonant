@@ -1901,6 +1901,22 @@ export class Storage {
     }
   }
 
+  async getCalendarEventsForProfiles(profileIds: number[]) {
+    try {
+      const events = await db
+        .select()
+        .from(calendarEvents)
+        .where(sql`${calendarEvents.profileId} = ANY(${profileIds})`)
+        .orderBy(calendarEvents.date);
+
+      console.log(`Calendar events for profiles ${profileIds}:`, events);
+      return events;
+    } catch (error) {
+      console.error("Error fetching calendar events for profiles:", error);
+      throw new Error("Failed to fetch calendar events for profiles");
+    }
+  }
+
   // Get calendar events for multiple profiles (for availability checking)
   async getCalendarEventsForProfiles(profileIds: number[]) {
     try {

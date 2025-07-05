@@ -94,11 +94,11 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
 
   // Fetch calendar events from database
   const { data: storedEvents = [] } = useQuery<CalendarEvent[]>({
-    queryKey: ["/api/calendar-events"],
+    queryKey: ["/api/calendar-events", activeProfile?.id],
     queryFn: async () => {
       if (!activeProfile) return [];
 
-      const response = await fetch("/api/calendar-events", {
+      const response = await fetch(`/api/calendar-events?profileId=${activeProfile.id}`, {
         credentials: "include",
       });
 
@@ -108,6 +108,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
 
       return response.json();
     },
+    enabled: !!activeProfile,
   });
 
   // Calendar event mutations

@@ -168,7 +168,7 @@ export default function AvailabilityChecker({
 
   const getDayEvents = (day: Date) => {
     return combinedEvents.filter(event => {
-      const eventDate = event.date;
+      const eventDate = new Date(event.date);
       return eventDate.getDate() === day.getDate() &&
              eventDate.getMonth() === day.getMonth() &&
              eventDate.getFullYear() === day.getFullYear();

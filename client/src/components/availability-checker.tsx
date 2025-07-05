@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Calendar, ChevronLeft, ChevronRight, Clock, X, AlertTriangle } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Clock, X, AlertTriangle, User } from "lucide-react";
 
 // Helper function to format time from 24-hour to 12-hour format
 const formatTime = (time24: string): string => {

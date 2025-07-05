@@ -248,11 +248,10 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       return;
     }
 
-    // Fix timezone issue by creating date in local timezone
-    const localDate = new Date(newBooking.date + 'T00:00:00');
+    // Use the date string directly to avoid timezone conversion issues
     const eventData = {
       title: newBooking.title,
-      date: localDate.toISOString().split('T')[0], // Ensure YYYY-MM-DD format
+      date: newBooking.date, // Keep as YYYY-MM-DD format
       startTime: newBooking.startTime,
       endTime: newBooking.endTime,
       type: newBooking.type,
@@ -365,23 +364,25 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
   };
 
   const getDayEvents = (day: number) => {
-    const date = new Date(currentYear, currentMonth, day);
+    const targetDate = new Date(currentYear, currentMonth, day);
+    const targetDateString = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+    
     return calendarEvents.filter(event => {
+      // Convert event date to local date string to avoid timezone issues
       const eventDate = new Date(event.date);
-      // Compare year, month, and day directly to avoid timezone issues
-      return eventDate.getFullYear() === currentYear &&
-             eventDate.getMonth() === currentMonth &&
-             eventDate.getDate() === day;
+      const eventDateString = new Date(eventDate.getTime() + eventDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      return eventDateString === targetDateString;
     });
   };
 
   const getSelectedDateEvents = () => {
     if (!selectedDate) return [];
+    const targetDateString = selectedDate.toISOString().split('T')[0];
+    
     return calendarEvents.filter(event => {
       const eventDate = new Date(event.date);
-      return eventDate.getFullYear() === selectedDate.getFullYear() &&
-             eventDate.getMonth() === selectedDate.getMonth() &&
-             eventDate.getDate() === selectedDate.getDate();
+      const eventDateString = new Date(eventDate.getTime() + eventDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      return eventDateString === targetDateString;
     });
   };
 

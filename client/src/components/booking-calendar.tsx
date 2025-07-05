@@ -70,7 +70,6 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
   const [showRequestDialog, setShowRequestDialog] = useState(false);
   const [editingBooking, setEditingBooking] = useState<CalendarEvent | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<BookingRequest | null>(null);
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [newBooking, setNewBooking] = useState({
     title: '',
     date: '',
@@ -188,7 +187,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
   });
 
   // Memoize calendar events to prevent infinite re-renders
-  const memoizedCalendarEvents = useMemo(() => {
+  const calendarEvents = useMemo(() => {
     // Convert booking requests to calendar events
     const eventsFromRequests: CalendarEvent[] = bookingRequests
       .filter(request => request.eventDate)
@@ -220,10 +219,6 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     
     return uniqueEvents;
   }, [bookingRequests, storedEvents, profileType]);
-
-  useEffect(() => {
-    setCalendarEvents(memoizedCalendarEvents);
-  }, [memoizedCalendarEvents]);
 
   const resetForm = () => {
     setNewBooking({

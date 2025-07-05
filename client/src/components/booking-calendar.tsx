@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Calendar, Plus, ChevronLeft, ChevronRight, Clock, MapPin, User, Edit, Trash2, CheckCircle, XCircle, DollarSign } from "lucide-react";
+import { Calendar, Plus, ChevronLeft, ChevronRight, Clock, MapPin, User, Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
 
 interface Booking {
   id: string;
@@ -55,7 +55,6 @@ interface CalendarEvent extends Omit<Booking, 'date'> {
   artistProfileId?: number;
   venueProfileId?: number;
   isRequest?: boolean;
-  budget?: number;
 }
 
 interface BookingCalendarProps {
@@ -207,7 +206,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
         artistProfileId: request.artistProfileId,
         venueProfileId: request.venueProfileId,
         isRequest: true,
-        budget: request.budget ? parseFloat(request.budget) : undefined
+        
       }));
 
     // Combine with stored events and ensure no duplicates
@@ -746,12 +745,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                                   <span>{event.location}</span>
                                 </div>
                               )}
-                              {event.budget && (
-                                <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
-                                  <DollarSign className="w-4 h-4" />
-                                  <span>${event.budget}</span>
-                                </div>
-                              )}
+                              
                               {event.notes && (
                                 <p className="mt-2 text-sm text-gray-600">{event.notes}</p>
                               )}

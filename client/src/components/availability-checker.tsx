@@ -73,19 +73,17 @@ export default function AvailabilityChecker({
     enabled: open,
   });
 
-  // Fetch calendar events for both artist and venue profiles
-  const { data: artistCalendarEvents = [] } = useQuery<CalendarEvent[]>({
-    queryKey: ["/api/calendar-events", { profileId: artistProfileId }],
-    enabled: open,
+  // Fetch calendar events from the actual API for both profiles
+  const { data: calendarEvents = [] } = useQuery<CalendarEvent[]>({
+    queryKey: ["/api/calendar-events", artistProfileId, venueProfileId],
+    queryFn: async () => {
+      const profileIds = [artistProfileId, venueProfileId].filter(id => id).join(',');
+      const response = await fetch(`/api/calendar-events?profileIds=${profileIds}`);
+      if (!response.ok) throw new Error("Failed to fetch calendar events");
+      return response.json();
+    },
+    enabled: !!artistProfileId && !!venueProfileId,
   });
-
-  const { data: venueCalendarEvents = [] } = useQuery<CalendarEvent[]>({
-    queryKey: ["/api/calendar-events", { profileId: venueProfileId }],
-    enabled: open,
-  });
-
-  // Combine calendar events from both profiles
-  const calendarEvents = [...artistCalendarEvents, ...venueCalendarEvents];
 
   useEffect(() => {
     if (!open) return;

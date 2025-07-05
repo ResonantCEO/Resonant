@@ -1893,9 +1893,29 @@ export class Storage {
         .where(eq(calendarEvents.profileId, profileId))
         .orderBy(calendarEvents.date);
 
+      console.log(`Calendar events for profile ${profileId}:`, events);
       return events;
     } catch (error) {
       console.error("Error fetching calendar events:", error);
+      throw new Error("Failed to fetch calendar events");
+    }
+  }
+
+  // Get calendar events for multiple profiles (for availability checking)
+  async getCalendarEventsForProfiles(profileIds: number[]) {
+    try {
+      if (profileIds.length === 0) return [];
+      
+      const events = await db
+        .select()
+        .from(calendarEvents)
+        .where(inArray(calendarEvents.profileId, profileIds))
+        .orderBy(calendarEvents.date);
+
+      console.log(`Calendar events for profiles ${profileIds}:`, events);
+      return events;
+    } catch (error) {
+      console.error("Error fetching calendar events for profiles:", error);
       throw new Error("Failed to fetch calendar events");
     }
   }

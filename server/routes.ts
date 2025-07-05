@@ -2478,8 +2478,18 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      const events = await storage.getCalendarEvents(activeProfile.id);
-      res.json(events);
+      // Check if profileIds query param is provided for multi-profile fetching
+      const profileIdsParam = req.query.profileIds as string;
+      
+      if (profileIdsParam) {
+        const profileIds = profileIdsParam.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+        console.log('Fetching events for multiple profiles:', profileIds);
+        const events = await storage.getCalendarEventsForProfiles(profileIds);
+        res.json(events);
+      } else {
+        const events = await storage.getCalendarEvents(activeProfile.id);
+        res.json(events);
+      }
     } catch (error) {
       console.error("Error fetching calendar events:", error);
       res.status(500).json({ message: "Failed to fetch calendar events" });

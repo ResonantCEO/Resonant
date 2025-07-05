@@ -368,11 +368,10 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     const date = new Date(currentYear, currentMonth, day);
     return calendarEvents.filter(event => {
       const eventDate = new Date(event.date);
-      // Ensure we're comparing the exact same date, accounting for timezone issues
-      const eventDateLocal = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
-      const targetDateLocal = new Date(currentYear, currentMonth, day);
-      
-      return eventDateLocal.getTime() === targetDateLocal.getTime();
+      // Compare year, month, and day directly to avoid timezone issues
+      return eventDate.getFullYear() === currentYear &&
+             eventDate.getMonth() === currentMonth &&
+             eventDate.getDate() === day;
     });
   };
 
@@ -380,9 +379,9 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     if (!selectedDate) return [];
     return calendarEvents.filter(event => {
       const eventDate = new Date(event.date);
-      return eventDate.getDate() === selectedDate.getDate() &&
+      return eventDate.getFullYear() === selectedDate.getFullYear() &&
              eventDate.getMonth() === selectedDate.getMonth() &&
-             eventDate.getFullYear() === selectedDate.getFullYear();
+             eventDate.getDate() === selectedDate.getDate();
     });
   };
 

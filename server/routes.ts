@@ -2542,12 +2542,20 @@ export function registerRoutes(app: Express): Server {
 
   app.delete('/api/calendar-events/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const eventId = parseInt(req.params.id);
+      const eventIdParam = req.params.id;
       const activeProfile = await storage.getActiveProfile(req.user.id);
       if (!activeProfile) {
         return res.status(400).json({ message: "No active profile" });
       }
 
+      // Handle mock events (IDs starting with "mock-" or containing non-numeric characters)
+      if (eventIdParam.includes('mock-') || isNaN(parseInt(eventIdParam))) {
+        // For mock events, just return success since they're not stored in the database
+        console.log(`Simulating deletion of mock event: ${eventIdParam}`);
+        return res.json({ success: true });
+      }
+
+      const eventId = parseInt(eventIdParam);
       await storage.deleteCalendarEvent(eventId, activeProfile.id);
       res.json({ success: true });
     } catch (error) {

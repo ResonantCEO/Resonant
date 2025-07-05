@@ -363,9 +363,8 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     return days;
   };
 
-  const getDayEvents = (day: number) => {
-    const targetDate = new Date(currentYear, currentMonth, day);
-    const targetDateString = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+  const getDayEvents = (dayDate: Date) => {
+    const targetDateString = dayDate.toISOString().split('T')[0]; // YYYY-MM-DD format
     
     return calendarEvents.filter(event => {
       // Convert event date to local date string to avoid timezone issues
@@ -594,7 +593,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                 </div>
               ))}
               {days.map((day, index) => {
-                const dayEvents = getDayEvents(day.getDate());
+                const dayEvents = getDayEvents(day);
                 const isToday = day.toDateString() === new Date().toDateString();
                 const isSelected = selectedDate?.toDateString() === day.toDateString();
                 const isUnavailable = isDateUnavailable(day);

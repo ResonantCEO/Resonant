@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -187,7 +187,8 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     },
   });
 
-  useEffect(() => {
+  // Memoize calendar events to prevent infinite re-renders
+  const memoizedCalendarEvents = useMemo(() => {
     // Convert booking requests to calendar events
     const eventsFromRequests: CalendarEvent[] = bookingRequests
       .filter(request => request.eventDate)
@@ -217,8 +218,12 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       index === self.findIndex(e => e.id === event.id)
     );
     
-    setCalendarEvents(uniqueEvents);
+    return uniqueEvents;
   }, [bookingRequests, storedEvents, profileType]);
+
+  useEffect(() => {
+    setCalendarEvents(memoizedCalendarEvents);
+  }, [memoizedCalendarEvents]);
 
   const resetForm = () => {
     setNewBooking({

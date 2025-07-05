@@ -77,7 +77,6 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     type: 'booking' as const,
     status: 'confirmed' as const,
     client: '',
-    location: '',
     notes: ''
   });
 
@@ -98,15 +97,15 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     queryKey: ["/api/calendar-events"],
     queryFn: async () => {
       if (!activeProfile) return [];
-      
+
       const response = await fetch("/api/calendar-events", {
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch calendar events");
       }
-      
+
       return response.json();
     },
   });
@@ -206,7 +205,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
         artistProfileId: request.artistProfileId,
         venueProfileId: request.venueProfileId,
         isRequest: true,
-        
+
       }));
 
     // Combine with stored events and ensure no duplicates
@@ -214,7 +213,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     const uniqueEvents = combinedEvents.filter((event, index, self) => 
       index === self.findIndex(e => e.id === event.id)
     );
-    
+
     return uniqueEvents;
   }, [bookingRequests, storedEvents, profileType]);
 
@@ -227,7 +226,6 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       type: 'booking',
       status: 'confirmed',
       client: '',
-      location: '',
       notes: ''
     });
     setEditingBooking(null);
@@ -251,7 +249,6 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       type: newBooking.type,
       status: newBooking.status,
       client: newBooking.client,
-      location: newBooking.location,
       notes: newBooking.notes
     };
 
@@ -302,7 +299,6 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       type: event.type,
       status: event.status,
       client: event.client || '',
-      location: event.location || '',
       notes: event.notes || ''
     });
     setShowBookingDialog(true);
@@ -534,15 +530,6 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        value={newBooking.location}
-                        onChange={(e) => setNewBooking({...newBooking, location: e.target.value})}
-                        placeholder={profileType === 'artist' ? 'Studio, venue address' : 'Room, stage area'}
-                      />
-                    </div>
-                    <div>
                       <Label htmlFor="notes">Notes</Label>
                       <Textarea
                         id="notes"
@@ -583,7 +570,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
               </div>
             </div>
 
-            
+
 
             {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-1">
@@ -655,7 +642,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                           {event.title}
                         </div>
                       ))}
-                      
+
                       {/* Show event type indicators for remaining events */}
                       {dayEvents.length > 2 && (
                         <div className="flex flex-wrap gap-1 mt-1">
@@ -745,7 +732,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                                   <span>{event.location}</span>
                                 </div>
                               )}
-                              
+
                               {event.notes && (
                                 <p className="mt-2 text-sm text-gray-600">{event.notes}</p>
                               )}

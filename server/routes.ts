@@ -2503,35 +2503,68 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
+      console.log('Calendar event request body:', req.body);
+
       const { title, date, startTime, endTime, type, status, client, location, notes, budget, isPrivate } = req.body;
 
       // Validate required fields
-      if (!title || !date || !startTime) {
-        return res.status(400).json({ message: "Title, date, and start time are required" });
+      if (!title || !title.trim()) {
+        return res.status(400).json({ message: "Title is required" });
+      }
+
+      if (!date) {
+        return res.status(400).json({ message: "Date is required" });
+      }
+
+      if (!startTime) {
+        return res.status(400).json({ message: "Start time is required" });
+      }
+
+      // Clean and validate the data
+      const cleanTitle = title.trim();
+      const cleanType = type || 'event';
+      const cleanStatus = status || 'confirmed';
+      const cleanClient = client && client.trim() ? client.trim() : null;
+      const cleanLocation = location && location.trim() ? location.trim() : null;
+      const cleanNotes = notes && notes.trim() ? notes.trim() : null;
+      
+      // Parse budget carefully
+      let parsedBudget = null;
+      if (budget !== undefined && budget !== null && budget !== '') {
+        const budgetNum = parseFloat(budget);
+        if (!isNaN(budgetNum)) {
+          parsedBudget = budgetNum;
+        }
       }
 
       const eventData = {
         profileId: activeProfile.id,
-        title,
+        title: cleanTitle,
         date: new Date(date),
         startTime,
         endTime: endTime || null,
-        type: type || 'event',
-        status: status || 'confirmed',
-        client: client || null,
-        location: location || null,
-        notes: notes || null,
-        budget: budget ? parseFloat(budget) : null,
-        isPrivate: isPrivate || false
+        type: cleanType,
+        status: cleanStatus,
+        client: cleanClient,
+        location: cleanLocation,
+        notes: cleanNotes,
+        budget: parsedBudget,
+        isPrivate: Boolean(isPrivate)
       };
 
-      console.log('Creating calendar event with data:', eventData);
+      console.log('Creating calendar event with cleaned data:', eventData);
 
       const event = await storage.createCalendarEvent(eventData);
+      console.log('Calendar event created successfully:', event);
+      
       res.json(event);
     } catch (error) {
       console.error("Error creating calendar event:", error);
-      res.status(500).json({ message: "Failed to create calendar event" });
+      console.error("Error stack:", error.stack);
+      res.status(500).json({ 
+        message: "Failed to create calendar event",
+        error: error.message 
+      });
     }
   });
 

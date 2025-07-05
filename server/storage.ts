@@ -1922,18 +1922,53 @@ export class Storage {
 
   async createCalendarEvent(eventData: Omit<InsertCalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) {
     try {
+      console.log('Storage: Creating calendar event with data:', eventData);
+      
+      // Validate the data before insertion
+      if (!eventData.profileId) {
+        throw new Error("Profile ID is required");
+      }
+      
+      if (!eventData.title || !eventData.title.trim()) {
+        throw new Error("Title is required");
+      }
+      
+      if (!eventData.date) {
+        throw new Error("Date is required");
+      }
+      
+      if (!eventData.startTime) {
+        throw new Error("Start time is required");
+      }
+
+      // Ensure date is a proper Date object
+      const eventDate = eventData.date instanceof Date ? eventData.date : new Date(eventData.date);
+      if (isNaN(eventDate.getTime())) {
+        throw new Error("Invalid date provided");
+      }
+
+      const cleanEventData = {
+        ...eventData,
+        date: eventDate,
+        title: eventData.title.trim(),
+        type: eventData.type || 'event',
+        status: eventData.status || 'confirmed',
+        isPrivate: Boolean(eventData.isPrivate)
+      };
+
+      console.log('Storage: Inserting cleaned calendar event data:', cleanEventData);
+
       const [event] = await db
         .insert(calendarEvents)
-        .values({
-          ...eventData,
-          date: new Date(eventData.date),
-        })
+        .values(cleanEventData)
         .returning();
 
+      console.log('Storage: Calendar event created successfully:', event);
       return event;
     } catch (error) {
-      console.error("Error creating calendar event:", error);
-      throw new Error("Failed to create calendar event");
+      console.error("Storage: Error creating calendar event:", error);
+      console.error("Storage: Error details:", error.message);
+      throw new Error(`Failed to create calendar event: ${error.message}`);
     }
   }
 

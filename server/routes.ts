@@ -2478,8 +2478,8 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      // For now, return empty array - you can implement actual calendar events storage
-      res.json([]);
+      const events = await storage.getCalendarEvents(activeProfile.id);
+      res.json(events);
     } catch (error) {
       console.error("Error fetching calendar events:", error);
       res.status(500).json({ message: "Failed to fetch calendar events" });
@@ -2493,17 +2493,56 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      // For now, just return the posted event with an ID
-      const event = {
-        id: Date.now().toString(),
+      const eventData = {
         ...req.body,
         profileId: activeProfile.id
       };
 
+      const event = await storage.createCalendarEvent(eventData);
       res.json(event);
     } catch (error) {
       console.error("Error creating calendar event:", error);
       res.status(500).json({ message: "Failed to create calendar event" });
+    }
+  });
+
+  app.put('/api/calendar-events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Verify event belongs to active profile
+      const existingEvents = await storage.getCalendarEvents(activeProfile.id);
+      const eventExists = existingEvents.find(e => e.id === eventId);
+      
+      if (!eventExists) {
+        return res.status(404).json({ message: "Event not found or unauthorized" });
+      }
+
+      const event = await storage.updateCalendarEvent(eventId, req.body);
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating calendar event:", error);
+      res.status(500).json({ message: "Failed to update calendar event" });
+    }
+  });
+
+  app.delete('/api/calendar-events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      await storage.deleteCalendarEvent(eventId, activeProfile.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting calendar event:", error);
+      res.status(500).json({ message: "Failed to delete calendar event" });
     }
   });
 

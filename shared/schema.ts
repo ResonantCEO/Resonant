@@ -1018,6 +1018,33 @@ export const ticketsUpdatedRelations = relations(ticketsUpdated, ({ one, many })
   returns: many(ticketReturns),
 }));
 
+// Calendar events table for booking calendar
+export const calendarEvents = pgTable("calendar_events", {
+  id: serial("id").primaryKey(),
+  profileId: integer("profile_id").notNull().references(() => profiles.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  date: timestamp("date").notNull(),
+  startTime: varchar("start_time").notNull(),
+  endTime: varchar("end_time"),
+  type: varchar("type").notNull(), // 'booking', 'event', 'rehearsal', 'meeting', 'unavailable'
+  status: varchar("status").notNull().default("confirmed"), // 'confirmed', 'pending', 'cancelled'
+  client: varchar("client"),
+  location: varchar("location"),
+  notes: text("notes"),
+  budget: real("budget"),
+  isPrivate: boolean("is_private").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations for calendar events
+export const calendarEventsRelations = relations(calendarEvents, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [calendarEvents.profileId],
+    references: [profiles.id],
+  }),
+}));
+
 // Type exports
 export type Event = InferSelectModel<typeof events>;
 export type InsertEvent = InferInsertModel<typeof events>;
@@ -1031,6 +1058,8 @@ export type TicketTransfer = InferSelectModel<typeof ticketTransfers>;
 export type InsertTicketTransfer = InferInsertModel<typeof ticketTransfers>;
 export type TicketReturn = InferSelectModel<typeof ticketReturns>;
 export type InsertTicketReturn = InferInsertModel<typeof ticketReturns>;
+export type CalendarEvent = InferSelectModel<typeof calendarEvents>;
+export type InsertCalendarEvent = InferInsertModel<typeof calendarEvents>;
 
 export type Conversation = InferSelectModel<typeof conversations>;
 export type InsertConversation = InferInsertModel<typeof conversations>;

@@ -1,26 +1,30 @@
 import { db } from "./db";
-import { 
-  users, 
-  profiles, 
-  posts, 
-  postLikes, 
-  comments, 
-  friendships, 
-  notifications,
-  profileMemberships,
-  profileInvitations,
-  albums,
-  photos,
-  photoComments,
-  bookingRequests,
-  conversations,
-  conversationParticipants,
-  messages,
-  messageReads,
-  profileViews
-} from "@shared/schema";
-import { eq, and, or, sql, desc, asc, not, isNull, inArray, ne, lt, ilike, gt, isNotNull } from "drizzle-orm";
+import { eq, and, sql, desc, asc, or, like, ilike, gte, lt, ne, inArray, exists, notExists } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import { users, profiles, posts, postLikes, comments, friendships, insertProfileSchema, profileMemberships, profileInvitations, notifications, albums, photos, photoComments, bookingRequests, conversations, conversationParticipants, messages, messageReads, profileBlocks, profileReports, tickets, ticketTransfers, ticketReturns, contractProposals, contractNegotiations, contractSignatures, profileViews, calendarEvents } from "@shared/schema";
+import type { 
+  InsertUser, 
+  InsertProfile, 
+  InsertPost, 
+  InsertComment, 
+  InsertFriendship, 
+  InsertProfileMembership, 
+  InsertProfileInvitation,
+  InsertNotification,
+  InsertPhoto,
+  InsertPhotoComment,
+  InsertBookingRequest,
+  InsertConversation,
+  InsertMessage,
+  InsertConversationParticipant,
+  InsertProfileBlock,
+  ProfileRole,
+  ProfilePermission,
+  InsertTicket,
+  InsertTicketTransfer,
+  InsertTicketReturn,
+  InsertCalendarEvent
+} from "@shared/schema";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { lookupZipcode, formatCityState } from "./zipcode-lookup";
@@ -1866,395 +1870,88 @@ export class Storage {
     }
   }
 
-  async reportProfile(reporterId: number, reportedProfileId: number, reason: string) {
-    // Implementation for reporting profiles would go here
-    // For now, just log the report
-    console.log(`Profile ${reportedProfileId} reported by ${reporterId} for: ${reason}`);
-  }
-
-  async trackProfileView(viewerId: number, viewerProfileId: number, viewedProfileId: number, sessionId?: string, ipAddress?: string, userAgent?: string) {
-    // Don't track self-views
-    if (viewerProfileId === viewedProfileId) {
-      return;
-    }
-
-    // Check if this user has viewed this profile in the last hour to avoid spam
-    const recentView = await db
-      .select()
-      .from(profileViews)
-      .where(and(
-        eq(profileViews.viewerId, viewerId),
-        eq(profileViews.viewerProfileId, viewerProfileId),
-        eq(profileViews.viewedProfileId, viewedProfileId),
-        sql`${profileViews.viewedAt} > NOW() - INTERVAL '1 hour'`
-      ))
-      .limit(1);
-
-    if (recentView.length === 0) {
-      await db.insert(profileViews).values({
-        viewerId,
-        viewerProfileId,
-        viewedProfileId,
-        sessionId,
-        ipAddress,
-        userAgent,
-        viewedAt: new Date()
+  async reportProfile(reporterProfileId: number, reportedProfileId: number, reason: string) {
+    try {
+      await db.insert(profileReports).values({
+        reporterProfileId,
+        reportedProfileId,
+        reason,
+        status: 'pending'
       });
+    } catch (error) {
+      console.error("Error reporting profile:", error);
+      throw new Error("Failed to report profile");
     }
   }
 
-  async getMostViewedArtistProfile(viewerId: number, viewerProfileId: number) {
-    // Get the most viewed artist profile in the last 30 days
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const mostViewed = await db
-      .select({
-        profileId: profileViews.viewedProfileId,
-        viewCount: sql<number>`COUNT(*)`,
-        profile: {
-          id: profiles.id,
-          name: profiles.name,
-          profileImageUrl: profiles.profileImageUrl,
-          bio: profiles.bio,
-          location: profiles.location,
-          type: profiles.type,
-          genre: profiles.genre
-        }
-      })
-      .from(profileViews)
-      .innerJoin(profiles, eq(profileViews.viewedProfileId, profiles.id))
-      .where(and(
-        eq(profileViews.viewerId, viewerId),
-        eq(profileViews.viewerProfileId, viewerProfileId),
-        eq(profiles.type, 'artist'),
-        sql`${profileViews.viewedAt} >= ${thirtyDaysAgo}`
-      ))
-      .groupBy(profileViews.viewedProfileId, profiles.id, profiles.name, profiles.profileImageUrl, profiles.bio, profiles.location, profiles.type, profiles.genre)
-      .orderBy(sql`COUNT(*) DESC`)
-      .limit(1);
-
-    return mostViewed[0] || null;
-  }
-
-  async getProfilePhotos(profileId: number) {
-    const result = await db
-      .select()
-      .from(photos)
-      .where(eq(photos.profileId, profileId))
-      .orderBy(desc(photos.createdAt));
-
-    // Get tagged friends data for each photo
-    const photosWithTaggedFriends = await Promise.all(result.map(async (photo) => {
-      if (photo.friendTags && photo.friendTags.length > 0) {
-        const taggedFriends = await db
-          .select({
-            id: profiles.id,
-            name: profiles.name,
-            profileImageUrl: profiles.profileImageUrl,
-          })
-          .from(profiles)
-          .where(inArray(profiles.id, photo.friendTags));
-
-        return {
-          ...photo,
-          taggedFriends,
-        };
-      }
-      return {
-        ...photo,
-        taggedFriends: [],
-      };
-    }));
-
-    return photosWithTaggedFriends;
-  }
-
-  async createProfilePhotos(photosData: Array<{ profileId: number; albumId?: number | null; imageUrl: string; caption?: string; tags?: string[]; friendTags?: number[] }>) {
-    const [insertedPhotos] = await Promise.all([
-      db.insert(photos).values(photosData.map(data => ({
-        profileId: data.profileId,
-        albumId: data.albumId,
-        imageUrl: data.imageUrl,
-        caption: data.caption,
-        tags: data.tags || [],
-        friendTags: data.friendTags || [],
-      }))).returning()
-    ]);
-
-    return insertedPhotos;
-  }
-
-  async getPhoto(photoId: number): Promise<Photo | null> {
+  // Calendar Events methods
+  async getCalendarEvents(profileId: number) {
     try {
-      const result = await db
+      const events = await db
         .select()
-        .from(photos)
-        .where(eq(photos.id, photoId))
-        .limit(1);
+        .from(calendarEvents)
+        .where(eq(calendarEvents.profileId, profileId))
+        .orderBy(calendarEvents.date);
 
-      return result[0] || null;
+      return events;
     } catch (error) {
-      console.error("Error fetching photo:", error);
-      throw error;
+      console.error("Error fetching calendar events:", error);
+      throw new Error("Failed to fetch calendar events");
     }
   }
 
-  async updatePhoto(photoId: number, updates: { caption?: string; friendTags?: number[] }) {
-    const [updatedPhoto] = await db
-      .update(photos)
-      .set(updates)
-      .where(eq(photos.id, photoId))
-      .returning();
-
-    return updatedPhoto;
-  }
-
-  async deletePhoto(photoId: number): Promise<void> {
+  async createCalendarEvent(eventData: Omit<InsertCalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) {
     try {
-      await db
-        .delete(photos)
-        .where(eq(photos.id, photoId));
-    } catch (error) {
-      console.error("Error deleting photo:", error);
-      throw error;
-    }
-  }
-
-  // Album methods
-  async getProfileAlbums(profileId: number): Promise<Album[]> {
-    try {
-      const result = await db
-        .select()
-        .from(albums)
-        .where(eq(albums.profileId, profileId))
-        .orderBy(desc(albums.createdAt));
-
-      return result;
-    } catch (error) {
-      console.error("Error fetching profile albums:", error);
-      throw error;
-    }
-  }
-
-  async createAlbum(albumData: Omit<Album, 'id' | 'createdAt' | 'updatedAt'>): Promise<Album> {
-    try {
-      const result = await db
-        .insert(albums)
-        .values(albumData)
-        .returning();
-
-      return result[0];
-    } catch (error) {
-      console.error("Error creating album:", error);
-      throw error;
-    }
-  }
-
-  async getAlbum(albumId: number): Promise<Album | null> {
-    try {
-      const result = await db
-        .select()
-        .from(albums)
-        .where(eq(albums.id, albumId))
-        .limit(1);
-
-      return result[0] || null;
-    } catch (error) {
-      console.error("Error fetching album:", error);
-      throw error;
-    }
-  }
-
-  async updateAlbum(albumId: number, updates: Partial<Omit<Album, 'id' | 'profileId' | 'createdAt'>>): Promise<Album> {
-    try {
-      const result = await db
-        .update(albums)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(albums.id, albumId))
-        .returning();
-
-      return result[0];
-    } catch (error) {
-      console.error("Error updating album:", error);
-      throw error;
-    }
-  }
-
-  async deleteAlbum(albumId: number) {
-    return await db.delete(albums).where(eq(albums.id, albumId));
-  }
-
-  // Photo comment methods
-  async getPhotoComments(photoId: number) {
-    // Build the comments tree
-    const buildCommentsTree = (comments: any[], parentId: number | null = null): any[] => {
-      return comments
-        .filter(comment => comment.parentId === parentId)
-        .map(comment => ({
-          ...comment,
-          replies: buildCommentsTree(comments, comment.id)
-        }));
-    };
-
-    const commentsData = await db
-      .select({
-        id: photoComments.id,
-        content: photoComments.content,
-        friendTags: photoComments.friendTags,
-        createdAt: photoComments.createdAt,
-        updatedAt: photoComments.updatedAt,
-        parentId: photoComments.parentId,
-        profile: {
-          id: profiles.id,
-          name: profiles.name,
-          profileImageUrl: profiles.profileImageUrl,
-        },
-      })
-      .from(photoComments)
-      .innerJoin(profiles, eq(photoComments.profileId, profiles.id))
-      .where(eq(photoComments.photoId, photoId))
-      .orderBy(photoComments.createdAt);
-
-    // Get tagged friends data for each comment
-    const commentsWithTaggedFriends = await Promise.all(commentsData.map(async (comment) => {
-      if (comment.friendTags && comment.friendTags.length > 0) {
-        const taggedFriends = await db
-          .select({
-            id: profiles.id,
-            name: profiles.name,
-            profileImageUrl: profiles.profileImageUrl,
-          })
-          .from(profiles)
-          .where(inArray(profiles.id, comment.friendTags));
-
-        return {
-          ...comment,
-          taggedFriends,
-        };
-      }
-      return {
-        ...comment,
-        taggedFriends: [],
-      };
-    }));
-
-    return buildCommentsTree(commentsWithTaggedFriends);
-  }
-
-  async createPhotoComment(commentData: { photoId: number; profileId: number; content: string; parentId?: number; friendTags?: number[] }) {
-    return await db.transaction(async (tx) => {
-      // Create the comment
-      const [comment] = await tx
-        .insert(photoComments)
+      const [event] = await db
+        .insert(calendarEvents)
         .values({
-          ...commentData,
-          friendTags: commentData.friendTags || [],
+          ...eventData,
+          date: new Date(eventData.date),
         })
         .returning();
 
-      // Update parent comment replies count if this is a reply
-      if (commentData.parentId) {
-        await tx
-          .update(photoComments)
-          .set({
-            repliesCount: sql`${photoComments.repliesCount} + 1`
-          })
-          .where(eq(photoComments.id, commentData.parentId));
+      return event;
+    } catch (error) {
+      console.error("Error creating calendar event:", error);
+      throw new Error("Failed to create calendar event");
+    }
+  }
+
+  async updateCalendarEvent(eventId: number, updates: Partial<Omit<InsertCalendarEvent, 'id' | 'profileId' | 'createdAt'>>) {
+    try {
+      const updateData = {
+        ...updates,
+        updatedAt: new Date(),
+      };
+
+      if (updates.date) {
+        updateData.date = new Date(updates.date);
       }
 
-      // Update photo comments count
-      await tx
-        .update(photos)
-        .set({
-          commentsCount: sql`${photos.commentsCount} + 1`
-        })
-        .where(eq(photos.id, commentData.photoId));
+      const [event] = await db
+        .update(calendarEvents)
+        .set(updateData)
+        .where(eq(calendarEvents.id, eventId))
+        .returning();
 
-      // Return comment with profile data
-      const result = await tx
-        .select({
-          id: photoComments.id,
-          content: photoComments.content,
-          friendTags: photoComments.friendTags,
-          createdAt: photoComments.createdAt,
-          updatedAt: photoComments.updatedAt,
-          parentId: photoComments.parentId,
-          profile: {
-            id: profiles.id,
-            name: profiles.name,
-            profileImageUrl: profiles.profileImageUrl,
-          },
-        })
-        .from(photoComments)
-        .innerJoin(profiles, eq(photoComments.profileId, profiles.id))
-        .where(eq(photoComments.id, comment.id));
-
-      return result[0];
-    });
-  }
-
-  async deletePhotoComment(commentId: number, profileId: number) {
-    // Get the comment to find the photo ID
-    const [comment] = await db
-      .select()
-      .from(photoComments)
-      .where(and(eq(photoComments.id, commentId), eq(photoComments.profileId, profileId)));
-
-    if (!comment) {
-      throw new Error("Comment not found or unauthorized");
-    }
-
-    // Delete the comment
-    await db.delete(photoComments).where(eq(photoComments.id, commentId));
-
-    // Update comments count
-    await db
-      .update(photos)
-      .set({ 
-        commentsCount: sql`${photos.commentsCount} - 1` 
-      })
-      .where(eq(photos.id, comment.photoId));
-
-    return true;
-  }
-
-  async getAlbumPhotos(albumId: number): Promise<Photo[]> {
-    try {
-      const result = await db
-        .select()
-        .from(photos)
-        .where(eq(photos.albumId, albumId))
-        .orderBy(desc(photos.createdAt));
-
-      return result;
+      return event;
     } catch (error) {
-      console.error("Error fetching album photos:", error);
-      throw error;
+      console.error("Error updating calendar event:", error);
+      throw new Error("Failed to update calendar event");
     }
   }
 
-  async addPhotosToAlbum(photoIds: number[], albumId: number): Promise<void> {
+  async deleteCalendarEvent(eventId: number, profileId: number) {
     try {
       await db
-        .update(photos)
-        .set({ albumId })
-        .where(inArray(photos.id, photoIds));
+        .delete(calendarEvents)
+        .where(and(
+          eq(calendarEvents.id, eventId),
+          eq(calendarEvents.profileId, profileId)
+        ));
     } catch (error) {
-      console.error("Error adding photos to album:", error);
-      throw error;
-    }
-  }
-
-  async removePhotosFromAlbum(photoIds: number[]): Promise<void> {
-    try {
-      await db
-        .update(photos)
-        .set({ albumId: null })
-        .where(inArray(photos.id, photoIds));
-    } catch (error) {
-      console.error("Error removing photos from album:", error);
-      throw error;
+      console.error("Error deleting calendar event:", error);
+      throw new Error("Failed to delete calendar event");
     }
   }
 }

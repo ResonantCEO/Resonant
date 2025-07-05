@@ -175,6 +175,50 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     },
   });
 
+  // Calendar event mutations
+  const createEventMutation = useMutation({
+    mutationFn: async (eventData: any) => {
+      const response = await fetch("/api/calendar-events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventData),
+      });
+      if (!response.ok) throw new Error("Failed to create event");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/calendar-events"] });
+    },
+  });
+
+  const updateEventMutation = useMutation({
+    mutationFn: async ({ id, ...eventData }: any) => {
+      const response = await fetch(`/api/calendar-events/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventData),
+      });
+      if (!response.ok) throw new Error("Failed to update event");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/calendar-events"] });
+    },
+  });
+
+  const deleteEventMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      const response = await fetch(`/api/calendar-events/${eventId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete event");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/calendar-events"] });
+    },
+  });
+
   // Update booking request mutation
   const updateBookingRequestMutation = useMutation({
     mutationFn: async ({ requestId, status }: { requestId: number; status: 'accepted' | 'rejected' }) => {
@@ -253,7 +297,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     setEditingBooking(null);
   };
 
-  const handleSaveBooking = () => {
+  const handleSaveBooking = async () => {
     if (!newBooking.title || !newBooking.date) {
       toast({
         title: "Error",
@@ -263,10 +307,9 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       return;
     }
 
-    const event: CalendarEvent = {
-      id: editingBooking?.id || Date.now().toString(),
+    const eventData = {
       title: newBooking.title,
-      date: new Date(newBooking.date),
+      date: newBooking.date,
       startTime: newBooking.startTime,
       endTime: newBooking.endTime,
       type: newBooking.type,
@@ -274,37 +317,34 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       client: newBooking.client,
       location: newBooking.location,
       notes: newBooking.notes,
-      budget: newBooking.budget ? parseFloat(newBooking.budget) : undefined
+      budget: newBooking.budget ? parseFloat(newBooking.budget) : null
     };
 
-    if (editingBooking) {
-      setCalendarEvents(prev => prev.map(e => e.id === event.id ? event : e));
+    try {
+      if (editingBooking) {
+        await updateEventMutation.mutateAsync({ id: editingBooking.id, ...eventData });
+        toast({
+          title: "Success",
+          description: "Event updated successfully",
+        });
+      } else {
+        await createEventMutation.mutateAsync(eventData);
+        toast({
+          title: "Success",
+          description: "Event created successfully",
+        });
+      }
+
+      setShowBookingDialog(false);
+      setEditingBooking(null);
+      resetForm();
+    } catch (error) {
       toast({
-        title: "Success",
-        description: "Event updated successfully",
-      });
-    } else {
-      setCalendarEvents(prev => [...prev, event]);
-      toast({
-        title: "Success",
-        description: "Event created successfully",
+        title: "Error",
+        description: "Failed to save event",
+        variant: "destructive",
       });
     }
-
-    setShowBookingDialog(false);
-    setEditingBooking(null);
-    setNewBooking({
-      title: '',
-      date: '',
-      startTime: '',
-      endTime: '',
-      type: 'booking',
-      status: 'confirmed',
-      client: '',
-      location: '',
-      notes: '',
-      budget: ''
-    });
   };
 
   const handleEditEvent = (event: CalendarEvent) => {
@@ -334,7 +374,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     setShowBookingDialog(true);
   };
 
-  const handleDeleteEvent = (eventId: string) => {
+  const handleDeleteEvent = async (eventId: string) => {
     const event = calendarEvents.find(e => e.id === eventId);
     if (event?.isRequest) {
       toast({
@@ -345,11 +385,19 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       return;
     }
 
-    setCalendarEvents(prev => prev.filter(e => e.id !== eventId));
-    toast({
-      title: "Success",
-      description: "Event deleted successfully",
-    });
+    try {
+      await deleteEventMutation.mutateAsync(eventId);
+      toast({
+        title: "Success",
+        description: "Event deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete event",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleBookingResponse = (requestId: number, status: 'accepted' | 'rejected') => {

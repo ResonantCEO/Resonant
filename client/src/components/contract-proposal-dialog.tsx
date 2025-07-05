@@ -47,8 +47,24 @@ export default function ContractProposalDialog({
   bookingRequest,
   venues = []
 }: ContractProposalDialogProps) {
+  // Generate default contract title
+  const getDefaultTitle = () => {
+    const artistName = bookingRequest?.artistProfile?.name || "Artist";
+    let venueName = "";
+    
+    if (bookingRequest?.venueProfile?.name) {
+      venueName = bookingRequest.venueProfile.name;
+    } else if (selectedVenueForContract?.name) {
+      venueName = selectedVenueForContract.name;
+    } else {
+      venueName = "Venue";
+    }
+    
+    return `${artistName} at ${venueName}`;
+  };
+
   const [formData, setFormData] = useState({
-    title: "",
+    title: getDefaultTitle(),
     description: "",
     requirements: "",
     expiresAt: "",
@@ -110,7 +126,7 @@ export default function ContractProposalDialog({
 
   const resetForm = () => {
     setFormData({
-      title: "",
+      title: getDefaultTitle(),
       description: "",
       requirements: "",
       expiresAt: "",
@@ -203,6 +219,13 @@ export default function ContractProposalDialog({
                 <Select onValueChange={(value) => {
                   const venue = venues.find(v => v.id.toString() === value);
                   setSelectedVenueForContract(venue);
+                  // Update contract title when venue is selected
+                  const artistName = bookingRequest?.artistProfile?.name || "Artist";
+                  const venueName = venue?.name || "Venue";
+                  setFormData(prev => ({
+                    ...prev,
+                    title: `${artistName} at ${venueName}`
+                  }));
                 }}>
                   <SelectTrigger>
                     <SelectValue placeholder="Choose a venue" />

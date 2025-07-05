@@ -2503,10 +2503,29 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
+      const { title, date, startTime, endTime, type, status, client, location, notes, budget, isPrivate } = req.body;
+
+      // Validate required fields
+      if (!title || !date || !startTime) {
+        return res.status(400).json({ message: "Title, date, and start time are required" });
+      }
+
       const eventData = {
-        ...req.body,
-        profileId: activeProfile.id
+        profileId: activeProfile.id,
+        title,
+        date: new Date(date),
+        startTime,
+        endTime: endTime || null,
+        type: type || 'event',
+        status: status || 'confirmed',
+        client: client || null,
+        location: location || null,
+        notes: notes || null,
+        budget: budget ? parseFloat(budget) : null,
+        isPrivate: isPrivate || false
       };
+
+      console.log('Creating calendar event with data:', eventData);
 
       const event = await storage.createCalendarEvent(eventData);
       res.json(event);

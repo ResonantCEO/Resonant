@@ -119,13 +119,13 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
         body: JSON.stringify(eventData),
         credentials: "include",
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
         console.error("Calendar event creation failed:", errorData);
         throw new Error(errorData.message || `Failed to create event (${response.status})`);
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -365,7 +365,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
   const getDayEvents = (day: number) => {
     const date = new Date(currentYear, currentMonth, day);
     return calendarEvents.filter(event => {
-      const eventDate = event.date;
+      const eventDate = new Date(event.date);
       return eventDate.getDate() === day &&
              eventDate.getMonth() === currentMonth &&
              eventDate.getFullYear() === currentYear;
@@ -375,7 +375,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
   const getSelectedDateEvents = () => {
     if (!selectedDate) return [];
     return calendarEvents.filter(event => {
-      const eventDate = event.date;
+      const eventDate = new Date(event.date);
       return eventDate.getDate() === selectedDate.getDate() &&
              eventDate.getMonth() === selectedDate.getMonth() &&
              eventDate.getFullYear() === selectedDate.getFullYear();

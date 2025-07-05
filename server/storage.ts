@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, and, sql, desc, asc, or, like, ilike, gte, lt, ne, inArray, exists, notExists } from "drizzle-orm";
+import { eq, and, sql, desc, asc, or, like, ilike, gte, lt, ne, inArray, exists, notExists, isNull, isNotNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { users, profiles, posts, postLikes, comments, friendships, insertProfileSchema, profileMemberships, profileInvitations, notifications, albums, photos, photoComments, bookingRequests, conversations, conversationParticipants, messages, messageReads, profileBlocks, profileReports, tickets, ticketTransfers, ticketReturns, contractProposals, contractNegotiations, contractSignatures, profileViews, calendarEvents } from "@shared/schema";
 import type { 

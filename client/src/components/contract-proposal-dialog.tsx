@@ -47,6 +47,8 @@ export default function ContractProposalDialog({
   bookingRequest,
   venues = []
 }: ContractProposalDialogProps) {
+  const [selectedVenueForContract, setSelectedVenueForContract] = useState<any>(null);
+  
   // Generate default contract title
   const getDefaultTitle = () => {
     const artistName = bookingRequest?.artistProfile?.name || "Artist";
@@ -69,7 +71,6 @@ export default function ContractProposalDialog({
     requirements: "",
     expiresAt: "",
   });
-  const [selectedVenueForContract, setSelectedVenueForContract] = useState<any>(null);
 
   const [terms, setTerms] = useState<ContractTerms>({
     performanceDuration: "",

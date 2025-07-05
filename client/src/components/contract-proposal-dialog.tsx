@@ -279,7 +279,7 @@ export default function ContractProposalDialog({
                 />
               </div>
               <div>
-                <Label htmlFor="expiresAt">Expires On</Label>
+                <Label htmlFor="expiresAt">Event Date</Label>
                 <Input
                   id="expiresAt"
                   type="datetime-local"

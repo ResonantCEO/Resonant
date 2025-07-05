@@ -248,9 +248,11 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       return;
     }
 
+    // Fix timezone issue by creating date in local timezone
+    const localDate = new Date(newBooking.date + 'T00:00:00');
     const eventData = {
       title: newBooking.title,
-      date: newBooking.date,
+      date: localDate.toISOString().split('T')[0], // Ensure YYYY-MM-DD format
       startTime: newBooking.startTime,
       endTime: newBooking.endTime,
       type: newBooking.type,

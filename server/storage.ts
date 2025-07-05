@@ -1941,8 +1941,21 @@ export class Storage {
         throw new Error("Start time is required");
       }
 
-      // Ensure date is a proper Date object
-      const eventDate = eventData.date instanceof Date ? eventData.date : new Date(eventData.date);
+      // Ensure date is a proper Date object and handle timezone correctly
+      let eventDate: Date;
+      if (eventData.date instanceof Date) {
+        eventDate = eventData.date;
+      } else {
+        // Parse date string in local timezone to prevent UTC shift
+        const dateStr = eventData.date.toString();
+        if (dateStr.includes('T')) {
+          eventDate = new Date(dateStr);
+        } else {
+          // For YYYY-MM-DD format, add time to prevent UTC conversion
+          eventDate = new Date(dateStr + 'T00:00:00');
+        }
+      }
+      
       if (isNaN(eventDate.getTime())) {
         throw new Error("Invalid date provided");
       }

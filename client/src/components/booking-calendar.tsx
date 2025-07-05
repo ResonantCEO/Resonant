@@ -79,8 +79,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     status: 'confirmed' as const,
     client: '',
     location: '',
-    notes: '',
-    budget: ''
+    notes: ''
   });
 
   const queryClient = useQueryClient();
@@ -230,8 +229,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       status: 'confirmed',
       client: '',
       location: '',
-      notes: '',
-      budget: ''
+      notes: ''
     });
     setEditingBooking(null);
   };
@@ -255,8 +253,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       status: newBooking.status,
       client: newBooking.client,
       location: newBooking.location,
-      notes: newBooking.notes,
-      budget: newBooking.budget ? parseFloat(newBooking.budget) : null
+      notes: newBooking.notes
     };
 
     try {
@@ -307,8 +304,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       status: event.status,
       client: event.client || '',
       location: event.location || '',
-      notes: event.notes || '',
-      budget: event.budget?.toString() || ''
+      notes: event.notes || ''
     });
     setShowBookingDialog(true);
   };
@@ -545,16 +541,6 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                         value={newBooking.location}
                         onChange={(e) => setNewBooking({...newBooking, location: e.target.value})}
                         placeholder={profileType === 'artist' ? 'Studio, venue address' : 'Room, stage area'}
-                      />
-                    </div>
-                     <div>
-                      <Label htmlFor="budget">Budget</Label>
-                      <Input
-                        id="budget"
-                        type="number"
-                        value={newBooking.budget}
-                        onChange={(e) => setNewBooking({...newBooking, budget: e.target.value})}
-                        placeholder="Enter budget if applicable"
                       />
                     </div>
                     <div>

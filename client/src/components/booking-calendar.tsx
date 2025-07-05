@@ -11,6 +11,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { Calendar, Plus, ChevronLeft, ChevronRight, Clock, MapPin, User, Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
 
+// Helper function to format time from 24-hour to 12-hour format
+const formatTime = (time24: string): string => {
+  if (!time24) return '';
+  
+  const [hours, minutes] = time24.split(':');
+  const hour = parseInt(hours, 10);
+  const minute = minutes || '00';
+  
+  if (hour === 0) {
+    return `12:${minute} AM`;
+  } else if (hour < 12) {
+    return `${hour}:${minute} AM`;
+  } else if (hour === 12) {
+    return `12:${minute} PM`;
+  } else {
+    return `${hour - 12}:${minute} PM`;
+  }
+};
+
 interface Booking {
   id: string;
   title: string;
@@ -729,8 +748,8 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
                                   <Clock className="w-4 h-4" />
                                   <span>
-                                    {event.startTime}
-                                    {event.endTime && ` - ${event.endTime}`}
+                                    {formatTime(event.startTime)}
+                                    {event.endTime && ` - ${formatTime(event.endTime)}`}
                                   </span>
                                 </div>
                               )}

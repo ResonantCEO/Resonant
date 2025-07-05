@@ -1,10 +1,29 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, ChevronLeft, ChevronRight, Clock, User, MapPin } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar, ChevronLeft, ChevronRight, Clock, X, AlertTriangle } from "lucide-react";
+
+// Helper function to format time from 24-hour to 12-hour format
+const formatTime = (time24: string): string => {
+  if (!time24) return '';
+
+  const [hours, minutes] = time24.split(':');
+  const hour = parseInt(hours, 10);
+  const minute = minutes || '00';
+
+  if (hour === 0) {
+    return `12:${minute} AM`;
+  } else if (hour < 12) {
+    return `${hour}:${minute} AM`;
+  } else if (hour === 12) {
+    return `12:${minute} PM`;
+  } else {
+    return `${hour - 12}:${minute} PM`;
+  }
+};
 
 interface BookingRequest {
   id: number;
@@ -437,15 +456,12 @@ export default function AvailabilityChecker({
                                 <span>{event.profileName}</span>
                               </div>
                               {event.startTime && (
-                                <div className="flex items-center space-x-2 text-xs text-gray-600 mb-1">
-                                  <Clock className="w-3 h-3" />
-                                  <span>{event.startTime}{event.endTime && ` - ${event.endTime}`}</span>
-                                </div>
-                              )}
-                              {event.location && (
-                                <div className="flex items-center space-x-2 text-xs text-gray-600 mb-1">
-                                  <MapPin className="w-3 h-3" />
-                                  <span>{event.location}</span>
+                                <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
+                                  <Clock className="w-4 h-4" />
+                                  <span>
+                                    {formatTime(event.startTime)}
+                                    {event.endTime && ` - ${formatTime(event.endTime)}`}
+                                  </span>
                                 </div>
                               )}
                               <div className="flex space-x-2 mt-2">

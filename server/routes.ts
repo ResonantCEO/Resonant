@@ -3,9 +3,9 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles, bookingRequests, contractProposals, contractNegotiations, contractSignatures, profileViews } from "@shared/schema";
+import { insertProfileSchema, insertPostSchema, insertCommentSchema, posts, users, notifications, friendships, albums, photos, profiles, bookingRequests, contractProposals, contractNegotiations, contractSignatures, profileViews, events } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, or } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import multer from "multer";
@@ -4116,6 +4116,302 @@ export function registerRoutes(app: Express): Server {
     } catch (error: any) {
       console.error('Error updating cover image:', error);
       res.status(500).json({ message: error.message || 'Failed to update cover image' });
+    }
+  });
+
+  // Events system routes
+  app.get('/api/events', async (req, res) => {
+    try {
+      const { profileId, limit = 50, offset = 0 } = req.query;
+      
+      let query = db
+        .select({
+          id: events.id,
+          organizerProfileId: events.organizerProfileId,
+          venueProfileId: events.venueProfileId,
+          artistProfileIds: events.artistProfileIds,
+          name: events.name,
+          description: events.description,
+          eventDate: events.eventDate,
+          eventTime: events.eventTime,
+          duration: events.duration,
+          genre: events.genre,
+          ageRestriction: events.ageRestriction,
+          status: events.status,
+          capacity: events.capacity,
+          ticketsAvailable: events.ticketsAvailable,
+          ticketSalesStart: events.ticketSalesStart,
+          ticketSalesEnd: events.ticketSalesEnd,
+          eventImageUrl: events.eventImageUrl,
+          tags: events.tags,
+          socialLinks: events.socialLinks,
+          requiresApproval: events.requiresApproval,
+          isPrivate: events.isPrivate,
+          bookingRequestId: events.bookingRequestId,
+          createdAt: events.createdAt,
+          updatedAt: events.updatedAt,
+          organizer: {
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+            type: profiles.type
+          }
+        })
+        .from(events)
+        .leftJoin(profiles, eq(events.organizerProfileId, profiles.id))
+        .limit(parseInt(limit as string))
+        .offset(parseInt(offset as string))
+        .orderBy(sql`${events.eventDate} DESC`);
+
+      if (profileId) {
+        const profileIdNum = parseInt(profileId as string);
+        query = query.where(
+          or(
+            eq(events.organizerProfileId, profileIdNum),
+            eq(events.venueProfileId, profileIdNum),
+            sql`${profileIdNum} = ANY(${events.artistProfileIds})`
+          )
+        );
+      }
+
+      const eventsList = await query;
+      res.json(eventsList);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
+  app.post('/api/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      const {
+        venueProfileId,
+        artistProfileIds = [],
+        name,
+        description,
+        eventDate,
+        eventTime,
+        duration,
+        genre,
+        ageRestriction,
+        status = 'draft',
+        capacity,
+        ticketsAvailable = true,
+        ticketSalesStart,
+        ticketSalesEnd,
+        eventImageUrl,
+        tags = [],
+        socialLinks = {},
+        requiresApproval = false,
+        isPrivate = false,
+        bookingRequestId
+      } = req.body;
+
+      // Validate required fields
+      if (!name || !eventDate) {
+        return res.status(400).json({ message: "Event name and date are required" });
+      }
+
+      // Check permissions for creating events
+      const hasPermission = await storage.checkProfilePermission(req.user.id, activeProfile.id, "manage_events");
+      if (!hasPermission && activeProfile.type !== 'venue' && activeProfile.type !== 'artist') {
+        return res.status(403).json({ message: "Permission denied to create events" });
+      }
+
+      const eventData = {
+        organizerProfileId: activeProfile.id,
+        venueProfileId: venueProfileId || (activeProfile.type === 'venue' ? activeProfile.id : null),
+        artistProfileIds: Array.isArray(artistProfileIds) ? artistProfileIds : [],
+        name,
+        description,
+        eventDate: new Date(eventDate),
+        eventTime,
+        duration,
+        genre,
+        ageRestriction,
+        status,
+        capacity,
+        ticketsAvailable,
+        ticketSalesStart: ticketSalesStart ? new Date(ticketSalesStart) : null,
+        ticketSalesEnd: ticketSalesEnd ? new Date(ticketSalesEnd) : null,
+        eventImageUrl,
+        tags,
+        socialLinks,
+        requiresApproval,
+        isPrivate,
+        bookingRequestId
+      };
+
+      const [event] = await db.insert(events).values(eventData).returning();
+
+      // Create corresponding calendar event
+      await storage.createCalendarEvent({
+        profileId: activeProfile.id,
+        title: name,
+        date: new Date(eventDate),
+        startTime: eventTime || '19:00',
+        endTime: duration ? 
+          new Date(new Date(`2000-01-01T${eventTime || '19:00'}`).getTime() + (duration * 60000)).toTimeString().slice(0, 5) : 
+          '23:00',
+        type: 'event',
+        status: status === 'published' ? 'confirmed' : 'pending',
+        client: '',
+        location: '',
+        notes: description || '',
+        budget: null,
+        isPrivate
+      });
+
+      res.json(event);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      res.status(500).json({ message: "Failed to create event" });
+    }
+  });
+
+  app.get('/api/events/:id', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      
+      const [event] = await db
+        .select({
+          id: events.id,
+          organizerProfileId: events.organizerProfileId,
+          venueProfileId: events.venueProfileId,
+          artistProfileIds: events.artistProfileIds,
+          name: events.name,
+          description: events.description,
+          eventDate: events.eventDate,
+          eventTime: events.eventTime,
+          duration: events.duration,
+          genre: events.genre,
+          ageRestriction: events.ageRestriction,
+          status: events.status,
+          capacity: events.capacity,
+          ticketsAvailable: events.ticketsAvailable,
+          ticketSalesStart: events.ticketSalesStart,
+          ticketSalesEnd: events.ticketSalesEnd,
+          eventImageUrl: events.eventImageUrl,
+          tags: events.tags,
+          socialLinks: events.socialLinks,
+          requiresApproval: events.requiresApproval,
+          isPrivate: events.isPrivate,
+          bookingRequestId: events.bookingRequestId,
+          createdAt: events.createdAt,
+          updatedAt: events.updatedAt,
+          organizer: {
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+            type: profiles.type
+          }
+        })
+        .from(events)
+        .leftJoin(profiles, eq(events.organizerProfileId, profiles.id))
+        .where(eq(events.id, eventId));
+
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      res.json(event);
+    } catch (error) {
+      console.error("Error fetching event:", error);
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+
+  app.put('/api/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Get the event to check permissions
+      const [existingEvent] = await db
+        .select()
+        .from(events)
+        .where(eq(events.id, eventId));
+
+      if (!existingEvent) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      // Check if user can edit this event
+      const canEdit = existingEvent.organizerProfileId === activeProfile.id ||
+                     await storage.checkProfilePermission(req.user.id, existingEvent.organizerProfileId, "manage_events");
+
+      if (!canEdit) {
+        return res.status(403).json({ message: "Permission denied to edit this event" });
+      }
+
+      const updateData = { ...req.body };
+      delete updateData.id;
+      delete updateData.createdAt;
+      updateData.updatedAt = new Date();
+
+      // Handle date conversion
+      if (updateData.eventDate) {
+        updateData.eventDate = new Date(updateData.eventDate);
+      }
+      if (updateData.ticketSalesStart) {
+        updateData.ticketSalesStart = new Date(updateData.ticketSalesStart);
+      }
+      if (updateData.ticketSalesEnd) {
+        updateData.ticketSalesEnd = new Date(updateData.ticketSalesEnd);
+      }
+
+      const [updatedEvent] = await db
+        .update(events)
+        .set(updateData)
+        .where(eq(events.id, eventId))
+        .returning();
+
+      res.json(updatedEvent);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ message: "Failed to update event" });
+    }
+  });
+
+  app.delete('/api/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const activeProfile = await storage.getActiveProfile(req.user.id);
+      if (!activeProfile) {
+        return res.status(400).json({ message: "No active profile" });
+      }
+
+      // Get the event to check permissions
+      const [existingEvent] = await db
+        .select()
+        .from(events)
+        .where(eq(events.id, eventId));
+
+      if (!existingEvent) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      // Check if user can delete this event
+      const canDelete = existingEvent.organizerProfileId === activeProfile.id ||
+                       await storage.checkProfilePermission(req.user.id, existingEvent.organizerProfileId, "manage_events");
+
+      if (!canDelete) {
+        return res.status(403).json({ message: "Permission denied to delete this event" });
+      }
+
+      await db.delete(events).where(eq(events.id, eventId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ message: "Failed to delete event" });
     }
   });
 

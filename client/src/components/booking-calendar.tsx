@@ -74,8 +74,8 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     date: '',
     startTime: '',
     endTime: '',
-    type: 'booking' as const,
-    status: 'confirmed' as const,
+    type: 'booking' as 'booking' | 'event' | 'rehearsal' | 'meeting' | 'unavailable',
+    status: 'confirmed' as 'confirmed' | 'pending' | 'cancelled',
     client: '',
     notes: ''
   });
@@ -117,8 +117,15 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(eventData),
+        credentials: "include",
       });
-      if (!response.ok) throw new Error("Failed to create event");
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        console.error("Calendar event creation failed:", errorData);
+        throw new Error(errorData.message || `Failed to create event (${response.status})`);
+      }
+      
       return response.json();
     },
     onSuccess: () => {
@@ -223,8 +230,8 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       date: '',
       startTime: '',
       endTime: '',
-      type: 'booking',
-      status: 'confirmed',
+      type: 'booking' as 'booking' | 'event' | 'rehearsal' | 'meeting' | 'unavailable',
+      status: 'confirmed' as 'confirmed' | 'pending' | 'cancelled',
       client: '',
       notes: ''
     });
@@ -252,6 +259,8 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       notes: newBooking.notes
     };
 
+    console.log('Submitting event data:', eventData);
+
     try {
       if (editingBooking) {
         await updateEventMutation.mutateAsync({ id: editingBooking.id, ...eventData });
@@ -270,10 +279,11 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       setShowBookingDialog(false);
       setEditingBooking(null);
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to save event:", error);
       toast({
         title: "Error",
-        description: "Failed to save event",
+        description: error.message || "Failed to save event",
         variant: "destructive",
       });
     }

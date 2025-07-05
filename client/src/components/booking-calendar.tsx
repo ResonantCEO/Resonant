@@ -368,9 +368,11 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     const date = new Date(currentYear, currentMonth, day);
     return calendarEvents.filter(event => {
       const eventDate = new Date(event.date);
-      return eventDate.getDate() === day &&
-             eventDate.getMonth() === currentMonth &&
-             eventDate.getFullYear() === currentYear;
+      // Ensure we're comparing the exact same date, accounting for timezone issues
+      const eventDateLocal = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+      const targetDateLocal = new Date(currentYear, currentMonth, day);
+      
+      return eventDateLocal.getTime() === targetDateLocal.getTime();
     });
   };
 

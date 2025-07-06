@@ -479,13 +479,13 @@ export default function AvailabilityChecker({
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <div className="font-medium text-gray-900">{event.profileName || 'Unknown'}</div>
-                                  <div className="text-xs text-gray-500 capitalize">{event.profileType}</div>
+                                  <div className="font-medium text-white">{event.profileName || 'Unknown'}</div>
+                                  <div className="text-xs text-gray-300 capitalize">{event.profileType}</div>
                                 </div>
                               </div>
 
                               {/* Event Title - Now underneath */}
-                              <h5 className="font-medium mb-2 text-gray-700">
+                              <h5 className="font-medium mb-2 text-white">
                                 {event.title}
                               </h5>
 

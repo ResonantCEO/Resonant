@@ -1888,8 +1888,28 @@ export class Storage {
   async getCalendarEvents(profileId: number) {
     try {
       const events = await db
-        .select()
+        .select({
+          id: calendarEvents.id,
+          profileId: calendarEvents.profileId,
+          title: calendarEvents.title,
+          date: calendarEvents.date,
+          startTime: calendarEvents.startTime,
+          endTime: calendarEvents.endTime,
+          type: calendarEvents.type,
+          status: calendarEvents.status,
+          client: calendarEvents.client,
+          location: calendarEvents.location,
+          notes: calendarEvents.notes,
+          budget: calendarEvents.budget,
+          isPrivate: calendarEvents.isPrivate,
+          createdAt: calendarEvents.createdAt,
+          updatedAt: calendarEvents.updatedAt,
+          profileName: profiles.name,
+          profileType: profiles.type,
+          profileImageUrl: profiles.profileImageUrl
+        })
         .from(calendarEvents)
+        .leftJoin(profiles, eq(calendarEvents.profileId, profiles.id))
         .where(eq(calendarEvents.profileId, profileId))
         .orderBy(calendarEvents.date);
 
@@ -1904,8 +1924,28 @@ export class Storage {
   async getCalendarEventsForProfiles(profileIds: number[]) {
     try {
       const events = await db
-        .select()
+        .select({
+          id: calendarEvents.id,
+          profileId: calendarEvents.profileId,
+          title: calendarEvents.title,
+          date: calendarEvents.date,
+          startTime: calendarEvents.startTime,
+          endTime: calendarEvents.endTime,
+          type: calendarEvents.type,
+          status: calendarEvents.status,
+          client: calendarEvents.client,
+          location: calendarEvents.location,
+          notes: calendarEvents.notes,
+          budget: calendarEvents.budget,
+          isPrivate: calendarEvents.isPrivate,
+          createdAt: calendarEvents.createdAt,
+          updatedAt: calendarEvents.updatedAt,
+          profileName: profiles.name,
+          profileType: profiles.type,
+          profileImageUrl: profiles.profileImageUrl
+        })
         .from(calendarEvents)
+        .leftJoin(profiles, eq(calendarEvents.profileId, profiles.id))
         .where(sql`${calendarEvents.profileId} = ANY(${profileIds})`)
         .orderBy(calendarEvents.date);
 
@@ -1917,24 +1957,7 @@ export class Storage {
     }
   }
 
-  // Get calendar events for multiple profiles (for availability checking)
-  async getCalendarEventsForProfiles(profileIds: number[]) {
-    try {
-      if (profileIds.length === 0) return [];
-      
-      const events = await db
-        .select()
-        .from(calendarEvents)
-        .where(inArray(calendarEvents.profileId, profileIds))
-        .orderBy(calendarEvents.date);
 
-      console.log(`Calendar events for profiles ${profileIds}:`, events);
-      return events;
-    } catch (error) {
-      console.error("Error fetching calendar events for profiles:", error);
-      throw new Error("Failed to fetch calendar events");
-    }
-  }
 
   async createCalendarEvent(eventData: Omit<InsertCalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) {
     try {

@@ -289,25 +289,12 @@ export default function ContractProposalDialog({
               </div>
               <div>
                 <Label htmlFor="expiresAt">Event Date</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    id="expiresAt"
-                    type="date"
-                    value={formData.expiresAt}
-                    onChange={(e) => setFormData({...formData, expiresAt: e.target.value})}
-                    className="flex-1"
-                  />
-                  {(bookingRequest?.artistProfile?.id && bookingRequest?.venueProfile?.id) && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowAvailabilityChecker(true)}
-                      className="whitespace-nowrap"
-                    >
-                      Check Availability
-                    </Button>
-                  )}
-                </div>
+                <Input
+                  id="expiresAt"
+                  type="date"
+                  value={formData.expiresAt}
+                  onChange={(e) => setFormData({...formData, expiresAt: e.target.value})}
+                />
               </div>
             </CardContent>
           </Card>

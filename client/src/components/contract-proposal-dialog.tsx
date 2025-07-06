@@ -531,8 +531,10 @@ export default function ContractProposalDialog({
         <AvailabilityChecker
           open={showAvailabilityChecker}
           onOpenChange={setShowAvailabilityChecker}
-          artistId={bookingRequest.artistProfile.id}
-          venueId={bookingRequest.venueProfile.id}
+          artistProfileId={bookingRequest.artistProfile.id}
+          venueProfileId={bookingRequest.venueProfile.id}
+          artistName={bookingRequest.artistProfile.name}
+          venueName={bookingRequest.venueProfile.name}
           onDateSelect={handleDateSelect}
         />
       )}

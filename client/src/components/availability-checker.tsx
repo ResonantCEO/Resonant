@@ -460,8 +460,10 @@ export default function AvailabilityChecker({
                               
                               {/* Profile Info with Avatar */}
                               <div className="flex items-center space-x-2 mb-2">
-                                <User className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-700">{event.profileName || 'Unknown'} ({event.profileType})</span>
+                                <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 border border-white overflow-hidden">
+                                  {event.profileName?.charAt(0) || '?'}
+                                </div>
+                                <span className="text-sm text-gray-700">{event.profileName || 'Unknown'}</span>
                               </div>
                               
                               {/* Time */}

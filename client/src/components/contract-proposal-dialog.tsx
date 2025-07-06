@@ -236,11 +236,15 @@ export default function ContractProposalDialog({
 
         <div className="flex h-full">
           {/* Sidebar Navigation */}
-          <div className="w-64 border-r bg-gray-50 p-4">
+          <div className="w-64 border-r border-gray-700 bg-gray-900 p-4">
             <div className="space-y-2">
               <Button
                 variant={currentPage === 'event-terms' ? "default" : "ghost"}
-                className="w-full justify-start"
+                className={`w-full justify-start ${
+                  currentPage === 'event-terms' 
+                    ? "bg-blue-600 text-white hover:bg-blue-700" 
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
                 onClick={() => setCurrentPage('event-terms')}
               >
                 <Calendar className="w-4 h-4 mr-2" />
@@ -248,7 +252,11 @@ export default function ContractProposalDialog({
               </Button>
               <Button
                 variant={currentPage === 'artist-terms' ? "default" : "ghost"}
-                className="w-full justify-start"
+                className={`w-full justify-start ${
+                  currentPage === 'artist-terms' 
+                    ? "bg-blue-600 text-white hover:bg-blue-700" 
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
                 onClick={() => setCurrentPage('artist-terms')}
               >
                 <Clock className="w-4 h-4 mr-2" />
@@ -256,7 +264,11 @@ export default function ContractProposalDialog({
               </Button>
               <Button
                 variant={currentPage === 'payment' ? "default" : "ghost"}
-                className="w-full justify-start"
+                className={`w-full justify-start ${
+                  currentPage === 'payment' 
+                    ? "bg-blue-600 text-white hover:bg-blue-700" 
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
                 onClick={() => setCurrentPage('payment')}
               >
                 <DollarSign className="w-4 h-4 mr-2" />
@@ -264,7 +276,11 @@ export default function ContractProposalDialog({
               </Button>
               <Button
                 variant={currentPage === 'docs' ? "default" : "ghost"}
-                className="w-full justify-start"
+                className={`w-full justify-start ${
+                  currentPage === 'docs' 
+                    ? "bg-blue-600 text-white hover:bg-blue-700" 
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
                 onClick={() => setCurrentPage('docs')}
               >
                 <FileText className="w-4 h-4 mr-2" />

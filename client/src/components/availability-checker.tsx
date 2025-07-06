@@ -399,14 +399,15 @@ export default function AvailabilityChecker({
                             {dayEvents.slice(0, 2).map((event, i) => (
                               <div key={i} className="flex items-center">
                                 <Avatar className="w-4 h-4 border border-white">
-                                  <AvatarImage 
-                                    src={event.profileImageUrl} 
-                                    alt={event.profileName}
-                                    onError={() => console.log(`Failed to load avatar for ${event.profileName}: ${event.profileImageUrl}`)}
-                                    onLoad={() => console.log(`Successfully loaded avatar for ${event.profileName}: ${event.profileImageUrl}`)}
-                                  />
-                                  <AvatarFallback className="text-xs font-medium">
-                                    {event.profileName?.charAt(0) || '?'}
+                                  {event.profileImageUrl ? (
+                                    <AvatarImage 
+                                      src={event.profileImageUrl} 
+                                      alt={event.profileName}
+                                      className="object-cover"
+                                    />
+                                  ) : null}
+                                  <AvatarFallback className="text-xs font-medium bg-blue-500 text-white">
+                                    {event.profileName?.charAt(0)?.toUpperCase() || '?'}
                                   </AvatarFallback>
                                 </Avatar>
                               </div>
@@ -466,14 +467,15 @@ export default function AvailabilityChecker({
                               {/* Profile Info with Avatar - Now at top */}
                               <div className="flex items-center space-x-3 mb-2">
                                 <Avatar className="w-8 h-8">
-                                  <AvatarImage 
-                                    src={event.profileImageUrl} 
-                                    alt={event.profileName}
-                                    onError={() => console.log(`Failed to load detailed avatar for ${event.profileName}: ${event.profileImageUrl}`)}
-                                    onLoad={() => console.log(`Successfully loaded detailed avatar for ${event.profileName}: ${event.profileImageUrl}`)}
-                                  />
-                                  <AvatarFallback className="text-xs font-medium">
-                                    {event.profileName?.charAt(0) || '?'}
+                                  {event.profileImageUrl ? (
+                                    <AvatarImage 
+                                      src={event.profileImageUrl} 
+                                      alt={event.profileName}
+                                      className="object-cover"
+                                    />
+                                  ) : null}
+                                  <AvatarFallback className="text-sm font-medium bg-blue-500 text-white">
+                                    {event.profileName?.charAt(0)?.toUpperCase() || '?'}
                                   </AvatarFallback>
                                 </Avatar>
                                 <div>

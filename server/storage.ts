@@ -1923,6 +1923,8 @@ export class Storage {
 
   async getCalendarEventsForProfiles(profileIds: number[]) {
     try {
+      if (profileIds.length === 0) return [];
+      
       const events = await db
         .select({
           id: calendarEvents.id,
@@ -1946,7 +1948,7 @@ export class Storage {
         })
         .from(calendarEvents)
         .leftJoin(profiles, eq(calendarEvents.profileId, profiles.id))
-        .where(sql`${calendarEvents.profileId} = ANY(${profileIds})`)
+        .where(inArray(calendarEvents.profileId, profileIds))
         .orderBy(calendarEvents.date);
 
       console.log(`Calendar events for profiles ${profileIds}:`, events);

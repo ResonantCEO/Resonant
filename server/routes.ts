@@ -2472,9 +2472,14 @@ export function registerRoutes(app: Express): Server {
 
   // Calendar events routes
   app.get('/api/calendar-events', isAuthenticated, async (req: any, res) => {
+    console.log('=== CALENDAR EVENTS API CALLED ===');
+    console.log('Query params:', req.query);
+    console.log('User ID:', req.user?.id);
+    
     try {
       const activeProfile = await storage.getActiveProfile(req.user.id);
       if (!activeProfile) {
+        console.log('No active profile found for user:', req.user.id);
         return res.status(400).json({ message: "No active profile" });
       }
 
@@ -2486,15 +2491,18 @@ export function registerRoutes(app: Express): Server {
         const profileIds = profileIdsParam.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
         console.log('Fetching events for multiple profiles:', profileIds);
         const events = await storage.getCalendarEventsForProfiles(profileIds);
+        console.log('Retrieved events:', events);
         res.json(events);
       } else if (profileIdParam) {
         const profileId = parseInt(profileIdParam);
         console.log(`Fetching events for specific profile: ${profileId}`);
         const events = await storage.getCalendarEvents(profileId);
+        console.log('Retrieved events:', events);
         res.json(events);
       } else {
         console.log(`Fetching events for active profile: ${activeProfile.id}`);
         const events = await storage.getCalendarEvents(activeProfile.id);
+        console.log('Retrieved events:', events);
         res.json(events);
       }
     } catch (error) {

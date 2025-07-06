@@ -340,18 +340,16 @@ export default function AvailabilityChecker({
           </Card>
 
           {/* Calendar Navigation */}
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">
+          <div className="flex items-center justify-center space-x-4">
+            <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <h3 className="text-lg font-medium min-w-[140px] text-center">
               {monthNames[currentMonth]} {currentYear}
             </h3>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigateMonth('next')}>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+            <Button variant="outline" size="sm" onClick={() => navigateMonth('next')}>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

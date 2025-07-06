@@ -464,7 +464,7 @@ export default function AvailabilityChecker({
                               <h5 className="font-medium mb-2">
                                 {event.status === 'pending' ? '⏳ ' : event.status === 'confirmed' ? '✅ ' : ''}{event.title}
                               </h5>
-                              
+
                               {/* Profile Info with Avatar */}
                               <div className="flex items-center space-x-2 mb-2">
                                 <Avatar className="w-6 h-6">
@@ -475,7 +475,7 @@ export default function AvailabilityChecker({
                                 </Avatar>
                                 <span className="text-sm text-gray-700">{event.profileName || 'Unknown'}</span>
                               </div>
-                              
+
                               {/* Time */}
                               {event.startTime && (
                                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
@@ -486,12 +486,12 @@ export default function AvailabilityChecker({
                                   </span>
                                 </div>
                               )}
-                              
+
                               {/* Notes */}
                               {event.notes && (
                                 <p className="text-xs text-gray-600 mb-2">{event.notes}</p>
                               )}
-                              
+
                               {/* Badges at bottom */}
                               <div className="flex items-center space-x-2 mt-2">
                                 <Badge variant="outline" className={`${getTypeColor(event.type)} text-white`}>

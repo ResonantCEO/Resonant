@@ -462,7 +462,7 @@ export default function AvailabilityChecker({
                             <div className="flex-1">
                               {/* Event Title */}
                               <h5 className="font-medium mb-2">
-                                {event.status === 'pending' ? '⏳ ' : event.status === 'confirmed' ? '✅ ' : ''}{event.title}
+                                {event.title}
                               </h5>
 
                               {/* Profile Info with Avatar */}

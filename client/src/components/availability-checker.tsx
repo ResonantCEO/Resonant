@@ -437,23 +437,20 @@ export default function AvailabilityChecker({
                         <div key={event.id} className={`bg-white p-3 rounded border ${event.status === 'pending' ? 'border-l-4 border-l-yellow-500' : event.status === 'confirmed' ? 'border-l-4 border-l-green-500' : ''}`}>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
+                              {/* Event Title */}
+                              <h5 className="font-medium mb-2">
+                                {event.status === 'pending' ? '⏳ ' : event.status === 'confirmed' ? '✅ ' : ''}{event.title}
+                              </h5>
+                              
+                              {/* Profile Info with Avatar */}
                               <div className="flex items-center space-x-2 mb-2">
-                                <h5 className="font-medium">
-                                  {event.status === 'pending' ? '⏳ ' : event.status === 'confirmed' ? '✅ ' : ''}{event.title}
-                                </h5>
-                                <Badge variant="outline" className={`${getTypeColor(event.type)} text-white`}>
-                                  {event.type}
-                                </Badge>
-                                <Badge variant="outline" className={getStatusColor(event.status)}>
-                                  {event.status}
-                                </Badge>
+                                <User className="w-4 h-4 text-gray-500" />
+                                <span className="text-sm text-gray-700">{event.profileName} ({event.profileType})</span>
                               </div>
-                              <div className="flex items-center space-x-2 text-xs text-gray-600 mb-1">
-                                <User className="w-3 h-3" />
-                                <span>{event.profileName} ({event.profileType})</span>
-                              </div>
+                              
+                              {/* Time */}
                               {event.startTime && (
-                                <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
+                                <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
                                   <Clock className="w-4 h-4" />
                                   <span>
                                     {formatTime(event.startTime)}
@@ -461,9 +458,21 @@ export default function AvailabilityChecker({
                                   </span>
                                 </div>
                               )}
+                              
+                              {/* Notes */}
                               {event.notes && (
-                                <p className="mt-2 text-xs text-gray-600">{event.notes}</p>
+                                <p className="text-xs text-gray-600 mb-2">{event.notes}</p>
                               )}
+                              
+                              {/* Badges at bottom */}
+                              <div className="flex items-center space-x-2 mt-2">
+                                <Badge variant="outline" className={`${getTypeColor(event.type)} text-white`}>
+                                  {event.type}
+                                </Badge>
+                                <Badge variant="outline" className={getStatusColor(event.status)}>
+                                  {event.status}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
                           {(event.type === 'unavailable' || 

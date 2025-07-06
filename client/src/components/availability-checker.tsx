@@ -71,6 +71,7 @@ interface AvailabilityCheckerProps {
   venueProfileId: number;
   artistName: string;
   venueName: string;
+  onDateSelect?: (date: string) => void;
 }
 
 export default function AvailabilityChecker({
@@ -79,7 +80,8 @@ export default function AvailabilityChecker({
   artistProfileId,
   venueProfileId,
   artistName,
-  venueName
+  venueName,
+  onDateSelect
 }: AvailabilityCheckerProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -490,9 +492,21 @@ export default function AvailabilityChecker({
                     <div className="text-center py-8">
                       <div className="text-green-600 text-lg mb-2">✅</div>
                       <p className="text-green-700 font-medium">Date Available</p>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <div className="text-sm text-gray-400 mb-4">
                         Both {artistName} and {venueName} are available on this date
-                      </p>
+                      </div>
+                      {onDateSelect && (
+                        <Button
+                          onClick={() => {
+                            const dateString = selectedDate.toISOString().split('T')[0];
+                            onDateSelect(dateString);
+                            onOpenChange(false);
+                          }}
+                          className="w-full bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          Select This Date
+                        </Button>
+                      )}
                     </div>
                   ) : selectedDate ? (
                     <div className="text-center py-8">

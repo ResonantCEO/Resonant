@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { FileText, DollarSign, Calendar, Clock } from "lucide-react";
+import AvailabilityChecker from "./availability-checker";
 
 interface ContractProposalDialogProps {
   open: boolean;
@@ -48,6 +49,7 @@ export default function ContractProposalDialog({
   venues = []
 }: ContractProposalDialogProps) {
   const [selectedVenueForContract, setSelectedVenueForContract] = useState<any>(null);
+  const [showAvailabilityChecker, setShowAvailabilityChecker] = useState(false);
   
   // Generate default contract title
   const getDefaultTitle = () => {
@@ -165,6 +167,13 @@ export default function ContractProposalDialog({
     });
   };
 
+  const handleDateSelect = (selectedDate: string) => {
+    setFormData(prev => ({
+      ...prev,
+      expiresAt: selectedDate
+    }));
+  };
+
   const handleSubmit = () => {
     if (!formData.title.trim()) {
       toast({
@@ -280,12 +289,25 @@ export default function ContractProposalDialog({
               </div>
               <div>
                 <Label htmlFor="expiresAt">Event Date</Label>
-                <Input
-                  id="expiresAt"
-                  type="datetime-local"
-                  value={formData.expiresAt}
-                  onChange={(e) => setFormData({...formData, expiresAt: e.target.value})}
-                />
+                <div className="flex space-x-2">
+                  <Input
+                    id="expiresAt"
+                    type="date"
+                    value={formData.expiresAt}
+                    onChange={(e) => setFormData({...formData, expiresAt: e.target.value})}
+                    className="flex-1"
+                  />
+                  {(bookingRequest?.artistProfile?.id && bookingRequest?.venueProfile?.id) && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowAvailabilityChecker(true)}
+                      className="whitespace-nowrap"
+                    >
+                      Check Availability
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -503,6 +525,17 @@ export default function ContractProposalDialog({
           </div>
         </div>
       </DialogContent>
+
+      {/* Availability Checker Modal */}
+      {showAvailabilityChecker && bookingRequest?.artistProfile?.id && bookingRequest?.venueProfile?.id && (
+        <AvailabilityChecker
+          open={showAvailabilityChecker}
+          onOpenChange={setShowAvailabilityChecker}
+          artistId={bookingRequest.artistProfile.id}
+          venueId={bookingRequest.venueProfile.id}
+          onDateSelect={handleDateSelect}
+        />
+      )}
     </Dialog>
   );
 }

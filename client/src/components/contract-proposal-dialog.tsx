@@ -240,10 +240,10 @@ export default function ContractProposalDialog({
             <div className="space-y-2">
               <Button
                 variant={currentPage === 'event-terms' ? "default" : "ghost"}
-                className={`w-full justify-start ${
+                className={`w-full justify-start text-white ${
                   currentPage === 'event-terms' 
-                    ? "bg-blue-600 text-white hover:bg-blue-700" 
-                    : "text-white hover:bg-gray-800"
+                    ? "bg-blue-600 hover:bg-blue-700" 
+                    : "hover:bg-gray-800"
                 }`}
                 onClick={() => setCurrentPage('event-terms')}
               >
@@ -252,10 +252,10 @@ export default function ContractProposalDialog({
               </Button>
               <Button
                 variant={currentPage === 'artist-terms' ? "default" : "ghost"}
-                className={`w-full justify-start ${
+                className={`w-full justify-start text-white ${
                   currentPage === 'artist-terms' 
-                    ? "bg-blue-600 text-white hover:bg-blue-700" 
-                    : "text-white hover:bg-gray-800"
+                    ? "bg-blue-600 hover:bg-blue-700" 
+                    : "hover:bg-gray-800"
                 }`}
                 onClick={() => setCurrentPage('artist-terms')}
               >
@@ -264,10 +264,10 @@ export default function ContractProposalDialog({
               </Button>
               <Button
                 variant={currentPage === 'payment' ? "default" : "ghost"}
-                className={`w-full justify-start ${
+                className={`w-full justify-start text-white ${
                   currentPage === 'payment' 
-                    ? "bg-blue-600 text-white hover:bg-blue-700" 
-                    : "text-white hover:bg-gray-800"
+                    ? "bg-blue-600 hover:bg-blue-700" 
+                    : "hover:bg-gray-800"
                 }`}
                 onClick={() => setCurrentPage('payment')}
               >
@@ -276,10 +276,10 @@ export default function ContractProposalDialog({
               </Button>
               <Button
                 variant={currentPage === 'docs' ? "default" : "ghost"}
-                className={`w-full justify-start ${
+                className={`w-full justify-start text-white ${
                   currentPage === 'docs' 
-                    ? "bg-blue-600 text-white hover:bg-blue-700" 
-                    : "text-white hover:bg-gray-800"
+                    ? "bg-blue-600 hover:bg-blue-700" 
+                    : "hover:bg-gray-800"
                 }`}
                 onClick={() => setCurrentPage('docs')}
               >

@@ -14,11 +14,11 @@ import { Calendar, Plus, ChevronLeft, ChevronRight, Clock, MapPin, User, Edit, T
 // Helper function to format time from 24-hour to 12-hour format
 const formatTime = (time24: string): string => {
   if (!time24) return '';
-  
+
   const [hours, minutes] = time24.split(':');
   const hour = parseInt(hours, 10);
   const minute = minutes || '00';
-  
+
   if (hour === 0) {
     return `12:${minute} AM`;
   } else if (hour < 12) {
@@ -322,9 +322,22 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     }
 
     setEditingBooking(event);
+
+    // Handle date conversion safely
+    let dateString = '';
+    if (event.date instanceof Date) {
+      dateString = event.date.toISOString().split('T')[0];
+    } else if (typeof event.date === 'string') {
+      // If it's already a string, extract just the date part
+      dateString = event.date.split('T')[0];
+    } else {
+      // Fallback to today's date
+      dateString = new Date().toISOString().split('T')[0];
+    }
+
     setNewBooking({
       title: event.title,
-      date: event.date.toISOString().split('T')[0],
+      date: dateString,
       startTime: event.startTime,
       endTime: event.endTime,
       type: event.type,
@@ -385,7 +398,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
 
   const getDayEvents = (dayDate: Date) => {
     const targetDateString = dayDate.toISOString().split('T')[0]; // YYYY-MM-DD format
-    
+
     return calendarEvents.filter(event => {
       // Convert event date to local date string to avoid timezone issues
       const eventDate = new Date(event.date);
@@ -397,7 +410,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
   const getSelectedDateEvents = () => {
     if (!selectedDate) return [];
     const targetDateString = selectedDate.toISOString().split('T')[0];
-    
+
     return calendarEvents.filter(event => {
       const eventDate = new Date(event.date);
       const eventDateString = new Date(eventDate.getTime() + eventDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];

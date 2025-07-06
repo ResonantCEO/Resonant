@@ -503,12 +503,6 @@ export default function AvailabilityChecker({
                               </div>
                             </div>
                           </div>
-                          {(event.type === 'unavailable' || 
-                            (event.status === 'confirmed' && (event.type === 'booking' || event.type === 'event'))) && (
-                            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
-                              ⚠️ Date Unavailable
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>

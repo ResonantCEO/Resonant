@@ -394,7 +394,7 @@ export default function AvailabilityChecker({
                             {dayEvents.slice(0, 2).map((event, i) => (
                               <div key={i} className="flex items-center">
                                 <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 border border-white">
-                                  {event.profileName.charAt(0)}
+                                  {event.profileName?.charAt(0) || '?'}
                                 </div>
                               </div>
                             ))}
@@ -412,7 +412,7 @@ export default function AvailabilityChecker({
                         <div
                           key={i}
                           className={`text-xs px-1 py-0.5 rounded text-white truncate ${getTypeColor(event.type)} relative`}
-                          title={`${event.profileName} (${event.profileType}): ${event.title} - ${event.status}`}
+                          title={`${event.profileName || 'Unknown'} (${event.profileType}): ${event.title} - ${event.status}`}
                         >
                           {event.status === 'pending' && (
                             <span className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full border border-white"></span>
@@ -458,7 +458,7 @@ export default function AvailabilityChecker({
                               {/* Profile Info with Avatar */}
                               <div className="flex items-center space-x-2 mb-2">
                                 <User className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-700">{event.profileName} ({event.profileType})</span>
+                                <span className="text-sm text-gray-700">{event.profileName || 'Unknown'} ({event.profileType})</span>
                               </div>
                               
                               {/* Time */}

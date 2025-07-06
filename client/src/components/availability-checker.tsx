@@ -447,15 +447,10 @@ export default function AvailabilityChecker({
                                 <Badge variant="outline" className={getStatusColor(event.status)}>
                                   {event.status}
                                 </Badge>
-                                {event.profileName && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    {event.profileName} ({event.profileType})
-                                  </Badge>
-                                )}
                               </div>
                               <div className="flex items-center space-x-2 text-xs text-gray-600 mb-1">
                                 <User className="w-3 h-3" />
-                                <span>{event.profileName}</span>
+                                <span>{event.profileName} ({event.profileType})</span>
                               </div>
                               {event.startTime && (
                                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-1">
@@ -466,14 +461,6 @@ export default function AvailabilityChecker({
                                   </span>
                                 </div>
                               )}
-                              <div className="flex space-x-2 mt-2">
-                                <Badge variant="outline" className={getTypeColor(event.type) + ' text-white text-xs'}>
-                                  {event.type}
-                                </Badge>
-                                <Badge variant="outline" className={getStatusColor(event.status) + ' text-xs'}>
-                                  {event.status}
-                                </Badge>
-                              </div>
                               {event.notes && (
                                 <p className="mt-2 text-xs text-gray-600">{event.notes}</p>
                               )}

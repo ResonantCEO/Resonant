@@ -377,6 +377,12 @@ export default function ContractProposalDialog({
                   </CardContent>
                 </Card>
 
+                
+              </>
+            )}
+
+            {currentPage === 'artist-terms' && (
+              <>
                 {/* Performance Schedule */}
                 <Card>
                   <CardHeader>
@@ -444,11 +450,7 @@ export default function ContractProposalDialog({
                     </div>
                   </CardContent>
                 </Card>
-              </>
-            )}
 
-            {currentPage === 'artist-terms' && (
-              <>
                 {/* Artist Requirements */}
                 <Card>
                   <CardHeader>

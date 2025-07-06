@@ -334,7 +334,7 @@ export default function ContractProposalDialog({
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label htmlFor="title">Contract Title *</Label>
+                      <Label htmlFor="title">Event Name *</Label>
                       <Input
                         id="title"
                         placeholder="e.g., Performance Agreement - Live Concert"

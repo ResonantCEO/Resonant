@@ -295,7 +295,7 @@ export default function ContractProposalDialog({
                     type="date"
                     value={formData.expiresAt}
                     onChange={(e) => setFormData({...formData, expiresAt: e.target.value})}
-                    className="flex-1"
+                    className="flex-1 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
                   />
                   {(bookingRequest?.artistProfile?.id && bookingRequest?.venueProfile?.id) && (
                     <Button

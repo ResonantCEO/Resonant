@@ -1,0 +1,93 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database ERD Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .svg-container {
+            text-align: center;
+            overflow: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+        .error-message {
+            color: #d32f2f;
+            text-align: center;
+            padding: 20px;
+            background: #ffebee;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .fallback-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .fallback-link a {
+            color: #1976d2;
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid #1976d2;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .fallback-link a:hover {
+            background: #1976d2;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Discovery Platform - Database ERD</h1>
+        <div class="svg-container">
+            <iframe 
+                src="IMPORTANT/database-erd.svg" 
+                width="100%" 
+                height="800" 
+                style="border: none;">
+                <div class="error-message">
+                    Your browser does not support iframes.
+                </div>
+            </iframe>
+        </div>
+        <div class="fallback-link">
+            <a href="IMPORTANT/database-erd.svg" target="_blank">
+                Open ERD in New Tab
+            </a>
+        </div>
+        <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+            <h3>About this ERD</h3>
+            <p>This Entity Relationship Diagram shows the complete database schema for the Discovery Platform, including:</p>
+            <ul>
+                <li><strong>Core Tables:</strong> Users, Profiles, Events, Messages</li>
+                <li><strong>Social Features:</strong> Posts, Comments, Friendships</li>
+                <li><strong>Business Logic:</strong> Bookings, Contracts, Tickets</li>
+                <li><strong>Media & Content:</strong> Photos, Albums, Notifications</li>
+            </ul>
+            <p>The diagram displays all table relationships, primary keys (PK), foreign keys (FK), and data flow connections.</p>
+        </div>
+    </div>
+</body>
+</html>

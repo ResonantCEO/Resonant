@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar, ChevronLeft, ChevronRight, Clock, X, AlertTriangle, User } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 // Helper function to format time from 24-hour to 12-hour format
 const formatTime = (time24: string): string => {
@@ -62,6 +63,7 @@ interface CalendarEvent {
   profileId: number;
   profileName: string;
   profileType: 'artist' | 'venue';
+  profileImageUrl?: string;
 }
 
 interface AvailabilityCheckerProps {
@@ -133,7 +135,8 @@ export default function AvailabilityChecker({
             notes: request.message || '',
             profileId: request.artistProfileId,
             profileName: request.artistProfile?.name || 'Unknown Artist',
-            profileType: 'artist' as const
+            profileType: 'artist' as const,
+            profileImageUrl: request.artistProfile?.profileImageUrl
           });
         }
 
@@ -152,7 +155,8 @@ export default function AvailabilityChecker({
             notes: request.message || '',
             profileId: request.venueProfileId,
             profileName: request.venueProfile?.name || 'Unknown Venue',
-            profileType: 'venue' as const
+            profileType: 'venue' as const,
+            profileImageUrl: request.venueProfile?.profileImageUrl
           });
         }
 
@@ -396,9 +400,12 @@ export default function AvailabilityChecker({
                           <div className="flex items-center space-x-1">
                             {dayEvents.slice(0, 2).map((event, i) => (
                               <div key={i} className="flex items-center">
-                                <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 border border-white">
-                                  {event.profileName?.charAt(0) || '?'}
-                                </div>
+                                <Avatar className="w-4 h-4 border border-white">
+                                  <AvatarImage src={event.profileImageUrl} alt={event.profileName} />
+                                  <AvatarFallback className="text-xs font-medium">
+                                    {event.profileName?.charAt(0) || '?'}
+                                  </AvatarFallback>
+                                </Avatar>
                               </div>
                             ))}
                             {dayEvents.length > 2 && (
@@ -460,9 +467,12 @@ export default function AvailabilityChecker({
                               
                               {/* Profile Info with Avatar */}
                               <div className="flex items-center space-x-2 mb-2">
-                                <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 border border-white overflow-hidden">
-                                  {event.profileName?.charAt(0) || '?'}
-                                </div>
+                                <Avatar className="w-6 h-6">
+                                  <AvatarImage src={event.profileImageUrl} alt={event.profileName} />
+                                  <AvatarFallback className="text-xs font-medium">
+                                    {event.profileName?.charAt(0) || '?'}
+                                  </AvatarFallback>
+                                </Avatar>
                                 <span className="text-sm text-gray-700">{event.profileName || 'Unknown'}</span>
                               </div>
                               

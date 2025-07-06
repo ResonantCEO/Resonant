@@ -395,16 +395,17 @@ export default function AvailabilityChecker({
                           {day.getDate()}
                         </div>
 
-                        {/* Profile indicator - show A for Artist, V for Venue */}
+                        {/* Profile indicator - show profile avatar for events */}
                         {isCurrentMonth && dayEvents.length > 0 && (
                           <div className="flex items-center space-x-1">
                             {dayEvents.slice(0, 2).map((event, i) => (
                               <div key={i} className="flex items-center">
-                                <div className={`w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold text-white border border-white ${
-                                  event.profileType === 'artist' ? 'bg-green-600' : 'bg-red-600'
-                                }`}>
-                                  {event.profileType === 'artist' ? 'A' : 'V'}
-                                </div>
+                                <Avatar className="w-4 h-4 border border-white">
+                                  <AvatarImage src={event.profileImageUrl} alt={event.profileName} />
+                                  <AvatarFallback className="text-xs font-medium">
+                                    {event.profileName?.charAt(0) || '?'}
+                                  </AvatarFallback>
+                                </Avatar>
                               </div>
                             ))}
                             {dayEvents.length > 2 && (
@@ -467,16 +468,9 @@ export default function AvailabilityChecker({
                               {/* Profile Info with Avatar */}
                               <div className="flex items-center space-x-2 mb-2">
                                 <Avatar className="w-6 h-6">
-                                  {event.profileImageUrl && (
-                                    <AvatarImage 
-                                      src={event.profileImageUrl.startsWith('/') ? event.profileImageUrl : `/${event.profileImageUrl}`} 
-                                      alt={event.profileName} 
-                                    />
-                                  )}
-                                  <AvatarFallback className={`text-xs font-bold text-white ${
-                                    event.profileType === 'artist' ? 'bg-green-600' : 'bg-red-600'
-                                  }`}>
-                                    {event.profileType === 'artist' ? 'A' : 'V'}
+                                  <AvatarImage src={event.profileImageUrl} alt={event.profileName} />
+                                  <AvatarFallback className="text-xs font-medium">
+                                    {event.profileName?.charAt(0) || '?'}
                                   </AvatarFallback>
                                 </Avatar>
                                 <span className="text-sm text-gray-700">{event.profileName || 'Unknown'}</span>

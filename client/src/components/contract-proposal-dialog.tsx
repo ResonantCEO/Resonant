@@ -341,7 +341,7 @@ export default function ContractProposalDialog({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="setupTime">Setup Time</Label>
+                  <Label htmlFor="setupTime">Load-in Time</Label>
                   <Input
                     id="setupTime"
                     placeholder="e.g., 2 hours"

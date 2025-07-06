@@ -243,7 +243,7 @@ export default function ContractProposalDialog({
                 className={`w-full justify-start ${
                   currentPage === 'event-terms' 
                     ? "bg-blue-600 text-white hover:bg-blue-700" 
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    : "text-white hover:bg-gray-800"
                 }`}
                 onClick={() => setCurrentPage('event-terms')}
               >
@@ -255,7 +255,7 @@ export default function ContractProposalDialog({
                 className={`w-full justify-start ${
                   currentPage === 'artist-terms' 
                     ? "bg-blue-600 text-white hover:bg-blue-700" 
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    : "text-white hover:bg-gray-800"
                 }`}
                 onClick={() => setCurrentPage('artist-terms')}
               >
@@ -267,7 +267,7 @@ export default function ContractProposalDialog({
                 className={`w-full justify-start ${
                   currentPage === 'payment' 
                     ? "bg-blue-600 text-white hover:bg-blue-700" 
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    : "text-white hover:bg-gray-800"
                 }`}
                 onClick={() => setCurrentPage('payment')}
               >
@@ -279,7 +279,7 @@ export default function ContractProposalDialog({
                 className={`w-full justify-start ${
                   currentPage === 'docs' 
                     ? "bg-blue-600 text-white hover:bg-blue-700" 
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    : "text-white hover:bg-gray-800"
                 }`}
                 onClick={() => setCurrentPage('docs')}
               >

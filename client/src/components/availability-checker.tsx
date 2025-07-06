@@ -458,21 +458,24 @@ export default function AvailabilityChecker({
                         <div key={event.id} className={`bg-white p-3 rounded border ${event.status === 'pending' ? 'border-l-4 border-l-yellow-500' : event.status === 'confirmed' ? 'border-l-4 border-l-green-500' : ''}`}>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              {/* Event Title */}
-                              <h5 className="font-medium mb-2">
-                                {event.title}
-                              </h5>
-
-                              {/* Profile Info with Avatar */}
-                              <div className="flex items-center space-x-2 mb-2">
-                                <Avatar className="w-6 h-6">
+                              {/* Profile Info with Avatar - Now at top */}
+                              <div className="flex items-center space-x-3 mb-2">
+                                <Avatar className="w-8 h-8">
                                   <AvatarImage src={event.profileImageUrl} alt={event.profileName} />
                                   <AvatarFallback className="text-xs font-medium">
                                     {event.profileName?.charAt(0) || '?'}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span className="text-sm text-gray-700">{event.profileName || 'Unknown'}</span>
+                                <div>
+                                  <div className="font-medium text-gray-900">{event.profileName || 'Unknown'}</div>
+                                  <div className="text-xs text-gray-500 capitalize">{event.profileType}</div>
+                                </div>
                               </div>
+
+                              {/* Event Title - Now underneath */}
+                              <h5 className="font-medium mb-2 text-gray-700">
+                                {event.title}
+                              </h5>
 
                               {/* Time */}
                               {event.startTime && (

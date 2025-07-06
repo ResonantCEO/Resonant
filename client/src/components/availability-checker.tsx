@@ -132,7 +132,7 @@ export default function AvailabilityChecker({
             location: request.venueProfile.location || '',
             notes: request.message || '',
             profileId: request.artistProfileId,
-            profileName: request.artistProfile.name,
+            profileName: request.artistProfile?.name || 'Unknown Artist',
             profileType: 'artist' as const
           });
         }
@@ -151,7 +151,7 @@ export default function AvailabilityChecker({
             location: request.venueProfile.location || '',
             notes: request.message || '',
             profileId: request.venueProfileId,
-            profileName: request.venueProfile.name,
+            profileName: request.venueProfile?.name || 'Unknown Venue',
             profileType: 'venue' as const
           });
         }
@@ -159,10 +159,13 @@ export default function AvailabilityChecker({
         return events;
       });
 
-    // Filter calendar events to show events for both profiles
-    const relevantCalendarEvents = calendarEvents.filter(event => 
-      event.profileId === artistProfileId || event.profileId === venueProfileId
-    );
+    // Filter calendar events to show events for both profiles and ensure profileName is set
+    const relevantCalendarEvents = calendarEvents
+      .filter(event => event.profileId === artistProfileId || event.profileId === venueProfileId)
+      .map(event => ({
+        ...event,
+        profileName: event.profileName || (event.profileId === artistProfileId ? artistName : venueName)
+      }));
 
     // Combine all events and remove duplicates by date
     const allEvents = [...relevantCalendarEvents, ...eventsFromBookings];

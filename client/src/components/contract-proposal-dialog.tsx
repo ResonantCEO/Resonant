@@ -344,7 +344,7 @@ export default function ContractProposalDialog({
                   <Label htmlFor="setupTime">Load-in Time</Label>
                   <Input
                     id="setupTime"
-                    placeholder="e.g., 2 hours"
+                    type="time"
                     value={terms.setupTime}
                     onChange={(e) => setTerms({...terms, setupTime: e.target.value})}
                   />

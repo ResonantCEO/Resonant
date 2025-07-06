@@ -388,9 +388,22 @@ export default function AvailabilityChecker({
                           {day.getDate()}
                         </div>
 
-                        {/* Availability indicator - always show for current month */}
-                        {isCurrentMonth && (
-                          <div className={`w-2 h-2 rounded-full ${availability.color}`}></div>
+                        {/* Profile indicator - show profile avatar for events */}
+                        {isCurrentMonth && dayEvents.length > 0 && (
+                          <div className="flex items-center space-x-1">
+                            {dayEvents.slice(0, 2).map((event, i) => (
+                              <div key={i} className="flex items-center">
+                                <div className="w-4 h-4 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 border border-white">
+                                  {event.profileName.charAt(0)}
+                                </div>
+                              </div>
+                            ))}
+                            {dayEvents.length > 2 && (
+                              <div className="w-4 h-4 rounded-full bg-gray-400 flex items-center justify-center text-xs font-medium text-white border border-white">
+                                +{dayEvents.length - 2}
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
 

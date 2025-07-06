@@ -1,513 +1,799 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database ERD Viewer</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .svg-container {
-            text-align: center;
-            overflow: auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: white;
-            max-width: 100%;
-        }
-        .erd-svg {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-        }
-        .controls {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .zoom-btn {
-            background: #1976d2;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            margin: 0 5px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .zoom-btn:hover {
-            background: #1565c0;
-        }
-        .error-message {
-            color: #d32f2f;
-            text-align: center;
-            padding: 20px;
-            background: #ffebee;
-            border-radius: 4px;
-            margin: 20px 0;
-        }
-        .fallback-link {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .fallback-link a {
-            color: #1976d2;
-            text-decoration: none;
-            padding: 10px 20px;
-            border: 1px solid #1976d2;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        .fallback-link a:hover {
-            background: #1976d2;
-            color: white;
-        }
-        .info-section {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 4px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Discovery Platform - Database ERD</h1>
-        
-        <div class="controls">
-            <button class="zoom-btn" onclick="zoomIn()">Zoom In</button>
-            <button class="zoom-btn" onclick="zoomOut()">Zoom Out</button>
-            <button class="zoom-btn" onclick="resetZoom()">Reset Zoom</button>
-            <button class="zoom-btn" onclick="downloadSVG()">Download SVG</button>
-        </div>
-        
-        <div class="svg-container" id="svgContainer">
-            <svg class="erd-svg" id="erdSvg" width="2400" height="1600" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <style>
-                  .table { fill: #ffffff; stroke: #2563eb; stroke-width: 2; rx: 8; }
-                  .table-header { fill: #2563eb; }
-                  .table-name { fill: #ffffff; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; text-anchor: middle; dominant-baseline: middle; }
-                  .field { font-family: Arial, sans-serif; font-size: 9px; fill: #1f2937; }
-                  .pk { font-weight: bold; fill: #dc2626; }
-                  .fk { fill: #059669; }
-                  .connection { stroke: #6b7280; stroke-width: 1.5; fill: none; }
-                  .connection-label { font-family: Arial, sans-serif; font-size: 8px; fill: #6b7280; text-anchor: middle; }
-                </style>
-              </defs>
-              
-              <!-- Sessions Table -->
-              <rect class="table" x="50" y="50" width="160" height="100"/>
-              <rect class="table-header" x="50" y="50" width="160" height="25"/>
-              <text class="table-name" x="130" y="62">sessions</text>
-              <text class="field pk" x="60" y="80">sid (PK)</text>
-              <text class="field" x="60" y="95">sess</text>
-              <text class="field" x="60" y="110">expire</text>
-              <text class="field" x="60" y="125">created_at</text>
-              
-              <!-- Users Table -->
-              <rect class="table" x="250" y="50" width="180" height="420"/>
-              <rect class="table-header" x="250" y="50" width="180" height="25"/>
-              <text class="table-name" x="340" y="62">users</text>
-              <text class="field pk" x="260" y="80">id (PK)</text>
-              <text class="field" x="260" y="95">email</text>
-              <text class="field" x="260" y="110">password</text>
-              <text class="field" x="260" y="125">firstName</text>
-              <text class="field" x="260" y="140">lastName</text>
-              <text class="field" x="260" y="155">profileImageUrl</text>
-              <text class="field" x="260" y="170">coverImageUrl</text>
-              <text class="field" x="260" y="185">backgroundImageUrl</text>
-              <text class="field" x="260" y="200">birthdate</text>
-              <text class="field" x="260" y="215">hometown</text>
-              <text class="field" x="260" y="230">showOnlineStatus</text>
-              <text class="field" x="260" y="245">allowFriendRequests</text>
-              <text class="field" x="260" y="260">showActivityStatus</text>
-              <text class="field" x="260" y="275">emailNotifications</text>
-              <text class="field" x="260" y="290">notifyFriendRequests</text>
-              <text class="field" x="260" y="305">notifyMessages</text>
-              <text class="field" x="260" y="320">notifyPostLikes</text>
-              <text class="field" x="260" y="335">notifyComments</text>
-              <text class="field" x="260" y="350">theme</text>
-              <text class="field" x="260" y="365">language</text>
-              <text class="field" x="260" y="380">compactMode</text>
-              <text class="field" x="260" y="395">autoplayVideos</text>
-              <text class="field" x="260" y="410">profileBackground</text>
-              <text class="field" x="260" y="425">createdAt</text>
-              <text class="field" x="260" y="440">updatedAt</text>
-              
-              <!-- Profiles Table -->
-              <rect class="table" x="500" y="50" width="180" height="440"/>
-              <rect class="table-header" x="500" y="50" width="180" height="25"/>
-              <text class="table-name" x="590" y="62">profiles</text>
-              <text class="field pk" x="510" y="80">id (PK)</text>
-              <text class="field fk" x="510" y="95">userId (FK)</text>
-              <text class="field" x="510" y="110">type</text>
-              <text class="field" x="510" y="125">name</text>
-              <text class="field" x="510" y="140">bio</text>
-              <text class="field" x="510" y="155">profileImageUrl</text>
-              <text class="field" x="510" y="170">coverImageUrl</text>
-              <text class="field" x="510" y="185">coverPositionX</text>
-              <text class="field" x="510" y="200">coverPositionY</text>
-              <text class="field" x="510" y="215">profilePositionX</text>
-              <text class="field" x="510" y="230">profilePositionY</text>
-              <text class="field" x="510" y="245">backgroundImageUrl</text>
-              <text class="field" x="510" y="260">profileBackground</text>
-              <text class="field" x="510" y="275">visibility</text>
-              <text class="field" x="510" y="290">location</text>
-              <text class="field" x="510" y="305">hometown</text>
-              <text class="field" x="510" y="320">isActive</text>
-              <text class="field" x="510" y="335">isShared</text>
-              <text class="field" x="510" y="350">deletedAt</text>
-              <text class="field fk" x="510" y="365">deletedBy (FK)</text>
-              <text class="field" x="510" y="380">deletionReason</text>
-              <text class="field" x="510" y="395">backupData</text>
-              <text class="field" x="510" y="410">createdAt</text>
-              <text class="field" x="510" y="425">updatedAt</text>
-              
-              <!-- Profile Memberships Table -->
-              <rect class="table" x="750" y="50" width="180" height="240"/>
-              <rect class="table-header" x="750" y="50" width="180" height="25"/>
-              <text class="table-name" x="840" y="62">profile_memberships</text>
-              <text class="field pk" x="760" y="80">id (PK)</text>
-              <text class="field fk" x="760" y="95">profileId (FK)</text>
-              <text class="field fk" x="760" y="110">userId (FK)</text>
-              <text class="field" x="760" y="125">role</text>
-              <text class="field" x="760" y="140">permissions</text>
-              <text class="field" x="760" y="155">status</text>
-              <text class="field fk" x="760" y="170">invitedBy (FK)</text>
-              <text class="field" x="760" y="185">joinedAt</text>
-              <text class="field" x="760" y="200">createdAt</text>
-              <text class="field" x="760" y="215">updatedAt</text>
-              
-              <!-- Profile Invitations Table -->
-              <rect class="table" x="1000" y="50" width="180" height="240"/>
-              <rect class="table-header" x="1000" y="50" width="180" height="25"/>
-              <text class="table-name" x="1090" y="62">profile_invitations</text>
-              <text class="field pk" x="1010" y="80">id (PK)</text>
-              <text class="field fk" x="1010" y="95">profileId (FK)</text>
-              <text class="field" x="1010" y="110">invitedEmail</text>
-              <text class="field fk" x="1010" y="125">invitedBy (FK)</text>
-              <text class="field" x="1010" y="140">role</text>
-              <text class="field" x="1010" y="155">permissions</text>
-              <text class="field" x="1010" y="170">token</text>
-              <text class="field" x="1010" y="185">status</text>
-              <text class="field" x="1010" y="200">expiresAt</text>
-              <text class="field" x="1010" y="215">createdAt</text>
-              <text class="field" x="1010" y="230">updatedAt</text>
-              
-              <!-- Friendships Table -->
-              <rect class="table" x="1250" y="50" width="180" height="160"/>
-              <rect class="table-header" x="1250" y="50" width="180" height="25"/>
-              <text class="table-name" x="1340" y="62">friendships</text>
-              <text class="field pk" x="1260" y="80">id (PK)</text>
-              <text class="field fk" x="1260" y="95">requesterId (FK)</text>
-              <text class="field fk" x="1260" y="110">addresseeId (FK)</text>
-              <text class="field" x="1260" y="125">status</text>
-              <text class="field" x="1260" y="140">createdAt</text>
-              <text class="field" x="1260" y="155">updatedAt</text>
-              
-              <!-- Posts Table -->
-              <rect class="table" x="50" y="550" width="180" height="200"/>
-              <rect class="table-header" x="50" y="550" width="180" height="25"/>
-              <text class="table-name" x="140" y="562">posts</text>
-              <text class="field pk" x="60" y="580">id (PK)</text>
-              <text class="field fk" x="60" y="595">profileId (FK)</text>
-              <text class="field" x="60" y="610">content</text>
-              <text class="field" x="60" y="625">imageUrl</text>
-              <text class="field" x="60" y="640">visibility</text>
-              <text class="field" x="60" y="655">likesCount</text>
-              <text class="field" x="60" y="670">commentsCount</text>
-              <text class="field" x="60" y="685">createdAt</text>
-              <text class="field" x="60" y="700">updatedAt</text>
-              
-              <!-- Post Likes Table -->
-              <rect class="table" x="300" y="550" width="180" height="120"/>
-              <rect class="table-header" x="300" y="550" width="180" height="25"/>
-              <text class="table-name" x="390" y="562">post_likes</text>
-              <text class="field pk" x="310" y="580">id (PK)</text>
-              <text class="field fk" x="310" y="595">postId (FK)</text>
-              <text class="field fk" x="310" y="610">profileId (FK)</text>
-              <text class="field" x="310" y="625">createdAt</text>
-              
-              <!-- Comments Table -->
-              <rect class="table" x="550" y="550" width="180" height="140"/>
-              <rect class="table-header" x="550" y="550" width="180" height="25"/>
-              <text class="table-name" x="640" y="562">comments</text>
-              <text class="field pk" x="560" y="580">id (PK)</text>
-              <text class="field fk" x="560" y="595">postId (FK)</text>
-              <text class="field fk" x="560" y="610">profileId (FK)</text>
-              <text class="field" x="560" y="625">content</text>
-              <text class="field" x="560" y="640">createdAt</text>
-              <text class="field" x="560" y="655">updatedAt</text>
-              
-              <!-- Events Table -->
-              <rect class="table" x="800" y="350" width="180" height="380"/>
-              <rect class="table-header" x="800" y="350" width="180" height="25"/>
-              <text class="table-name" x="890" y="362">events</text>
-              <text class="field pk" x="810" y="380">id (PK)</text>
-              <text class="field fk" x="810" y="395">organizerProfileId (FK)</text>
-              <text class="field fk" x="810" y="410">venueProfileId (FK)</text>
-              <text class="field" x="810" y="425">artistProfileIds</text>
-              <text class="field" x="810" y="440">name</text>
-              <text class="field" x="810" y="455">description</text>
-              <text class="field" x="810" y="470">eventDate</text>
-              <text class="field" x="810" y="485">eventTime</text>
-              <text class="field" x="810" y="500">duration</text>
-              <text class="field" x="810" y="515">genre</text>
-              <text class="field" x="810" y="530">ageRestriction</text>
-              <text class="field" x="810" y="545">status</text>
-              <text class="field" x="810" y="560">capacity</text>
-              <text class="field" x="810" y="575">ticketsAvailable</text>
-              <text class="field" x="810" y="590">ticketSalesStart</text>
-              <text class="field" x="810" y="605">ticketSalesEnd</text>
-              <text class="field" x="810" y="620">eventImageUrl</text>
-              <text class="field" x="810" y="635">tags</text>
-              <text class="field" x="810" y="650">socialLinks</text>
-              <text class="field" x="810" y="665">requiresApproval</text>
-              <text class="field" x="810" y="680">isPrivate</text>
-              <text class="field fk" x="810" y="695">bookingRequestId (FK)</text>
-              <text class="field" x="810" y="710">createdAt</text>
-              
-              <!-- Event Ticket Types Table -->
-              <rect class="table" x="1050" y="350" width="180" height="220"/>
-              <rect class="table-header" x="1050" y="350" width="180" height="25"/>
-              <text class="table-name" x="1140" y="362">event_ticket_types</text>
-              <text class="field pk" x="1060" y="380">id (PK)</text>
-              <text class="field fk" x="1060" y="395">eventId (FK)</text>
-              <text class="field" x="1060" y="410">name</text>
-              <text class="field" x="1060" y="425">description</text>
-              <text class="field" x="1060" y="440">price</text>
-              <text class="field" x="1060" y="455">quantity</text>
-              <text class="field" x="1060" y="470">quantitySold</text>
-              <text class="field" x="1060" y="485">saleStart</text>
-              <text class="field" x="1060" y="500">saleEnd</text>
-              <text class="field" x="1060" y="515">isActive</text>
-              <text class="field" x="1060" y="530">benefits</text>
-              <text class="field" x="1060" y="545">createdAt</text>
-              <text class="field" x="1060" y="560">updatedAt</text>
-              
-              <!-- Tickets Table -->
-              <rect class="table" x="1300" y="350" width="180" height="280"/>
-              <rect class="table-header" x="1300" y="350" width="180" height="25"/>
-              <text class="table-name" x="1390" y="362">tickets</text>
-              <text class="field pk" x="1310" y="380">id (PK)</text>
-              <text class="field fk" x="1310" y="395">eventId (FK)</text>
-              <text class="field fk" x="1310" y="410">ticketTypeId (FK)</text>
-              <text class="field fk" x="1310" y="425">profileId (FK)</text>
-              <text class="field fk" x="1310" y="440">originalPurchaserId (FK)</text>
-              <text class="field" x="1310" y="455">ticketType</text>
-              <text class="field" x="1310" y="470">sectionName</text>
-              <text class="field" x="1310" y="485">rowName</text>
-              <text class="field" x="1310" y="500">seatNumber</text>
-              <text class="field" x="1310" y="515">price</text>
-              <text class="field" x="1310" y="530">qrCode</text>
-              <text class="field" x="1310" y="545">orderNumber</text>
-              <text class="field" x="1310" y="560">status</text>
-              <text class="field" x="1310" y="575">purchaseDate</text>
-              <text class="field" x="1310" y="590">transferable</text>
-              <text class="field" x="1310" y="605">returnable</text>
-              <text class="field" x="1310" y="620">returnDeadline</text>
-              
-              <!-- Booking Requests Table -->
-              <rect class="table" x="1550" y="50" width="180" height="280"/>
-              <rect class="table-header" x="1550" y="50" width="180" height="25"/>
-              <text class="table-name" x="1640" y="62">booking_requests</text>
-              <text class="field pk" x="1560" y="80">id (PK)</text>
-              <text class="field fk" x="1560" y="95">artistProfileId (FK)</text>
-              <text class="field fk" x="1560" y="110">venueProfileId (FK)</text>
-              <text class="field" x="1560" y="125">status</text>
-              <text class="field" x="1560" y="140">requestedAt</text>
-              <text class="field" x="1560" y="155">eventDate</text>
-              <text class="field" x="1560" y="170">eventTime</text>
-              <text class="field" x="1560" y="185">budget</text>
-              <text class="field" x="1560" y="200">requirements</text>
-              <text class="field" x="1560" y="215">message</text>
-              <text class="field" x="1560" y="230">createdAt</text>
-              <text class="field" x="1560" y="245">updatedAt</text>
-              <text class="field" x="1560" y="260">respondedAt</text>
-              
-              <!-- Key Relationships -->
-              <!-- Users to Profiles -->
-              <path class="connection" d="M 430 240 L 500 240"/>
-              <text class="connection-label" x="465" y="235">1:M</text>
-              
-              <!-- Profiles to Profile Memberships -->
-              <path class="connection" d="M 680 150 L 750 150"/>
-              <text class="connection-label" x="715" y="145">1:M</text>
-              
-              <!-- Users to Profile Memberships -->
-              <path class="connection" d="M 430 200 Q 600 200 750 120"/>
-              <text class="connection-label" x="590" y="190">1:M</text>
-              
-              <!-- Profiles to Profile Invitations -->
-              <path class="connection" d="M 680 120 L 1000 120"/>
-              <text class="connection-label" x="840" y="115">1:M</text>
-              
-              <!-- Profiles to Friendships -->
-              <path class="connection" d="M 680 100 L 1250 100"/>
-              <text class="connection-label" x="965" y="95">M:M</text>
-              
-              <!-- Profiles to Posts -->
-              <path class="connection" d="M 590 490 L 140 550"/>
-              <text class="connection-label" x="365" y="520">1:M</text>
-              
-              <!-- Posts to Post Likes -->
-              <path class="connection" d="M 230 610 L 300 610"/>
-              <text class="connection-label" x="265" y="605">1:M</text>
-              
-              <!-- Profiles to Post Likes -->
-              <path class="connection" d="M 590 490 Q 590 520 390 550"/>
-              <text class="connection-label" x="490" y="515">1:M</text>
-              
-              <!-- Posts to Comments -->
-              <path class="connection" d="M 230 620 L 550 620"/>
-              <text class="connection-label" x="390" y="615">1:M</text>
-              
-              <!-- Profiles to Comments -->
-              <path class="connection" d="M 640 490 L 640 550"/>
-              <text class="connection-label" x="645" y="520">1:M</text>
-              
-              <!-- Profiles to Events -->
-              <path class="connection" d="M 680 400 L 800 450"/>
-              <text class="connection-label" x="740" y="425">1:M</text>
-              
-              <!-- Events to Event Ticket Types -->
-              <path class="connection" d="M 980 450 L 1050 450"/>
-              <text class="connection-label" x="1015" y="445">1:M</text>
-              
-              <!-- Events to Tickets -->
-              <path class="connection" d="M 980 500 L 1300 500"/>
-              <text class="connection-label" x="1140" y="495">1:M</text>
-              
-              <!-- Event Ticket Types to Tickets -->
-              <path class="connection" d="M 1230 450 L 1300 450"/>
-              <text class="connection-label" x="1265" y="445">1:M</text>
-              
-              <!-- Profiles to Booking Requests -->
-              <path class="connection" d="M 680 200 L 1550 200"/>
-              <text class="connection-label" x="1115" y="195">1:M</text>
-              
-              <!-- Booking Requests to Events -->
-              <path class="connection" d="M 1640 330 L 890 350"/>
-              <text class="connection-label" x="1265" y="340">1:M</text>
-              
-              <!-- Legend -->
-              <rect fill="#f9fafb" stroke="#d1d5db" x="50" y="1150" width="400" height="140"/>
-              <text class="table-name" x="250" y="1170" fill="#1f2937">Entity Relationship Diagram - Discovery Platform</text>
-              <text class="field pk" x="60" y="1195">Primary Key (PK)</text>
-              <text class="field fk" x="60" y="1215">Foreign Key (FK)</text>
-              <text class="field" x="60" y="1235">Regular Field</text>
-              <text class="connection-label" x="60" y="1255">1:M = One-to-Many Relationship</text>
-              <text class="connection-label" x="60" y="1275">M:M = Many-to-Many Relationship</text>
-              
-              <!-- Additional Tables Note -->
-              <text class="field" x="250" y="1195" fill="#6b7280">Core Tables: Users, Profiles, Events, Messages</text>
-              <text class="field" x="250" y="1215" fill="#6b7280">Social Features: Posts, Comments, Friendships</text>
-              <text class="field" x="250" y="1235" fill="#6b7280">Business Logic: Bookings, Contracts, Tickets</text>
-              <text class="field" x="250" y="1255" fill="#6b7280">Media & Content: Photos, Albums, Notifications</text>
-              <text class="field" x="250" y="1275" fill="#6b7280">Note: Simplified view - Additional tables exist</text>
-            </svg>
-        </div>
-        
-        <div class="fallback-link">
-            <a href="IMPORTANT/database-erd.svg" target="_blank">
-                Open Original SVG in New Tab
-            </a>
-        </div>
-        
-        <div class="info-section">
-            <h3>About this ERD</h3>
-            <p>This Entity Relationship Diagram shows the complete database schema for the Discovery Platform, including:</p>
-            <ul>
-                <li><strong>Core Tables:</strong> Users, Profiles, Events, Messages</li>
-                <li><strong>Social Features:</strong> Posts, Comments, Friendships</li>
-                <li><strong>Business Logic:</strong> Bookings, Contracts, Tickets</li>
-                <li><strong>Media & Content:</strong> Photos, Albums, Notifications</li>
-            </ul>
-            <p>The diagram displays all table relationships, primary keys (PK), foreign keys (FK), and data flow connections.</p>
-        </div>
-    </div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Database ERD Viewer</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 20px;
+                background-color: #f5f5f5;
+                font-family: Arial, sans-serif;
+            }
+            .container {
+                max-width: 100%;
+                margin: 0 auto;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            h1 {
+                text-align: center;
+                color: #333;
+                margin-bottom: 30px;
+            }
+            .svg-container {
+                text-align: center;
+                overflow: auto;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                background: white;
+                max-width: 100%;
+            }
+            .erd-svg {
+                max-width: 100%;
+                height: auto;
+                display: block;
+                margin: 0 auto;
+            }
+            .controls {
+                text-align: center;
+                margin: 20px 0;
+            }
+            .zoom-btn {
+                background: #1976d2;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                margin: 0 5px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            .zoom-btn:hover {
+                background: #1565c0;
+            }
+            .error-message {
+                color: #d32f2f;
+                text-align: center;
+                padding: 20px;
+                background: #ffebee;
+                border-radius: 4px;
+                margin: 20px 0;
+            }
+            .fallback-link {
+                text-align: center;
+                margin-top: 20px;
+            }
+            .fallback-link a {
+                color: #1976d2;
+                text-decoration: none;
+                padding: 10px 20px;
+                border: 1px solid #1976d2;
+                border-radius: 4px;
+                display: inline-block;
+            }
+            .fallback-link a:hover {
+                background: #1976d2;
+                color: white;
+            }
+            .info-section {
+                margin-top: 20px;
+                padding: 15px;
+                background: #f5f5f5;
+                border-radius: 4px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Discovery Platform - Database ERD</h1>
 
-    <script>
-        let currentZoom = 1;
-        const svg = document.getElementById('erdSvg');
-        
-        function zoomIn() {
-            currentZoom += 0.2;
-            updateZoom();
-        }
-        
-        function zoomOut() {
-            currentZoom = Math.max(0.2, currentZoom - 0.2);
-            updateZoom();
-        }
-        
-        function resetZoom() {
-            currentZoom = 1;
-            updateZoom();
-        }
-        
-        function updateZoom() {
-            svg.style.transform = `scale(${currentZoom})`;
-            svg.style.transformOrigin = 'top left';
-        }
-        
-        function downloadSVG() {
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const svgBlob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
-            const svgUrl = URL.createObjectURL(svgBlob);
-            const downloadLink = document.createElement("a");
-            downloadLink.href = svgUrl;
-            downloadLink.download = "database-erd.svg";
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-        }
-        
-        // Add pan functionality
-        let isPanning = false;
-        let startPoint = { x: 0, y: 0 };
-        let endPoint = { x: 0, y: 0 };
-        
-        svg.addEventListener('mousedown', function(e) {
-            isPanning = true;
-            startPoint = { x: e.clientX, y: e.clientY };
-        });
-        
-        document.addEventListener('mousemove', function(e) {
-            if (!isPanning) return;
-            
-            endPoint = { x: e.clientX, y: e.clientY };
-            const deltaX = endPoint.x - startPoint.x;
-            const deltaY = endPoint.y - startPoint.y;
-            
-            const container = document.getElementById('svgContainer');
-            container.scrollLeft -= deltaX;
-            container.scrollTop -= deltaY;
-            
-            startPoint = endPoint;
-        });
-        
-        document.addEventListener('mouseup', function() {
-            isPanning = false;
-        });
-    </script>
-</body>
+            <div class="controls">
+                <button class="zoom-btn" onclick="zoomIn()">Zoom In</button>
+                <button class="zoom-btn" onclick="zoomOut()">Zoom Out</button>
+                <button class="zoom-btn" onclick="resetZoom()">
+                    Reset Zoom
+                </button>
+                <button class="zoom-btn" onclick="downloadSVG()">
+                    Download SVG
+                </button>
+            </div>
+
+            <div class="svg-container" id="svgContainer">
+                <svg
+                    class="erd-svg"
+                    id="erdSvg"
+                    width="2400"
+                    height="1600"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <defs>
+                        <style>
+                            .table {
+                                fill: #ffffff;
+                                stroke: #2563eb;
+                                stroke-width: 2;
+                                rx: 8;
+                            }
+                            .table-header {
+                                fill: #2563eb;
+                            }
+                            .table-name {
+                                fill: #ffffff;
+                                font-family: Arial, sans-serif;
+                                font-size: 12px;
+                                font-weight: bold;
+                                text-anchor: middle;
+                                dominant-baseline: middle;
+                            }
+                            .field {
+                                font-family: Arial, sans-serif;
+                                font-size: 9px;
+                                fill: #1f2937;
+                            }
+                            .pk {
+                                font-weight: bold;
+                                fill: #dc2626;
+                            }
+                            .fk {
+                                fill: #059669;
+                            }
+                            .connection {
+                                stroke: #6b7280;
+                                stroke-width: 1.5;
+                                fill: none;
+                            }
+                            .connection-label {
+                                font-family: Arial, sans-serif;
+                                font-size: 8px;
+                                fill: #6b7280;
+                                text-anchor: middle;
+                            }
+                        </style>
+                    </defs>
+
+                    <!-- Sessions Table -->
+                    <rect
+                        class="table"
+                        x="50"
+                        y="50"
+                        width="160"
+                        height="100"
+                    />
+                    <rect
+                        class="table-header"
+                        x="50"
+                        y="50"
+                        width="160"
+                        height="25"
+                    />
+                    <text class="table-name" x="130" y="62">sessions</text>
+                    <text class="field pk" x="60" y="80">sid (PK)</text>
+                    <text class="field" x="60" y="95">sess</text>
+                    <text class="field" x="60" y="110">expire</text>
+                    <text class="field" x="60" y="125">created_at</text>
+
+                    <!-- Users Table -->
+                    <rect
+                        class="table"
+                        x="250"
+                        y="50"
+                        width="180"
+                        height="420"
+                    />
+                    <rect
+                        class="table-header"
+                        x="250"
+                        y="50"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="340" y="62">users</text>
+                    <text class="field pk" x="260" y="80">id (PK)</text>
+                    <text class="field" x="260" y="95">email</text>
+                    <text class="field" x="260" y="110">password</text>
+                    <text class="field" x="260" y="125">firstName</text>
+                    <text class="field" x="260" y="140">lastName</text>
+                    <text class="field" x="260" y="155">profileImageUrl</text>
+                    <text class="field" x="260" y="170">coverImageUrl</text>
+                    <text class="field" x="260" y="185">
+                        backgroundImageUrl
+                    </text>
+                    <text class="field" x="260" y="200">birthdate</text>
+                    <text class="field" x="260" y="215">hometown</text>
+                    <text class="field" x="260" y="230">showOnlineStatus</text>
+                    <text class="field" x="260" y="245">
+                        allowFriendRequests
+                    </text>
+                    <text class="field" x="260" y="260">
+                        showActivityStatus
+                    </text>
+                    <text class="field" x="260" y="275">
+                        emailNotifications
+                    </text>
+                    <text class="field" x="260" y="290">
+                        notifyFriendRequests
+                    </text>
+                    <text class="field" x="260" y="305">notifyMessages</text>
+                    <text class="field" x="260" y="320">notifyPostLikes</text>
+                    <text class="field" x="260" y="335">notifyComments</text>
+                    <text class="field" x="260" y="350">theme</text>
+                    <text class="field" x="260" y="365">language</text>
+                    <text class="field" x="260" y="380">compactMode</text>
+                    <text class="field" x="260" y="395">autoplayVideos</text>
+                    <text class="field" x="260" y="410">profileBackground</text>
+                    <text class="field" x="260" y="425">createdAt</text>
+                    <text class="field" x="260" y="440">updatedAt</text>
+
+                    <!-- Profiles Table -->
+                    <rect
+                        class="table"
+                        x="500"
+                        y="50"
+                        width="180"
+                        height="440"
+                    />
+                    <rect
+                        class="table-header"
+                        x="500"
+                        y="50"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="590" y="62">profiles</text>
+                    <text class="field pk" x="510" y="80">id (PK)</text>
+                    <text class="field fk" x="510" y="95">userId (FK)</text>
+                    <text class="field" x="510" y="110">type</text>
+                    <text class="field" x="510" y="125">name</text>
+                    <text class="field" x="510" y="140">bio</text>
+                    <text class="field" x="510" y="155">profileImageUrl</text>
+                    <text class="field" x="510" y="170">coverImageUrl</text>
+                    <text class="field" x="510" y="185">coverPositionX</text>
+                    <text class="field" x="510" y="200">coverPositionY</text>
+                    <text class="field" x="510" y="215">profilePositionX</text>
+                    <text class="field" x="510" y="230">profilePositionY</text>
+                    <text class="field" x="510" y="245">
+                        backgroundImageUrl
+                    </text>
+                    <text class="field" x="510" y="260">profileBackground</text>
+                    <text class="field" x="510" y="275">visibility</text>
+                    <text class="field" x="510" y="290">location</text>
+                    <text class="field" x="510" y="305">hometown</text>
+                    <text class="field" x="510" y="320">isActive</text>
+                    <text class="field" x="510" y="335">isShared</text>
+                    <text class="field" x="510" y="350">deletedAt</text>
+                    <text class="field fk" x="510" y="365">deletedBy (FK)</text>
+                    <text class="field" x="510" y="380">deletionReason</text>
+                    <text class="field" x="510" y="395">backupData</text>
+                    <text class="field" x="510" y="410">createdAt</text>
+                    <text class="field" x="510" y="425">updatedAt</text>
+
+                    <!-- Profile Memberships Table -->
+                    <rect
+                        class="table"
+                        x="750"
+                        y="50"
+                        width="180"
+                        height="240"
+                    />
+                    <rect
+                        class="table-header"
+                        x="750"
+                        y="50"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="840" y="62">
+                        profile_memberships
+                    </text>
+                    <text class="field pk" x="760" y="80">id (PK)</text>
+                    <text class="field fk" x="760" y="95">profileId (FK)</text>
+                    <text class="field fk" x="760" y="110">userId (FK)</text>
+                    <text class="field" x="760" y="125">role</text>
+                    <text class="field" x="760" y="140">permissions</text>
+                    <text class="field" x="760" y="155">status</text>
+                    <text class="field fk" x="760" y="170">invitedBy (FK)</text>
+                    <text class="field" x="760" y="185">joinedAt</text>
+                    <text class="field" x="760" y="200">createdAt</text>
+                    <text class="field" x="760" y="215">updatedAt</text>
+
+                    <!-- Profile Invitations Table -->
+                    <rect
+                        class="table"
+                        x="1000"
+                        y="50"
+                        width="180"
+                        height="240"
+                    />
+                    <rect
+                        class="table-header"
+                        x="1000"
+                        y="50"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="1090" y="62">
+                        profile_invitations
+                    </text>
+                    <text class="field pk" x="1010" y="80">id (PK)</text>
+                    <text class="field fk" x="1010" y="95">profileId (FK)</text>
+                    <text class="field" x="1010" y="110">invitedEmail</text>
+                    <text class="field fk" x="1010" y="125">
+                        invitedBy (FK)
+                    </text>
+                    <text class="field" x="1010" y="140">role</text>
+                    <text class="field" x="1010" y="155">permissions</text>
+                    <text class="field" x="1010" y="170">token</text>
+                    <text class="field" x="1010" y="185">status</text>
+                    <text class="field" x="1010" y="200">expiresAt</text>
+                    <text class="field" x="1010" y="215">createdAt</text>
+                    <text class="field" x="1010" y="230">updatedAt</text>
+
+                    <!-- Friendships Table -->
+                    <rect
+                        class="table"
+                        x="1250"
+                        y="50"
+                        width="180"
+                        height="160"
+                    />
+                    <rect
+                        class="table-header"
+                        x="1250"
+                        y="50"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="1340" y="62">friendships</text>
+                    <text class="field pk" x="1260" y="80">id (PK)</text>
+                    <text class="field fk" x="1260" y="95">
+                        requesterId (FK)
+                    </text>
+                    <text class="field fk" x="1260" y="110">
+                        addresseeId (FK)
+                    </text>
+                    <text class="field" x="1260" y="125">status</text>
+                    <text class="field" x="1260" y="140">createdAt</text>
+                    <text class="field" x="1260" y="155">updatedAt</text>
+
+                    <!-- Posts Table -->
+                    <rect
+                        class="table"
+                        x="50"
+                        y="550"
+                        width="180"
+                        height="200"
+                    />
+                    <rect
+                        class="table-header"
+                        x="50"
+                        y="550"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="140" y="562">posts</text>
+                    <text class="field pk" x="60" y="580">id (PK)</text>
+                    <text class="field fk" x="60" y="595">profileId (FK)</text>
+                    <text class="field" x="60" y="610">content</text>
+                    <text class="field" x="60" y="625">imageUrl</text>
+                    <text class="field" x="60" y="640">visibility</text>
+                    <text class="field" x="60" y="655">likesCount</text>
+                    <text class="field" x="60" y="670">commentsCount</text>
+                    <text class="field" x="60" y="685">createdAt</text>
+                    <text class="field" x="60" y="700">updatedAt</text>
+
+                    <!-- Post Likes Table -->
+                    <rect
+                        class="table"
+                        x="300"
+                        y="550"
+                        width="180"
+                        height="120"
+                    />
+                    <rect
+                        class="table-header"
+                        x="300"
+                        y="550"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="390" y="562">post_likes</text>
+                    <text class="field pk" x="310" y="580">id (PK)</text>
+                    <text class="field fk" x="310" y="595">postId (FK)</text>
+                    <text class="field fk" x="310" y="610">profileId (FK)</text>
+                    <text class="field" x="310" y="625">createdAt</text>
+
+                    <!-- Comments Table -->
+                    <rect
+                        class="table"
+                        x="550"
+                        y="550"
+                        width="180"
+                        height="140"
+                    />
+                    <rect
+                        class="table-header"
+                        x="550"
+                        y="550"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="640" y="562">comments</text>
+                    <text class="field pk" x="560" y="580">id (PK)</text>
+                    <text class="field fk" x="560" y="595">postId (FK)</text>
+                    <text class="field fk" x="560" y="610">profileId (FK)</text>
+                    <text class="field" x="560" y="625">content</text>
+                    <text class="field" x="560" y="640">createdAt</text>
+                    <text class="field" x="560" y="655">updatedAt</text>
+
+                    <!-- Events Table -->
+                    <rect
+                        class="table"
+                        x="800"
+                        y="350"
+                        width="180"
+                        height="380"
+                    />
+                    <rect
+                        class="table-header"
+                        x="800"
+                        y="350"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="890" y="362">events</text>
+                    <text class="field pk" x="810" y="380">id (PK)</text>
+                    <text class="field fk" x="810" y="395">
+                        organizerProfileId (FK)
+                    </text>
+                    <text class="field fk" x="810" y="410">
+                        venueProfileId (FK)
+                    </text>
+                    <text class="field" x="810" y="425">artistProfileIds</text>
+                    <text class="field" x="810" y="440">name</text>
+                    <text class="field" x="810" y="455">description</text>
+                    <text class="field" x="810" y="470">eventDate</text>
+                    <text class="field" x="810" y="485">eventTime</text>
+                    <text class="field" x="810" y="500">duration</text>
+                    <text class="field" x="810" y="515">genre</text>
+                    <text class="field" x="810" y="530">ageRestriction</text>
+                    <text class="field" x="810" y="545">status</text>
+                    <text class="field" x="810" y="560">capacity</text>
+                    <text class="field" x="810" y="575">ticketsAvailable</text>
+                    <text class="field" x="810" y="590">ticketSalesStart</text>
+                    <text class="field" x="810" y="605">ticketSalesEnd</text>
+                    <text class="field" x="810" y="620">eventImageUrl</text>
+                    <text class="field" x="810" y="635">tags</text>
+                    <text class="field" x="810" y="650">socialLinks</text>
+                    <text class="field" x="810" y="665">requiresApproval</text>
+                    <text class="field" x="810" y="680">isPrivate</text>
+                    <text class="field fk" x="810" y="695">
+                        bookingRequestId (FK)
+                    </text>
+                    <text class="field" x="810" y="710">createdAt</text>
+
+                    <!-- Event Ticket Types Table -->
+                    <rect
+                        class="table"
+                        x="1050"
+                        y="350"
+                        width="180"
+                        height="220"
+                    />
+                    <rect
+                        class="table-header"
+                        x="1050"
+                        y="350"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="1140" y="362">
+                        event_ticket_types
+                    </text>
+                    <text class="field pk" x="1060" y="380">id (PK)</text>
+                    <text class="field fk" x="1060" y="395">eventId (FK)</text>
+                    <text class="field" x="1060" y="410">name</text>
+                    <text class="field" x="1060" y="425">description</text>
+                    <text class="field" x="1060" y="440">price</text>
+                    <text class="field" x="1060" y="455">quantity</text>
+                    <text class="field" x="1060" y="470">quantitySold</text>
+                    <text class="field" x="1060" y="485">saleStart</text>
+                    <text class="field" x="1060" y="500">saleEnd</text>
+                    <text class="field" x="1060" y="515">isActive</text>
+                    <text class="field" x="1060" y="530">benefits</text>
+                    <text class="field" x="1060" y="545">createdAt</text>
+                    <text class="field" x="1060" y="560">updatedAt</text>
+
+                    <!-- Tickets Table -->
+                    <rect
+                        class="table"
+                        x="1300"
+                        y="350"
+                        width="180"
+                        height="280"
+                    />
+                    <rect
+                        class="table-header"
+                        x="1300"
+                        y="350"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="1390" y="362">tickets</text>
+                    <text class="field pk" x="1310" y="380">id (PK)</text>
+                    <text class="field fk" x="1310" y="395">eventId (FK)</text>
+                    <text class="field fk" x="1310" y="410">
+                        ticketTypeId (FK)
+                    </text>
+                    <text class="field fk" x="1310" y="425">
+                        profileId (FK)
+                    </text>
+                    <text class="field fk" x="1310" y="440">
+                        originalPurchaserId (FK)
+                    </text>
+                    <text class="field" x="1310" y="455">ticketType</text>
+                    <text class="field" x="1310" y="470">sectionName</text>
+                    <text class="field" x="1310" y="485">rowName</text>
+                    <text class="field" x="1310" y="500">seatNumber</text>
+                    <text class="field" x="1310" y="515">price</text>
+                    <text class="field" x="1310" y="530">qrCode</text>
+                    <text class="field" x="1310" y="545">orderNumber</text>
+                    <text class="field" x="1310" y="560">status</text>
+                    <text class="field" x="1310" y="575">purchaseDate</text>
+                    <text class="field" x="1310" y="590">transferable</text>
+                    <text class="field" x="1310" y="605">returnable</text>
+                    <text class="field" x="1310" y="620">returnDeadline</text>
+
+                    <!-- Booking Requests Table -->
+                    <rect
+                        class="table"
+                        x="1550"
+                        y="50"
+                        width="180"
+                        height="280"
+                    />
+                    <rect
+                        class="table-header"
+                        x="1550"
+                        y="50"
+                        width="180"
+                        height="25"
+                    />
+                    <text class="table-name" x="1640" y="62">
+                        booking_requests
+                    </text>
+                    <text class="field pk" x="1560" y="80">id (PK)</text>
+                    <text class="field fk" x="1560" y="95">
+                        artistProfileId (FK)
+                    </text>
+                    <text class="field fk" x="1560" y="110">
+                        venueProfileId (FK)
+                    </text>
+                    <text class="field" x="1560" y="125">status</text>
+                    <text class="field" x="1560" y="140">requestedAt</text>
+                    <text class="field" x="1560" y="155">eventDate</text>
+                    <text class="field" x="1560" y="170">eventTime</text>
+                    <text class="field" x="1560" y="185">budget</text>
+                    <text class="field" x="1560" y="200">requirements</text>
+                    <text class="field" x="1560" y="215">message</text>
+                    <text class="field" x="1560" y="230">createdAt</text>
+                    <text class="field" x="1560" y="245">updatedAt</text>
+                    <text class="field" x="1560" y="260">respondedAt</text>
+
+                    <!-- Key Relationships -->
+                    <!-- Users to Profiles -->
+                    <path class="connection" d="M 430 240 L 500 240" />
+                    <text class="connection-label" x="465" y="235">1:M</text>
+
+                    <!-- Profiles to Profile Memberships -->
+                    <path class="connection" d="M 680 150 L 750 150" />
+                    <text class="connection-label" x="715" y="145">1:M</text>
+
+                    <!-- Users to Profile Memberships -->
+                    <path class="connection" d="M 430 200 Q 600 200 750 120" />
+                    <text class="connection-label" x="590" y="190">1:M</text>
+
+                    <!-- Profiles to Profile Invitations -->
+                    <path class="connection" d="M 680 120 L 1000 120" />
+                    <text class="connection-label" x="840" y="115">1:M</text>
+
+                    <!-- Profiles to Friendships -->
+                    <path class="connection" d="M 680 100 L 1250 100" />
+                    <text class="connection-label" x="965" y="95">M:M</text>
+
+                    <!-- Profiles to Posts -->
+                    <path class="connection" d="M 590 490 L 140 550" />
+                    <text class="connection-label" x="365" y="520">1:M</text>
+
+                    <!-- Posts to Post Likes -->
+                    <path class="connection" d="M 230 610 L 300 610" />
+                    <text class="connection-label" x="265" y="605">1:M</text>
+
+                    <!-- Profiles to Post Likes -->
+                    <path class="connection" d="M 590 490 Q 590 520 390 550" />
+                    <text class="connection-label" x="490" y="515">1:M</text>
+
+                    <!-- Posts to Comments -->
+                    <path class="connection" d="M 230 620 L 550 620" />
+                    <text class="connection-label" x="390" y="615">1:M</text>
+
+                    <!-- Profiles to Comments -->
+                    <path class="connection" d="M 640 490 L 640 550" />
+                    <text class="connection-label" x="645" y="520">1:M</text>
+
+                    <!-- Profiles to Events -->
+                    <path class="connection" d="M 680 400 L 800 450" />
+                    <text class="connection-label" x="740" y="425">1:M</text>
+
+                    <!-- Events to Event Ticket Types -->
+                    <path class="connection" d="M 980 450 L 1050 450" />
+                    <text class="connection-label" x="1015" y="445">1:M</text>
+
+                    <!-- Events to Tickets -->
+                    <path class="connection" d="M 980 500 L 1300 500" />
+                    <text class="connection-label" x="1140" y="495">1:M</text>
+
+                    <!-- Event Ticket Types to Tickets -->
+                    <path class="connection" d="M 1230 450 L 1300 450" />
+                    <text class="connection-label" x="1265" y="445">1:M</text>
+
+                    <!-- Profiles to Booking Requests -->
+                    <path class="connection" d="M 680 200 L 1550 200" />
+                    <text class="connection-label" x="1115" y="195">1:M</text>
+
+                    <!-- Booking Requests to Events -->
+                    <path class="connection" d="M 1640 330 L 890 350" />
+                    <text class="connection-label" x="1265" y="340">1:M</text>
+
+                    <!-- Legend -->
+                    <rect
+                        fill="#f9fafb"
+                        stroke="#d1d5db"
+                        x="50"
+                        y="1150"
+                        width="400"
+                        height="140"
+                    />
+                    <text class="table-name" x="250" y="1170" fill="#1f2937">
+                        Entity Relationship Diagram - Discovery Platform
+                    </text>
+                    <text class="field pk" x="60" y="1195">
+                        Primary Key (PK)
+                    </text>
+                    <text class="field fk" x="60" y="1215">
+                        Foreign Key (FK)
+                    </text>
+                    <text class="field" x="60" y="1235">Regular Field</text>
+                    <text class="connection-label" x="60" y="1255">
+                        1:M = One-to-Many Relationship
+                    </text>
+                    <text class="connection-label" x="60" y="1275">
+                        M:M = Many-to-Many Relationship
+                    </text>
+
+                    <!-- Additional Tables Note -->
+                    <text class="field" x="250" y="1195" fill="#6b7280">
+                        Core Tables: Users, Profiles, Events, Messages
+                    </text>
+                    <text class="field" x="250" y="1215" fill="#6b7280">
+                        Social Features: Posts, Comments, Friendships
+                    </text>
+                    <text class="field" x="250" y="1235" fill="#6b7280">
+                        Business Logic: Bookings, Contracts, Tickets
+                    </text>
+                    <text class="field" x="250" y="1255" fill="#6b7280">
+                        Media & Content: Photos, Albums, Notifications
+                    </text>
+                    <text class="field" x="250" y="1275" fill="#6b7280">
+                        Note: Simplified view - Additional tables exist
+                    </text>
+                </svg>
+            </div>
+
+            <div class="fallback-link">
+                <a href="IMPORTANT/database-erd.svg" target="_blank">
+                    Open Original SVG in New Tab
+                </a>
+            </div>
+
+            <div class="info-section">
+                <h3>About this ERD</h3>
+                <p>
+                    This Entity Relationship Diagram shows the complete database
+                    schema for the Discovery Platform, including:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Core Tables:</strong> Users, Profiles, Events,
+                        Messages
+                    </li>
+                    <li>
+                        <strong>Social Features:</strong> Posts, Comments,
+                        Friendships
+                    </li>
+                    <li>
+                        <strong>Business Logic:</strong> Bookings, Contracts,
+                        Tickets
+                    </li>
+                    <li>
+                        <strong>Media & Content:</strong> Photos, Albums,
+                        Notifications
+                    </li>
+                </ul>
+                <p>
+                    The diagram displays all table relationships, primary keys
+                    (PK), foreign keys (FK), and data flow connections.
+                </p>
+            </div>
+        </div>
+
+        <script>
+            let currentZoom = 1;
+            const svg = document.getElementById("erdSvg");
+
+            function zoomIn() {
+                currentZoom += 0.2;
+                updateZoom();
+            }
+
+            function zoomOut() {
+                currentZoom = Math.max(0.2, currentZoom - 0.2);
+                updateZoom();
+            }
+
+            function resetZoom() {
+                currentZoom = 1;
+                updateZoom();
+            }
+
+            function updateZoom() {
+                svg.style.transform = `scale(${currentZoom})`;
+                svg.style.transformOrigin = "top left";
+            }
+
+            function downloadSVG() {
+                const svgData = new XMLSerializer().serializeToString(svg);
+                const svgBlob = new Blob([svgData], {
+                    type: "image/svg+xml;charset=utf-8",
+                });
+                const svgUrl = URL.createObjectURL(svgBlob);
+                const downloadLink = document.createElement("a");
+                downloadLink.href = svgUrl;
+                downloadLink.download = "database-erd.svg";
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }
+
+            // Add pan functionality
+            let isPanning = false;
+            let startPoint = { x: 0, y: 0 };
+            let endPoint = { x: 0, y: 0 };
+
+            svg.addEventListener("mousedown", function (e) {
+                isPanning = true;
+                startPoint = { x: e.clientX, y: e.clientY };
+            });
+
+            document.addEventListener("mousemove", function (e) {
+                if (!isPanning) return;
+
+                endPoint = { x: e.clientX, y: e.clientY };
+                const deltaX = endPoint.x - startPoint.x;
+                const deltaY = endPoint.y - startPoint.y;
+
+                const container = document.getElementById("svgContainer");
+                container.scrollLeft -= deltaX;
+                container.scrollTop -= deltaY;
+
+                startPoint = endPoint;
+            });
+
+            document.addEventListener("mouseup", function () {
+                isPanning = false;
+            });
+        </script>
+    </body>
 </html>

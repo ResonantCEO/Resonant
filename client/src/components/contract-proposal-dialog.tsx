@@ -26,6 +26,11 @@ interface ContractTerms {
   startTime: string;
   soundCheckLength: string;
   breakdownTime: string;
+  doorsOpenTime: string;
+  eventStartTime: string;
+  setChangeWindow: string;
+  intermissionPerformer: string;
+  venueSoundSystem: string;
   cancellationPolicy: string;
   forceMateure: boolean;
   merchandising: string;
@@ -84,6 +89,11 @@ export default function ContractProposalDialog({
     startTime: "",
     soundCheckLength: "",
     breakdownTime: "",
+    doorsOpenTime: "",
+    eventStartTime: "",
+    setChangeWindow: "",
+    intermissionPerformer: "",
+    venueSoundSystem: "",
     cancellationPolicy: "",
     forceMateure: false,
     merchandising: "",
@@ -156,6 +166,11 @@ export default function ContractProposalDialog({
       startTime: "",
       soundCheckLength: "",
       breakdownTime: "",
+      doorsOpenTime: "",
+      eventStartTime: "",
+      setChangeWindow: "",
+      intermissionPerformer: "",
+      venueSoundSystem: "",
       cancellationPolicy: "",
       forceMateure: false,
       merchandising: "",
@@ -261,6 +276,18 @@ export default function ContractProposalDialog({
               >
                 <Clock className="w-4 h-4 mr-2" />
                 Artist Terms
+              </Button>
+              <Button
+                variant={currentPage === 'tickets' ? "default" : "ghost"}
+                className={`w-full justify-start text-white ${
+                  currentPage === 'tickets' 
+                    ? "bg-blue-600 hover:bg-blue-700" 
+                    : "hover:bg-gray-800"
+                }`}
+                onClick={() => setCurrentPage('tickets')}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Tickets
               </Button>
               <Button
                 variant={currentPage === 'payment' ? "default" : "ghost"}
@@ -377,7 +404,82 @@ export default function ContractProposalDialog({
                   </CardContent>
                 </Card>
 
-                
+                {/* Event Timing */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Clock className="w-5 h-5" />
+                      <span>Event Timing</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="doorsOpenTime">Doors Open Time</Label>
+                        <Input
+                          id="doorsOpenTime"
+                          type="time"
+                          value={terms.doorsOpenTime}
+                          onChange={(e) => setTerms({...terms, doorsOpenTime: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="eventStartTime">Event Start Time</Label>
+                        <Input
+                          id="eventStartTime"
+                          type="time"
+                          value={terms.eventStartTime}
+                          onChange={(e) => setTerms({...terms, eventStartTime: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="setChangeWindow">Set Change Window Length</Label>
+                        <Input
+                          id="setChangeWindow"
+                          placeholder="e.g., 15 minutes"
+                          value={terms.setChangeWindow}
+                          onChange={(e) => setTerms({...terms, setChangeWindow: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Performance & Sound Setup */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Performance & Sound Setup</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="intermissionPerformer">Intermission Performer</Label>
+                      <Select onValueChange={(value) => setTerms({...terms, intermissionPerformer: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select intermission option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="yes">Yes - There will be an intermission performer</SelectItem>
+                          <SelectItem value="house_sound">House Sound Only</SelectItem>
+                          <SelectItem value="n/a">N/A - No intermission</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="venueSoundSystem">Venue Sound System</Label>
+                      <Select onValueChange={(value) => setTerms({...terms, venueSoundSystem: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Will venue provide sound system?" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="yes">Yes - Venue provides full sound system</SelectItem>
+                          <SelectItem value="partial">Partial - Venue provides basic equipment</SelectItem>
+                          <SelectItem value="no">No - Artist must provide own sound system</SelectItem>
+                          <SelectItem value="negotiable">Negotiable</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
               </>
             )}
 
@@ -527,6 +629,168 @@ export default function ContractProposalDialog({
                       onChange={(e) => setFormData({...formData, requirements: e.target.value})}
                       rows={6}
                     />
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {currentPage === 'tickets' && (
+              <>
+                {/* Ticket Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5" />
+                      <span>Ticket Information</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="ticketPrice">General Admission Price</Label>
+                        <Input
+                          id="ticketPrice"
+                          type="number"
+                          placeholder="0.00"
+                          // value={ticketData.generalPrice}
+                          // onChange={(e) => setTicketData({...ticketData, generalPrice: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="vipPrice">VIP/Premium Price</Label>
+                        <Input
+                          id="vipPrice"
+                          type="number"
+                          placeholder="0.00"
+                          // value={ticketData.vipPrice}
+                          // onChange={(e) => setTicketData({...ticketData, vipPrice: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="capacity">Venue Capacity</Label>
+                        <Input
+                          id="capacity"
+                          type="number"
+                          placeholder="e.g., 500"
+                          // value={ticketData.capacity}
+                          // onChange={(e) => setTicketData({...ticketData, capacity: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="ticketSalesStart">Ticket Sales Start Date</Label>
+                        <Input
+                          id="ticketSalesStart"
+                          type="date"
+                          // value={ticketData.salesStartDate}
+                          // onChange={(e) => setTicketData({...ticketData, salesStartDate: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="ticketPlatform">Ticket Sales Platform</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select ticket platform" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="eventbrite">Eventbrite</SelectItem>
+                          <SelectItem value="ticketmaster">Ticketmaster</SelectItem>
+                          <SelectItem value="venue_website">Venue Website</SelectItem>
+                          <SelectItem value="door_only">Door Sales Only</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Revenue Sharing */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Revenue Sharing</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="revenueModel">Revenue Model</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select revenue sharing model" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="door_split">Door Split (% of ticket sales)</SelectItem>
+                          <SelectItem value="guarantee">Guarantee Only</SelectItem>
+                          <SelectItem value="guarantee_plus">Guarantee Plus % Over</SelectItem>
+                          <SelectItem value="artist_keeps_all">Artist Keeps All Ticket Revenue</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="artistPercentage">Artist Percentage</Label>
+                        <Input
+                          id="artistPercentage"
+                          type="number"
+                          placeholder="e.g., 70"
+                          // value={ticketData.artistPercentage}
+                          // onChange={(e) => setTicketData({...ticketData, artistPercentage: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="venuePercentage">Venue Percentage</Label>
+                        <Input
+                          id="venuePercentage"
+                          type="number"
+                          placeholder="e.g., 30"
+                          // value={ticketData.venuePercentage}
+                          // onChange={(e) => setTicketData({...ticketData, venuePercentage: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="ticketFees">Ticket Processing Fees</Label>
+                      <Textarea
+                        id="ticketFees"
+                        placeholder="Describe who pays processing fees, service charges, etc..."
+                        rows={3}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Guest List & Comps */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Guest List & Complimentary Tickets</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="artistGuestList">Artist Guest List Limit</Label>
+                        <Input
+                          id="artistGuestList"
+                          type="number"
+                          placeholder="e.g., 10"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="venueGuestList">Venue Guest List Limit</Label>
+                        <Input
+                          id="venueGuestList"
+                          type="number"
+                          placeholder="e.g., 5"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="guestListPolicy">Guest List Policy</Label>
+                      <Textarea
+                        id="guestListPolicy"
+                        placeholder="Additional guest list terms, restrictions, or requirements..."
+                        rows={3}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </>

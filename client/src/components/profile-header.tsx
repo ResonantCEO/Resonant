@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { 
   Camera, 
   Edit, 
@@ -84,6 +85,25 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
   const [profilePhotoPosition, setProfilePhotoPosition] = useState({ x: 50, y: 50 });
   const [isProfileDragging, setIsProfileDragging] = useState(false);
   const [profileDragStart, setProfileDragStart] = useState({ x: 0, y: 0 });
+  const [isEditingVenueInfo, setIsEditingVenueInfo] = useState(false);
+  const [venueInfoData, setVenueInfoData] = useState({
+    capacity: "350",
+    stageSize: "20' x 12'",
+    ceilingHeight: "14 feet",
+    ageRestriction: "21+",
+    loadInTime: "2 hours before",
+    soundCheck: "1 hour before",
+    parkingSpaces: "50 spots",
+    greenRoom: "Available",
+    advanceNotice: "30 days",
+    securityDeposit: "$500",
+    insurance: "General liability required",
+    setupBreakdown: "Artist responsible",
+    cancellationPolicy: "30-day notice for full refund. 14-day notice for 50% refund.",
+    paymentTerms: "50% deposit required. Balance due 7 days before event.",
+    maxVolumeLevel: "105 dB",
+    businessHours: "Mon-Fri 9AM-6PM"
+  });
 
   const coverContainerRef = useRef<HTMLDivElement>(null);
   const profileContainerRef = useRef<HTMLDivElement>(null);
@@ -296,6 +316,27 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       toast({
         title: "Error",
         description: error.message || "Failed to update profile picture position",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateVenueInfoMutation = useMutation({
+    mutationFn: async (venueData: any) => {
+      return await apiRequest("PATCH", `/api/profiles/${profile.id}/venue-info`, venueData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${profile.id}`] });
+      setIsEditingVenueInfo(false);
+      toast({
+        title: "Venue Information Updated",
+        description: "Your venue information has been saved successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update venue information",
         variant: "destructive",
       });
     },
@@ -647,6 +688,26 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
 
   const handleProfileTouchEnd = () => {
     setIsProfileDragging(false);
+  };
+
+  const handleEditVenueInfo = () => {
+    setIsEditingVenueInfo(true);
+  };
+
+  const handleSaveVenueInfo = () => {
+    updateVenueInfoMutation.mutate(venueInfoData);
+  };
+
+  const handleCancelVenueEdit = () => {
+    setIsEditingVenueInfo(false);
+    // Reset to original values if needed
+  };
+
+  const handleVenueInfoChange = (field: string, value: string) => {
+    setVenueInfoData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const renderActionButtons = () => {
@@ -1293,6 +1354,38 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 <div className="text-center">
                   <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Venue Information</h3>
                   <p className="text-gray-600 dark:text-gray-400">Detailed venue specifications and booking information</p>
+                  {isOwn && (
+                    <div className="mt-4">
+                      {!isEditingVenueInfo ? (
+                        <Button 
+                          onClick={handleEditVenueInfo}
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit Venue Info
+                        </Button>
+                      ) : (
+                        <div className="flex space-x-2 justify-center">
+                          <Button 
+                            onClick={handleSaveVenueInfo}
+                            disabled={updateVenueInfoMutation.isPending}
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            <Check className="w-4 h-4 mr-2" />
+                            {updateVenueInfoMutation.isPending ? "Saving..." : "Save Changes"}
+                          </Button>
+                          <Button 
+                            onClick={handleCancelVenueEdit}
+                            variant="outline"
+                            disabled={updateVenueInfoMutation.isPending}
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Cancel
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Venue Specifications */}
@@ -1305,37 +1398,109 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <span className="text-gray-600 dark:text-gray-400 font-medium">Maximum Capacity</span>
-                        <span className="text-gray-900 dark:text-white font-semibold">350 people</span>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.capacity}
+                            onChange={(e) => handleVenueInfoChange('capacity', e.target.value)}
+                            className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-right font-semibold"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-white font-semibold">{venueInfoData.capacity} people</span>
+                        )}
                       </div>
                       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <span className="text-gray-600 dark:text-gray-400 font-medium">Stage Size</span>
-                        <span className="text-gray-900 dark:text-white font-semibold">20' x 12'</span>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.stageSize}
+                            onChange={(e) => handleVenueInfoChange('stageSize', e.target.value)}
+                            className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-right font-semibold"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-white font-semibold">{venueInfoData.stageSize}</span>
+                        )}
                       </div>
                       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <span className="text-gray-600 dark:text-gray-400 font-medium">Ceiling Height</span>
-                        <span className="text-gray-900 dark:text-white font-semibold">14 feet</span>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.ceilingHeight}
+                            onChange={(e) => handleVenueInfoChange('ceilingHeight', e.target.value)}
+                            className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-right font-semibold"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-white font-semibold">{venueInfoData.ceilingHeight}</span>
+                        )}
                       </div>
                       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <span className="text-gray-600 dark:text-gray-400 font-medium">Age Restriction</span>
-                        <span className="text-gray-900 dark:text-white font-semibold">21+</span>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.ageRestriction}
+                            onChange={(e) => handleVenueInfoChange('ageRestriction', e.target.value)}
+                            className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-right font-semibold"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-white font-semibold">{venueInfoData.ageRestriction}</span>
+                        )}
                       </div>
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <span className="text-gray-600 dark:text-gray-400 font-medium">Load-in Time</span>
-                        <span className="text-gray-900 dark:text-white font-semibold">2 hours before</span>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.loadInTime}
+                            onChange={(e) => handleVenueInfoChange('loadInTime', e.target.value)}
+                            className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-right font-semibold"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-white font-semibold">{venueInfoData.loadInTime}</span>
+                        )}
                       </div>
                       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <span className="text-gray-600 dark:text-gray-400 font-medium">Sound Check</span>
-                        <span className="text-gray-900 dark:text-white font-semibold">1 hour before</span>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.soundCheck}
+                            onChange={(e) => handleVenueInfoChange('soundCheck', e.target.value)}
+                            className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-right font-semibold"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-white font-semibold">{venueInfoData.soundCheck}</span>
+                        )}
                       </div>
                       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <span className="text-gray-600 dark:text-gray-400 font-medium">Parking Spaces</span>
-                        <span className="text-gray-900 dark:text-white font-semibold">50 spots</span>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.parkingSpaces}
+                            onChange={(e) => handleVenueInfoChange('parkingSpaces', e.target.value)}
+                            className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-right font-semibold"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-white font-semibold">{venueInfoData.parkingSpaces}</span>
+                        )}
                       </div>
                       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <span className="text-gray-600 dark:text-gray-400 font-medium">Green Room</span>
-                        <span className="text-gray-900 dark:text-white font-semibold">Available</span>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.greenRoom}
+                            onChange={(e) => handleVenueInfoChange('greenRoom', e.target.value)}
+                            className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-right font-semibold"
+                          />
+                        ) : (
+                          <span className="text-gray-900 dark:text-white font-semibold">{venueInfoData.greenRoom}</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1403,21 +1568,61 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     <div className="space-y-4">
                       <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <h5 className="font-medium text-gray-900 dark:text-white mb-2">Advance Notice</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Minimum 30 days for booking requests</p>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.advanceNotice}
+                            onChange={(e) => handleVenueInfoChange('advanceNotice', e.target.value)}
+                            className="w-full bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-3 py-2 rounded border text-sm"
+                            placeholder="e.g., Minimum 30 days for booking requests"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Minimum {venueInfoData.advanceNotice} for booking requests</p>
+                        )}
                       </div>
                       <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <h5 className="font-medium text-gray-900 dark:text-white mb-2">Security Deposit</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">$500 refundable security deposit required</p>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.securityDeposit}
+                            onChange={(e) => handleVenueInfoChange('securityDeposit', e.target.value)}
+                            className="w-full bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-3 py-2 rounded border text-sm"
+                            placeholder="e.g., $500"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{venueInfoData.securityDeposit} refundable security deposit required</p>
+                        )}
                       </div>
                     </div>
                     <div className="space-y-4">
                       <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <h5 className="font-medium text-gray-900 dark:text-white mb-2">Insurance</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">General liability insurance required</p>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.insurance}
+                            onChange={(e) => handleVenueInfoChange('insurance', e.target.value)}
+                            className="w-full bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-3 py-2 rounded border text-sm"
+                            placeholder="e.g., General liability insurance required"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{venueInfoData.insurance}</p>
+                        )}
                       </div>
                       <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <h5 className="font-medium text-gray-900 dark:text-white mb-2">Setup/Breakdown</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Artist responsible for equipment setup</p>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.setupBreakdown}
+                            onChange={(e) => handleVenueInfoChange('setupBreakdown', e.target.value)}
+                            className="w-full bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-3 py-2 rounded border text-sm"
+                            placeholder="e.g., Artist responsible for equipment setup"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{venueInfoData.setupBreakdown}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1435,7 +1640,14 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                       <ul className="space-y-2 text-sm text-yellow-700 dark:text-yellow-300">
                         <li>• No outside food or beverages allowed</li>
                         <li>• All equipment must be removed by 2 AM</li>
-                        <li>• Maximum volume level: 105 dB</li>
+                        <li>• Maximum volume level: {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.maxVolumeLevel}
+                            onChange={(e) => handleVenueInfoChange('maxVolumeLevel', e.target.value)}
+                            className="bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 px-1 py-0.5 rounded border border-yellow-300 dark:border-yellow-600 text-xs inline-block w-16"
+                          />
+                        ) : venueInfoData.maxVolumeLevel}</li>
                         <li>• No pyrotechnics or open flames</li>
                         <li>• Final headcount required 48 hours prior</li>
                       </ul>
@@ -1443,11 +1655,31 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <h5 className="font-medium text-gray-900 dark:text-white mb-2">Cancellation Policy</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">30-day notice required for full refund. 14-day notice for 50% refund.</p>
+                        {isEditingVenueInfo && isOwn ? (
+                          <textarea 
+                            value={venueInfoData.cancellationPolicy}
+                            onChange={(e) => handleVenueInfoChange('cancellationPolicy', e.target.value)}
+                            className="w-full bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-3 py-2 rounded border text-sm resize-none"
+                            rows={3}
+                            placeholder="Enter cancellation policy"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{venueInfoData.cancellationPolicy}</p>
+                        )}
                       </div>
                       <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <h5 className="font-medium text-gray-900 dark:text-white mb-2">Payment Terms</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">50% deposit required to secure booking. Balance due 7 days before event.</p>
+                        {isEditingVenueInfo && isOwn ? (
+                          <textarea 
+                            value={venueInfoData.paymentTerms}
+                            onChange={(e) => handleVenueInfoChange('paymentTerms', e.target.value)}
+                            className="w-full bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-3 py-2 rounded border text-sm resize-none"
+                            rows={3}
+                            placeholder="Enter payment terms"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{venueInfoData.paymentTerms}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1475,7 +1707,17 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <Clock className="w-4 h-4 text-gray-500" />
-                        <span className="text-gray-600 dark:text-gray-400">Business Hours: Mon-Fri 9AM-6PM</span>
+                        {isEditingVenueInfo && isOwn ? (
+                          <input 
+                            type="text"
+                            value={venueInfoData.businessHours}
+                            onChange={(e) => handleVenueInfoChange('businessHours', e.target.value)}
+                            className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                            placeholder="e.g., Mon-Fri 9AM-6PM"
+                          />
+                        ) : (
+                          <span className="text-gray-600 dark:text-gray-400">Business Hours: {venueInfoData.businessHours}</span>
+                        )}
                       </div>
                       <div className="flex items-center space-x-3">
                         <MapPin className="w-4 h-4 text-gray-500" />

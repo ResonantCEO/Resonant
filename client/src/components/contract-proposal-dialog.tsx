@@ -700,21 +700,7 @@ export default function ContractProposalDialog({
                         />
                       </div>
                     </div>
-                    <div>
-                      <Label htmlFor="ticketPlatform">Ticket Sales Platform</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select ticket platform" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="eventbrite">Eventbrite</SelectItem>
-                          <SelectItem value="ticketmaster">Ticketmaster</SelectItem>
-                          <SelectItem value="venue_website">Venue Website</SelectItem>
-                          <SelectItem value="door_only">Door Sales Only</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    
                   </CardContent>
                 </Card>
 

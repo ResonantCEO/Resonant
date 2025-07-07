@@ -1194,6 +1194,390 @@ export default function Profile() {
                     </p>
                   </div>
                 </div>
+              ) : profile?.type === "venue" ? (
+                <div className="space-y-8">
+                  {/* Header */}
+                  <div className="text-center">
+                    <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">About {profile.name}</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Discover this venue's story and atmosphere</p>
+                  </div>
+
+                  {/* Venue Information */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <Building className="w-5 h-5 mr-2 text-red-500" />
+                      Venue Information
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[100px]">Venue Name:</span>
+                          <span className="text-gray-900 dark:text-white">{profile.name}</span>
+                        </div>
+
+                        {profile.location && (
+                          <div className="flex items-center space-x-3">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[100px]">Address:</span>
+                            <span className="text-gray-900 dark:text-white">{profile.location}</span>
+                          </div>
+                        )}
+
+                        {profile.genre && (
+                          <div className="flex items-center space-x-3">
+                            <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[100px]">Venue Type:</span>
+                            <span className="text-gray-900 dark:text-white">{profile.genre}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[100px]">Established:</span>
+                          <span className="text-gray-900 dark:text-white">
+                            {new Date(profile.createdAt).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'long'
+                            })}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[100px]">Capacity:</span>
+                          <span className="text-gray-900 dark:text-white">250 people</span>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <span className="text-gray-600 dark:text-gray-400 font-medium min-w-[100px]">Age Restriction:</span>
+                          <span className="text-gray-900 dark:text-white">21+</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* About Venue Section */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <FileText className="w-5 h-5 mr-2 text-purple-500" />
+                      About This Venue
+                    </h4>
+
+                    {isOwn ? (
+                      <BioEditor 
+                        currentBio={profile.bio || ""} 
+                        profileId={profileId}
+                        profileType={profile.type}
+                      />
+                    ) : profile.bio ? (
+                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                        {profile.bio}
+                      </p>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="text-gray-400 dark:text-gray-500 mb-3">
+                          <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                        </div>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                          {`${profile.name} hasn't added a description yet.`}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Venue Features & Amenities */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <Award className="w-5 h-5 mr-2 text-amber-500" />
+                      Features & Amenities
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Professional Sound System</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Stage Lighting</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Full Bar</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Dance Floor</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Parking Available</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Outdoor Seating</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">VIP Area</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Coat Check</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Accessible Entrance</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Music & Events */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <Music className="w-5 h-5 mr-2 text-green-500" />
+                      Music & Events
+                    </h4>
+                    <div className="space-y-4">
+                      {/* Preferred Genres */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preferred Music Genres</h5>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-sm rounded-full">
+                            Indie Rock
+                          </span>
+                          <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full">
+                            Electronic
+                          </span>
+                          <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm rounded-full">
+                            Jazz
+                          </span>
+                          <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm rounded-full">
+                            Folk
+                          </span>
+                          <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 text-sm rounded-full">
+                            Alternative
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Event Types */}
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Event Types</h5>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          <div className="flex items-center space-x-2">
+                            <Mic className="w-4 h-4 text-purple-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Live Music</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Users className="w-4 h-4 text-blue-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Private Events</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4 text-green-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Weekly Shows</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Star className="w-4 h-4 text-yellow-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Special Events</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Headphones className="w-4 h-4 text-pink-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">DJ Nights</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Building className="w-4 h-4 text-indigo-500" />
+                            <span className="text-gray-600 dark:text-gray-400 text-sm">Corporate Events</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Venue Statistics */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <BarChart3 className="w-5 h-5 mr-2 text-orange-500" />
+                      Venue Statistics
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                          24
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Events This Year</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                          {friends.length}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Connected Artists</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          4.8
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Average Rating</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                          89%
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Capacity Average</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Operating Hours */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <Clock className="w-5 h-5 mr-2 text-blue-500" />
+                      Operating Hours
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Monday</span>
+                          <span className="text-gray-900 dark:text-white">Closed</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Tuesday</span>
+                          <span className="text-gray-900 dark:text-white">Closed</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Wednesday</span>
+                          <span className="text-gray-900 dark:text-white">6:00 PM - 12:00 AM</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Thursday</span>
+                          <span className="text-gray-900 dark:text-white">6:00 PM - 12:00 AM</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Friday</span>
+                          <span className="text-gray-900 dark:text-white font-semibold">6:00 PM - 2:00 AM</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Saturday</span>
+                          <span className="text-gray-900 dark:text-white font-semibold">6:00 PM - 2:00 AM</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Sunday</span>
+                          <span className="text-gray-900 dark:text-white">4:00 PM - 10:00 PM</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact & Social */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <Globe className="w-5 h-5 mr-2 text-indigo-500" />
+                      Connect With Us
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        {profile.website && (
+                          <a 
+                            href={profile.website} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                          >
+                            <Globe className="w-4 h-4 mr-2" />
+                            Visit Website
+                          </a>
+                        )}
+                        <div className="flex items-center space-x-2">
+                          <Mail className="w-4 h-4 text-gray-500" />
+                          <span className="text-gray-600 dark:text-gray-400">booking@venue.com</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
+                          <span className="text-gray-600 dark:text-gray-400">(555) 123-4567</span>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4 text-gray-500" />
+                          <span className="text-gray-600 dark:text-gray-400">
+                            {profile.location || "Location not specified"}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="w-4 h-4 text-gray-500" />
+                          <span className="text-gray-600 dark:text-gray-400">
+                            Open Wed-Sat
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Community & Reviews */}
+                  <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                      <Users className="w-5 h-5 mr-2 text-purple-500" />
+                      Community & Reviews
+                    </h4>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Overall Rating</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="flex space-x-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star key={star} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                            ))}
+                          </div>
+                          <span className="text-gray-900 dark:text-white font-semibold">4.8/5</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-green-600 dark:text-green-400">156</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Total Reviews</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-lg font-bold text-blue-600 dark:text-blue-400">94%</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Would Recommend</div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-600 dark:text-gray-400 w-12">Sound</span>
+                          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div className="bg-green-500 h-2 rounded-full" style={{width: '92%'}}></div>
+                          </div>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">4.6</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-600 dark:text-gray-400 w-12">Atmosphere</span>
+                          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div className="bg-green-500 h-2 rounded-full" style={{width: '96%'}}></div>
+                          </div>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">4.8</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-gray-600 dark:text-gray-400 w-12">Service</span>
+                          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div className="bg-green-500 h-2 rounded-full" style={{width: '88%'}}></div>
+                          </div>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">4.4</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p>
+                      {isOwn 
+                        ? "This is how your venue appears to others. You can edit your information in Settings."
+                        : `Learn more about ${profile.name} and plan your visit.`
+                      }
+                    </p>
+                  </div>
+                </div>
               ) : (
                 <div className="text-center text-gray-500 dark:text-gray-400">
                   <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">About</h3>

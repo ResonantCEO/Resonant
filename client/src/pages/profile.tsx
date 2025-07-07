@@ -277,6 +277,11 @@ export default function Profile() {
     enabled: !!profileId && profile?.type === 'audience' && isOwn,
   });
 
+  const { data: friends = [] } = useQuery({
+    queryKey: [`/api/profiles/${profileId}/friends`],
+    enabled: !!profileId,
+  });
+
   const sendFriendRequestMutation = useMutation({
     mutationFn: async (profileId: number) => {
       return await apiRequest("POST", "/api/friend-requests", { addresseeId: profileId });

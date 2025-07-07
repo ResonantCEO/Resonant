@@ -1273,12 +1273,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   Stats
                 </TabsTrigger>
               )}
-              {/* Management tab - visible only for venue profiles (artist members moved to dashboard) */}
-              {profile?.type === "venue" && (
-                <TabsTrigger value="management" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
-                  Staff
-                </TabsTrigger>
-              )}
+              
               {/* Venue Info tab - only visible for venue profiles and hidden from audience viewers */}
               {profile?.type === "venue" && viewerProfile?.type !== "audience" && (
                 <TabsTrigger value="venue-info" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
@@ -1288,17 +1283,7 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
             </TabsList>
           </div>
 
-          {/* Management tab content - only show for venue profiles */}
-          {profile?.type === "venue" && (
-            <TabsContent value="management" className="p-6">
-              <ProfileManagement 
-                profileId={profile?.id || 0}
-                profileType={profile?.type || 'audience'}
-                isOwner={isOwn}
-                canManageMembers={canManageMembers || false}
-              />
-            </TabsContent>
-          )}
+          
 
           {/* Venue Info tab content - only show for venue profiles and hidden from audience viewers */}
           {profile?.type === "venue" && viewerProfile?.type !== "audience" && (

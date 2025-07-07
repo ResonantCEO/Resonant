@@ -102,7 +102,20 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
     cancellationPolicy: "30-day notice for full refund. 14-day notice for 50% refund.",
     paymentTerms: "50% deposit required. Balance due 7 days before event.",
     maxVolumeLevel: "105 dB",
-    businessHours: "Mon-Fri 9AM-6PM"
+    businessHours: "Mon-Fri 9AM-6PM",
+    // Technical Equipment
+    soundSystem: {
+      mixingConsole: "32-channel mixing console",
+      paSystem: "Line array PA system",
+      monitors: "Monitor speakers",
+      microphones: "Wireless microphone system"
+    },
+    lighting: {
+      stageLight: "LED stage lighting",
+      movingHeads: "Moving head lights",
+      fogMachine: "Fog machine",
+      lightingConsole: "DMX lighting console"
+    }
   });
 
   const coverContainerRef = useRef<HTMLDivElement>(null);
@@ -1518,19 +1531,71 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">32-channel mixing console</span>
+                          {isEditingVenueInfo && isOwn ? (
+                            <input 
+                              type="text"
+                              value={venueInfoData.soundSystem.mixingConsole}
+                              onChange={(e) => setVenueInfoData(prev => ({
+                                ...prev,
+                                soundSystem: { ...prev.soundSystem, mixingConsole: e.target.value }
+                              }))}
+                              className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                              placeholder="e.g., 32-channel mixing console"
+                            />
+                          ) : (
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{venueInfoData.soundSystem.mixingConsole}</span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">Line array PA system</span>
+                          {isEditingVenueInfo && isOwn ? (
+                            <input 
+                              type="text"
+                              value={venueInfoData.soundSystem.paSystem}
+                              onChange={(e) => setVenueInfoData(prev => ({
+                                ...prev,
+                                soundSystem: { ...prev.soundSystem, paSystem: e.target.value }
+                              }))}
+                              className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                              placeholder="e.g., Line array PA system"
+                            />
+                          ) : (
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{venueInfoData.soundSystem.paSystem}</span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">Monitor speakers</span>
+                          {isEditingVenueInfo && isOwn ? (
+                            <input 
+                              type="text"
+                              value={venueInfoData.soundSystem.monitors}
+                              onChange={(e) => setVenueInfoData(prev => ({
+                                ...prev,
+                                soundSystem: { ...prev.soundSystem, monitors: e.target.value }
+                              }))}
+                              className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                              placeholder="e.g., Monitor speakers"
+                            />
+                          ) : (
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{venueInfoData.soundSystem.monitors}</span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">Wireless microphone system</span>
+                          {isEditingVenueInfo && isOwn ? (
+                            <input 
+                              type="text"
+                              value={venueInfoData.soundSystem.microphones}
+                              onChange={(e) => setVenueInfoData(prev => ({
+                                ...prev,
+                                soundSystem: { ...prev.soundSystem, microphones: e.target.value }
+                              }))}
+                              className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                              placeholder="e.g., Wireless microphone system"
+                            />
+                          ) : (
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{venueInfoData.soundSystem.microphones}</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1539,19 +1604,71 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">LED stage lighting</span>
+                          {isEditingVenueInfo && isOwn ? (
+                            <input 
+                              type="text"
+                              value={venueInfoData.lighting.stageLight}
+                              onChange={(e) => setVenueInfoData(prev => ({
+                                ...prev,
+                                lighting: { ...prev.lighting, stageLight: e.target.value }
+                              }))}
+                              className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                              placeholder="e.g., LED stage lighting"
+                            />
+                          ) : (
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{venueInfoData.lighting.stageLight}</span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">Moving head lights</span>
+                          {isEditingVenueInfo && isOwn ? (
+                            <input 
+                              type="text"
+                              value={venueInfoData.lighting.movingHeads}
+                              onChange={(e) => setVenueInfoData(prev => ({
+                                ...prev,
+                                lighting: { ...prev.lighting, movingHeads: e.target.value }
+                              }))}
+                              className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                              placeholder="e.g., Moving head lights"
+                            />
+                          ) : (
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{venueInfoData.lighting.movingHeads}</span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">Fog machine</span>
+                          {isEditingVenueInfo && isOwn ? (
+                            <input 
+                              type="text"
+                              value={venueInfoData.lighting.fogMachine}
+                              onChange={(e) => setVenueInfoData(prev => ({
+                                ...prev,
+                                lighting: { ...prev.lighting, fogMachine: e.target.value }
+                              }))}
+                              className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                              placeholder="e.g., Fog machine"
+                            />
+                          ) : (
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{venueInfoData.lighting.fogMachine}</span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">DMX lighting console</span>
+                          {isEditingVenueInfo && isOwn ? (
+                            <input 
+                              type="text"
+                              value={venueInfoData.lighting.lightingConsole}
+                              onChange={(e) => setVenueInfoData(prev => ({
+                                ...prev,
+                                lighting: { ...prev.lighting, lightingConsole: e.target.value }
+                              }))}
+                              className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                              placeholder="e.g., DMX lighting console"
+                            />
+                          ) : (
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{venueInfoData.lighting.lightingConsole}</span>
+                          )}
                         </div>
                       </div>
                     </div>

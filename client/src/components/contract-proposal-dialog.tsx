@@ -29,6 +29,7 @@ interface ContractTerms {
   doorsOpenTime: string;
   eventStartTime: string;
   setChangeWindow: string;
+  hardStopTime: string;
   intermissionPerformer: string;
   venueSoundSystem: string;
   cancellationPolicy: string;
@@ -92,6 +93,7 @@ export default function ContractProposalDialog({
     doorsOpenTime: "",
     eventStartTime: "",
     setChangeWindow: "",
+    hardStopTime: "",
     intermissionPerformer: "",
     venueSoundSystem: "",
     cancellationPolicy: "",
@@ -169,6 +171,7 @@ export default function ContractProposalDialog({
       doorsOpenTime: "",
       eventStartTime: "",
       setChangeWindow: "",
+      hardStopTime: "",
       intermissionPerformer: "",
       venueSoundSystem: "",
       cancellationPolicy: "",
@@ -439,6 +442,15 @@ export default function ContractProposalDialog({
                           placeholder="e.g., 15 minutes"
                           value={terms.setChangeWindow}
                           onChange={(e) => setTerms({...terms, setChangeWindow: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hardStopTime">Hard Stop Time</Label>
+                        <Input
+                          id="hardStopTime"
+                          type="time"
+                          value={terms.hardStopTime}
+                          onChange={(e) => setTerms({...terms, hardStopTime: e.target.value})}
                         />
                       </div>
                     </div>

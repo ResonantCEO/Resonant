@@ -24,7 +24,12 @@ import {
   Book,
   Move,
   Check,
-  X
+  X,
+  Building,
+  Settings,
+  Calendar,
+  FileText,
+  Mail
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -1274,6 +1279,12 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                   Staff
                 </TabsTrigger>
               )}
+              {/* Venue Info tab - only visible for venue profiles and hidden from audience viewers */}
+              {profile?.type === "venue" && viewerProfile?.type !== "audience" && (
+                <TabsTrigger value="venue-info" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 rounded-none">
+                  Venue Info
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
@@ -1286,6 +1297,209 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                 isOwner={isOwn}
                 canManageMembers={canManageMembers || false}
               />
+            </TabsContent>
+          )}
+
+          {/* Venue Info tab content - only show for venue profiles and hidden from audience viewers */}
+          {profile?.type === "venue" && viewerProfile?.type !== "audience" && (
+            <TabsContent value="venue-info" className="p-6">
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2">Venue Information</h3>
+                  <p className="text-gray-600 dark:text-gray-400">Detailed venue specifications and booking information</p>
+                </div>
+
+                {/* Venue Specifications */}
+                <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <Building className="w-5 h-5 mr-2 text-red-500" />
+                    Venue Specifications
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Maximum Capacity</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">350 people</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Stage Size</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">20' x 12'</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Ceiling Height</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">14 feet</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Age Restriction</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">21+</span>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Load-in Time</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">2 hours before</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Sound Check</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">1 hour before</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Parking Spaces</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">50 spots</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <span className="text-gray-600 dark:text-gray-400 font-medium">Green Room</span>
+                        <span className="text-gray-900 dark:text-white font-semibold">Available</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Technical Equipment */}
+                <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <Settings className="w-5 h-5 mr-2 text-blue-500" />
+                    Technical Equipment
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Sound System</h5>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">32-channel mixing console</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Line array PA system</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Monitor speakers</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Wireless microphone system</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Lighting</h5>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">LED stage lighting</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Moving head lights</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">Fog machine</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">DMX lighting console</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Booking Requirements */}
+                <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <Calendar className="w-5 h-5 mr-2 text-purple-500" />
+                    Booking Requirements
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">Advance Notice</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Minimum 30 days for booking requests</p>
+                      </div>
+                      <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">Security Deposit</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">$500 refundable security deposit required</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">Insurance</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">General liability insurance required</p>
+                      </div>
+                      <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">Setup/Breakdown</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Artist responsible for equipment setup</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Venue Policies */}
+                <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <FileText className="w-5 h-5 mr-2 text-orange-500" />
+                    Venue Policies
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                      <h5 className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">⚠️ Important Policies</h5>
+                      <ul className="space-y-2 text-sm text-yellow-700 dark:text-yellow-300">
+                        <li>• No outside food or beverages allowed</li>
+                        <li>• All equipment must be removed by 2 AM</li>
+                        <li>• Maximum volume level: 105 dB</li>
+                        <li>• No pyrotechnics or open flames</li>
+                        <li>• Final headcount required 48 hours prior</li>
+                      </ul>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">Cancellation Policy</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">30-day notice required for full refund. 14-day notice for 50% refund.</p>
+                      </div>
+                      <div className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <h5 className="font-medium text-gray-900 dark:text-white mb-2">Payment Terms</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">50% deposit required to secure booking. Balance due 7 days before event.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="bg-white/50 dark:bg-gray-800/50 rounded-lg p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <Mail className="w-5 h-5 mr-2 text-green-500" />
+                    Booking Contact
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <Mail className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-600 dark:text-gray-400">booking@{profile.name.toLowerCase().replace(/\s+/g, '')}.com</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        <span className="text-gray-600 dark:text-gray-400">(555) 123-BOOK</span>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <Clock className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-600 dark:text-gray-400">Business Hours: Mon-Fri 9AM-6PM</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <MapPin className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-600 dark:text-gray-400">{profile.location || "Location not specified"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </TabsContent>
           )}
         </Tabs>

@@ -108,13 +108,15 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
       mixingConsole: "32-channel mixing console",
       paSystem: "Line array PA system",
       monitors: "Monitor speakers",
-      microphones: "Wireless microphone system"
+      microphones: "Wireless microphone system",
+      additional: []
     },
     lighting: {
       stageLight: "LED stage lighting",
       movingHeads: "Moving head lights",
       fogMachine: "Fog machine",
-      lightingConsole: "DMX lighting console"
+      lightingConsole: "DMX lighting console",
+      additional: []
     }
   });
 
@@ -1597,6 +1599,64 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                             <span className="text-sm text-gray-700 dark:text-gray-300">{venueInfoData.soundSystem.microphones}</span>
                           )}
                         </div>
+                        {/* Additional Sound System Equipment */}
+                        {(venueInfoData.soundSystem.additional || []).map((item, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            {isEditingVenueInfo && isOwn ? (
+                              <div className="flex items-center space-x-2 flex-1">
+                                <input 
+                                  type="text"
+                                  value={item}
+                                  onChange={(e) => {
+                                    const newAdditional = [...(venueInfoData.soundSystem.additional || [])];
+                                    newAdditional[index] = e.target.value;
+                                    setVenueInfoData(prev => ({
+                                      ...prev,
+                                      soundSystem: { ...prev.soundSystem, additional: newAdditional }
+                                    }));
+                                  }}
+                                  className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                                  placeholder="Additional equipment..."
+                                />
+                                <Button
+                                  onClick={() => {
+                                    const newAdditional = [...(venueInfoData.soundSystem.additional || [])];
+                                    newAdditional.splice(index, 1);
+                                    setVenueInfoData(prev => ({
+                                      ...prev,
+                                      soundSystem: { ...prev.soundSystem, additional: newAdditional }
+                                    }));
+                                  }}
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-500 hover:text-red-700 p-1 h-6 w-6"
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
+                            )}
+                          </div>
+                        ))}
+                        {/* Add new sound equipment button */}
+                        {isEditingVenueInfo && isOwn && (
+                          <Button
+                            onClick={() => {
+                              const newAdditional = [...(venueInfoData.soundSystem.additional || []), ''];
+                              setVenueInfoData(prev => ({
+                                ...prev,
+                                soundSystem: { ...prev.soundSystem, additional: newAdditional }
+                              }));
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="text-blue-500 hover:text-blue-700 text-xs"
+                          >
+                            + Add Equipment
+                          </Button>
+                        )}
                       </div>
                     </div>
                     <div>
@@ -1670,6 +1730,64 @@ export default function ProfileHeader({ profile, isOwn, canManageMembers, active
                             <span className="text-sm text-gray-700 dark:text-gray-300">{venueInfoData.lighting.lightingConsole}</span>
                           )}
                         </div>
+                        {/* Additional Lighting Equipment */}
+                        {(venueInfoData.lighting.additional || []).map((item, index) => (
+                          <div key={index} className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            {isEditingVenueInfo && isOwn ? (
+                              <div className="flex items-center space-x-2 flex-1">
+                                <input 
+                                  type="text"
+                                  value={item}
+                                  onChange={(e) => {
+                                    const newAdditional = [...(venueInfoData.lighting.additional || [])];
+                                    newAdditional[index] = e.target.value;
+                                    setVenueInfoData(prev => ({
+                                      ...prev,
+                                      lighting: { ...prev.lighting, additional: newAdditional }
+                                    }));
+                                  }}
+                                  className="bg-white dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1 rounded border text-sm flex-1"
+                                  placeholder="Additional equipment..."
+                                />
+                                <Button
+                                  onClick={() => {
+                                    const newAdditional = [...(venueInfoData.lighting.additional || [])];
+                                    newAdditional.splice(index, 1);
+                                    setVenueInfoData(prev => ({
+                                      ...prev,
+                                      lighting: { ...prev.lighting, additional: newAdditional }
+                                    }));
+                                  }}
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-500 hover:text-red-700 p-1 h-6 w-6"
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
+                            )}
+                          </div>
+                        ))}
+                        {/* Add new lighting equipment button */}
+                        {isEditingVenueInfo && isOwn && (
+                          <Button
+                            onClick={() => {
+                              const newAdditional = [...(venueInfoData.lighting.additional || []), ''];
+                              setVenueInfoData(prev => ({
+                                ...prev,
+                                lighting: { ...prev.lighting, additional: newAdditional }
+                              }));
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="text-blue-500 hover:text-blue-700 text-xs"
+                          >
+                            + Add Equipment
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>

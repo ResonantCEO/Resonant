@@ -3254,6 +3254,17 @@ export function registerRoutes(app: Express): Server {
             );
           }
         }
+
+        // Clean up the venue's booking request notification after accepting
+        await db
+          .delete(notifications)
+          .where(and(
+            eq(notifications.type, 'booking_request'),
+            eq(notifications.recipientId, req.user.id),
+            sql`(${notifications.data}->>'bookingId')::int = ${requestId} OR 
+                (${notifications.data}->>'bookingRequestId')::int = ${requestId} OR
+                (${notifications.data}->>'id')::int = ${requestId}`
+          ));
       }
 
       // If booking was rejected/declined, send decline notification with optional message
@@ -3276,7 +3287,7 @@ export function registerRoutes(app: Express): Server {
           }
         }
 
-        // Clean up the original booking request notification
+        // Clean up the venue's booking request notification after declining
         await db
           .delete(notifications)
           .where(and(

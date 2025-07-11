@@ -13,6 +13,14 @@ The application is fully functional with:
 - Image upload and profile customization
 
 ## Recent Changes
+### July 11, 2025 - Version 0.8.2 - Booking Decline Message System Fixed
+- ✓ **Root Cause Identified**: Found dual booking decline routes causing message loss - redundant POST route bypassed notification service
+- ✓ **Route Consolidation**: Removed redundant `/api/bookings/:id/decline` route that created notifications directly without proper message handling
+- ✓ **Fixed Message Flow**: Consolidated all booking declines to use proper PATCH `/api/booking-requests/:id` route with notification service
+- ✓ **Message Display Working**: Verified frontend display logic correctly shows decline messages in red-styled boxes
+- ✓ **Backend Integration**: Confirmed `notifyBookingDeclined` function properly handles and stores decline messages in notification data
+- ✓ **Process Streamlined**: Eliminated redundancy by ensuring single path for booking declines with proper message support
+
 ### July 2, 2025 - Version 0.8.1 - WebSocket Performance Optimization Implementation Complete
 - ✓ **Production Integration**: Successfully integrated optimized WebSocket implementation into production server
 - ✓ **Backend Optimization Active**: Replaced server/websocket.ts with server/websocket-optimized.ts in main server configuration

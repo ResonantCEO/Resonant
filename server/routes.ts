@@ -3396,7 +3396,7 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
-      const { profileId, message } = req.body;
+      const { profileId, message, bookingRequestId } = req.body;
 
       if (!profileId) {
         return res.status(400).json({ message: "Profile ID is required" });
@@ -3413,11 +3413,21 @@ export function registerRoutes(app: Express): Server {
 
       // Send initial message if provided
       if (message && message.trim()) {
-        await storage.sendMessage({
+        const messageData: any = {
           conversationId: conversation.id,
           senderId: activeProfile.id,
           content: message.trim(),
-        });
+        };
+
+        // Add booking context if provided
+        if (bookingRequestId) {
+          messageData.attachments = [{
+            type: 'booking_reference',
+            bookingRequestId: bookingRequestId
+          }];
+        }
+
+        await storage.sendMessage(messageData);
       }
 
       res.json(conversation);

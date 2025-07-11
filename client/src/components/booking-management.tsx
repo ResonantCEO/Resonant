@@ -12,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { Calendar, Clock, MapPin, User, Plus, CheckCircle, XCircle, MessageSquare, BarChart3 } from "lucide-react";
 import { FileText } from "lucide-react";
-import ContractProposalDialog from "./contract-proposal-dialog";
-import AvailabilityChecker from "./availability-checker";
+import ContractProposalDialog from './contract-proposal-dialog';
+import AvailabilityChecker from './availability-checker';
+import BookingMessageWidget from './booking-message-widget';
 
 interface BookingRequest {
   id: number;
@@ -58,9 +59,12 @@ export default function BookingManagement({ profileType }: BookingManagementProp
   const [selectedBookingForContract, setSelectedBookingForContract] = useState<any>(null);
   const [showAvailabilityChecker, setShowAvailabilityChecker] = useState(false);
   const [selectedAvailabilityRequest, setSelectedAvailabilityRequest] = useState<any>(null);
-    const [showDeclineDialog, setShowDeclineDialog] = useState(false);
-    const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
-    const [declineMessage, setDeclineMessage] = useState('');
+  const [showDeclineDialog, setShowDeclineDialog] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
+  const [declineMessage, setDeclineMessage] = useState('');
+  const [showMessageWidget, setShowMessageWidget] = useState(false);
+  const [selectedBookingForMessage, setSelectedBookingForMessage] = useState<any>(null);
+  const [conversationId, setConversationId] = useState<number | null>(null);
 
 
   const queryClient = useQueryClient();
@@ -129,11 +133,11 @@ export default function BookingManagement({ profileType }: BookingManagementProp
 
   // Update booking request mutation
   const updateBookingRequestMutation = useMutation({
-      mutationFn: async ({ requestId, status, message }: { requestId: number; status: 'accepted' | 'rejected'; message?: string }) => {
+    mutationFn: async ({ requestId, status, message }: { requestId: number; status: 'accepted' | 'rejected'; message?: string }) => {
       const response = await fetch(`/api/booking-requests/${requestId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status, declineMessage: message }),
+        body: JSON.stringify({ status, declineMessage: message }),
       });
       if (!response.ok) throw new Error("Failed to update booking request");
       return response.json();
@@ -144,9 +148,9 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         title: "Success",
         description: "Booking request updated successfully",
       });
-        setShowDeclineDialog(false);
-        setDeclineMessage('');
-        setSelectedRequestId(null);
+      setShowDeclineDialog(false);
+      setDeclineMessage('');
+      setSelectedRequestId(null);
     },
     onError: (error: Error) => {
       toast({
@@ -189,20 +193,20 @@ export default function BookingManagement({ profileType }: BookingManagementProp
     createBookingRequestMutation.mutate(requestData);
   };
 
-    const handleBookingResponse = (requestId: number, status: 'accepted' | 'rejected') => {
-        if (status === 'rejected') {
-            setSelectedRequestId(requestId);
-            setShowDeclineDialog(true);
-        } else {
-            updateBookingRequestMutation.mutate({ requestId, status });
-        }
-    };
+  const handleBookingResponse = (requestId: number, status: 'accepted' | 'rejected') => {
+    if (status === 'rejected') {
+      setSelectedRequestId(requestId);
+      setShowDeclineDialog(true);
+    } else {
+      updateBookingRequestMutation.mutate({ requestId, status });
+    }
+  };
 
-    const handleDeclineConfirmation = () => {
-        if (selectedRequestId) {
-            updateBookingRequestMutation.mutate({ requestId: selectedRequestId, status: 'rejected', message: declineMessage });
-        }
-    };
+  const handleDeclineConfirmation = () => {
+    if (selectedRequestId) {
+      updateBookingRequestMutation.mutate({ requestId: selectedRequestId, status: 'rejected', message: declineMessage });
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -214,7 +218,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
   };
 
   // Filter requests based on profile type and active profile
-  const filteredRequests = profileType === 'artist' 
+  const filteredRequests = profileType === 'artist'
     ? bookingRequests.filter(req => req.artistProfile && req.artistProfileId === activeProfile?.id) // Requests sent by this artist
     : bookingRequests.filter(req => req.venueProfile && req.venueProfileId === activeProfile?.id); // Requests received by this venue
 
@@ -225,6 +229,109 @@ export default function BookingManagement({ profileType }: BookingManagementProp
     return <div>Loading booking requests...</div>;
   }
 
+  const handleMessage = async (request: BookingRequest) => {
+    setSelectedBookingForMessage(request);
+
+    // Determine the target profile based on current user's role
+    let targetProfileId;
+    if (profileType === 'artist') {
+      targetProfileId = request.venueProfile?.id;
+    } else {
+      targetProfileId = request.artistProfile?.id;
+    }
+
+    if (!targetProfileId) {
+      toast({
+        title: "Error",
+        description: "Unable to determine conversation partner",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if conversation already exists for this booking
+    try {
+      // Assuming apiRequest is defined elsewhere and handles API calls with authentication
+      const apiRequest = async (method: string, url: string, data?: any) => {
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: data ? JSON.stringify(data) : undefined
+        });
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        return await response.json();
+      };
+
+      const conversations = await apiRequest("GET", "/api/conversations");
+      const existingConversation = conversations.find((conv: any) =>
+        conv.name.includes(request.artistProfile?.name) &&
+        conv.name.includes(request.venueProfile?.name) &&
+        conv.participants?.some((p: any) => p.id === targetProfileId)
+      );
+
+      if (existingConversation) {
+        setConversationId(existingConversation.id);
+        setShowMessageWidget(true);
+      } else {
+        // Start new conversation with booking context
+        const initialMessage = `Hi! I'm messaging about the booking request for ${request.eventDate ? new Date(request.eventDate).toLocaleDateString() : 'your event'}. ${request.message ? `Original request: "${request.message}"` : ''}`;
+
+        // Assuming startBookingConversationMutation is a mutation for starting a conversation
+        const startBookingConversationMutation = useMutation({
+          mutationFn: async (data: any) => {
+            const response = await apiRequest("POST", "/api/conversations", data);
+            return response;
+          },
+          onSuccess: (data: any) => {
+            setConversationId(data.id);
+            setShowMessageWidget(true);
+          },
+          onError: (error: any) => {
+            toast({
+              title: "Error",
+              description: "Failed to start conversation",
+              variant: "destructive",
+            });
+          },
+        });
+
+        startBookingConversationMutation.mutate({
+          profileId: targetProfileId,
+          message: initialMessage,
+          bookingRequestId: request.id
+        });
+      }
+    } catch (error) {
+      // If we can't check existing conversations, just start a new one
+      const startBookingConversationMutation = useMutation({
+        mutationFn: async (data: any) => {
+          const response = await apiRequest("POST", "/api/conversations", data);
+          return response;
+        },
+        onSuccess: (data: any) => {
+          setConversationId(data.id);
+          setShowMessageWidget(true);
+        },
+        onError: (error: any) => {
+          toast({
+            title: "Error",
+            description: "Failed to start conversation",
+            variant: "destructive",
+          });
+        },
+      });
+      startBookingConversationMutation.mutate({
+        profileId: targetProfileId,
+        message: `Hi! I'm messaging about the booking request for ${request.eventDate ? new Date(request.eventDate).toLocaleDateString() : 'your event'}.`,
+        bookingRequestId: request.id
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with action button */}
@@ -234,7 +341,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         </h2>
         <div className="flex space-x-2">
           {profileType === 'artist' && (
-            <Button 
+            <Button
               onClick={() => setShowRequestTypeDialog(true)}
               className="bg-blue-600 hover:bg-blue-700 !text-white"
             >
@@ -254,8 +361,8 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                   How would you like to approach this venue?
                 </p>
                 <div className="space-y-3">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full justify-start h-auto p-4"
                     onClick={() => {
                       setShowRequestTypeDialog(false);
@@ -269,8 +376,8 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                       </div>
                     </div>
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full justify-start h-auto p-4"
                     onClick={() => {
                       setShowRequestTypeDialog(false);
@@ -310,7 +417,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
           {/* Simple Booking Request Dialog */}
           <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
             <DialogContent className="max-w-lg">
-            <DialogHeader>
+              <DialogHeader>
                 <DialogTitle>Request Venue Booking</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
@@ -340,7 +447,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                       id="eventDate"
                       type="date"
                       value={newRequest.eventDate}
-                      onChange={(e) => setNewRequest({...newRequest, eventDate: e.target.value})}
+                      onChange={(e) => setNewRequest({ ...newRequest, eventDate: e.target.value })}
                     />
                   </div>
                   <div>
@@ -349,7 +456,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                       id="eventTime"
                       type="time"
                       value={newRequest.eventTime}
-                      onChange={(e) => setNewRequest({...newRequest, eventTime: e.target.value})}
+                      onChange={(e) => setNewRequest({ ...newRequest, eventTime: e.target.value })}
                     />
                   </div>
                 </div>
@@ -361,7 +468,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                     type="number"
                     placeholder="Enter your budget"
                     value={newRequest.budget}
-                    onChange={(e) => setNewRequest({...newRequest, budget: e.target.value})}
+                    onChange={(e) => setNewRequest({ ...newRequest, budget: e.target.value })}
                   />
                 </div>
 
@@ -371,7 +478,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                     id="requirements"
                     placeholder="Sound system, lighting, staging requirements..."
                     value={newRequest.requirements}
-                    onChange={(e) => setNewRequest({...newRequest, requirements: e.target.value})}
+                    onChange={(e) => setNewRequest({ ...newRequest, requirements: e.target.value })}
                     rows={3}
                   />
                 </div>
@@ -382,7 +489,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                     id="message"
                     placeholder="Tell the venue about your event..."
                     value={newRequest.message}
-                    onChange={(e) => setNewRequest({...newRequest, message: e.target.value})}
+                    onChange={(e) => setNewRequest({ ...newRequest, message: e.target.value })}
                     rows={3}
                   />
                 </div>
@@ -391,7 +498,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                   <Button variant="outline" onClick={() => setShowRequestDialog(false)}>
                     Cancel
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleCreateBookingRequest}
                     disabled={createBookingRequestMutation.isPending}
                     className="bg-blue-600 hover:bg-blue-700 !text-white"
@@ -402,7 +509,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
               </div>
             </DialogContent>
           </Dialog>
-          <Button 
+          <Button
             variant="outline"
             onClick={() => {
               // Scroll to calendar section
@@ -557,9 +664,9 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                               Propose Contract
                             </Button>
                             <Button
-                              size="sm"
+                              onClick={() => handleMessage(request)}
                               variant="outline"
-                              className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white w-full justify-start"
+                              size="sm"
                             >
                               <MessageSquare className="w-4 h-4 mr-2" />
                               Message
@@ -590,9 +697,9 @@ export default function BookingManagement({ profileType }: BookingManagementProp
                       )}
                       {!(profileType === 'venue' && request.status === 'pending') && (
                         <Button
-                          size="sm"
+                          onClick={() => handleMessage(request)}
                           variant="outline"
-                          className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
+                          size="sm"
                         >
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Message
@@ -618,13 +725,13 @@ export default function BookingManagement({ profileType }: BookingManagementProp
               {profileType === 'artist' ? 'No Booking Requests' : 'No Booking Requests'}
             </h3>
             <p className="text-gray-600 mb-4">
-              {profileType === 'artist' 
+              {profileType === 'artist'
                 ? "You haven't sent any booking requests yet. Start by browsing venues and sending your first request."
                 : "You haven't received any booking requests yet. Artists will be able to send you booking requests soon."
               }
             </p>
             {profileType === 'artist' && (
-              <Button 
+              <Button
                 onClick={() => setShowRequestTypeDialog(true)}
                 className="bg-blue-600 hover:bg-blue-700 !text-white"
               >
@@ -637,7 +744,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
       )}
 
       {/* Contract Proposal Dialog */}
-      <ContractProposalDialog 
+      <ContractProposalDialog
         open={showContractDialog}
         onOpenChange={setShowContractDialog}
         bookingRequest={selectedBookingForContract}
@@ -646,7 +753,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
 
       {/* Availability Checker Dialog */}
       {selectedAvailabilityRequest && (
-        <AvailabilityChecker 
+        <AvailabilityChecker
           open={showAvailabilityChecker}
           onOpenChange={setShowAvailabilityChecker}
           artistProfileId={selectedAvailabilityRequest.artistProfileId}
@@ -655,40 +762,51 @@ export default function BookingManagement({ profileType }: BookingManagementProp
           venueName={selectedAvailabilityRequest.venueProfile.name}
         />
       )}
-        {/* Decline Confirmation Dialog */}
-        <Dialog open={showDeclineDialog} onOpenChange={setShowDeclineDialog}>
-            <DialogContent className="max-w-md">
-                <DialogHeader>
-                    <DialogTitle>Decline Booking Request</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                    <p>Are you sure you want to decline this booking request?</p>
-                    <Label htmlFor="declineMessage">Message (Optional):</Label>
-                    <Textarea
-                        id="declineMessage"
-                        placeholder="Enter a message to send with the decline notification"
-                        value={declineMessage}
-                        onChange={(e) => setDeclineMessage(e.target.value)}
-                        rows={3}
-                    />
-                    <div className="flex justify-end space-x-2">
-                        <Button variant="outline" onClick={() => {
-                            setShowDeclineDialog(false);
-                            setDeclineMessage('');
-                            setSelectedRequestId(null);
-                        }}>
-                            Cancel
-                        </Button>
-                        <Button
-                            className="bg-red-600 hover:bg-red-700 !text-white"
-                            onClick={handleDeclineConfirmation}
-                        >
-                            Decline
-                        </Button>
-                    </div>
-                </div>
-            </DialogContent>
-        </Dialog>
+      {/* Decline Confirmation Dialog */}
+      <Dialog open={showDeclineDialog} onOpenChange={setShowDeclineDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Decline Booking Request</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>Are you sure you want to decline this booking request?</p>
+            <Label htmlFor="declineMessage">Message (Optional):</Label>
+            <Textarea
+              id="declineMessage"
+              placeholder="Enter a message to send with the decline notification"
+              value={declineMessage}
+              onChange={(e) => setDeclineMessage(e.target.value)}
+              rows={3}
+            />
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => {
+                setShowDeclineDialog(false);
+                setDeclineMessage('');
+                setSelectedRequestId(null);
+              }}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-red-600 hover:bg-red-700 !text-white"
+                onClick={handleDeclineConfirmation}
+              >
+                Decline
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <BookingMessageWidget
+        isOpen={showMessageWidget}
+        onClose={() => {
+          setShowMessageWidget(false);
+          setSelectedBookingForMessage(null);
+          setConversationId(null);
+        }}
+        conversationId={conversationId}
+        bookingRequest={selectedBookingForMessage}
+      />
     </div>
   );
 }

@@ -3234,12 +3234,15 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
+      console.log('=== BOOKING DECLINE DEBUG START ===');
       console.log('PATCH booking request - request ID:', requestId);
-      console.log('PATCH booking request - received body:', req.body);
+      console.log('PATCH booking request - received body:', JSON.stringify(req.body, null, 2));
       console.log('PATCH booking request - status:', status);
-      console.log('PATCH booking request - decline message:', declineMessage);
+      console.log('PATCH booking request - decline message raw:', declineMessage);
       console.log('PATCH booking request - decline message type:', typeof declineMessage);
       console.log('PATCH booking request - decline message length:', declineMessage ? declineMessage.length : 'null/undefined');
+      console.log('PATCH booking request - req.body keys:', Object.keys(req.body));
+      console.log('=== BOOKING DECLINE DEBUG END ===');
 
       // Update booking request status in database
       const updatedRequest = await storage.updateBookingRequestStatus(requestId, status, activeProfile.id);
@@ -3306,7 +3309,16 @@ export function registerRoutes(app: Express): Server {
               }
             }
             
-            console.log('Sending booking declined notification with decline message:', finalDeclineMessage);
+            console.log('=== NOTIFICATION CREATION DEBUG ===');
+            console.log('Raw decline message from body:', declineMessage);
+            console.log('Processed final decline message:', finalDeclineMessage);
+            console.log('About to call notifyBookingDeclined with:', {
+              artistUserId: artistProfile.userId,
+              venueUserId: req.user.id,
+              venueName,
+              venueProfileName: activeProfile.name,
+              declineMessage: finalDeclineMessage
+            });
             
             await notificationService.notifyBookingDeclined(
               artistProfile.userId,
@@ -3315,6 +3327,8 @@ export function registerRoutes(app: Express): Server {
               activeProfile.name,
               finalDeclineMessage
             );
+            
+            console.log('=== NOTIFICATION CREATION COMPLETE ===');
           }
         }
       }

@@ -1029,8 +1029,7 @@ export class Storage {
     } catch (error) {
       console.error("Error fetching booking request by ID:", error);
       return null;
-    }
-  }
+    }}
 
   // Messaging functions
   async getConversations(profileId: number): Promise<any[]> {
@@ -1924,7 +1923,7 @@ export class Storage {
   async getCalendarEventsForProfiles(profileIds: number[]) {
     try {
       if (profileIds.length === 0) return [];
-      
+
       const events = await db
         .select({
           id: calendarEvents.id,
@@ -1964,20 +1963,20 @@ export class Storage {
   async createCalendarEvent(eventData: Omit<InsertCalendarEvent, 'id' | 'createdAt' | 'updatedAt'>) {
     try {
       console.log('Storage: Creating calendar event with data:', eventData);
-      
+
       // Validate the data before insertion
       if (!eventData.profileId) {
         throw new Error("Profile ID is required");
       }
-      
+
       if (!eventData.title || !eventData.title.trim()) {
         throw new Error("Title is required");
       }
-      
+
       if (!eventData.date) {
         throw new Error("Date is required");
       }
-      
+
       if (!eventData.startTime) {
         throw new Error("Start time is required");
       }
@@ -1996,7 +1995,7 @@ export class Storage {
           eventDate = new Date(dateStr + 'T00:00:00');
         }
       }
-      
+
       if (isNaN(eventDate.getTime())) {
         throw new Error("Invalid date provided");
       }
@@ -2065,4 +2064,5 @@ export class Storage {
   }
 }
 
+// Exclude booking_request notifications from general notification counts
 export const storage = new Storage();

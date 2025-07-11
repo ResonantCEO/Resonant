@@ -28,7 +28,7 @@ export default function Sidebar() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { isCollapsed, setIsCollapsed } = useSidebar();
   const { user } = useAuth();
-  
+
   // Initialize WebSocket notifications for real-time updates
   const { isConnected } = useNotificationSocket();
 
@@ -153,16 +153,16 @@ export default function Sidebar() {
   // Debounced profile activation to prevent rapid-fire API calls
   const rawActivateProfile = async (profileId: number) => {
     await apiRequest("POST", `/api/profiles/${profileId}/activate`);
-    
+
     // Clear message-related caches that might block profile switching
     queryClient.removeQueries({ queryKey: ["/api/conversations"] });
     queryClient.removeQueries({ queryKey: ["/api/friends"] });
-    
+
     // Invalidate core profile queries
     queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
     queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
   };
-  
+
   const debouncedActivateProfile = useDebounce(rawActivateProfile, 300);
 
   const activateProfileMutation = useMutation({
@@ -266,6 +266,16 @@ export default function Sidebar() {
       console.log(`Final count for profile ${profile.id} (${profile.name}):`, finalCount);
       return finalCount;
   };
+
+    // Fetch booking requests for dashboard count
+    const { data: bookingRequests = [] } = useQuery({
+        queryKey: ["/api/booking-requests"],
+        enabled: !!activeProfile && ((activeProfile as any).type === 'artist' || (activeProfile as any).type === 'venue'),
+        refetchInterval: 5000, // Poll every 5 seconds
+    });
+
+    // Count pending booking requests
+    const pendingBookingCount = bookingRequests.filter((request: any) => request.status === 'pending').length;
 
   return (
     <div className={`${isCollapsed ? 'w-16' : 'w-80'} bg-white dark:bg-neutral-900 shadow-lg border-r border-neutral-200 dark:border-neutral-700 hidden lg:block transition-all duration-300 fixed top-0 left-0 h-screen overflow-hidden z-40`}>
@@ -415,7 +425,7 @@ export default function Sidebar() {
             <li>
               <Button
                 variant="ghost"
-                className={`${isCollapsed ? 'w-full justify-center p-2' : 'w-full justify-start'} ${
+                className={`${isCollapsed ? 'w-full justify-center p-2 relative' : 'w-full justify-start'} ${
                   isActivePath("/dashboard") 
                     ? "bg-blue-600 !text-white hover:bg-blue-700 font-medium" 
                     : "text-neutral-600 hover:bg-neutral-100"
@@ -424,6 +434,16 @@ export default function Sidebar() {
               >
                 <BarChart3 className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
                 {!isCollapsed && "Dashboard"}
+                  {pendingBookingCount > 0 && !isCollapsed && (
+                      <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
+                          {pendingBookingCount > 99 ? '99+' : pendingBookingCount}
+                      </Badge>
+                  )}
+                  {isCollapsed && pendingBookingCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
+                          {pendingBookingCount > 99 ? '99+' : pendingBookingCount}
+                      </span>
+                  )}
               </Button>
             </li>
           )}
@@ -525,14 +545,14 @@ export default function Sidebar() {
             >
               <Bell className={`w-5 h-5 ${!isCollapsed ? 'mr-3' : ''}`} />
               {!isCollapsed && "Notifications"}
-              {!isCollapsed && unreadNotificationCount > 0 && (
+              {!isCollapsed && (unreadNotificationCount - pendingBookingCount) > 0 && (
                 <Badge className="ml-auto bg-red-500 text-white text-xs min-w-[20px] h-5 flex items-center justify-center">
-                  {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                  {(unreadNotificationCount - pendingBookingCount) > 99 ? '99+' : (unreadNotificationCount - pendingBookingCount)}
                 </Badge>
               )}
-              {isCollapsed && unreadNotificationCount > 0 && (
+              {isCollapsed && (unreadNotificationCount - pendingBookingCount) > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-medium">
-                  {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+                  {(unreadNotificationCount - pendingBookingCount) > 99 ? '99+' : (unreadNotificationCount - pendingBookingCount)}
                 </span>
               )}
             </Button>

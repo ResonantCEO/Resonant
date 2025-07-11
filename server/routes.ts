@@ -3265,12 +3265,13 @@ export function registerRoutes(app: Express): Server {
           if (artistProfile?.userId) {
             const venueUser = await storage.getUser(req.user.id);
             const venueName = `${venueUser?.firstName} ${venueUser?.lastName}`;
+            console.log('Sending booking declined notification with decline message:', declineMessage);
             await notificationService.notifyBookingDeclined(
               artistProfile.userId,
               req.user.id,
               venueName,
               activeProfile.name,
-              declineMessage
+              declineMessage || null
             );
           }
         }

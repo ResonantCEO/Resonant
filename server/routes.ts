@@ -3234,8 +3234,12 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
+      console.log('PATCH booking request - request ID:', requestId);
       console.log('PATCH booking request - received body:', req.body);
+      console.log('PATCH booking request - status:', status);
       console.log('PATCH booking request - decline message:', declineMessage);
+      console.log('PATCH booking request - decline message type:', typeof declineMessage);
+      console.log('PATCH booking request - decline message length:', declineMessage ? declineMessage.length : 'null/undefined');
 
       const updatedRequest = await storage.updateBookingRequestStatus(requestId, status, activeProfile.id);
 

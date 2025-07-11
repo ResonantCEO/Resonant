@@ -407,6 +407,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
   };
 
   const handleDeclineBookingRequest = (bookingId: number, notification?: any) => {
+    console.log('handleDeclineBookingRequest called with:', { bookingId, notification });
     setSelectedBookingForDecline({ bookingId, notification });
     setShowDeclineDialog(true);
     setDeclineMessage("");
@@ -416,16 +417,21 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     if (!selectedBookingForDecline) return;
 
     const bookingId = selectedBookingForDecline.bookingId;
+    console.log('Declining booking with ID:', bookingId, 'and message:', declineMessage);
     setDecliningBooking(bookingId);
 
     try {
+      const requestBody = { 
+        status: "rejected",
+        declineMessage: declineMessage.trim() || null
+      };
+      
+      console.log('Sending PATCH request with body:', requestBody);
+
       const response = await fetch(`/api/booking-requests/${bookingId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          status: "rejected",
-          declineMessage: declineMessage.trim() || null
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -710,13 +716,14 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // For booking_request notifications, the booking ID should be in the notification data
-                      const bookingId = notification.data?.bookingId || 
-                                      notification.data?.bookingRequestId || 
+                      // For booking_request notifications, try to get the booking ID
+                      const bookingId = notification.data?.bookingRequestId || 
+                                      notification.data?.bookingId || 
                                       notification.data?.id ||
                                       notification.data?.requestId ||
                                       notification.data?.booking_id ||
-                                      notification.data?.booking_request_id;
+                                      notification.data?.booking_request_id ||
+                                      notification.id; // Use notification ID as fallback
 
                       console.log('Decline booking - Full notification:', notification);
                       console.log('Decline booking - Notification data:', notification.data);
@@ -734,10 +741,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                         });
                       }
                     }}
-                    disabled={decliningBooking === (notification.data?.bookingId || notification.data?.bookingRequestId || notification.data?.id || notification.data?.requestId)}
+                    disabled={decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId || notification.id)}
                     className="text-white border-white hover:bg-white hover:text-black"
                   >
-                    {decliningBooking === (notification.data?.bookingId || notification.data?.bookingRequestId || notification.data?.id || notification.data?.requestId) ? "..." : "Decline"}
+                    {decliningBooking === (notification.data?.bookingRequestId || notification.data?.bookingId || notification.data?.id || notification.data?.requestId || notification.id) ? "..." : "Decline"}
                   </Button>
                   <Button
                     size="sm"

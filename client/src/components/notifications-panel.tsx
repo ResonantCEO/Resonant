@@ -403,9 +403,11 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   const handleDeclineBookingRequest = (bookingId: number) => {
     console.log('Decline booking request called with ID:', bookingId);
+    console.log('Current dialog state before:', showDeclineDialog);
     setSelectedBookingId(bookingId);
     setDeclineMessage(""); // Reset message
     setShowDeclineDialog(true);
+    console.log('Dialog state set to true');
   };
 
   const handleDeclineDialogConfirm = async () => {
@@ -698,6 +700,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                       console.log('Decline booking - Available keys:', notification.data ? Object.keys(notification.data) : 'No data');
 
                       if (bookingId) {
+                        console.log('About to show decline dialog for booking ID:', bookingId);
                         handleDeclineBookingRequest(bookingId);
                       } else {
                         toast({
@@ -870,7 +873,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
       )}
 
       {/* Decline Booking Dialog */}
-      <Dialog open={showDeclineDialog} onOpenChange={setShowDeclineDialog}>
+      <Dialog open={showDeclineDialog} onOpenChange={(open) => {
+        console.log('Dialog open state changing to:', open);
+        setShowDeclineDialog(open);
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Decline Booking Request</DialogTitle>

@@ -573,6 +573,8 @@ export class NotificationService {
   }
 
   async notifyBookingConfirmed(venueUserId: number, artistUserId: number, venueName: string, venueProfileName: string, eventDate: string) {
+    console.log(`Creating booking confirmed notification for user ${artistUserId}`);
+
     await this.createNotification({
       recipientId: artistUserId,
       senderId: venueUserId,
@@ -580,6 +582,17 @@ export class NotificationService {
       title: 'Booking Confirmed! 🎉',
       message: `${venueName} (${venueProfileName}) has confirmed your booking for ${eventDate}`,
       data: { venueUserId, venueName, venueProfileName, eventDate }
+    });
+  }
+
+  async notifyBookingDeclined(artistUserId: number, venueUserId: number, venueName: string, venueProfileName: string, declineMessage?: string) {
+    await this.createNotification({
+      recipientId: artistUserId,
+      senderId: venueUserId,
+      type: 'booking_declined',
+      title: 'Booking Declined',
+      message: `${venueName} (${venueProfileName}) has declined your booking request${declineMessage ? ` with message: ${declineMessage}` : ''}`,
+      data: { venueUserId, venueName, venueProfileName, declineMessage }
     });
   }
 

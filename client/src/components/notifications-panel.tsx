@@ -8,6 +8,9 @@ import { Bell, Check, Trash2, Heart, UserMinus, ExternalLink, Reply, Send } from
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface NotificationsPanelProps {
   showAsCard?: boolean;
@@ -38,7 +41,7 @@ async function apiRequest(method: string, url: string, body?: any) {
     const text = await response.text();
     return text.trim() ? JSON.parse(text) : {};
   }
-  
+
   return {};
 }
 
@@ -51,6 +54,9 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
   const [decliningRequest, setDecliningRequest] = useState<number | null>(null);
   const [acceptingBooking, setAcceptingBooking] = useState<number | null>(null);
   const [decliningBooking, setDecliningBooking] = useState<number | null>(null);
+  const [showDeclineDialog, setShowDeclineDialog] = useState(false);
+  const [declineMessage, setDeclineMessage] = useState("");
+  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
 
   // Fetch notifications with real-time polling
   const { data: allNotifications = [], isLoading } = useQuery({
@@ -258,8 +264,9 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
 
   // Decline booking request mutation
   const declineBookingRequestMutation = useMutation({
-    mutationFn: async (bookingId: number) => {
-      return await apiRequest("POST", `/api/bookings/${bookingId}/decline`);
+    mutationFn: async ({ bookingId, message }: { bookingId: number; message?: string }) => {
+      const body = message ? { status: 'rejected', declineMessage: message } : { status: 'rejected' };
+      return await apiRequest("POST", `/api/bookings/${bookingId}/decline`, body);
     },
     onSuccess: () => {
       // Invalidate all notification-related queries
@@ -267,14 +274,14 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
-      
+
       // Force refetch to ensure immediate UI update
       queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
       queryClient.refetchQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
-      
+
       toast({
         title: "Booking Request Declined",
-        description: "You have declined the booking request",
+        description: "The booking request has been declined.",
       });
     },
     onError: (error: any) => {
@@ -374,7 +381,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
           result = JSON.parse(text);
         }
       }
-      
+
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
@@ -394,52 +401,40 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     }
   };
 
-  const handleDeclineBookingRequest = async (bookingId: number) => {
-    if (!bookingId) return;
+  const handleDeclineBookingRequest = (bookingId: number) => {
+    setSelectedBookingId(bookingId);
+    setShowDeclineDialog(true);
+  };
 
-    setDecliningBooking(bookingId);
+  const handleDeclineDialogConfirm = async () => {
+    if (!selectedBookingId) return;
+
+    setDecliningBooking(selectedBookingId);
+    setShowDeclineDialog(false);
+
     try {
-      const response = await fetch(`/api/booking-requests/${bookingId}`, {
-        method: 'PATCH',
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: 'rejected' }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
-      }
-
-      // Only try to parse JSON if there's content
-      let result = null;
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        const text = await response.text();
-        if (text.trim()) {
-          result = JSON.parse(text);
-        }
-      }
+      await declineBookingRequestMutation.mutateAsync({ bookingId: selectedBookingId, message: declineMessage });
 
       // Find and remove the booking request notification from local state immediately
       queryClient.setQueryData(["/api/notifications"], (oldData: any[]) => {
         if (!oldData) return oldData;
         return oldData.filter(notification => {
           return !(notification.type === 'booking_request' && 
-                  (notification.data?.bookingId === bookingId || 
-                   notification.data?.bookingRequestId === bookingId ||
-                   notification.data?.id === bookingId));
+                  (notification.data?.bookingId === selectedBookingId || 
+                   notification.data?.bookingRequestId === selectedBookingId ||
+                   notification.data?.id === selectedBookingId));
         });
       });
-      
+
       // Invalidate and refetch all notification-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
-      
+
       // Force refetch to ensure counts are updated
       queryClient.refetchQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
-      
+
       toast({
         title: "Booking Request Declined",
         description: "The booking request has been declined.",
@@ -452,6 +447,8 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
       });
     } finally {
       setDecliningBooking(null);
+      setSelectedBookingId(null);
+      setDeclineMessage("");
     }
   };
 
@@ -659,12 +656,12 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                                       notification.data?.booking_id ||
                                       notification.data?.booking_request_id ||
                                       notification.id; // Use notification ID as fallback
-                      
+
                       console.log('Accept booking - Full notification:', notification);
                       console.log('Accept booking - Notification data:', notification.data);
                       console.log('Accept booking - Extracted booking ID:', bookingId);
                       console.log('Accept booking - Available keys:', notification.data ? Object.keys(notification.data) : 'No data');
-                      
+
                       if (bookingId) {
                         handleAcceptBookingRequest(bookingId);
                       } else {
@@ -694,12 +691,12 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
                                       notification.data?.booking_id ||
                                       notification.data?.booking_request_id ||
                                       notification.id; // Use notification ID as fallback
-                      
+
                       console.log('Decline booking - Full notification:', notification);
                       console.log('Decline booking - Notification data:', notification.data);
                       console.log('Decline booking - Extracted booking ID:', bookingId);
                       console.log('Decline booking - Available keys:', notification.data ? Object.keys(notification.data) : 'No data');
-                      
+
                       if (bookingId) {
                         handleDeclineBookingRequest(bookingId);
                       } else {
@@ -871,6 +868,50 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
           ))}
         </div>
       )}
+
+      {/* Decline Booking Dialog */}
+      <Dialog open={showDeclineDialog} onOpenChange={setShowDeclineDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Decline Booking Request</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="decline-message">
+                Would you like to send a message to the artist explaining why you're declining? (Optional)
+              </Label>
+              <Textarea
+                id="decline-message"
+                placeholder="Let the artist know why you can't accommodate their request..."
+                value={declineMessage}
+                onChange={(e) => setDeclineMessage(e.target.value)}
+                className="mt-2"
+                rows={4}
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDeclineDialog(false);
+                  setSelectedBookingId(null);
+                  setDeclineMessage("");
+                }}
+                disabled={decliningBooking !== null}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeclineDialogConfirm}
+                disabled={decliningBooking !== null}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {decliningBooking !== null ? "Declining..." : "Decline Request"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 

@@ -3226,7 +3226,7 @@ export function registerRoutes(app: Express): Server {
   app.patch('/api/booking-requests/:id', isAuthenticated, async (req: any, res) => {
     try {
       const requestId = parseInt(req.params.id);
-      const { status } = req.body;
+      const { status, declineMessage } = req.body;
       const activeProfile = await storage.getActiveProfile(req.user.id);
 
       if (!activeProfile) {
@@ -3255,8 +3255,26 @@ export function registerRoutes(app: Express): Server {
         }
       }
 
-      // If booking was rejected/declined, clean up the original booking request notification
+      // If booking was rejected/declined, send decline notification with optional message
       if (status === 'rejected' || status === 'declined') {
+        const { notificationService } = await import('./notifications');
+        const bookingRequest = await storage.getBookingRequestById(requestId);
+        if (bookingRequest) {
+          const artistProfile = await storage.getProfile(bookingRequest.artistProfileId);
+          if (artistProfile?.userId) {
+            const venueUser = await storage.getUser(req.user.id);
+            const venueName = `${venueUser?.firstName} ${venueUser?.lastName}`;
+            await notificationService.notifyBookingDeclined(
+              artistProfile.userId,
+              req.user.id,
+              venueName,
+              activeProfile.name,
+              declineMessage || null
+            );
+          }
+        }
+
+        // Clean up the original booking request notification
         await db
           .delete(notifications)
           .where(and(

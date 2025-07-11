@@ -2691,7 +2691,8 @@ export function registerRoutes(app: Express): Server {
             venueProfile.userId,
             req.user.id,
             artistName,
-            activeProfile.name
+            activeProfile.name,
+            bookingRequest.id // Pass the booking request ID
           );
           console.log('Notification sent successfully');
         }

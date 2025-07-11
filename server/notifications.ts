@@ -497,7 +497,14 @@ export class NotificationService {
       type: 'booking_request',
       title: 'New Booking Request',
       message: `${artistName} (${artistProfileName}) wants to book your venue`,
-      data: { artistUserId, artistName, artistProfileName, bookingId }
+      data: { 
+        artistUserId, 
+        artistName, 
+        artistProfileName, 
+        bookingId,
+        bookingRequestId: bookingId, // Add this for consistency
+        id: bookingId // Add this as fallback
+      }
     });
   }
 

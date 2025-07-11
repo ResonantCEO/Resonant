@@ -104,8 +104,8 @@ export class NotificationService {
       }
 
       // For booking-related notifications, only show to relevant profiles
-      if (notification.type === 'booking_confirmed') {
-        // Only show booking confirmations to artist profiles (who made the original request)
+      if (notification.type === 'booking_confirmed' || notification.type === 'booking_declined') {
+        // Only show booking confirmations and declines to artist profiles (who made the original request)
         return activeProfileType === 'artist';
       }
 
@@ -198,7 +198,7 @@ export class NotificationService {
       }
 
       // For booking-related notifications, only count for relevant profiles
-      if (notification.type === 'booking_confirmed') {
+      if (notification.type === 'booking_confirmed' || notification.type === 'booking_declined') {
         return activeProfileType === 'artist';
       }
 

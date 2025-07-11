@@ -3226,6 +3226,10 @@ export function registerRoutes(app: Express): Server {
 
   app.patch('/api/booking-requests/:id', isAuthenticated, async (req: any, res) => {
     console.log('\n\n🔥🔥🔥 PATCH BOOKING REQUEST ROUTE HIT 🔥🔥🔥');
+    console.log('🔥 REQUEST ID:', req.params.id);
+    console.log('🔥 REQUEST BODY:', JSON.stringify(req.body, null, 2));
+    console.log('🔥 USER ID:', req.user?.id);
+    console.log('🔥 REQUEST HEADERS:', JSON.stringify(req.headers, null, 2));
     try {
       const requestId = parseInt(req.params.id);
       const { status, declineMessage } = req.body;

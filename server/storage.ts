@@ -1,6 +1,3 @@
-The code changes address issues with the messages API by adding error handling and ensuring the correct data format.
-```
-```replit_final_file
 import { db } from "./db";
 import { eq, and, sql, desc, asc, or, like, ilike, gte, lt, ne, inArray, exists, notExists, isNull, isNotNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";

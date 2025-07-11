@@ -555,7 +555,9 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
               <p className="text-xs text-red-600 dark:text-red-400 mb-1 font-medium">Message from venue:</p>
               <p className="text-sm text-red-800 dark:text-red-200 italic">
                 "{notification.data.declineMessage}"
-              </p></old_str>
+              </p>
+            </div>
+          )}</old_str>
             </div>
           )}
 

@@ -592,14 +592,14 @@ export class NotificationService {
     });
   }
 
-  async notifyBookingDeclined(artistUserId: number, venueUserId: number, venueName: string, venueProfileName: string, declineMessage?: string) {
+  async notifyBookingDeclined(artistUserId: number, venueUserId: number, venueName: string, venueProfileName: string, declineMessage?: string | null) {
     await this.createNotification({
       recipientId: artistUserId,
       senderId: venueUserId,
       type: 'booking_declined',
       title: 'Booking Declined',
-      message: `${venueName} (${venueProfileName}) has declined your booking request${declineMessage ? ` with message: ${declineMessage}` : ''}`,
-      data: { venueUserId, venueName, venueProfileName, declineMessage }
+      message: `${venueName} (${venueProfileName}) has declined your booking request`,
+      data: { venueUserId, venueName, venueProfileName, declineMessage: declineMessage || null }
     });
   }
 

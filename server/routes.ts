@@ -3270,7 +3270,7 @@ export function registerRoutes(app: Express): Server {
               req.user.id,
               venueName,
               activeProfile.name,
-              declineMessage || null
+              declineMessage
             );
           }
         }
@@ -4807,6 +4807,7 @@ app.post("/api/bookings/:bookingId/decline", requireAuth, async (req, res) => {
 
       // Create notification for the artist
       if (bookingData.artistProfile?.userId) {
+        const { declineMessage } = req.body;
         await db.insert(notifications).values({
           userId: bookingData.artistProfile.userId,
           type: "booking_declined",
@@ -4817,7 +4818,8 @@ app.post("/api/bookings/:bookingId/decline", requireAuth, async (req, res) => {
             venueId: bookingData.venueId,
             venueName: bookingData.venueProfile?.name,
             venueProfileImageUrl: bookingData.venueProfile?.profileImageUrl,
-            senderProfileId: bookingData.venueId
+            senderProfileId: bookingData.venueId,
+            declineMessage: declineMessage || null
           },
           createdAt: new Date(),
           read: false

@@ -3238,6 +3238,8 @@ export function registerRoutes(app: Express): Server {
       console.log('PATCH booking request - received body:', req.body);
       console.log('PATCH booking request - status:', status);
       console.log('PATCH booking request - decline message:', declineMessage);
+      console.log('PATCH booking request - decline message type:', typeof declineMessage);
+      console.log('PATCH booking request - decline message length:', declineMessage ? declineMessage.length : 'null/undefined');
 
       // Update booking request status in database
       const updatedRequest = await storage.updateBookingRequestStatus(requestId, status, activeProfile.id);

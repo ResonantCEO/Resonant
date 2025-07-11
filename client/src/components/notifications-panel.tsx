@@ -551,17 +551,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
           </p>
 
           {/* Show decline message for booking declined notifications */}
-          {notification.type === 'booking_declined' && notification.data?.declineMessage && (
-            <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Message from venue:</p>
-              <p className="text-sm text-gray-800 dark:text-gray-200 italic">
-                "{notification.data.declineMessage}"
-              </p>
-            </div>
-          )}
-
-          {/* Show decline message for general booking declined notifications */}
-          {notification.type === 'booking_response' && notification.data?.status === 'declined' && notification.data?.declineMessage && (
+          {(notification.type === 'booking_declined' || notification.type === 'booking_response') && notification.data?.declineMessage && (
             <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Message from venue:</p>
               <p className="text-sm text-gray-800 dark:text-gray-200 italic">

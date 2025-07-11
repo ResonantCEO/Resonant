@@ -1029,9 +1029,11 @@ export class Storage {
     } catch (error) {
       console.error("Error fetching booking request by ID:", error);
       return null;
-    }}
+    }
+  }
 
-  // Messaging functions  async getConversationById(conversationId: number) {
+  // Messaging functions
+  async getConversationById(conversationId: number) {
     try {
       const [conversation] = await db
         .select({

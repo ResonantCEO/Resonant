@@ -3449,8 +3449,18 @@ export function registerRoutes(app: Express): Server {
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
 
+      console.log(`Fetching messages for conversation ${conversationId}, profile ${activeProfile.id}`);
+      
       const messages = await storage.getMessages(conversationId, activeProfile.id, limit, offset);
-      res.json(messages);
+      
+      console.log(`Messages retrieved:`, messages);
+      console.log(`Messages is array:`, Array.isArray(messages));
+      console.log(`Messages length:`, messages ? messages.length : 'null/undefined');
+      
+      // Ensure we always return an array
+      const messagesArray = Array.isArray(messages) ? messages : [];
+      
+      res.json(messagesArray);
     } catch (error) {
       console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });

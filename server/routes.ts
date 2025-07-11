@@ -3294,7 +3294,7 @@ export function registerRoutes(app: Express): Server {
               req.user.id,
               venueName,
               activeProfile.name,
-              declineMessage || null
+              declineMessage && declineMessage.trim() ? declineMessage.trim() : null
             );
           }
         }

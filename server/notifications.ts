@@ -595,8 +595,8 @@ export class NotificationService {
   async notifyBookingDeclined(artistUserId: number, venueUserId: number, venueName: string, venueProfileName: string, declineMessage?: string | null) {
     console.log('Creating booking declined notification with decline message:', declineMessage);
     
-    const message = declineMessage 
-      ? `${venueName} (${venueProfileName}) has declined your booking request: "${declineMessage}"`
+    const message = declineMessage && declineMessage.trim()
+      ? `${venueName} (${venueProfileName}) has declined your booking request`
       : `${venueName} (${venueProfileName}) has declined your booking request`;
     
     await this.createNotification({

@@ -432,11 +432,14 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
         throw new Error("Failed to decline booking request");
       }
 
-      // Remove the notification from the list
-      setNotifications(prev => prev.filter(n => {
-        const notificationBookingId = n.data?.bookingId || n.data?.bookingRequestId || n.data?.id || n.data?.requestId;
-        return notificationBookingId !== bookingId;
-      }));
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+
+      // Force refetch to ensure immediate UI update
+      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
 
       toast({
         title: "Booking Declined",
@@ -444,9 +447,6 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
           ? "Booking request declined with message sent to artist"
           : "Booking request declined",
       });
-
-      queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
     } catch (error) {
       console.error("Error declining booking:", error);
       toast({

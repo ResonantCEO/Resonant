@@ -2076,4 +2076,40 @@ export class Storage {
   async updateCalendarEvent(eventId: number, updates: Partial<Omit<InsertCalendarEvent, 'id' | 'profileId' | 'createdAt'>>) {
     try {
       const updateData = {
-        ...
+        ...updates,
+        updatedAt: new Date()
+      };
+
+      const [event] = await db
+        .update(calendarEvents)
+        .set(updateData)
+        .where(eq(calendarEvents.id, eventId))
+        .returning();
+
+      if (!event) {
+        throw new Error("Calendar event not found");
+      }
+
+      return event;
+    } catch (error) {
+      console.error("Error updating calendar event:", error);
+      throw new Error(`Failed to update calendar event: ${error.message}`);
+    }
+  }
+
+  async deleteCalendarEvent(eventId: number) {
+    try {
+      await db
+        .delete(calendarEvents)
+        .where(eq(calendarEvents.id, eventId));
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting calendar event:", error);
+      throw new Error(`Failed to delete calendar event: ${error.message}`);
+    }
+  }
+}
+
+// Export a singleton instance
+export const storage = new Storage();

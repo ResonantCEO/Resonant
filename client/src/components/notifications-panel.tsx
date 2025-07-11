@@ -266,8 +266,12 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
   // Decline booking request mutation
   const declineBookingRequestMutation = useMutation({
     mutationFn: async ({ bookingId, message }: { bookingId: number; message?: string }) => {
-      const body = message ? { status: 'rejected', declineMessage: message } : { status: 'rejected' };
-      return await apiRequest("POST", `/api/bookings/${bookingId}/decline`, body);
+      const body = message && message.trim() 
+        ? { status: 'rejected', declineMessage: message.trim() } 
+        : { status: 'rejected' };
+      
+      // Use PATCH for the booking request update
+      return await apiRequest("PATCH", `/api/booking-requests/${bookingId}`, body);
     },
     onSuccess: () => {
       // Invalidate all notification-related queries

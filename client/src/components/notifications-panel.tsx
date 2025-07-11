@@ -52,7 +52,7 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
   const [acceptingBooking, setAcceptingBooking] = useState<number | null>(null);
   const [decliningBooking, setDecliningBooking] = useState<number | null>(null);
 
-  // Fetch notifications with real-time polling (excluding booking requests)
+  // Fetch notifications with real-time polling
   const { data: allNotifications = [], isLoading } = useQuery({
     queryKey: ["/api/notifications"],
     queryFn: () => apiRequest("GET", "/api/notifications"),
@@ -63,10 +63,8 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     staleTime: 0, // Always consider data stale to ensure fresh fetches
   });
 
-  // Filter out booking request notifications
-  const notifications = allNotifications.filter(
-    (notification: any) => notification.type !== 'booking_request'
-  );
+  // Show all notifications (booking requests are already filtered server-side based on profile type)
+  const notifications = allNotifications;
 
   // Mark as read mutation
   const markAsReadMutation = useMutation({

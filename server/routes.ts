@@ -1808,7 +1808,7 @@ export function registerRoutes(app: Express): Server {
         parseInt(offset),
         activeProfile.id,
         activeProfile.type,
-        true // Exclude friend requests from notifications page
+        false // Include all relevant notifications including booking requests
       );
 
       res.json(notifications);

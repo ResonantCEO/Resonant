@@ -3295,10 +3295,14 @@ export function registerRoutes(app: Express): Server {
             const venueUser = await storage.getUser(req.user.id);
             const venueName = `${venueUser?.firstName} ${venueUser?.lastName}`;
             
-            // Properly handle the decline message
-            const finalDeclineMessage = declineMessage && typeof declineMessage === 'string' && declineMessage.trim() 
-              ? declineMessage.trim() 
-              : null;
+            // Ensure decline message is properly handled
+            let finalDeclineMessage = null;
+            if (declineMessage && typeof declineMessage === 'string') {
+              const trimmedMessage = declineMessage.trim();
+              if (trimmedMessage.length > 0) {
+                finalDeclineMessage = trimmedMessage;
+              }
+            }
             
             console.log('Sending booking declined notification with decline message:', finalDeclineMessage);
             

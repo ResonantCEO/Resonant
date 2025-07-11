@@ -3234,6 +3234,9 @@ export function registerRoutes(app: Express): Server {
         return res.status(400).json({ message: "No active profile" });
       }
 
+      console.log('PATCH booking request - received body:', req.body);
+      console.log('PATCH booking request - decline message:', declineMessage);
+
       const updatedRequest = await storage.updateBookingRequestStatus(requestId, status, activeProfile.id);
 
       // If booking was accepted, send confirmation notification
@@ -3289,6 +3292,7 @@ export function registerRoutes(app: Express): Server {
             const venueUser = await storage.getUser(req.user.id);
             const venueName = `${venueUser?.firstName} ${venueUser?.lastName}`;
             console.log('Sending booking declined notification with decline message:', declineMessage);
+            console.log('Final decline message being passed:', declineMessage && declineMessage.trim() ? declineMessage.trim() : null);
             await notificationService.notifyBookingDeclined(
               artistProfile.userId,
               req.user.id,

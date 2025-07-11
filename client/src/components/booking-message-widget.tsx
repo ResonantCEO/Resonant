@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -45,8 +45,20 @@ export default function BookingMessageWidget({
     refetchInterval: 3000, // Refresh every 3 seconds for real-time feel
   });
 
-  // Ensure messages is always an array
-  const messages = Array.isArray(messagesData) ? messagesData : [];
+  // Ensure messages is always an array and handle different response formats
+  const messages = React.useMemo(() => {
+    console.log('Raw messages data:', messagesData);
+    console.log('Messages data type:', typeof messagesData);
+    console.log('Is array?', Array.isArray(messagesData));
+    
+    if (!messagesData) return [];
+    if (Array.isArray(messagesData)) return messagesData;
+    if (messagesData.messages && Array.isArray(messagesData.messages)) return messagesData.messages;
+    if (messagesData.data && Array.isArray(messagesData.data)) return messagesData.data;
+    
+    console.warn('Unexpected messages data format:', messagesData);
+    return [];
+  }, [messagesData]);
 
   // Fetch conversation details
   const { data: conversation } = useQuery({
@@ -60,16 +72,24 @@ export default function BookingMessageWidget({
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: (data: { content: string }) =>
-      apiRequest("POST", `/api/conversations/${conversationId}/messages`, data),
-    onSuccess: () => {
+    mutationFn: (data: { content: string }) => {
+      console.log('Sending message:', data);
+      console.log('To conversation:', conversationId);
+      return apiRequest("POST", `/api/conversations/${conversationId}/messages`, data);
+    },
+    onSuccess: (response) => {
+      console.log('Message sent successfully:', response);
       setNewMessage("");
       queryClient.invalidateQueries({ 
         queryKey: ["/api/conversations", conversationId, "messages"] 
       });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/conversations"]
+      });
       scrollToBottom();
     },
     onError: (error: Error) => {
+      console.error('Error sending message:', error);
       toast({
         title: "Error",
         description: error.message,

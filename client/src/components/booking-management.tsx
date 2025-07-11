@@ -66,8 +66,33 @@ export default function BookingManagement({ profileType }: BookingManagementProp
   const [selectedBookingForMessage, setSelectedBookingForMessage] = useState<any>(null);
   const [conversationId, setConversationId] = useState<number | null>(null);
 
-
   const queryClient = useQueryClient();
+
+  // Move mutation to component level to avoid Rules of Hooks violation
+  const startBookingConversationMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      return await response.json();
+    },
+    onSuccess: (data: any) => {
+      setConversationId(data.id);
+      setShowMessageWidget(true);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to start conversation",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Fetch active profile
   const { data: activeProfile } = useQuery({
@@ -251,22 +276,16 @@ export default function BookingManagement({ profileType }: BookingManagementProp
 
     // Check if conversation already exists for this booking
     try {
-      // Assuming apiRequest is defined elsewhere and handles API calls with authentication
-      const apiRequest = async (method: string, url: string, data?: any) => {
-        const response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: data ? JSON.stringify(data) : undefined
-        });
-        if (!response.ok) {
-          throw new Error(`API request failed with status ${response.status}`);
-        }
-        return await response.json();
-      };
-
-      const conversations = await apiRequest("GET", "/api/conversations");
+      const response = await fetch("/api/conversations", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch conversations: ${response.status}`);
+      }
+      
+      const conversations = await response.json();
       const existingConversation = conversations.find((conv: any) =>
         conv.name.includes(request.artistProfile?.name) &&
         conv.name.includes(request.venueProfile?.name) &&
@@ -280,25 +299,6 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         // Start new conversation with booking context
         const initialMessage = `Hi! I'm messaging about the booking request for ${request.eventDate ? new Date(request.eventDate).toLocaleDateString() : 'your event'}. ${request.message ? `Original request: "${request.message}"` : ''}`;
 
-        // Assuming startBookingConversationMutation is a mutation for starting a conversation
-        const startBookingConversationMutation = useMutation({
-          mutationFn: async (data: any) => {
-            const response = await apiRequest("POST", "/api/conversations", data);
-            return response;
-          },
-          onSuccess: (data: any) => {
-            setConversationId(data.id);
-            setShowMessageWidget(true);
-          },
-          onError: (error: any) => {
-            toast({
-              title: "Error",
-              description: "Failed to start conversation",
-              variant: "destructive",
-            });
-          },
-        });
-
         startBookingConversationMutation.mutate({
           profileId: targetProfileId,
           message: initialMessage,
@@ -307,26 +307,11 @@ export default function BookingManagement({ profileType }: BookingManagementProp
       }
     } catch (error) {
       // If we can't check existing conversations, just start a new one
-      const startBookingConversationMutation = useMutation({
-        mutationFn: async (data: any) => {
-          const response = await apiRequest("POST", "/api/conversations", data);
-          return response;
-        },
-        onSuccess: (data: any) => {
-          setConversationId(data.id);
-          setShowMessageWidget(true);
-        },
-        onError: (error: any) => {
-          toast({
-            title: "Error",
-            description: "Failed to start conversation",
-            variant: "destructive",
-          });
-        },
-      });
+      const fallbackMessage = `Hi! I'm messaging about the booking request for ${request.eventDate ? new Date(request.eventDate).toLocaleDateString() : 'your event'}.`;
+      
       startBookingConversationMutation.mutate({
         profileId: targetProfileId,
-        message: `Hi! I'm messaging about the booking request for ${request.eventDate ? new Date(request.eventDate).toLocaleDateString() : 'your event'}.`,
+        message: fallbackMessage,
         bookingRequestId: request.id
       });
     }

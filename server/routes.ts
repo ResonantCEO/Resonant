@@ -3238,9 +3238,8 @@ export function registerRoutes(app: Express): Server {
       console.log('PATCH booking request - received body:', req.body);
       console.log('PATCH booking request - status:', status);
       console.log('PATCH booking request - decline message:', declineMessage);
-      console.log('PATCH booking request - decline message type:', typeof declineMessage);
-      console.log('PATCH booking request - decline message length:', declineMessage ? declineMessage.length : 'null/undefined');
 
+      // Update booking request status in database
       const updatedRequest = await storage.updateBookingRequestStatus(requestId, status, activeProfile.id);
 
       // If booking was accepted, send confirmation notification
@@ -3295,14 +3294,20 @@ export function registerRoutes(app: Express): Server {
           if (artistProfile?.userId) {
             const venueUser = await storage.getUser(req.user.id);
             const venueName = `${venueUser?.firstName} ${venueUser?.lastName}`;
-            console.log('Sending booking declined notification with decline message:', declineMessage);
-            console.log('Final decline message being passed:', declineMessage && declineMessage.trim() ? declineMessage.trim() : null);
+            
+            // Properly handle the decline message
+            const finalDeclineMessage = declineMessage && typeof declineMessage === 'string' && declineMessage.trim() 
+              ? declineMessage.trim() 
+              : null;
+            
+            console.log('Sending booking declined notification with decline message:', finalDeclineMessage);
+            
             await notificationService.notifyBookingDeclined(
               artistProfile.userId,
               req.user.id,
               venueName,
               activeProfile.name,
-              declineMessage && declineMessage.trim() ? declineMessage.trim() : null
+              finalDeclineMessage
             );
           }
         }

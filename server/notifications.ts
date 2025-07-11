@@ -594,16 +594,15 @@ export class NotificationService {
 
   async notifyBookingDeclined(artistUserId: number, venueUserId: number, venueName: string, venueProfileName: string, declineMessage?: string | null) {
     console.log('Creating booking declined notification with decline message:', declineMessage);
-    console.log('Decline message type:', typeof declineMessage);
-    console.log('Decline message length:', declineMessage ? declineMessage.length : 'null/undefined');
     
     const message = `${venueName} (${venueProfileName}) has declined your booking request`;
     
+    // Ensure the decline message is properly included in the notification data
     const notificationData = { 
       venueUserId, 
       venueName, 
       venueProfileName, 
-      declineMessage: declineMessage && declineMessage.trim() ? declineMessage.trim() : null 
+      declineMessage: declineMessage || null
     };
 
     console.log('Final notification data being created:', notificationData);

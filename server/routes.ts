@@ -3255,6 +3255,19 @@ export function registerRoutes(app: Express): Server {
         }
       }
 
+      // If booking was rejected/declined, clean up the original booking request notification
+      if (status === 'rejected' || status === 'declined') {
+        await db
+          .delete(notifications)
+          .where(and(
+            eq(notifications.type, 'booking_request'),
+            eq(notifications.recipientId, req.user.id),
+            sql`(${notifications.data}->>'bookingId')::int = ${requestId} OR 
+                (${notifications.data}->>'bookingRequestId')::int = ${requestId} OR
+                (${notifications.data}->>'id')::int = ${requestId}`
+          ));
+      }
+
       res.json(updatedRequest);
     } catch (error) {
       console.error("Error updating booking request:", error);

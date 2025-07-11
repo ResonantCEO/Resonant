@@ -264,9 +264,16 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
       return await apiRequest("POST", `/api/bookings/${bookingId}/decline`);
     },
     onSuccess: () => {
+      // Invalidate all notification-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
+      
+      // Force refetch to ensure immediate UI update
+      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
+      queryClient.refetchQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+      
       toast({
         title: "Booking Request Declined",
         description: "You have declined the booking request",
@@ -414,11 +421,27 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
           result = JSON.parse(text);
         }
       }
+
+      // Find and remove the booking request notification from local state immediately
+      queryClient.setQueryData(["/api/notifications"], (oldData: any[]) => {
+        if (!oldData) return oldData;
+        return oldData.filter(notification => {
+          return !(notification.type === 'booking_request' && 
+                  (notification.data?.bookingId === bookingId || 
+                   notification.data?.bookingRequestId === bookingId ||
+                   notification.data?.id === bookingId));
+        });
+      });
       
+      // Invalidate and refetch all notification-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/booking-requests"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+      
+      // Force refetch to ensure counts are updated
+      queryClient.refetchQueries({ queryKey: ["/api/notifications/counts-by-profile"] });
+      
       toast({
         title: "Booking Request Declined",
         description: "The booking request has been declined.",

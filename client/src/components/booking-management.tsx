@@ -3,8 +3,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -58,6 +58,10 @@ export default function BookingManagement({ profileType }: BookingManagementProp
   const [selectedBookingForContract, setSelectedBookingForContract] = useState<any>(null);
   const [showAvailabilityChecker, setShowAvailabilityChecker] = useState(false);
   const [selectedAvailabilityRequest, setSelectedAvailabilityRequest] = useState<any>(null);
+    const [showDeclineDialog, setShowDeclineDialog] = useState(false);
+    const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
+    const [declineMessage, setDeclineMessage] = useState('');
+
 
   const queryClient = useQueryClient();
 
@@ -125,11 +129,11 @@ export default function BookingManagement({ profileType }: BookingManagementProp
 
   // Update booking request mutation
   const updateBookingRequestMutation = useMutation({
-    mutationFn: async ({ requestId, status }: { requestId: number; status: 'accepted' | 'rejected' }) => {
+      mutationFn: async ({ requestId, status, message }: { requestId: number; status: 'accepted' | 'rejected'; message?: string }) => {
       const response = await fetch(`/api/booking-requests/${requestId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+          body: JSON.stringify({ status, message }),
       });
       if (!response.ok) throw new Error("Failed to update booking request");
       return response.json();
@@ -140,6 +144,9 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         title: "Success",
         description: "Booking request updated successfully",
       });
+        setShowDeclineDialog(false);
+        setDeclineMessage('');
+        setSelectedRequestId(null);
     },
     onError: (error: Error) => {
       toast({
@@ -182,9 +189,20 @@ export default function BookingManagement({ profileType }: BookingManagementProp
     createBookingRequestMutation.mutate(requestData);
   };
 
-  const handleBookingResponse = (requestId: number, status: 'accepted' | 'rejected') => {
-    updateBookingRequestMutation.mutate({ requestId, status });
-  };
+    const handleBookingResponse = (requestId: number, status: 'accepted' | 'rejected') => {
+        if (status === 'rejected') {
+            setSelectedRequestId(requestId);
+            setShowDeclineDialog(true);
+        } else {
+            updateBookingRequestMutation.mutate({ requestId, status });
+        }
+    };
+
+    const handleDeclineConfirmation = () => {
+        if (selectedRequestId) {
+            updateBookingRequestMutation.mutate({ requestId: selectedRequestId, status: 'rejected', message: declineMessage });
+        }
+    };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -224,7 +242,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
               Request Booking
             </Button>
           )}
-          
+
           {/* Request Type Selection Dialog */}
           <Dialog open={showRequestTypeDialog} onOpenChange={setShowRequestTypeDialog}>
             <DialogContent className="max-w-md">
@@ -637,6 +655,40 @@ export default function BookingManagement({ profileType }: BookingManagementProp
           venueName={selectedAvailabilityRequest.venueProfile.name}
         />
       )}
+        {/* Decline Confirmation Dialog */}
+        <Dialog open={showDeclineDialog} onOpenChange={setShowDeclineDialog}>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Decline Booking Request</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                    <p>Are you sure you want to decline this booking request?</p>
+                    <Label htmlFor="declineMessage">Message (Optional):</Label>
+                    <Textarea
+                        id="declineMessage"
+                        placeholder="Enter a message to send with the decline notification"
+                        value={declineMessage}
+                        onChange={(e) => setDeclineMessage(e.target.value)}
+                        rows={3}
+                    />
+                    <div className="flex justify-end space-x-2">
+                        <Button variant="outline" onClick={() => {
+                            setShowDeclineDialog(false);
+                            setDeclineMessage('');
+                            setSelectedRequestId(null);
+                        }}>
+                            Cancel
+                        </Button>
+                        <Button
+                            className="bg-red-600 hover:bg-red-700 !text-white"
+                            onClick={handleDeclineConfirmation}
+                        >
+                            Decline
+                        </Button>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }

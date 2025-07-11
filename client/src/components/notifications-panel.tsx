@@ -415,11 +415,10 @@ export default function NotificationsPanel({ showAsCard = true }: NotificationsP
     setDecliningBooking(bookingId);
 
     try {
-      const response = await fetch(`/api/booking-requests/${bookingId}`, {
-        method: "PATCH",
+      const response = await fetch(`/api/bookings/${bookingId}/decline`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          status: "rejected",
           declineMessage: declineMessage.trim() || null
         }),
       });

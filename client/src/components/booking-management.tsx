@@ -133,7 +133,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
       const response = await fetch(`/api/booking-requests/${requestId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status, message }),
+          body: JSON.stringify({ status, declineMessage: message }),
       });
       if (!response.ok) throw new Error("Failed to update booking request");
       return response.json();

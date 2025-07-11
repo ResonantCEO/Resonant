@@ -3269,6 +3269,18 @@ export function registerRoutes(app: Express): Server {
 
       // If booking was rejected/declined, send decline notification with optional message
       if (status === 'rejected' || status === 'declined') {
+        // First, clean up the venue's booking request notification BEFORE sending decline notification
+        await db
+          .delete(notifications)
+          .where(and(
+            eq(notifications.type, 'booking_request'),
+            eq(notifications.recipientId, req.user.id),
+            sql`(${notifications.data}->>'bookingId')::int = ${requestId} OR 
+                (${notifications.data}->>'bookingRequestId')::int = ${requestId} OR
+                (${notifications.data}->>'id')::int = ${requestId}`
+          ));
+
+        // Then send the decline notification to the artist
         const { notificationService } = await import('./notifications');
         const bookingRequest = await storage.getBookingRequestById(requestId);
         if (bookingRequest) {
@@ -3286,17 +3298,6 @@ export function registerRoutes(app: Express): Server {
             );
           }
         }
-
-        // Clean up the venue's booking request notification after declining
-        await db
-          .delete(notifications)
-          .where(and(
-            eq(notifications.type, 'booking_request'),
-            eq(notifications.recipientId, req.user.id),
-            sql`(${notifications.data}->>'bookingId')::int = ${requestId} OR 
-                (${notifications.data}->>'bookingRequestId')::int = ${requestId} OR
-                (${notifications.data}->>'id')::int = ${requestId}`
-          ));
       }
 
       res.json(updatedRequest);

@@ -38,12 +38,15 @@ export default function BookingMessageWidget({
   const queryClient = useQueryClient();
 
   // Fetch messages for the conversation
-  const { data: messages = [], isLoading: loadingMessages } = useQuery({
+  const { data: messagesData, isLoading: loadingMessages } = useQuery({
     queryKey: ["/api/conversations", conversationId, "messages"],
     queryFn: () => apiRequest("GET", `/api/conversations/${conversationId}/messages`),
     enabled: !!conversationId && isOpen,
     refetchInterval: 3000, // Refresh every 3 seconds for real-time feel
   });
+
+  // Ensure messages is always an array
+  const messages = Array.isArray(messagesData) ? messagesData : [];
 
   // Fetch conversation details
   const { data: conversation } = useQuery({

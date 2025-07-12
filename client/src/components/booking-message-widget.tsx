@@ -77,9 +77,16 @@ export default function BookingMessageWidget({
   // Fetch messages for the conversation
   const { data: messagesData, isLoading: loadingMessages, error: messagesError, isError } = useQuery({
     queryKey: ["/api/conversations", conversationId, "messages"],
-    queryFn: () => {
+    queryFn: async () => {
       console.log('Fetching messages for conversation:', conversationId);
-      return apiRequest("GET", `/api/conversations/${conversationId}/messages`);
+      const response = await apiRequest("GET", `/api/conversations/${conversationId}/messages`);
+      console.log('API Response received:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response is array:', Array.isArray(response));
+      if (response && typeof response === 'object') {
+        console.log('Response keys:', Object.keys(response));
+      }
+      return response;
     },
     enabled: !!conversationId && isOpen,
     refetchInterval: 3000, // Refresh every 3 seconds for real-time feel

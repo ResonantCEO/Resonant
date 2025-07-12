@@ -1030,7 +1030,7 @@ export class Storage {
       console.error("Error fetching booking request by ID:", error);
       return null;
     }
-  }<replit_final_file>
+  }
   // Messaging functions
   async getConversationById(conversationId: number) {
     try {

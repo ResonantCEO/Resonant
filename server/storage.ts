@@ -1030,8 +1030,7 @@ export class Storage {
       console.error("Error fetching booking request by ID:", error);
       return null;
     }
-  }
-
+  }<replit_final_file>
   // Messaging functions
   async getConversationById(conversationId: number) {
     try {
@@ -2073,8 +2072,7 @@ export class Storage {
     }
   }
 
-  async updateCalendarEvent(eventId: number, updates: Partial<Omit<InsertCalendarEvent, 'id' | 'profileId' | 'createdAt'>>) {
-    try {
+  async updateCalendarEvent(eventId: number, updates: Partial<Omit<InsertCalendarEvent, 'id' | 'profileId' | 'createdAt'>>) {    try {
       const updateData = {
         ...updates,
         updatedAt: new Date()
@@ -2107,6 +2105,92 @@ export class Storage {
     } catch (error) {
       console.error("Error deleting calendar event:", error);
       throw new Error(`Failed to delete calendar event: ${error.message}`);
+    }
+  }
+
+  async getMessages(conversationId: number, profileId: number, limit = 50, offset = 0) {
+    try {
+      console.log(`Storage.getMessages called with conversationId: ${conversationId}, profileId: ${profileId}`);
+
+      const conversation = await this.getConversationById(conversationId);
+      if (!conversation) {
+        console.log(`Conversation ${conversationId} not found`);
+        throw new Error("Conversation not found");
+      }
+
+      // Check if user is a participant
+      const isParticipant = conversation.participants?.some((p: any) => p.id === profileId);
+      if (!isParticipant) {
+        console.log(`Profile ${profileId} is not a participant in conversation ${conversationId}`);
+        throw new Error("User is not a participant in this conversation");
+      }
+
+      console.log(`Fetching messages from database for conversation ${conversationId}`);
+
+      const messageList = await db
+        .select({
+          message: messages,
+          sender: {
+            id: profiles.id,
+            name: profiles.name,
+            profileImageUrl: profiles.profileImageUrl,
+          },
+          replyTo: {
+            id: sql<number>`reply_msg.id`.as('reply_id'),
+            content: sql<string>`reply_msg.content`.as('reply_content'),
+            senderName: sql<string>`reply_sender.name`.as('reply_sender_name'),
+          }
+        })
+        .from(messages)
+        .innerJoin(profiles, eq(messages.senderId, profiles.id))
+        .leftJoin(
+          sql`messages reply_msg`,
+          sql`${messages.replyToId} = reply_msg.id`
+        )
+        .leftJoin(
+          sql`profiles reply_sender`,
+          sql`reply_msg.sender_id = reply_sender.id`
+        )
+        .where(
+          and(
+            eq(messages.conversationId, conversationId),
+            isNull(messages.deletedAt)
+          )
+        )
+        .orderBy(desc(messages.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      console.log(`Retrieved ${messageList.length} messages from database`);
+      console.log(`Messages array:`, messageList);
+
+      const messageIds = messageList.map(m => m.message.id);
+      const readReceipts = await this.getReadReceipts(messageIds);
+
+      const formattedMessages = messageList.reverse().map(msg => ({
+        id: msg.message.id,
+        content: msg.message.content,
+        messageType: msg.message.messageType,
+        senderId: msg.message.senderId,
+        senderName: msg.sender.name,
+        senderImage: msg.sender.profileImageUrl,
+        attachments: msg.message.attachments,
+        reactions: msg.message.reactions,
+        replyTo: msg.replyTo?.id ? {
+          id: msg.replyTo.id,
+          content: msg.replyTo.content,
+          senderName: msg.replyTo.senderName,
+        } : null,
+        readBy: readReceipts[msg.message.id] || [],
+        editedAt: msg.message.editedAt,
+        createdAt: msg.message.createdAt,
+        updatedAt: msg.message.updatedAt,
+      }));
+
+      return formattedMessages;
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      return [];
     }
   }
 }

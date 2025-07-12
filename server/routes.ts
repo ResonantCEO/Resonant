@@ -3457,10 +3457,19 @@ export function registerRoutes(app: Express): Server {
       console.log(`Messages is array:`, Array.isArray(messages));
       console.log(`Messages length:`, messages ? messages.length : 'null/undefined');
       
-      // Ensure we always return an array
-      const messagesArray = Array.isArray(messages) ? messages : [];
+      // Ensure we always return an array - fix the response format issue
+      if (!messages) {
+        console.log('No messages found, returning empty array');
+        return res.json([]);
+      }
       
-      res.json(messagesArray);
+      if (!Array.isArray(messages)) {
+        console.log('Messages is not an array, converting or returning empty array');
+        return res.json([]);
+      }
+      
+      console.log('Returning messages array with length:', messages.length);
+      res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });

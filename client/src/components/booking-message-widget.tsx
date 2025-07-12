@@ -119,14 +119,29 @@ export default function BookingMessageWidget({
     console.log('Messages data type:', typeof messagesData);
     console.log('Is array?', Array.isArray(messagesData));
     
-    if (!messagesData) return [];
-    if (Array.isArray(messagesData)) return messagesData;
-    if (messagesData.messages && Array.isArray(messagesData.messages)) return messagesData.messages;
-    if (messagesData.data && Array.isArray(messagesData.data)) return messagesData.data;
+    if (!messagesData) {
+      console.log('No messages data, returning empty array');
+      return [];
+    }
     
-    // Handle case where messagesData is an empty object but we should refetch
+    if (Array.isArray(messagesData)) {
+      console.log('Messages data is array with length:', messagesData.length);
+      return messagesData;
+    }
+    
+    if (messagesData.messages && Array.isArray(messagesData.messages)) {
+      console.log('Messages nested in .messages property');
+      return messagesData.messages;
+    }
+    
+    if (messagesData.data && Array.isArray(messagesData.data)) {
+      console.log('Messages nested in .data property');
+      return messagesData.data;
+    }
+    
+    // Handle case where messagesData is an empty object - this indicates an API issue
     if (typeof messagesData === 'object' && Object.keys(messagesData).length === 0) {
-      console.log('Empty object received, messages might still be loading');
+      console.warn('Empty object received from API - this indicates a server-side issue');
       return [];
     }
     

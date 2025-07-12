@@ -2072,7 +2072,8 @@ export class Storage {
     }
   }
 
-  async updateCalendarEvent(eventId: number, updates: Partial<Omit<InsertCalendarEvent, 'id' | 'profileId' | 'createdAt'>>) {    try {
+  async updateCalendarEvent(eventId: number, updates: Partial<Omit<InsertCalendarEvent, 'id' | 'profileId' | 'createdAt'>>) {
+    try {
       const updateData = {
         ...updates,
         updatedAt: new Date()

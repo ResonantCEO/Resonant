@@ -2108,8 +2108,6 @@ export class Storage {
       throw new Error(`Failed to delete calendar event: ${error.message}`);
     }
   }
-
-  
 }
 
 // Export a singleton instance

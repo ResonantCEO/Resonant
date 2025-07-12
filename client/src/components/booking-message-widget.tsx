@@ -46,17 +46,47 @@ export default function BookingMessageWidget({
 
   // Find the current conversation
   const conversation = React.useMemo(() => {
-    if (!conversations || !conversationId) return null;
-    return conversations.find((c: any) => c.id === conversationId);
+    console.log('Finding conversation:', { conversationId, conversationsCount: conversations?.length });
+    if (!conversations || !conversationId) {
+      console.log('No conversations or conversationId');
+      return null;
+    }
+    const found = conversations.find((c: any) => c.id === conversationId);
+    console.log('Found conversation:', found);
+    return found;
   }, [conversations, conversationId]);
 
   // Fetch messages for the conversation
-  const { data: messagesData, isLoading: loadingMessages } = useQuery({
+  const { data: messagesData, isLoading: loadingMessages, error: messagesError, isError } = useQuery({
     queryKey: ["/api/conversations", conversationId, "messages"],
-    queryFn: () => apiRequest("GET", `/api/conversations/${conversationId}/messages`),
+    queryFn: () => {
+      console.log('Fetching messages for conversation:', conversationId);
+      return apiRequest("GET", `/api/conversations/${conversationId}/messages`);
+    },
     enabled: !!conversationId && isOpen,
     refetchInterval: 3000, // Refresh every 3 seconds for real-time feel
+    retry: 3,
+    staleTime: 0, // Always fetch fresh data
+    onSuccess: (data) => {
+      console.log('Messages query successful:', data);
+    },
+    onError: (error) => {
+      console.error('Messages query error:', error);
+    }
   });
+
+  // Debug logging for query state
+  React.useEffect(() => {
+    console.log('Query state:', {
+      conversationId,
+      isOpen,
+      enabled: !!conversationId && isOpen,
+      loadingMessages,
+      isError,
+      messagesData,
+      messagesError
+    });
+  }, [conversationId, isOpen, loadingMessages, isError, messagesData, messagesError]);
 
   // Ensure messages is always an array and handle different response formats
   const messages = React.useMemo(() => {
@@ -68,6 +98,12 @@ export default function BookingMessageWidget({
     if (Array.isArray(messagesData)) return messagesData;
     if (messagesData.messages && Array.isArray(messagesData.messages)) return messagesData.messages;
     if (messagesData.data && Array.isArray(messagesData.data)) return messagesData.data;
+    
+    // Handle case where messagesData is an empty object but we should refetch
+    if (typeof messagesData === 'object' && Object.keys(messagesData).length === 0) {
+      console.log('Empty object received, messages might still be loading');
+      return [];
+    }
     
     console.warn('Unexpected messages data format:', messagesData);
     return [];
@@ -201,14 +237,25 @@ export default function BookingMessageWidget({
                 <div className="text-center py-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
                 </div>
+              ) : messagesError ? (
+                <div className="text-center py-8 text-red-500">
+                  <p className="text-sm">Error loading messages</p>
+                  <p className="text-xs">{messagesError.message}</p>
+                </div>
               ) : messages.length === 0 ? (
                 <div className="text-center py-8 text-neutral-500">
                   <p className="text-sm">No messages yet.</p>
                   <p className="text-xs">Start the conversation about your booking!</p>
+                  {conversationId && (
+                    <p className="text-xs mt-2 text-gray-400">Conversation ID: {conversationId}</p>
+                  )}
                 </div>
               ) : (
                 messages.map((message: Message) => {
-                  const isCurrentUser = message.senderId === JSON.parse(localStorage.getItem('user') || '{}').profileId;
+                  // Determine if message is from current user by checking if sender is in our known participant list
+                  const currentUserData = JSON.parse(localStorage.getItem('user') || '{}');
+                  const currentProfileId = currentUserData.activeProfileId || currentUserData.profileId;
+                  const isCurrentUser = message.senderId === currentProfileId;
 
                   return (
                     <div key={message.id} className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>

@@ -280,11 +280,11 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         method: "GET",
         headers: { "Content-Type": "application/json" }
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch conversations: ${response.status}`);
       }
-      
+
       const conversations = await response.json();
       const existingConversation = conversations.find((conv: any) =>
         conv.name.includes(request.artistProfile?.name) &&
@@ -308,7 +308,7 @@ export default function BookingManagement({ profileType }: BookingManagementProp
     } catch (error) {
       // If we can't check existing conversations, just start a new one
       const fallbackMessage = `Hi! I'm messaging about the booking request for ${request.eventDate ? new Date(request.eventDate).toLocaleDateString() : 'your event'}.`;
-      
+
       startBookingConversationMutation.mutate({
         profileId: targetProfileId,
         message: fallbackMessage,

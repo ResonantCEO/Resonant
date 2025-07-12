@@ -37,6 +37,19 @@ export default function BookingMessageWidget({
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch conversations first to get conversation details
+  const { data: conversations } = useQuery({
+    queryKey: ["/api/conversations"],
+    queryFn: () => apiRequest("GET", "/api/conversations"),
+    enabled: isOpen,
+  });
+
+  // Find the current conversation
+  const conversation = React.useMemo(() => {
+    if (!conversations || !conversationId) return null;
+    return conversations.find((c: any) => c.id === conversationId);
+  }, [conversations, conversationId]);
+
   // Fetch messages for the conversation
   const { data: messagesData, isLoading: loadingMessages } = useQuery({
     queryKey: ["/api/conversations", conversationId, "messages"],
@@ -59,16 +72,6 @@ export default function BookingMessageWidget({
     console.warn('Unexpected messages data format:', messagesData);
     return [];
   }, [messagesData]);
-
-  // Fetch conversation details
-  const { data: conversation } = useQuery({
-    queryKey: ["/api/conversations", conversationId],
-    queryFn: async () => {
-      const conversations = await apiRequest("GET", "/api/conversations");
-      return conversations.find((c: any) => c.id === conversationId);
-    },
-    enabled: !!conversationId && isOpen,
-  });
 
   // Send message mutation
   const sendMessageMutation = useMutation({
@@ -155,7 +158,9 @@ export default function BookingMessageWidget({
               </Avatar>
               <div>
                 <DialogTitle className="text-sm font-medium">
-                  {conversation?.name || "Booking Conversation"}
+                  {conversation?.name || 
+                   (conversation?.participants?.find((p: any) => p.id !== JSON.parse(localStorage.getItem('user') || '{}').profileId)?.name) ||
+                   "Booking Conversation"}
                 </DialogTitle>
                 {bookingRequest && (
                   <p className="text-xs text-neutral-500">

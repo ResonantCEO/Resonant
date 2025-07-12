@@ -47,11 +47,29 @@ export default function BookingMessageWidget({
   // Find the current conversation
   const conversation = React.useMemo(() => {
     console.log('Finding conversation:', { conversationId, conversationsCount: conversations?.length });
-    if (!conversations || !conversationId) {
-      console.log('No conversations or conversationId');
+    console.log('Conversations type:', typeof conversations, 'Is array:', Array.isArray(conversations));
+    
+    if (!conversationId) {
+      console.log('No conversationId');
       return null;
     }
-    const found = conversations.find((c: any) => c.id === conversationId);
+    
+    if (!conversations) {
+      console.log('No conversations data');
+      return null;
+    }
+    
+    // Ensure conversations is an array
+    const conversationsArray = Array.isArray(conversations) ? conversations : 
+                              (conversations.data && Array.isArray(conversations.data)) ? conversations.data :
+                              [];
+    
+    if (conversationsArray.length === 0) {
+      console.log('Conversations array is empty');
+      return null;
+    }
+    
+    const found = conversationsArray.find((c: any) => c.id === conversationId);
     console.log('Found conversation:', found);
     return found;
   }, [conversations, conversationId]);

@@ -515,12 +515,12 @@ export default function MessagesPage() {
         clearTimeout(typingTimeoutRef.current);
         typingTimeoutRef.current = null;
       }
-      
+
       // Quick cleanup without waiting for network calls
       setTypingUsers([]);
       setIsTyping(false);
       setSelectedConversation(null);
-      
+
       // Async cleanup that doesn't block component unmounting
       setTimeout(() => {
         if (selectedConversation && leaveConversation) {
@@ -711,8 +711,9 @@ export default function MessagesPage() {
     });
   };
 
-  const filteredConversations = conversations
+  const filteredConversations = (conversations || [])
     .filter((conv: Conversation) => {
+      if (!conv) return false;
       const matchesSearch = conv.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesArchiveFilter = showArchivedConversations ? conv.isArchived : !conv.isArchived;
       return matchesSearch && matchesArchiveFilter;
@@ -1582,7 +1583,7 @@ export default function MessagesPage() {
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Report User</DialogTitle>
+            <DialogTitle>Report User</AlertDialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-neutral-600 dark:text-neutral-400">

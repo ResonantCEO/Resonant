@@ -227,12 +227,6 @@ export default function BookingManagement({ profileType }: BookingManagementProp
     }
   };
 
-  const handleDeclineConfirmation = () => {
-    if (selectedRequestId) {
-      updateBookingRequestMutation.mutate({ requestId: selectedRequestId, status: 'rejected', message: declineMessage });
-    }
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'accepted': return 'bg-green-100 text-green-800 border-green-200';
@@ -286,48 +280,45 @@ export default function BookingManagement({ profileType }: BookingManagementProp
       }
 
       const conversations = await response.json();
-      const existingConversation = conversations.find((conv: any) =>
-        conv.name.includes(request.artistProfile?.name) &&
-        conv.name.includes(request.venueProfile?.name) &&
+      console.log('All conversations:', conversations);
+
+      // Find existing conversation with the target profile
+      const existingConversation = conversations.find((conv: any) => 
         conv.participants?.some((p: any) => p.id === targetProfileId)
       );
 
+      console.log('Existing conversation:', existingConversation);
+
       if (existingConversation) {
-        // Check if there's already a booking message for this specific request
-        const messagesResponse = await fetch(`/api/conversations/${existingConversation.id}/messages`);
-        if (messagesResponse.ok) {
-          const messages = await messagesResponse.json();
-          const hasBookingMessage = messages.some((msg: any) => 
-            msg.attachments?.some((att: any) => 
-              att.type === 'booking_reference' && att.bookingRequestId === request.id
-            )
-          );
-          
-          if (hasBookingMessage) {
-            // Conversation and booking message already exist, just open it
-            setConversationId(existingConversation.id);
-            setShowMessageWidget(true);
-            return;
-          }
-        }
-        
-        // Conversation exists but no booking message for this request
+        // Conversation exists, just open it without sending any message
         setConversationId(existingConversation.id);
         setShowMessageWidget(true);
       } else {
-        // Start new conversation with booking context
-        const initialMessage = `Hi! I'm messaging about the booking request for ${request.eventDate ? new Date(request.eventDate).toLocaleDateString() : 'your event'}. ${request.message ? `Original request: "${request.message}"` : ''}`;
-
-        startBookingConversationMutation.mutate({
-          profileId: targetProfileId,
-          message: initialMessage,
-          bookingRequestId: request.id
+        // Create new conversation without sending an initial message
+        const createResponse = await fetch("/api/conversations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            profileId: targetProfileId
+            // Removed message and bookingRequestId to prevent auto-sending
+          })
         });
+
+        if (!createResponse.ok) {
+          throw new Error(`Failed to create conversation: ${createResponse.status}`);
+        }
+
+        const newConversation = await createResponse.json();
+        setConversationId(newConversation.id);
+        setShowMessageWidget(true);
       }
     } catch (error) {
-      console.error('Error checking conversations:', error);
-      // Only create fallback if we're sure no conversation exists
-      setShowMessageWidget(false);
+      console.error('Error handling message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open conversation",
+        variant: "destructive",
+      });
     }
   };
 

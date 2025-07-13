@@ -374,21 +374,28 @@ export default function BookingMessageWidget({
                   </button>
                 </div>
               ) : !messages || messages.length === 0 ? (
-                <div className="text-center py-8 text-neutral-500">
-                  <p className="text-sm">No messages yet.</p>
-                  <p className="text-xs">Start the conversation about your booking!</p>
-                  {conversationId && (
-                    <div className="mt-2">
-                      <p className="text-xs text-gray-400">Conversation ID: {conversationId}</p>
-                      <p className="text-xs text-gray-400">Loading: {loadingMessages ? 'Yes' : 'No'}</p>
-                      <p className="text-xs text-gray-400">Messages count: {messages ? messages.length : 'null'}</p>
-                      <p className="text-xs text-gray-400">Raw data type: {typeof messagesData}</p>
-                      <p className="text-xs text-gray-400">Raw data is array: {Array.isArray(messagesData) ? 'Yes' : 'No'}</p>
-                      {messagesData && typeof messagesData === 'object' && (
-                        <p className="text-xs text-gray-400">Raw data keys: {Object.keys(messagesData).join(', ')}</p>
-                      )}
+                
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center space-y-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="48"
+                      height="48"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="w-12 h-12 text-neutral-400 mx-auto"
+                    >
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    <div className="space-y-1">
+                      <p className="text-neutral-500 text-sm">No messages yet.</p>
+                      <p className="text-neutral-400 text-xs">Start the conversation about your booking!</p>
                     </div>
-                  )}
+                  </div>
                 </div>
               ) : (
                 messages.map((message: Message) => {

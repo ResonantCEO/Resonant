@@ -36,6 +36,16 @@ interface ContractTerms {
   merchandising: string;
   recording: string;
   additionalServices: string[];
+  radiusClause: {
+    enabled: boolean;
+    distance: string;
+    distanceUnit: string;
+    timeRestriction: string;
+    timeUnit: string;
+    restrictions: string;
+    exceptions: string;
+    enforcement: string;
+  };
 }
 
 interface PaymentTerms {
@@ -100,6 +110,16 @@ export default function ContractProposalDialog({
     merchandising: "",
     recording: "",
     additionalServices: [],
+    radiusClause: {
+      enabled: false,
+      distance: "",
+      distanceUnit: "miles",
+      timeRestriction: "",
+      timeUnit: "days",
+      restrictions: "",
+      exceptions: "",
+      enforcement: "",
+    },
   });
 
   const [payment, setPayment] = useState<PaymentTerms>({
@@ -192,6 +212,16 @@ export default function ContractProposalDialog({
       merchandising: "",
       recording: "",
       additionalServices: [],
+      radiusClause: {
+        enabled: false,
+        distance: "",
+        distanceUnit: "miles",
+        timeRestriction: "",
+        timeUnit: "days",
+        restrictions: "",
+        exceptions: "",
+        enforcement: "",
+      },
     });
     setPayment({
       totalAmount: "",
@@ -340,6 +370,18 @@ export default function ContractProposalDialog({
               >
                 <FileText className="w-4 h-4 mr-2" />
                 Docs
+              </Button>
+              <Button
+                variant={currentPage === 'radius-clause' ? "default" : "ghost"}
+                className={`w-full justify-start text-white ${
+                  currentPage === 'radius-clause' 
+                    ? "bg-blue-600 hover:bg-blue-700" 
+                    : "hover:bg-gray-800"
+                }`}
+                onClick={() => setCurrentPage('radius-clause')}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Radius Clause
               </Button>
             </div>
           </div>
@@ -1083,6 +1125,212 @@ export default function ContractProposalDialog({
                     </div>
                   </CardContent>
                 </Card>
+              </>
+            )}
+
+            {currentPage === 'radius-clause' && (
+              <>
+                {/* Radius Clause Settings */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5" />
+                      <span>Radius Clause Terms</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label className="text-base font-medium">Enable Radius Clause</Label>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <input
+                          type="checkbox"
+                          id="radiusEnabled"
+                          checked={terms.radiusClause.enabled}
+                          onChange={(e) => setTerms(prev => ({
+                            ...prev,
+                            radiusClause: {
+                              ...prev.radiusClause,
+                              enabled: e.target.checked
+                            }
+                          }))}
+                          className="rounded border border-gray-300"
+                        />
+                        <Label htmlFor="radiusEnabled" className="text-sm font-normal">
+                          Include radius clause restrictions in this contract
+                        </Label>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-2">
+                        A radius clause restricts the artist from performing within a certain distance and time frame from this event.
+                      </p>
+                    </div>
+                    
+                    {terms.radiusClause.enabled && (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="radiusDistance">Distance Restriction</Label>
+                            <Input
+                              id="radiusDistance"
+                              type="number"
+                              placeholder="e.g., 50"
+                              value={terms.radiusClause.distance}
+                              onChange={(e) => setTerms(prev => ({
+                                ...prev,
+                                radiusClause: {
+                                  ...prev.radiusClause,
+                                  distance: e.target.value
+                                }
+                              }))}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="radiusDistanceUnit">Distance Unit</Label>
+                            <Select value={terms.radiusClause.distanceUnit} onValueChange={(value) => setTerms(prev => ({
+                              ...prev,
+                              radiusClause: {
+                                ...prev.radiusClause,
+                                distanceUnit: value
+                              }
+                            }))}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="miles">Miles</SelectItem>
+                                <SelectItem value="kilometers">Kilometers</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="radiusTime">Time Restriction</Label>
+                            <Input
+                              id="radiusTime"
+                              type="number"
+                              placeholder="e.g., 30"
+                              value={terms.radiusClause.timeRestriction}
+                              onChange={(e) => setTerms(prev => ({
+                                ...prev,
+                                radiusClause: {
+                                  ...prev.radiusClause,
+                                  timeRestriction: e.target.value
+                                }
+                              }))}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="radiusTimeUnit">Time Unit</Label>
+                            <Select value={terms.radiusClause.timeUnit} onValueChange={(value) => setTerms(prev => ({
+                              ...prev,
+                              radiusClause: {
+                                ...prev.radiusClause,
+                                timeUnit: value
+                              }
+                            }))}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="days">Days</SelectItem>
+                                <SelectItem value="weeks">Weeks</SelectItem>
+                                <SelectItem value="months">Months</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {terms.radiusClause.enabled && (
+                  <>
+                    {/* Radius Clause Details */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Radius Clause Details</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label htmlFor="radiusRestrictions">Specific Restrictions</Label>
+                          <Textarea
+                            id="radiusRestrictions"
+                            placeholder="Detail specific restrictions (e.g., no performances at competing venues, festival exclusions, etc.)"
+                            value={terms.radiusClause.restrictions}
+                            onChange={(e) => setTerms(prev => ({
+                              ...prev,
+                              radiusClause: {
+                                ...prev.radiusClause,
+                                restrictions: e.target.value
+                              }
+                            }))}
+                            rows={4}
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="radiusExceptions">Exceptions</Label>
+                          <Textarea
+                            id="radiusExceptions"
+                            placeholder="List any exceptions to the radius clause (e.g., previously booked shows, private events, etc.)"
+                            value={terms.radiusClause.exceptions}
+                            onChange={(e) => setTerms(prev => ({
+                              ...prev,
+                              radiusClause: {
+                                ...prev.radiusClause,
+                                exceptions: e.target.value
+                              }
+                            }))}
+                            rows={3}
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="radiusEnforcement">Enforcement & Penalties</Label>
+                          <Textarea
+                            id="radiusEnforcement"
+                            placeholder="Describe enforcement terms and penalties for violations (e.g., financial penalties, contract termination, etc.)"
+                            value={terms.radiusClause.enforcement}
+                            onChange={(e) => setTerms(prev => ({
+                              ...prev,
+                              radiusClause: {
+                                ...prev.radiusClause,
+                                enforcement: e.target.value
+                              }
+                            }))}
+                            rows={3}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Radius Clause Preview */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Clause Preview</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="bg-gray-50 p-4 rounded-lg border">
+                          <p className="text-sm font-medium mb-2">Radius Clause Summary:</p>
+                          <p className="text-sm text-gray-700">
+                            {terms.radiusClause.distance && terms.radiusClause.timeRestriction ? (
+                              <>
+                                Artist agrees not to perform within {terms.radiusClause.distance} {terms.radiusClause.distanceUnit} 
+                                of this venue for {terms.radiusClause.timeRestriction} {terms.radiusClause.timeUnit} 
+                                {terms.radiusClause.timeRestriction === "1" ? terms.radiusClause.timeUnit.slice(0, -1) : terms.radiusClause.timeUnit} 
+                                before and after the contracted performance date.
+                              </>
+                            ) : (
+                              "Complete the distance and time restrictions above to see the clause preview."
+                            )}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </>
             )}
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -48,27 +47,27 @@ export default function BookingMessageWidget({
   const conversation = React.useMemo(() => {
     console.log('Finding conversation:', { conversationId, conversationsCount: conversations?.length });
     console.log('Conversations type:', typeof conversations, 'Is array:', Array.isArray(conversations));
-    
+
     if (!conversationId) {
       console.log('No conversationId');
       return null;
     }
-    
+
     if (!conversations) {
       console.log('No conversations data');
       return null;
     }
-    
+
     // Ensure conversations is an array
     const conversationsArray = Array.isArray(conversations) ? conversations : 
                               (conversations.data && Array.isArray(conversations.data)) ? conversations.data :
                               [];
-    
+
     if (conversationsArray.length === 0) {
       console.log('Conversations array is empty');
       return null;
     }
-    
+
     const found = conversationsArray.find((c: any) => c.id === conversationId);
     console.log('Found conversation:', found);
     return found;
@@ -86,17 +85,17 @@ export default function BookingMessageWidget({
         console.log('Raw API Response:', data);
         console.log('Response type:', typeof data);
         console.log('Response is array:', Array.isArray(data));
-        
+
         // The API should return an array directly, but let's handle different formats
         if (Array.isArray(data)) {
           console.log('Direct array response with', data.length, 'messages');
           return data;
         }
-        
+
         if (data && typeof data === 'object') {
           console.log('Object response, checking for nested arrays');
           console.log('Response keys:', Object.keys(data));
-          
+
           // Check common wrapper patterns
           if (data.data && Array.isArray(data.data)) {
             console.log('Found messages in data.data');
@@ -106,7 +105,7 @@ export default function BookingMessageWidget({
             console.log('Found messages in data.messages');
             return data.messages;
           }
-          
+
           // Look for any array property that contains message-like objects
           for (const [key, value] of Object.entries(data)) {
             if (Array.isArray(value)) {
@@ -117,11 +116,11 @@ export default function BookingMessageWidget({
               }
             }
           }
-          
+
           console.warn('No valid messages array found in response');
           return [];
         }
-        
+
         console.warn('Unexpected response format, returning empty array');
         return [];
       } catch (error) {
@@ -151,7 +150,7 @@ export default function BookingMessageWidget({
       messagesDataKeys: messagesData && typeof messagesData === 'object' ? Object.keys(messagesData) : null,
       messagesLength: Array.isArray(messagesData) ? messagesData.length : null
     });
-    
+
     if (messagesData && !Array.isArray(messagesData)) {
       console.log('Non-array messages data received:', messagesData);
     }
@@ -162,12 +161,12 @@ export default function BookingMessageWidget({
     console.log('Processing messages data:', messagesData);
     console.log('Messages data type:', typeof messagesData);
     console.log('Is array?', Array.isArray(messagesData));
-    
+
     if (!messagesData) {
       console.log('No messages data, returning empty array');
       return [];
     }
-    
+
     // Check if messagesData is directly an array
     if (Array.isArray(messagesData)) {
       console.log('Messages data is array with length:', messagesData.length);
@@ -176,27 +175,27 @@ export default function BookingMessageWidget({
       console.log('Valid messages count:', validMessages.length);
       return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
-    
+
     // Check for nested messages property
     if (messagesData.messages && Array.isArray(messagesData.messages)) {
       console.log('Messages nested in .messages property');
       const validMessages = messagesData.messages.filter(msg => msg && typeof msg === 'object' && msg.id && msg.content);
       return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
-    
+
     // Check for nested data property
     if (messagesData.data && Array.isArray(messagesData.data)) {
       console.log('Messages nested in .data property');
       const validMessages = messagesData.data.filter(msg => msg && typeof msg === 'object' && msg.id && msg.content);
       return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
-    
+
     // Handle case where messagesData is an empty object
     if (typeof messagesData === 'object' && Object.keys(messagesData).length === 0) {
       console.warn('Empty object received from API - this indicates a server-side issue');
       return [];
     }
-    
+
     // If messagesData is an object but not in expected format, try to extract messages
     if (typeof messagesData === 'object') {
       console.log('Attempting to extract messages from object keys:', Object.keys(messagesData));
@@ -210,7 +209,7 @@ export default function BookingMessageWidget({
         }
       }
     }
-    
+
     console.warn('Unexpected messages data format:', messagesData);
     // Force refresh if we can't parse the data properly
     if (conversationId && messagesData && typeof messagesData === 'object') {
@@ -233,7 +232,7 @@ export default function BookingMessageWidget({
     onSuccess: async (response) => {
       console.log('Message sent successfully:', response);
       setNewMessage("");
-      
+
       // Force immediate refetch of messages
       await queryClient.refetchQueries({ 
         queryKey: ["/api/conversations", conversationId, "messages"] 
@@ -241,7 +240,7 @@ export default function BookingMessageWidget({
       await queryClient.refetchQueries({
         queryKey: ["/api/conversations"]
       });
-      
+
       // Also invalidate for good measure
       queryClient.invalidateQueries({ 
         queryKey: ["/api/conversations", conversationId, "messages"] 
@@ -249,7 +248,7 @@ export default function BookingMessageWidget({
       queryClient.invalidateQueries({
         queryKey: ["/api/conversations"]
       });
-      
+
       scrollToBottom();
     },
     onError: (error: Error) => {

@@ -360,16 +360,28 @@ export default function ContractProposalDialog({
                 Payment
               </Button>
               <Button
-                variant={currentPage === 'docs' ? "default" : "ghost"}
+                variant={currentPage === 'artist-docs' ? "default" : "ghost"}
                 className={`w-full justify-start text-white ${
-                  currentPage === 'docs' 
+                  currentPage === 'artist-docs' 
                     ? "bg-blue-600 hover:bg-blue-700" 
                     : "hover:bg-gray-800"
                 }`}
-                onClick={() => setCurrentPage('docs')}
+                onClick={() => setCurrentPage('artist-docs')}
               >
                 <FileText className="w-4 h-4 mr-2" />
-                Docs
+                Artist Docs
+              </Button>
+              <Button
+                variant={currentPage === 'venue-docs' ? "default" : "ghost"}
+                className={`w-full justify-start text-white ${
+                  currentPage === 'venue-docs' 
+                    ? "bg-blue-600 hover:bg-blue-700" 
+                    : "hover:bg-gray-800"
+                }`}
+                onClick={() => setCurrentPage('venue-docs')}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Venue Docs
               </Button>
               <Button
                 variant={currentPage === 'radius-clause' ? "default" : "ghost"}
@@ -968,7 +980,7 @@ export default function ContractProposalDialog({
               </>
             )}
 
-            {currentPage === 'docs' && (
+            {currentPage === 'artist-docs' && (
               <>
                 {/* Required Documents from Artist */}
                 <Card>
@@ -1121,6 +1133,185 @@ export default function ContractProposalDialog({
                         <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
                         <p className="text-sm text-gray-600">Upload contract documents, riders, or technical specs</p>
                         <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {currentPage === 'venue-docs' && (
+              <>
+                {/* Required Documents from Venue */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5" />
+                      <span>Required Documents from Venue</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label className="text-base font-medium">Select documents the venue must provide:</Label>
+                      <div className="grid grid-cols-2 gap-3 mt-3">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="venueInsurance"
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="venueInsurance" className="text-sm font-normal">Venue Insurance Certificate</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="venueLayout"
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="venueLayout" className="text-sm font-normal">Venue Layout & Capacity</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="soundSpecs"
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="soundSpecs" className="text-sm font-normal">Sound System Specifications</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="lightingSpecs"
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="lightingSpecs" className="text-sm font-normal">Lighting Specifications</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="safetyPlan"
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="safetyPlan" className="text-sm font-normal">Safety & Emergency Plan</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="loadInSpecs"
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="loadInSpecs" className="text-sm font-normal">Load-in/Load-out Specifications</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="parkingInfo"
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="parkingInfo" className="text-sm font-normal">Parking Information</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="cateringOptions"
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="cateringOptions" className="text-sm font-normal">Catering Options</Label>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Venue Policies & Procedures */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Venue Policies & Procedures</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="venueRules">Venue Rules & Restrictions</Label>
+                      <Textarea
+                        id="venueRules"
+                        placeholder="Describe venue-specific rules, noise restrictions, curfews, alcohol policies, etc..."
+                        rows={4}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="securityRequirements">Security Requirements</Label>
+                      <Textarea
+                        id="securityRequirements"
+                        placeholder="Security personnel requirements, bag checks, metal detectors, etc..."
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="venueStaffing">Venue Staffing</Label>
+                      <Textarea
+                        id="venueStaffing"
+                        placeholder="Bar staff, security, sound engineer, lighting technician availability..."
+                        rows={3}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Technical Infrastructure */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Technical Infrastructure</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="powerSpecs">Power & Electrical Specifications</Label>
+                      <Textarea
+                        id="powerSpecs"
+                        placeholder="Available power outlets, voltage, amperage, electrical limitations..."
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="internetAccess">Internet & WiFi Access</Label>
+                      <Textarea
+                        id="internetAccess"
+                        placeholder="WiFi networks available for artist/crew, livestreaming capabilities..."
+                        rows={2}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="greenRoomFacilities">Green Room & Facilities</Label>
+                      <Textarea
+                        id="greenRoomFacilities"
+                        placeholder="Dressing room amenities, restroom access, food/beverage provisions..."
+                        rows={3}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Venue Documentation Upload */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Venue Documentation Upload</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label>Venue Documents & Floor Plans</Label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-600">Upload venue floor plans, technical specs, or policy documents</p>
+                        <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx,.jpg,.png" />
                       </div>
                     </div>
                   </CardContent>

@@ -293,6 +293,25 @@ export default function BookingManagement({ profileType }: BookingManagementProp
       );
 
       if (existingConversation) {
+        // Check if there's already a booking message for this specific request
+        const messagesResponse = await fetch(`/api/conversations/${existingConversation.id}/messages`);
+        if (messagesResponse.ok) {
+          const messages = await messagesResponse.json();
+          const hasBookingMessage = messages.some((msg: any) => 
+            msg.attachments?.some((att: any) => 
+              att.type === 'booking_reference' && att.bookingRequestId === request.id
+            )
+          );
+          
+          if (hasBookingMessage) {
+            // Conversation and booking message already exist, just open it
+            setConversationId(existingConversation.id);
+            setShowMessageWidget(true);
+            return;
+          }
+        }
+        
+        // Conversation exists but no booking message for this request
         setConversationId(existingConversation.id);
         setShowMessageWidget(true);
       } else {
@@ -306,14 +325,9 @@ export default function BookingManagement({ profileType }: BookingManagementProp
         });
       }
     } catch (error) {
-      // If we can't check existing conversations, just start a new one
-      const fallbackMessage = `Hi! I'm messaging about the booking request for ${request.eventDate ? new Date(request.eventDate).toLocaleDateString() : 'your event'}.`;
-
-      startBookingConversationMutation.mutate({
-        profileId: targetProfileId,
-        message: fallbackMessage,
-        bookingRequestId: request.id
-      });
+      console.error('Error checking conversations:', error);
+      // Only create fallback if we're sure no conversation exists
+      setShowMessageWidget(false);
     }
   };
 

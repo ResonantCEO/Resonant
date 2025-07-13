@@ -53,18 +53,16 @@ export function useNotificationOptimized() {
 
   // Handle real-time notification events with deduplication
   const handleNotificationReceived = useCallback((notification: any) => {
-    console.log('Real-time notification received:', notification);
-    
     // Update cache optimistically if we have the data
     if (notificationCounts && notification.profileId) {
       queryClient.setQueryData<NotificationCounts>(
         ["/api/notifications/counts-by-profile"],
         (oldData) => {
           if (!oldData) return oldData;
-          
+
           const profileId = notification.profileId.toString();
           const currentCounts = oldData[profileId] || { notifications: 0, friendRequests: 0, total: 0 };
-          
+
           return {
             ...oldData,
             [profileId]: {
@@ -82,18 +80,16 @@ export function useNotificationOptimized() {
   }, [notificationCounts, queryClient, batchedInvalidateNotifications]);
 
   const handleNotificationRead = useCallback((notification: any) => {
-    console.log('Notification marked as read:', notification);
-    
     // Update cache optimistically
     if (notificationCounts && notification.profileId) {
       queryClient.setQueryData<NotificationCounts>(
         ["/api/notifications/counts-by-profile"],
         (oldData) => {
           if (!oldData) return oldData;
-          
+
           const profileId = notification.profileId.toString();
           const currentCounts = oldData[profileId] || { notifications: 0, friendRequests: 0, total: 0 };
-          
+
           return {
             ...oldData,
             [profileId]: {
@@ -110,18 +106,16 @@ export function useNotificationOptimized() {
   }, [notificationCounts, queryClient, batchedInvalidateNotifications]);
 
   const handleFriendRequest = useCallback((friendRequest: any) => {
-    console.log('Friend request received:', friendRequest);
-    
     // Update cache optimistically
     if (notificationCounts && friendRequest.profileId) {
       queryClient.setQueryData<NotificationCounts>(
         ["/api/notifications/counts-by-profile"],
         (oldData) => {
           if (!oldData) return oldData;
-          
+
           const profileId = friendRequest.profileId.toString();
           const currentCounts = oldData[profileId] || { notifications: 0, friendRequests: 0, total: 0 };
-          
+
           return {
             ...oldData,
             [profileId]: {
@@ -144,18 +138,16 @@ export function useNotificationOptimized() {
   }, [notificationCounts, queryClient, batchedInvalidateNotifications]);
 
   const handleFriendRequestAccepted = useCallback((response: any) => {
-    console.log('Friend request accepted:', response);
-    
     // Update cache optimistically
     if (notificationCounts && response.profileId) {
       queryClient.setQueryData<NotificationCounts>(
         ["/api/notifications/counts-by-profile"],
         (oldData) => {
           if (!oldData) return oldData;
-          
+
           const profileId = response.profileId.toString();
           const currentCounts = oldData[profileId] || { notifications: 0, friendRequests: 0, total: 0 };
-          
+
           return {
             ...oldData,
             [profileId]: {
@@ -187,12 +179,10 @@ export function useNotificationOptimized() {
     enableMessaging: false, // Only enable notifications for this hook
     enableStatusUpdates: false,
     onConnect: () => {
-      console.log('Notification WebSocket connected');
       // Refresh counts on reconnect to ensure consistency
       refetchNotifications();
     },
     onDisconnect: () => {
-      console.log('Notification WebSocket disconnected');
     }
   });
 
@@ -212,7 +202,7 @@ export function useNotificationOptimized() {
     return () => {
       window.removeEventListener('newNotification', handleNotificationEvent);
       window.removeEventListener('newFriendRequest', handleFriendRequestEvent);
-      
+
       // Clean up batch timeout
       if (batchUpdateTimeoutRef.current) {
         clearTimeout(batchUpdateTimeoutRef.current);

@@ -13,7 +13,7 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const isFormData = data instanceof FormData;
-  
+
   const res = await fetch(url, {
     method,
     headers: data && !isFormData ? { "Content-Type": "application/json" } : {},
@@ -41,13 +41,7 @@ export const getQueryFn: <T>(options: {
 
     await throwIfResNotOk(res);
     const data = await res.json();
-    
-    // Debug logging for /api/user endpoint specifically
-    if (queryKey[0] === '/api/user') {
-      console.log("QueryClient - Raw API response for /api/user:", data);
-      console.log("QueryClient - coverImageUrl in response:", data?.coverImageUrl);
-    }
-    
+
     return data;
   };
 

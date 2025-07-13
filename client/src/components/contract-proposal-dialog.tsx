@@ -927,14 +927,7 @@ export default function ContractProposalDialog({
                         <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx" />
                       </div>
                     </div>
-                    <div>
-                      <Label htmlFor="legalTerms">Legal Terms & Conditions</Label>
-                      <Textarea
-                        id="legalTerms"
-                        placeholder="Governing law, jurisdiction, dispute resolution, liability limitations..."
-                        rows={4}
-                      />
-                    </div>
+                    
                   </CardContent>
                 </Card>
               </>

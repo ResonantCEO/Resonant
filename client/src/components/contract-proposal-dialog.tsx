@@ -668,16 +668,6 @@ export default function ContractProposalDialog({
                     <CardTitle>Artist Requirements & Rights</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="cancellationPolicy">Cancellation Policy</Label>
-                      <Textarea
-                        id="cancellationPolicy"
-                        placeholder="Describe cancellation terms and notice requirements..."
-                        value={terms.cancellationPolicy}
-                        onChange={(e) => setTerms({...terms, cancellationPolicy: e.target.value})}
-                        rows={3}
-                      />
-                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="merchandising">Merchandising Rights</Label>

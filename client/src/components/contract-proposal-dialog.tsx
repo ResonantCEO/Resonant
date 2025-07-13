@@ -1230,89 +1230,60 @@ export default function ContractProposalDialog({
                   </CardContent>
                 </Card>
 
-                {/* Venue Policies & Procedures */}
+                {/* Venue Policies Upload */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Venue Policies & Procedures</CardTitle>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5" />
+                      <span>Venue Policies</span>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label htmlFor="venueRules">Venue Rules & Restrictions</Label>
-                      <Textarea
-                        id="venueRules"
-                        placeholder="Describe venue-specific rules, noise restrictions, curfews, alcohol policies, etc..."
-                        rows={4}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="securityRequirements">Security Requirements</Label>
-                      <Textarea
-                        id="securityRequirements"
-                        placeholder="Security personnel requirements, bag checks, metal detectors, etc..."
-                        rows={3}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="venueStaffing">Venue Staffing</Label>
-                      <Textarea
-                        id="venueStaffing"
-                        placeholder="Bar staff, security, sound engineer, lighting technician availability..."
-                        rows={3}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Technical Infrastructure */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Technical Infrastructure</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="powerSpecs">Power & Electrical Specifications</Label>
-                      <Textarea
-                        id="powerSpecs"
-                        placeholder="Available power outlets, voltage, amperage, electrical limitations..."
-                        rows={3}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="internetAccess">Internet & WiFi Access</Label>
-                      <Textarea
-                        id="internetAccess"
-                        placeholder="WiFi networks available for artist/crew, livestreaming capabilities..."
-                        rows={2}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="greenRoomFacilities">Green Room & Facilities</Label>
-                      <Textarea
-                        id="greenRoomFacilities"
-                        placeholder="Dressing room amenities, restroom access, food/beverage provisions..."
-                        rows={3}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Venue Documentation Upload */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Venue Documentation Upload</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label>Venue Documents & Floor Plans</Label>
+                      <Label>Upload Venue Policy Documents</Label>
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                         <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                        <p className="text-sm text-gray-600">Upload venue floor plans, technical specs, or policy documents</p>
-                        <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx,.jpg,.png" />
+                        <p className="text-sm text-gray-600 mb-2">Upload venue policies, rules, procedures, and regulations</p>
+                        <p className="text-xs text-gray-500 mb-3">Accepted formats: PDF, DOC, DOCX</p>
+                        <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx" />
                       </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="policyNotes">Policy Notes & Special Instructions</Label>
+                      <Textarea
+                        id="policyNotes"
+                        placeholder="Any additional notes about venue policies, special requirements, or important reminders..."
+                        rows={3}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Cancellation Agreements Upload */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5" />
+                      <span>Cancellation Agreements</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label>Upload Cancellation Agreement Documents</Label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-600 mb-2">Upload cancellation policies, penalty structures, and refund procedures</p>
+                        <p className="text-xs text-gray-500 mb-3">Accepted formats: PDF, DOC, DOCX</p>
+                        <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx" />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="cancellationTerms">Cancellation Terms Summary</Label>
+                      <Textarea
+                        id="cancellationTerms"
+                        placeholder="Brief summary of cancellation terms, notice requirements, penalty fees, force majeure clauses..."
+                        rows={4}
+                      />
                     </div>
                   </CardContent>
                 </Card>

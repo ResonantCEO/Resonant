@@ -81,47 +81,58 @@ export default function BookingMessageWidget({
       console.log('Fetching messages for conversation:', conversationId);
       try {
         const response = await apiRequest("GET", `/api/conversations/${conversationId}/messages`);
-        console.log('API Response received:', response);
+        console.log('Raw API Response:', response);
         console.log('Response type:', typeof response);
         console.log('Response is array:', Array.isArray(response));
         
-        if (response && typeof response === 'object') {
-          console.log('Response keys:', Object.keys(response));
-          if (!Array.isArray(response)) {
-            console.log('Non-array response values:', Object.values(response));
-          }
+        // The API should return an array directly, but let's handle different formats
+        if (Array.isArray(response)) {
+          console.log('Direct array response with', response.length, 'messages');
+          return response;
         }
         
-        // If response is not an array but contains data, try to extract it
-        if (response && !Array.isArray(response) && typeof response === 'object') {
-          // Check common response wrapper patterns
+        if (response && typeof response === 'object') {
+          console.log('Object response, checking for nested arrays');
+          console.log('Response keys:', Object.keys(response));
+          
+          // Check common wrapper patterns
           if (response.data && Array.isArray(response.data)) {
-            console.log('Extracting messages from response.data');
+            console.log('Found messages in response.data');
             return response.data;
           }
           if (response.messages && Array.isArray(response.messages)) {
-            console.log('Extracting messages from response.messages');
+            console.log('Found messages in response.messages');
             return response.messages;
           }
-          // If response has array values, return the first array found
+          
+          // Look for any array property that contains message-like objects
           for (const [key, value] of Object.entries(response)) {
-            if (Array.isArray(value) && value.length > 0 && value[0]?.id) {
-              console.log(`Extracting messages from response.${key}`);
-              return value;
+            if (Array.isArray(value)) {
+              console.log(`Found array in ${key} with ${value.length} items`);
+              if (value.length > 0 && value[0]?.id && value[0]?.content) {
+                console.log(`Using ${key} as messages array`);
+                return value;
+              }
             }
           }
+          
+          console.warn('No valid messages array found in response');
+          return [];
         }
         
-        return response;
+        console.warn('Unexpected response format, returning empty array');
+        return [];
       } catch (error) {
         console.error('Error fetching messages:', error);
         throw error;
       }
     },
     enabled: !!conversationId && isOpen,
-    refetchInterval: 5000, // Refresh every 5 seconds
-    retry: 3,
-    staleTime: 1000, // Cache for 1 second
+    refetchInterval: 3000, // Refresh every 3 seconds
+    retry: 2,
+    staleTime: 500, // Very short cache
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   // Debug logging for query state
@@ -159,7 +170,7 @@ export default function BookingMessageWidget({
     if (Array.isArray(messagesData)) {
       console.log('Messages data is array with length:', messagesData.length);
       // Filter out any invalid messages and sort by creation date
-      const validMessages = messagesData.filter(msg => msg && msg.id && msg.content);
+      const validMessages = messagesData.filter(msg => msg && typeof msg === 'object' && msg.id && msg.content);
       console.log('Valid messages count:', validMessages.length);
       return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
@@ -167,14 +178,14 @@ export default function BookingMessageWidget({
     // Check for nested messages property
     if (messagesData.messages && Array.isArray(messagesData.messages)) {
       console.log('Messages nested in .messages property');
-      const validMessages = messagesData.messages.filter(msg => msg && msg.id && msg.content);
+      const validMessages = messagesData.messages.filter(msg => msg && typeof msg === 'object' && msg.id && msg.content);
       return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
     
     // Check for nested data property
     if (messagesData.data && Array.isArray(messagesData.data)) {
       console.log('Messages nested in .data property');
-      const validMessages = messagesData.data.filter(msg => msg && msg.id && msg.content);
+      const validMessages = messagesData.data.filter(msg => msg && typeof msg === 'object' && msg.id && msg.content);
       return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
     
@@ -192,15 +203,22 @@ export default function BookingMessageWidget({
         const value = messagesData[key];
         if (Array.isArray(value) && value.length > 0 && value[0]?.id && value[0]?.content) {
           console.log(`Found messages in property '${key}' with ${value.length} items`);
-          const validMessages = value.filter(msg => msg && msg.id && msg.content);
+          const validMessages = value.filter(msg => msg && typeof msg === 'object' && msg.id && msg.content);
           return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
         }
       }
     }
     
     console.warn('Unexpected messages data format:', messagesData);
+    // Force refresh if we can't parse the data properly
+    if (conversationId && messagesData && typeof messagesData === 'object') {
+      console.log('Attempting to refetch messages due to parsing issue');
+      queryClient.invalidateQueries({ 
+        queryKey: ["/api/conversations", conversationId, "messages"] 
+      });
+    }
     return [];
-  }, [messagesData]);
+  }, [messagesData, conversationId, queryClient]);
 
   // Send message mutation
   const sendMessageMutation = useMutation({

@@ -104,10 +104,16 @@ export default function BookingManagement({ profileType }: BookingManagementProp
     queryKey: ["/api/booking-requests"],
   });
 
-  // Fetch venues for artists to book
+  // Fetch venues for direct booking requests
   const { data: venues = [] } = useQuery({
-    queryKey: ["/api/discover", { type: "venue" }],
-    enabled: profileType === 'artist',
+    queryKey: ['/api/discover'],
+    queryFn: async () => {
+      const response = await fetch('/api/discover?type=venue');
+      if (!response.ok) throw new Error('Failed to fetch venues');
+      const data = await response.json();
+      // Ensure we only return venue type profiles
+      return data.filter((profile: any) => profile.type === 'venue');
+    },
   });
 
   // Create booking request mutation

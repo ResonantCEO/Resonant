@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -59,12 +58,12 @@ export default function ContractProposalDialog({
   const [selectedVenueForContract, setSelectedVenueForContract] = useState<any>(null);
   const [showAvailabilityChecker, setShowAvailabilityChecker] = useState(false);
   const [currentPage, setCurrentPage] = useState('event-terms');
-  
+
   // Generate default contract title
   const getDefaultTitle = () => {
     const artistName = bookingRequest?.artistProfile?.name || "Artist";
     let venueName = "";
-    
+
     if (bookingRequest?.venueProfile?.name) {
       venueName = bookingRequest.venueProfile.name;
     } else if (selectedVenueForContract?.name) {
@@ -72,7 +71,7 @@ export default function ContractProposalDialog({
     } else {
       venueName = "Venue";
     }
-    
+
     return `${artistName} at ${venueName}`;
   };
 
@@ -346,7 +345,7 @@ export default function ContractProposalDialog({
                           <SelectValue placeholder="Choose a venue" />
                         </SelectTrigger>
                         <SelectContent>
-                          {venues.map((venue: any) => (
+                          {venues?.filter(venue => venue.type === 'venue').map((venue) => (
                             <SelectItem key={venue.id} value={venue.id.toString()}>
                               {venue.name} {venue.location && `- ${venue.location}`}
                             </SelectItem>
@@ -700,7 +699,7 @@ export default function ContractProposalDialog({
                         />
                       </div>
                     </div>
-                    
+
                   </CardContent>
                 </Card>
 

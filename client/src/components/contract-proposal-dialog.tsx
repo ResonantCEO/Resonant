@@ -927,7 +927,139 @@ export default function ContractProposalDialog({
                         <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx" />
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* W-9 Tax Form */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5" />
+                      <span>W-9 Tax Information</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="w9Name">Name (as shown on your income tax return)</Label>
+                        <Input
+                          id="w9Name"
+                          placeholder="Full legal name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="w9BusinessName">Business name/disregarded entity name (if different from above)</Label>
+                        <Input
+                          id="w9BusinessName"
+                          placeholder="Business name (if applicable)"
+                        />
+                      </div>
+                    </div>
                     
+                    <div>
+                      <Label htmlFor="w9TaxClassification">Federal tax classification</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select tax classification" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="individual">Individual/sole proprietor or single-member LLC</SelectItem>
+                          <SelectItem value="c-corp">C Corporation</SelectItem>
+                          <SelectItem value="s-corp">S Corporation</SelectItem>
+                          <SelectItem value="partnership">Partnership</SelectItem>
+                          <SelectItem value="trust">Trust/estate</SelectItem>
+                          <SelectItem value="llc">Limited liability company (LLC)</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="w9Address">Address (number, street, and apt. or suite no.)</Label>
+                        <Input
+                          id="w9Address"
+                          placeholder="Street address"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="w9City">City, state, and ZIP code</Label>
+                        <Input
+                          id="w9City"
+                          placeholder="City, State ZIP"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="w9AccountNumbers">List account number(s) here (optional)</Label>
+                      <Input
+                        id="w9AccountNumbers"
+                        placeholder="Account numbers (if applicable)"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="w9TaxpayerIdType">Taxpayer Identification Number (TIN) Type</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select TIN type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ssn">Social Security Number (SSN)</SelectItem>
+                            <SelectItem value="ein">Employer Identification Number (EIN)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="w9TaxpayerId">Taxpayer Identification Number</Label>
+                        <Input
+                          id="w9TaxpayerId"
+                          placeholder="XXX-XX-XXXX or XX-XXXXXXX"
+                          type="password"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label>Certification</Label>
+                      <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <div className="flex items-start space-x-2">
+                          <input
+                            type="checkbox"
+                            id="w9Certification"
+                            className="mt-1"
+                          />
+                          <Label htmlFor="w9Certification" className="text-sm">
+                            Under penalties of perjury, I certify that:
+                            <br />
+                            1. The number shown on this form is my correct taxpayer identification number (or I am waiting for a number to be issued to me); and
+                            <br />
+                            2. I am not subject to backup withholding because: (a) I am exempt from backup withholding, or (b) I have not been notified by the Internal Revenue Service (IRS) that I am subject to backup withholding as a result of a failure to report all interest or dividends, or (c) the IRS has notified me that I am no longer subject to backup withholding; and
+                            <br />
+                            3. I am a U.S. citizen or other U.S. person; and
+                            <br />
+                            4. The FATCA code(s) entered on this form (if any) indicating that I am exempt from FATCA reporting is correct.
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="w9Date">Date</Label>
+                      <Input
+                        id="w9Date"
+                        type="date"
+                        value={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+
+                    <div className="p-4 border border-amber-200 rounded-lg bg-amber-50">
+                      <p className="text-sm text-amber-800">
+                        <strong>Important:</strong> This W-9 form is for tax reporting purposes. The information provided will be used to issue Form 1099-NEC if payments exceed $600 in a calendar year. Please ensure all information is accurate and complete.
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </>

@@ -79,14 +79,44 @@ export default function BookingMessageWidget({
     queryKey: ["/api/conversations", conversationId, "messages"],
     queryFn: async () => {
       console.log('Fetching messages for conversation:', conversationId);
-      const response = await apiRequest("GET", `/api/conversations/${conversationId}/messages`);
-      console.log('API Response received:', response);
-      console.log('Response type:', typeof response);
-      console.log('Response is array:', Array.isArray(response));
-      if (response && typeof response === 'object') {
-        console.log('Response keys:', Object.keys(response));
+      try {
+        const response = await apiRequest("GET", `/api/conversations/${conversationId}/messages`);
+        console.log('API Response received:', response);
+        console.log('Response type:', typeof response);
+        console.log('Response is array:', Array.isArray(response));
+        
+        if (response && typeof response === 'object') {
+          console.log('Response keys:', Object.keys(response));
+          if (!Array.isArray(response)) {
+            console.log('Non-array response values:', Object.values(response));
+          }
+        }
+        
+        // If response is not an array but contains data, try to extract it
+        if (response && !Array.isArray(response) && typeof response === 'object') {
+          // Check common response wrapper patterns
+          if (response.data && Array.isArray(response.data)) {
+            console.log('Extracting messages from response.data');
+            return response.data;
+          }
+          if (response.messages && Array.isArray(response.messages)) {
+            console.log('Extracting messages from response.messages');
+            return response.messages;
+          }
+          // If response has array values, return the first array found
+          for (const [key, value] of Object.entries(response)) {
+            if (Array.isArray(value) && value.length > 0 && value[0]?.id) {
+              console.log(`Extracting messages from response.${key}`);
+              return value;
+            }
+          }
+        }
+        
+        return response;
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        throw error;
       }
-      return response;
     },
     enabled: !!conversationId && isOpen,
     refetchInterval: 5000, // Refresh every 5 seconds
@@ -103,8 +133,15 @@ export default function BookingMessageWidget({
       loadingMessages,
       isError,
       messagesData,
-      messagesError
+      messagesError,
+      messagesDataType: typeof messagesData,
+      messagesDataKeys: messagesData && typeof messagesData === 'object' ? Object.keys(messagesData) : null,
+      messagesLength: Array.isArray(messagesData) ? messagesData.length : null
     });
+    
+    if (messagesData && !Array.isArray(messagesData)) {
+      console.log('Non-array messages data received:', messagesData);
+    }
   }, [conversationId, isOpen, loadingMessages, isError, messagesData, messagesError]);
 
   // Ensure messages is always an array and handle different response formats
@@ -118,26 +155,47 @@ export default function BookingMessageWidget({
       return [];
     }
     
+    // Check if messagesData is directly an array
     if (Array.isArray(messagesData)) {
       console.log('Messages data is array with length:', messagesData.length);
-      // Sort messages by creation date to ensure proper order
-      return messagesData.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      // Filter out any invalid messages and sort by creation date
+      const validMessages = messagesData.filter(msg => msg && msg.id && msg.content);
+      console.log('Valid messages count:', validMessages.length);
+      return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
     
+    // Check for nested messages property
     if (messagesData.messages && Array.isArray(messagesData.messages)) {
       console.log('Messages nested in .messages property');
-      return messagesData.messages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      const validMessages = messagesData.messages.filter(msg => msg && msg.id && msg.content);
+      return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
     
+    // Check for nested data property
     if (messagesData.data && Array.isArray(messagesData.data)) {
       console.log('Messages nested in .data property');
-      return messagesData.data.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      const validMessages = messagesData.data.filter(msg => msg && msg.id && msg.content);
+      return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
     
-    // Handle case where messagesData is an empty object - this indicates an API issue
+    // Handle case where messagesData is an empty object
     if (typeof messagesData === 'object' && Object.keys(messagesData).length === 0) {
       console.warn('Empty object received from API - this indicates a server-side issue');
       return [];
+    }
+    
+    // If messagesData is an object but not in expected format, try to extract messages
+    if (typeof messagesData === 'object') {
+      console.log('Attempting to extract messages from object keys:', Object.keys(messagesData));
+      // Try to find any property that contains an array of messages
+      for (const key of Object.keys(messagesData)) {
+        const value = messagesData[key];
+        if (Array.isArray(value) && value.length > 0 && value[0]?.id && value[0]?.content) {
+          console.log(`Found messages in property '${key}' with ${value.length} items`);
+          const validMessages = value.filter(msg => msg && msg.id && msg.content);
+          return validMessages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        }
+      }
     }
     
     console.warn('Unexpected messages data format:', messagesData);
@@ -304,6 +362,11 @@ export default function BookingMessageWidget({
                       <p className="text-xs text-gray-400">Conversation ID: {conversationId}</p>
                       <p className="text-xs text-gray-400">Loading: {loadingMessages ? 'Yes' : 'No'}</p>
                       <p className="text-xs text-gray-400">Messages count: {messages ? messages.length : 'null'}</p>
+                      <p className="text-xs text-gray-400">Raw data type: {typeof messagesData}</p>
+                      <p className="text-xs text-gray-400">Raw data is array: {Array.isArray(messagesData) ? 'Yes' : 'No'}</p>
+                      {messagesData && typeof messagesData === 'object' && (
+                        <p className="text-xs text-gray-400">Raw data keys: {Object.keys(messagesData).join(', ')}</p>
+                      )}
                     </div>
                   )}
                 </div>

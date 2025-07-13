@@ -149,13 +149,8 @@ export default function ContractProposalDialog({
     [key: string]: boolean;
   }>({
     venueInsurance: false,
-    venueLayout: false,
-    soundSpecs: false,
-    lightingSpecs: false,
-    safetyPlan: false,
     loadInSpecs: false,
     parkingInfo: false,
-    cateringOptions: false,
     venuePolicies: false,
     cancellationAgreements: false,
   });
@@ -259,13 +254,8 @@ export default function ContractProposalDialog({
     });
     setRequiredVenueDocuments({
       venueInsurance: false,
-      venueLayout: false,
-      soundSpecs: false,
-      lightingSpecs: false,
-      safetyPlan: false,
       loadInSpecs: false,
       parkingInfo: false,
-      cateringOptions: false,
       venuePolicies: false,
       cancellationAgreements: false,
     });
@@ -1199,62 +1189,6 @@ export default function ContractProposalDialog({
                         <div className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            id="venueLayout"
-                            checked={requiredVenueDocuments.venueLayout}
-                            onChange={(e) => setRequiredVenueDocuments(prev => ({
-                              ...prev,
-                              venueLayout: e.target.checked
-                            }))}
-                            className="rounded border border-gray-300"
-                          />
-                          <Label htmlFor="venueLayout" className="text-sm font-normal">Venue Layout & Capacity</Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id="soundSpecs"
-                            checked={requiredVenueDocuments.soundSpecs}
-                            onChange={(e) => setRequiredVenueDocuments(prev => ({
-                              ...prev,
-                              soundSpecs: e.target.checked
-                            }))}
-                            className="rounded border border-gray-300"
-                          />
-                          <Label htmlFor="soundSpecs" className="text-sm font-normal">Sound System Specifications</Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id="lightingSpecs"
-                            checked={requiredVenueDocuments.lightingSpecs}
-                            onChange={(e) => setRequiredVenueDocuments(prev => ({
-                              ...prev,
-                              lightingSpecs: e.target.checked
-                            }))}
-                            className="rounded border border-gray-300"
-                          />
-                          <Label htmlFor="lightingSpecs" className="text-sm font-normal">Lighting Specifications</Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id="safetyPlan"
-                            checked={requiredVenueDocuments.safetyPlan}
-                            onChange={(e) => setRequiredVenueDocuments(prev => ({
-                              ...prev,
-                              safetyPlan: e.target.checked
-                            }))}
-                            className="rounded border border-gray-300"
-                          />
-                          <Label htmlFor="safetyPlan" className="text-sm font-normal">Safety & Emergency Plan</Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
                             id="loadInSpecs"
                             checked={requiredVenueDocuments.loadInSpecs}
                             onChange={(e) => setRequiredVenueDocuments(prev => ({
@@ -1278,20 +1212,6 @@ export default function ContractProposalDialog({
                             className="rounded border border-gray-300"
                           />
                           <Label htmlFor="parkingInfo" className="text-sm font-normal">Parking Information</Label>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id="cateringOptions"
-                            checked={requiredVenueDocuments.cateringOptions}
-                            onChange={(e) => setRequiredVenueDocuments(prev => ({
-                              ...prev,
-                              cateringOptions: e.target.checked
-                            }))}
-                            className="rounded border border-gray-300"
-                          />
-                          <Label htmlFor="cateringOptions" className="text-sm font-normal">Catering Options</Label>
                         </div>
                         
                         <div className="flex items-center space-x-2">

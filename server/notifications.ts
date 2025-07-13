@@ -120,6 +120,17 @@ export class NotificationService {
         return true;
       }
 
+      // For message notifications, only show for the profile that was involved in the conversation
+      if (notification.type === 'message') {
+        const data = notification.data as any;
+        // Check if the message was sent to/from the active profile
+        if (data?.targetProfileId) {
+          return data.targetProfileId === activeProfileId;
+        }
+        // For legacy message notifications without targetProfileId, show to all profiles
+        return true;
+      }
+
       // For other notification types, show to all profiles
       return true;
     });
@@ -209,6 +220,17 @@ export class NotificationService {
 
       // For photo comment, photo tag, and comment tag notifications, count for all profile types
       if (notification.type === 'photo_comment' || notification.type === 'photo_tag' || notification.type === 'comment_tag') {
+        return true;
+      }
+
+      // For message notifications, only count for the profile that was involved in the conversation
+      if (notification.type === 'message') {
+        const data = notification.data as any;
+        // Check if the message was sent to/from the active profile
+        if (data?.targetProfileId) {
+          return data.targetProfileId === activeProfileId;
+        }
+        // For legacy message notifications without targetProfileId, count for all profiles
         return true;
       }
 
@@ -568,14 +590,18 @@ export class NotificationService {
     });
   }
 
-  async notifyMessage(recipientId: number, senderId: number, senderName: string, conversationId: number, message: string): Promise<void> {
+  async notifyMessage(recipientId: number, senderId: number, senderName: string, conversationId: number, message: string, targetProfileId?: number): Promise<void> {
     await this.createNotification({
       recipientId,
       senderId,
       type: 'message',
       title: 'New message',
       message: `${senderName}: ${message}`,
-      data: { conversationId, messagePreview: message.substring(0, 100) }
+      data: { 
+        conversationId, 
+        messagePreview: message.substring(0, 100),
+        targetProfileId: targetProfileId
+      }
     });
   }
 

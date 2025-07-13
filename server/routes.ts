@@ -3517,7 +3517,8 @@ export function registerRoutes(app: Express): Server {
                 req.user.id,
                 senderName,
                 conversationId,
-                content.trim()
+                content.trim(),
+                participant.id // Pass the target profile ID
               );
             }
           }

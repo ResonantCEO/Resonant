@@ -89,15 +89,9 @@ export default function BookingMessageWidget({
       return response;
     },
     enabled: !!conversationId && isOpen,
-    refetchInterval: 3000, // Refresh every 3 seconds for real-time feel
+    refetchInterval: 5000, // Refresh every 5 seconds
     retry: 3,
-    staleTime: 0, // Always fetch fresh data
-    onSuccess: (data) => {
-      console.log('Messages query successful:', data);
-    },
-    onError: (error) => {
-      console.error('Messages query error:', error);
-    }
+    staleTime: 1000, // Cache for 1 second
   });
 
   // Debug logging for query state
@@ -115,7 +109,7 @@ export default function BookingMessageWidget({
 
   // Ensure messages is always an array and handle different response formats
   const messages = React.useMemo(() => {
-    console.log('Raw messages data:', messagesData);
+    console.log('Processing messages data:', messagesData);
     console.log('Messages data type:', typeof messagesData);
     console.log('Is array?', Array.isArray(messagesData));
     
@@ -126,17 +120,18 @@ export default function BookingMessageWidget({
     
     if (Array.isArray(messagesData)) {
       console.log('Messages data is array with length:', messagesData.length);
-      return messagesData;
+      // Sort messages by creation date to ensure proper order
+      return messagesData.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
     
     if (messagesData.messages && Array.isArray(messagesData.messages)) {
       console.log('Messages nested in .messages property');
-      return messagesData.messages;
+      return messagesData.messages.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
     
     if (messagesData.data && Array.isArray(messagesData.data)) {
       console.log('Messages nested in .data property');
-      return messagesData.data;
+      return messagesData.data.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
     
     // Handle case where messagesData is an empty object - this indicates an API issue
@@ -156,15 +151,26 @@ export default function BookingMessageWidget({
       console.log('To conversation:', conversationId);
       return apiRequest("POST", `/api/conversations/${conversationId}/messages`, data);
     },
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       console.log('Message sent successfully:', response);
       setNewMessage("");
+      
+      // Force immediate refetch of messages
+      await queryClient.refetchQueries({ 
+        queryKey: ["/api/conversations", conversationId, "messages"] 
+      });
+      await queryClient.refetchQueries({
+        queryKey: ["/api/conversations"]
+      });
+      
+      // Also invalidate for good measure
       queryClient.invalidateQueries({ 
         queryKey: ["/api/conversations", conversationId, "messages"] 
       });
       queryClient.invalidateQueries({
         queryKey: ["/api/conversations"]
       });
+      
       scrollToBottom();
     },
     onError: (error: Error) => {
@@ -276,18 +282,29 @@ export default function BookingMessageWidget({
               {loadingMessages ? (
                 <div className="text-center py-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="text-xs text-gray-500 mt-2">Loading messages...</p>
                 </div>
               ) : messagesError ? (
                 <div className="text-center py-8 text-red-500">
                   <p className="text-sm">Error loading messages</p>
                   <p className="text-xs">{messagesError.message}</p>
+                  <button 
+                    onClick={() => window.location.reload()} 
+                    className="text-blue-500 underline text-xs mt-2"
+                  >
+                    Retry
+                  </button>
                 </div>
-              ) : messages.length === 0 ? (
+              ) : !messages || messages.length === 0 ? (
                 <div className="text-center py-8 text-neutral-500">
                   <p className="text-sm">No messages yet.</p>
                   <p className="text-xs">Start the conversation about your booking!</p>
                   {conversationId && (
-                    <p className="text-xs mt-2 text-gray-400">Conversation ID: {conversationId}</p>
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-400">Conversation ID: {conversationId}</p>
+                      <p className="text-xs text-gray-400">Loading: {loadingMessages ? 'Yes' : 'No'}</p>
+                      <p className="text-xs text-gray-400">Messages count: {messages ? messages.length : 'null'}</p>
+                    </div>
                   )}
                 </div>
               ) : (

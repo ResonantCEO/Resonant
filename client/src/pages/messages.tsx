@@ -1583,7 +1583,7 @@ export default function MessagesPage() {
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Report User</AlertDialogTitle>
+            <DialogTitle>Report User</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-neutral-600 dark:text-neutral-400">

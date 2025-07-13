@@ -145,6 +145,21 @@ export default function ContractProposalDialog({
     other: false,
   });
 
+  const [requiredVenueDocuments, setRequiredVenueDocuments] = useState<{
+    [key: string]: boolean;
+  }>({
+    venueInsurance: false,
+    venueLayout: false,
+    soundSpecs: false,
+    lightingSpecs: false,
+    safetyPlan: false,
+    loadInSpecs: false,
+    parkingInfo: false,
+    cateringOptions: false,
+    venuePolicies: false,
+    cancellationAgreements: false,
+  });
+
   const [otherDocumentType, setOtherDocumentType] = useState("");
 
   const queryClient = useQueryClient();
@@ -242,6 +257,18 @@ export default function ContractProposalDialog({
       contactInfo: false,
       other: false,
     });
+    setRequiredVenueDocuments({
+      venueInsurance: false,
+      venueLayout: false,
+      soundSpecs: false,
+      lightingSpecs: false,
+      safetyPlan: false,
+      loadInSpecs: false,
+      parkingInfo: false,
+      cateringOptions: false,
+      venuePolicies: false,
+      cancellationAgreements: false,
+    });
     setOtherDocumentType("");
   };
 
@@ -291,6 +318,7 @@ export default function ContractProposalDialog({
       requirements: formData.requirements,
       expiresAt: formData.expiresAt || null,
       requiredDocuments,
+      requiredVenueDocuments,
       otherDocumentType: requiredDocuments.other ? otherDocumentType : "",
     };
 
@@ -1158,6 +1186,11 @@ export default function ContractProposalDialog({
                           <input
                             type="checkbox"
                             id="venueInsurance"
+                            checked={requiredVenueDocuments.venueInsurance}
+                            onChange={(e) => setRequiredVenueDocuments(prev => ({
+                              ...prev,
+                              venueInsurance: e.target.checked
+                            }))}
                             className="rounded border border-gray-300"
                           />
                           <Label htmlFor="venueInsurance" className="text-sm font-normal">Venue Insurance Certificate</Label>
@@ -1167,6 +1200,11 @@ export default function ContractProposalDialog({
                           <input
                             type="checkbox"
                             id="venueLayout"
+                            checked={requiredVenueDocuments.venueLayout}
+                            onChange={(e) => setRequiredVenueDocuments(prev => ({
+                              ...prev,
+                              venueLayout: e.target.checked
+                            }))}
                             className="rounded border border-gray-300"
                           />
                           <Label htmlFor="venueLayout" className="text-sm font-normal">Venue Layout & Capacity</Label>
@@ -1176,6 +1214,11 @@ export default function ContractProposalDialog({
                           <input
                             type="checkbox"
                             id="soundSpecs"
+                            checked={requiredVenueDocuments.soundSpecs}
+                            onChange={(e) => setRequiredVenueDocuments(prev => ({
+                              ...prev,
+                              soundSpecs: e.target.checked
+                            }))}
                             className="rounded border border-gray-300"
                           />
                           <Label htmlFor="soundSpecs" className="text-sm font-normal">Sound System Specifications</Label>
@@ -1185,6 +1228,11 @@ export default function ContractProposalDialog({
                           <input
                             type="checkbox"
                             id="lightingSpecs"
+                            checked={requiredVenueDocuments.lightingSpecs}
+                            onChange={(e) => setRequiredVenueDocuments(prev => ({
+                              ...prev,
+                              lightingSpecs: e.target.checked
+                            }))}
                             className="rounded border border-gray-300"
                           />
                           <Label htmlFor="lightingSpecs" className="text-sm font-normal">Lighting Specifications</Label>
@@ -1194,6 +1242,11 @@ export default function ContractProposalDialog({
                           <input
                             type="checkbox"
                             id="safetyPlan"
+                            checked={requiredVenueDocuments.safetyPlan}
+                            onChange={(e) => setRequiredVenueDocuments(prev => ({
+                              ...prev,
+                              safetyPlan: e.target.checked
+                            }))}
                             className="rounded border border-gray-300"
                           />
                           <Label htmlFor="safetyPlan" className="text-sm font-normal">Safety & Emergency Plan</Label>
@@ -1203,6 +1256,11 @@ export default function ContractProposalDialog({
                           <input
                             type="checkbox"
                             id="loadInSpecs"
+                            checked={requiredVenueDocuments.loadInSpecs}
+                            onChange={(e) => setRequiredVenueDocuments(prev => ({
+                              ...prev,
+                              loadInSpecs: e.target.checked
+                            }))}
                             className="rounded border border-gray-300"
                           />
                           <Label htmlFor="loadInSpecs" className="text-sm font-normal">Load-in/Load-out Specifications</Label>
@@ -1212,6 +1270,11 @@ export default function ContractProposalDialog({
                           <input
                             type="checkbox"
                             id="parkingInfo"
+                            checked={requiredVenueDocuments.parkingInfo}
+                            onChange={(e) => setRequiredVenueDocuments(prev => ({
+                              ...prev,
+                              parkingInfo: e.target.checked
+                            }))}
                             className="rounded border border-gray-300"
                           />
                           <Label htmlFor="parkingInfo" className="text-sm font-normal">Parking Information</Label>
@@ -1221,72 +1284,111 @@ export default function ContractProposalDialog({
                           <input
                             type="checkbox"
                             id="cateringOptions"
+                            checked={requiredVenueDocuments.cateringOptions}
+                            onChange={(e) => setRequiredVenueDocuments(prev => ({
+                              ...prev,
+                              cateringOptions: e.target.checked
+                            }))}
                             className="rounded border border-gray-300"
                           />
                           <Label htmlFor="cateringOptions" className="text-sm font-normal">Catering Options</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="venuePolicies"
+                            checked={requiredVenueDocuments.venuePolicies}
+                            onChange={(e) => setRequiredVenueDocuments(prev => ({
+                              ...prev,
+                              venuePolicies: e.target.checked
+                            }))}
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="venuePolicies" className="text-sm font-normal">Venue Policies</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="cancellationAgreements"
+                            checked={requiredVenueDocuments.cancellationAgreements}
+                            onChange={(e) => setRequiredVenueDocuments(prev => ({
+                              ...prev,
+                              cancellationAgreements: e.target.checked
+                            }))}
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="cancellationAgreements" className="text-sm font-normal">Cancellation Agreements</Label>
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Venue Policies Upload */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <FileText className="w-5 h-5" />
-                      <span>Venue Policies</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label>Upload Venue Policy Documents</Label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                        <p className="text-sm text-gray-600 mb-2">Upload venue policies, rules, procedures, and regulations</p>
-                        <p className="text-xs text-gray-500 mb-3">Accepted formats: PDF, DOC, DOCX</p>
-                        <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx" />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="policyNotes">Policy Notes & Special Instructions</Label>
-                      <Textarea
-                        id="policyNotes"
-                        placeholder="Any additional notes about venue policies, special requirements, or important reminders..."
-                        rows={3}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                
 
-                {/* Cancellation Agreements Upload */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <FileText className="w-5 h-5" />
-                      <span>Cancellation Agreements</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label>Upload Cancellation Agreement Documents</Label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                        <p className="text-sm text-gray-600 mb-2">Upload cancellation policies, penalty structures, and refund procedures</p>
-                        <p className="text-xs text-gray-500 mb-3">Accepted formats: PDF, DOC, DOCX</p>
-                        <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx" />
+                {/* Venue Policies Upload - Only show if selected */}
+                {requiredVenueDocuments.venuePolicies && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <FileText className="w-5 h-5" />
+                        <span>Venue Policies</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label>Upload Venue Policy Documents</Label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                          <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                          <p className="text-sm text-gray-600 mb-2">Upload venue policies, rules, procedures, and regulations</p>
+                          <p className="text-xs text-gray-500 mb-3">Accepted formats: PDF, DOC, DOCX</p>
+                          <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx" />
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="cancellationTerms">Cancellation Terms Summary</Label>
-                      <Textarea
-                        id="cancellationTerms"
-                        placeholder="Brief summary of cancellation terms, notice requirements, penalty fees, force majeure clauses..."
-                        rows={4}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                      <div>
+                        <Label htmlFor="policyNotes">Policy Notes & Special Instructions</Label>
+                        <Textarea
+                          id="policyNotes"
+                          placeholder="Any additional notes about venue policies, special requirements, or important reminders..."
+                          rows={3}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Cancellation Agreements Upload - Only show if selected */}
+                {requiredVenueDocuments.cancellationAgreements && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <FileText className="w-5 h-5" />
+                        <span>Cancellation Agreements</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label>Upload Cancellation Agreement Documents</Label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                          <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                          <p className="text-sm text-gray-600 mb-2">Upload cancellation policies, penalty structures, and refund procedures</p>
+                          <p className="text-xs text-gray-500 mb-3">Accepted formats: PDF, DOC, DOCX</p>
+                          <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx" />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="cancellationTerms">Cancellation Terms Summary</Label>
+                        <Textarea
+                          id="cancellationTerms"
+                          placeholder="Brief summary of cancellation terms, notice requirements, penalty fees, force majeure clauses..."
+                          rows={4}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </>
             )}
 

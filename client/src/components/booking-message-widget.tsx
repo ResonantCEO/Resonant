@@ -81,32 +81,34 @@ export default function BookingMessageWidget({
       console.log('Fetching messages for conversation:', conversationId);
       try {
         const response = await apiRequest("GET", `/api/conversations/${conversationId}/messages`);
-        console.log('Raw API Response:', response);
-        console.log('Response type:', typeof response);
-        console.log('Response is array:', Array.isArray(response));
+        // Parse the JSON from the Response object
+        const data = await response.json();
+        console.log('Raw API Response:', data);
+        console.log('Response type:', typeof data);
+        console.log('Response is array:', Array.isArray(data));
         
         // The API should return an array directly, but let's handle different formats
-        if (Array.isArray(response)) {
-          console.log('Direct array response with', response.length, 'messages');
-          return response;
+        if (Array.isArray(data)) {
+          console.log('Direct array response with', data.length, 'messages');
+          return data;
         }
         
-        if (response && typeof response === 'object') {
+        if (data && typeof data === 'object') {
           console.log('Object response, checking for nested arrays');
-          console.log('Response keys:', Object.keys(response));
+          console.log('Response keys:', Object.keys(data));
           
           // Check common wrapper patterns
-          if (response.data && Array.isArray(response.data)) {
-            console.log('Found messages in response.data');
-            return response.data;
+          if (data.data && Array.isArray(data.data)) {
+            console.log('Found messages in data.data');
+            return data.data;
           }
-          if (response.messages && Array.isArray(response.messages)) {
-            console.log('Found messages in response.messages');
-            return response.messages;
+          if (data.messages && Array.isArray(data.messages)) {
+            console.log('Found messages in data.messages');
+            return data.messages;
           }
           
           // Look for any array property that contains message-like objects
-          for (const [key, value] of Object.entries(response)) {
+          for (const [key, value] of Object.entries(data)) {
             if (Array.isArray(value)) {
               console.log(`Found array in ${key} with ${value.length} items`);
               if (value.length > 0 && value[0]?.id && value[0]?.content) {
@@ -222,10 +224,11 @@ export default function BookingMessageWidget({
 
   // Send message mutation
   const sendMessageMutation = useMutation({
-    mutationFn: (data: { content: string }) => {
+    mutationFn: async (data: { content: string }) => {
       console.log('Sending message:', data);
       console.log('To conversation:', conversationId);
-      return apiRequest("POST", `/api/conversations/${conversationId}/messages`, data);
+      const response = await apiRequest("POST", `/api/conversations/${conversationId}/messages`, data);
+      return await response.json();
     },
     onSuccess: async (response) => {
       console.log('Message sent successfully:', response);

@@ -227,6 +227,16 @@ export default function BookingManagement({ profileType }: BookingManagementProp
     }
   };
 
+  const handleDeclineConfirmation = () => {
+    if (selectedRequestId) {
+      updateBookingRequestMutation.mutate({ 
+        requestId: selectedRequestId, 
+        status: 'rejected',
+        message: declineMessage || undefined
+      });
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'accepted': return 'bg-green-100 text-green-800 border-green-200';

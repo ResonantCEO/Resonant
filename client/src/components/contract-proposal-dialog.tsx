@@ -113,6 +113,20 @@ export default function ContractProposalDialog({
     penaltyClause: "",
   });
 
+  const [requiredDocuments, setRequiredDocuments] = useState<{
+    [key: string]: boolean;
+  }>({
+    w9: false,
+    stagePlot: false,
+    technicalRider: false,
+    hospitalityRider: false,
+    performanceRider: false,
+    contactInfo: false,
+    other: false,
+  });
+
+  const [otherDocumentType, setOtherDocumentType] = useState("");
+
   const queryClient = useQueryClient();
 
   // Update contract title when booking request or selected venue changes
@@ -189,6 +203,16 @@ export default function ContractProposalDialog({
       expenses: "",
       penaltyClause: "",
     });
+    setRequiredDocuments({
+      w9: false,
+      stagePlot: false,
+      technicalRider: false,
+      hospitalityRider: false,
+      performanceRider: false,
+      contactInfo: false,
+      other: false,
+    });
+    setOtherDocumentType("");
   };
 
   const handleDateSelect = (selectedDate: string) => {
@@ -236,6 +260,8 @@ export default function ContractProposalDialog({
       payment,
       requirements: formData.requirements,
       expiresAt: formData.expiresAt || null,
+      requiredDocuments,
+      otherDocumentType: requiredDocuments.other ? otherDocumentType : "",
     };
 
     createProposalMutation.mutate(proposalData);
@@ -902,6 +928,134 @@ export default function ContractProposalDialog({
 
             {currentPage === 'docs' && (
               <>
+                {/* Required Documents from Artist */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5" />
+                      <span>Required Documents from Artist</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label className="text-base font-medium">Select documents the artist must provide:</Label>
+                      <div className="grid grid-cols-2 gap-3 mt-3">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="w9"
+                            checked={requiredDocuments.w9}
+                            onChange={(e) => setRequiredDocuments(prev => ({
+                              ...prev,
+                              w9: e.target.checked
+                            }))}
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="w9" className="text-sm font-normal">W-9 Tax Form</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="stagePlot"
+                            checked={requiredDocuments.stagePlot}
+                            onChange={(e) => setRequiredDocuments(prev => ({
+                              ...prev,
+                              stagePlot: e.target.checked
+                            }))}
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="stagePlot" className="text-sm font-normal">Stage Plot</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="technicalRider"
+                            checked={requiredDocuments.technicalRider}
+                            onChange={(e) => setRequiredDocuments(prev => ({
+                              ...prev,
+                              technicalRider: e.target.checked
+                            }))}
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="technicalRider" className="text-sm font-normal">Technical Rider</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="hospitalityRider"
+                            checked={requiredDocuments.hospitalityRider}
+                            onChange={(e) => setRequiredDocuments(prev => ({
+                              ...prev,
+                              hospitalityRider: e.target.checked
+                            }))}
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="hospitalityRider" className="text-sm font-normal">Hospitality Rider</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="performanceRider"
+                            checked={requiredDocuments.performanceRider}
+                            onChange={(e) => setRequiredDocuments(prev => ({
+                              ...prev,
+                              performanceRider: e.target.checked
+                            }))}
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="performanceRider" className="text-sm font-normal">Performance Rider</Label>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="contactInfo"
+                            checked={requiredDocuments.contactInfo}
+                            onChange={(e) => setRequiredDocuments(prev => ({
+                              ...prev,
+                              contactInfo: e.target.checked
+                            }))}
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="contactInfo" className="text-sm font-normal">Contact Info Sheet</Label>
+                        </div>
+                      </div>
+                      
+                      {/* Other Document Type */}
+                      <div className="mt-4">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="other"
+                            checked={requiredDocuments.other}
+                            onChange={(e) => setRequiredDocuments(prev => ({
+                              ...prev,
+                              other: e.target.checked
+                            }))}
+                            className="rounded border border-gray-300"
+                          />
+                          <Label htmlFor="other" className="text-sm font-normal">Other (specify below)</Label>
+                        </div>
+                        
+                        {requiredDocuments.other && (
+                          <div className="mt-2">
+                            <Input
+                              placeholder="Specify the type of document required..."
+                              value={otherDocumentType}
+                              onChange={(e) => setOtherDocumentType(e.target.value)}
+                              className="w-full"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Contract Documents */}
                 <Card>
                   <CardHeader>
@@ -927,7 +1081,6 @@ export default function ContractProposalDialog({
                         <Input type="file" multiple className="mt-2" accept=".pdf,.doc,.docx" />
                       </div>
                     </div>
-                    
                   </CardContent>
                 </Card>
               </>

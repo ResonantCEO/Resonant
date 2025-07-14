@@ -306,7 +306,7 @@ export default function BookingMessageWidget({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md h-[600px] flex flex-col p-0">
+      <DialogContent className="max-w-md h-[600px] flex flex-col p-0" hideCloseButton>
         <DialogHeader className="p-4 pb-2 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -374,7 +374,7 @@ export default function BookingMessageWidget({
                   </button>
                 </div>
               ) : !messages || messages.length === 0 ? (
-                
+
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center space-y-2">
                     <svg

@@ -327,7 +327,7 @@ export default function ContractProposalDialog({
 
         <div className="flex h-full max-h-[calc(90vh-80px)] relative">
           {/* Sidebar Navigation */}
-          <div className="w-52 min-w-52 max-w-52 border-r border-gray-700 bg-gray-900 p-2 rounded-l-lg overflow-y-auto flex-shrink-0">
+          <div className="w-52 min-w-52 max-w-52 border-r border-gray-700 bg-gray-900 p-2 rounded-l-lg overflow-y-auto flex-shrink-0 self-start">
             <div className="space-y-1">
               <Button
                 variant={currentPage === 'event-terms' ? "default" : "ghost"}
@@ -417,7 +417,7 @@ export default function ContractProposalDialog({
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 p-3 space-y-3 overflow-y-auto min-h-0 min-w-0">
+          <div className="flex-1 p-3 space-y-3 overflow-y-auto min-h-0 min-w-0 self-start">
             {currentPage === 'event-terms' && (
               <>
                 {/* Venue Selection (only for direct proposals) */}
@@ -982,10 +982,10 @@ export default function ContractProposalDialog({
             {currentPage === 'artist-docs' && (
               <>
                 {/* Required Documents from Artist */}
+```text
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
-```text
                       <FileText className="w-5 h-5" />
                       <span>Required Documents from Artist</span>
                     </CardTitle>
@@ -1227,8 +1227,6 @@ export default function ContractProposalDialog({
                     </div>
                   </CardContent>
                 </Card>
-
-
 
                 {/* Venue Policies Upload - Only show if selected */}
                 {requiredVenueDocuments.venuePolicies && (

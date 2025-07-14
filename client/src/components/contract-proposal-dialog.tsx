@@ -850,23 +850,14 @@ export default function ContractProposalDialog({
                     <CardTitle>Guest List & Complimentary Tickets</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="artistGuestList">Artist Guest List Limit</Label>
-                        <Input
-                          id="artistGuestList"
-                          type="number"
-                          placeholder="e.g., 10"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="venueGuestList">Venue Guest List Limit</Label>
-                        <Input
-                          id="venueGuestList"
-                          type="number"
-                          placeholder="e.g., 5"
-                        />
-                      </div>
+                    <div>
+                      <Label htmlFor="artistGuestList">Artist Guest List Limit</Label>
+                      <Input
+                        id="artistGuestList"
+                        type="number"
+                        placeholder="e.g., 10"
+                        className="max-w-sm"
+                      />
                     </div>
                     <div>
                       <Label htmlFor="guestListPolicy">Guest List Policy</Label>

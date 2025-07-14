@@ -205,11 +205,17 @@ export default function AvailabilityChecker({
         eventDateString = event.date.getFullYear() + '-' + 
           String(event.date.getMonth() + 1).padStart(2, '0') + '-' + 
           String(event.date.getDate()).padStart(2, '0');
+      } else if (typeof event.date === 'string') {
+        if (event.date.includes('T')) {
+          const eventDate = new Date(event.date);
+          eventDateString = eventDate.getFullYear() + '-' + 
+            String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(eventDate.getDate()).padStart(2, '0');
+        } else {
+          eventDateString = event.date;
+        }
       } else {
-        const eventDate = new Date(event.date + 'T00:00:00');
-        eventDateString = eventDate.getFullYear() + '-' + 
-          String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
-          String(eventDate.getDate()).padStart(2, '0');
+        eventDateString = String(event.date);
       }
       return eventDateString === targetDateString;
     });
@@ -231,11 +237,17 @@ export default function AvailabilityChecker({
           eventDateString = event.date.getFullYear() + '-' + 
             String(event.date.getMonth() + 1).padStart(2, '0') + '-' + 
             String(event.date.getDate()).padStart(2, '0');
+        } else if (typeof event.date === 'string') {
+          if (event.date.includes('T')) {
+            const eventDate = new Date(event.date);
+            eventDateString = eventDate.getFullYear() + '-' + 
+              String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
+              String(eventDate.getDate()).padStart(2, '0');
+          } else {
+            eventDateString = event.date;
+          }
         } else {
-          const eventDate = new Date(event.date + 'T00:00:00');
-          eventDateString = eventDate.getFullYear() + '-' + 
-            String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
-            String(eventDate.getDate()).padStart(2, '0');
+          eventDateString = String(event.date);
         }
         return eventDateString === targetDateString;
       });

@@ -241,6 +241,13 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
       index === self.findIndex(e => e.id === event.id)
     );
 
+    console.log('Calendar events data:', {
+      storedEvents: storedEvents.length,
+      eventsFromRequests: eventsFromRequests.length,
+      uniqueEvents: uniqueEvents.length,
+      events: uniqueEvents
+    });
+
     return uniqueEvents;
   }, [bookingRequests, storedEvents, profileType]);
 
@@ -410,14 +417,28 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
         eventDateString = event.date.getFullYear() + '-' + 
           String(event.date.getMonth() + 1).padStart(2, '0') + '-' + 
           String(event.date.getDate()).padStart(2, '0');
+      } else if (typeof event.date === 'string') {
+        // If it's a string, handle it properly
+        if (event.date.includes('T')) {
+          // If it contains time, parse it as a date
+          const eventDate = new Date(event.date);
+          eventDateString = eventDate.getFullYear() + '-' + 
+            String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(eventDate.getDate()).padStart(2, '0');
+        } else {
+          // If it's just a date string (YYYY-MM-DD), use it directly
+          eventDateString = event.date;
+        }
       } else {
-        // If it's a string, parse it correctly
-        const eventDate = new Date(event.date + 'T00:00:00');
-        eventDateString = eventDate.getFullYear() + '-' + 
-          String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
-          String(eventDate.getDate()).padStart(2, '0');
+        // Fallback - try to convert to string
+        eventDateString = String(event.date);
       }
-      return eventDateString === targetDateString;
+      
+      const matches = eventDateString === targetDateString;
+      if (matches) {
+        console.log('Event matches date:', event.title, 'on', targetDateString);
+      }
+      return matches;
     });
   };
 
@@ -433,11 +454,17 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
         eventDateString = event.date.getFullYear() + '-' + 
           String(event.date.getMonth() + 1).padStart(2, '0') + '-' + 
           String(event.date.getDate()).padStart(2, '0');
+      } else if (typeof event.date === 'string') {
+        if (event.date.includes('T')) {
+          const eventDate = new Date(event.date);
+          eventDateString = eventDate.getFullYear() + '-' + 
+            String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(eventDate.getDate()).padStart(2, '0');
+        } else {
+          eventDateString = event.date;
+        }
       } else {
-        const eventDate = new Date(event.date + 'T00:00:00');
-        eventDateString = eventDate.getFullYear() + '-' + 
-          String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
-          String(eventDate.getDate()).padStart(2, '0');
+        eventDateString = String(event.date);
       }
       return eventDateString === targetDateString;
     });

@@ -317,7 +317,7 @@ export default function ContractProposalDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] max-w-4xl h-[85vh] overflow-hidden">
+      <DialogContent className="w-[90vw] max-w-4xl h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <FileText className="w-5 h-5" />
@@ -325,9 +325,9 @@ export default function ContractProposalDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex h-full max-h-[calc(85vh-120px)]">
+        <div className="flex h-full max-h-[calc(90vh-100px)]">
           {/* Sidebar Navigation */}
-          <div className="w-64 border-r border-gray-700 bg-gray-900 p-4 rounded-l-lg overflow-y-auto">
+          <div className="w-56 border-r border-gray-700 bg-gray-900 p-3 rounded-l-lg overflow-y-auto">
             <div className="space-y-2">
               <Button
                 variant={currentPage === 'event-terms' ? "default" : "ghost"}
@@ -417,7 +417,7 @@ export default function ContractProposalDialog({
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 p-6 space-y-6 overflow-y-auto min-w-[600px] h-[600px]">
+          <div className="flex-1 p-4 space-y-4 overflow-y-auto min-w-[600px] h-[600px]">
             {currentPage === 'event-terms' && (
               <>
                 {/* Venue Selection (only for direct proposals) */}
@@ -456,10 +456,10 @@ export default function ContractProposalDialog({
 
                 {/* Basic Information */}
                 <Card>
-                  <CardHeader>
+                  <CardHeader className="pb-3">
                     <CardTitle>Contract Details</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-3">
                     <div>
                       <Label htmlFor="title">Event Name *</Label>
                       <Input
@@ -506,13 +506,13 @@ export default function ContractProposalDialog({
 
                 {/* Event Timing */}
                 <Card>
-                  <CardHeader>
+                  <CardHeader className="pb-3">
                     <CardTitle className="flex items-center space-x-2">
                       <Clock className="w-5 h-5" />
                       <span>Event Timing</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-3">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="doorsOpenTime">Doors Open Time</Label>
@@ -556,10 +556,10 @@ export default function ContractProposalDialog({
 
                 {/* Performance & Sound Setup */}
                 <Card>
-                  <CardHeader>
+                  <CardHeader className="pb-3">
                     <CardTitle>Performance & Sound Setup</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-3">
                     <div>
                       <Label htmlFor="intermissionPerformer">Intermission Performer</Label>
                       <Select onValueChange={(value) => setTerms({...terms, intermissionPerformer: value})}>

@@ -325,10 +325,10 @@ export default function ContractProposalDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex h-full max-h-[calc(90vh-100px)]">
+        <div className="flex h-full max-h-[calc(90vh-80px)]">
           {/* Sidebar Navigation */}
-          <div className="w-56 border-r border-gray-700 bg-gray-900 p-3 rounded-l-lg overflow-y-auto">
-            <div className="space-y-2">
+          <div className="w-52 border-r border-gray-700 bg-gray-900 p-2 rounded-l-lg overflow-y-auto flex-shrink-0">
+            <div className="space-y-1">
               <Button
                 variant={currentPage === 'event-terms' ? "default" : "ghost"}
                 className={`w-full justify-start text-white ${
@@ -417,7 +417,7 @@ export default function ContractProposalDialog({
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 p-4 space-y-4 overflow-y-auto min-w-[600px] h-[600px]">
+          <div className="flex-1 p-3 space-y-3 overflow-y-auto min-h-0">
             {currentPage === 'event-terms' && (
               <>
                 {/* Venue Selection (only for direct proposals) */}
@@ -985,6 +985,7 @@ export default function ContractProposalDialog({
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
+```text
                       <FileText className="w-5 h-5" />
                       <span>Required Documents from Artist</span>
                     </CardTitle>
@@ -1006,7 +1007,7 @@ export default function ContractProposalDialog({
                           />
                           <Label htmlFor="w9" className="text-sm font-normal">W-9 Tax Form</Label>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <input
                             type="checkbox"
@@ -1020,7 +1021,7 @@ export default function ContractProposalDialog({
                           />
                           <Label htmlFor="stagePlot" className="text-sm font-normal">Stage Plot</Label>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <input
                             type="checkbox"
@@ -1034,7 +1035,7 @@ export default function ContractProposalDialog({
                           />
                           <Label htmlFor="technicalRider" className="text-sm font-normal">Technical Rider</Label>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <input
                             type="checkbox"
@@ -1048,7 +1049,7 @@ export default function ContractProposalDialog({
                           />
                           <Label htmlFor="hospitalityRider" className="text-sm font-normal">Hospitality Rider</Label>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <input
                             type="checkbox"
@@ -1062,7 +1063,7 @@ export default function ContractProposalDialog({
                           />
                           <Label htmlFor="performanceRider" className="text-sm font-normal">Performance Rider</Label>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <input
                             type="checkbox"
@@ -1077,7 +1078,7 @@ export default function ContractProposalDialog({
                           <Label htmlFor="contactInfo" className="text-sm font-normal">Contact Info Sheet</Label>
                         </div>
                       </div>
-                      
+
                       {/* Other Document Type */}
                       <div className="mt-4">
                         <div className="flex items-center space-x-2">
@@ -1093,7 +1094,7 @@ export default function ContractProposalDialog({
                           />
                           <Label htmlFor="other" className="text-sm font-normal">Other (specify below)</Label>
                         </div>
-                        
+
                         {requiredDocuments.other && (
                           <div className="mt-2">
                             <Input
@@ -1166,7 +1167,7 @@ export default function ContractProposalDialog({
                           />
                           <Label htmlFor="venueInsurance" className="text-sm font-normal">Venue Insurance Certificate</Label>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <input
                             type="checkbox"
@@ -1180,7 +1181,7 @@ export default function ContractProposalDialog({
                           />
                           <Label htmlFor="loadInSpecs" className="text-sm font-normal">Load-in/Load-out Specifications</Label>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <input
                             type="checkbox"
@@ -1194,7 +1195,7 @@ export default function ContractProposalDialog({
                           />
                           <Label htmlFor="parkingInfo" className="text-sm font-normal">Parking Information</Label>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <input
                             type="checkbox"
@@ -1208,7 +1209,7 @@ export default function ContractProposalDialog({
                           />
                           <Label htmlFor="venuePolicies" className="text-sm font-normal">Venue Policies</Label>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <input
                             type="checkbox"
@@ -1227,7 +1228,7 @@ export default function ContractProposalDialog({
                   </CardContent>
                 </Card>
 
-                
+
 
                 {/* Venue Policies Upload - Only show if selected */}
                 {requiredVenueDocuments.venuePolicies && (
@@ -1328,7 +1329,7 @@ export default function ContractProposalDialog({
                         A radius clause restricts the artist from performing within a certain distance and time frame from this event.
                       </p>
                     </div>
-                    
+
                     {terms.radiusClause.enabled && (
                       <>
                         <div className="grid grid-cols-2 gap-4">
@@ -1367,7 +1368,7 @@ export default function ContractProposalDialog({
                             </Select>
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label htmlFor="radiusTime">Time Restriction</Label>
@@ -1434,7 +1435,7 @@ export default function ContractProposalDialog({
                             rows={4}
                           />
                         </div>
-                        
+
                         <div>
                           <Label htmlFor="radiusExceptions">Exceptions</Label>
                           <Textarea
@@ -1451,7 +1452,7 @@ export default function ContractProposalDialog({
                             rows={3}
                           />
                         </div>
-                        
+
                         <div>
                           <Label htmlFor="radiusEnforcement">Enforcement & Penalties</Label>
                           <Textarea
@@ -1500,7 +1501,7 @@ export default function ContractProposalDialog({
             )}
 
             {/* Action Buttons */}
-            <div className="flex justify-between items-center pt-6 border-t">
+            <div className="flex justify-between items-center pt-3 border-t mt-4">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>

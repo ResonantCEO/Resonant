@@ -327,7 +327,7 @@ export default function ContractProposalDialog({
 
         <div className="flex h-full max-h-[calc(90vh-80px)]">
           {/* Sidebar Navigation */}
-          <div className="w-52 border-r border-gray-700 bg-gray-900 p-2 rounded-l-lg overflow-y-auto flex-shrink-0">
+          <div className="w-52 border-r border-gray-700 bg-gray-900 p-2 rounded-l-lg overflow-y-auto flex-shrink-0 sticky top-0 self-start">
             <div className="space-y-1">
               <Button
                 variant={currentPage === 'event-terms' ? "default" : "ghost"}

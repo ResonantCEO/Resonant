@@ -400,9 +400,9 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
     const targetDateString = dayDate.toISOString().split('T')[0]; // YYYY-MM-DD format
 
     return calendarEvents.filter(event => {
-      // Convert event date to local date string to avoid timezone issues
+      // Ensure consistent date comparison without timezone adjustment
       const eventDate = new Date(event.date);
-      const eventDateString = new Date(eventDate.getTime() + eventDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      const eventDateString = eventDate.toISOString().split('T')[0];
       return eventDateString === targetDateString;
     });
   };
@@ -413,7 +413,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
 
     return calendarEvents.filter(event => {
       const eventDate = new Date(event.date);
-      const eventDateString = new Date(eventDate.getTime() + eventDate.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+      const eventDateString = eventDate.toISOString().split('T')[0];
       return eventDateString === targetDateString;
     });
   };

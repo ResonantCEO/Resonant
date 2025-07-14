@@ -209,13 +209,15 @@ export default function AvailabilityChecker({
   };
 
   const isDateUnavailable = (date: Date) => {
-    const dayEvents = getDayEvents(date);
-    return dayEvents.some(event => 
-      event.type === 'unavailable' || 
-      (event.status === 'confirmed' && event.type === 'booking') ||
-      event.type === 'event'
-    );
-  };
+      const targetDateString = date.toISOString().split('T')[0];
+
+      return combinedEvents.some(event => {
+        // Ensure consistent date comparison without timezone adjustment
+        const eventDate = new Date(event.date);
+        const eventDateString = eventDate.toISOString().split('T')[0];
+        return eventDateString === targetDateString;
+      });
+    };
 
   const getAvailabilityStatus = (date: Date) => {
     const dayEvents = getDayEvents(date);

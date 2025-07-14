@@ -125,7 +125,7 @@ export default function AvailabilityChecker({
           events.push({
             id: `booking-artist-${request.id}`,
             title: `Booking at ${request.venueProfile.name}`,
-            date: new Date(request.eventDate!),
+            date: new Date(request.eventDate! + 'T00:00:00'), // Add time to prevent timezone issues
             startTime: request.eventTime || '20:00',
             endTime: '', 
             type: 'booking' as const,
@@ -145,7 +145,7 @@ export default function AvailabilityChecker({
           events.push({
             id: `booking-venue-${request.id}`,
             title: `Booking with ${request.artistProfile.name}`,
-            date: new Date(request.eventDate!),
+            date: new Date(request.eventDate! + 'T00:00:00'), // Add time to prevent timezone issues
             startTime: request.eventTime || '20:00',
             endTime: '', 
             type: 'booking' as const,
@@ -195,11 +195,23 @@ export default function AvailabilityChecker({
   };
 
   const getDayEvents = (day: Date) => {
+    const targetDateString = day.getFullYear() + '-' + 
+      String(day.getMonth() + 1).padStart(2, '0') + '-' + 
+      String(day.getDate()).padStart(2, '0');
+
     return combinedEvents.filter(event => {
-      const eventDate = new Date(event.date);
-      return eventDate.getDate() === day.getDate() &&
-             eventDate.getMonth() === day.getMonth() &&
-             eventDate.getFullYear() === day.getFullYear();
+      let eventDateString;
+      if (event.date instanceof Date) {
+        eventDateString = event.date.getFullYear() + '-' + 
+          String(event.date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(event.date.getDate()).padStart(2, '0');
+      } else {
+        const eventDate = new Date(event.date + 'T00:00:00');
+        eventDateString = eventDate.getFullYear() + '-' + 
+          String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(eventDate.getDate()).padStart(2, '0');
+      }
+      return eventDateString === targetDateString;
     });
   };
 
@@ -209,12 +221,22 @@ export default function AvailabilityChecker({
   };
 
   const isDateUnavailable = (date: Date) => {
-      const targetDateString = date.toISOString().split('T')[0];
+      const targetDateString = date.getFullYear() + '-' + 
+        String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+        String(date.getDate()).padStart(2, '0');
 
       return combinedEvents.some(event => {
-        // Ensure consistent date comparison without timezone adjustment
-        const eventDate = new Date(event.date);
-        const eventDateString = eventDate.toISOString().split('T')[0];
+        let eventDateString;
+        if (event.date instanceof Date) {
+          eventDateString = event.date.getFullYear() + '-' + 
+            String(event.date.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(event.date.getDate()).padStart(2, '0');
+        } else {
+          const eventDate = new Date(event.date + 'T00:00:00');
+          eventDateString = eventDate.getFullYear() + '-' + 
+            String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(eventDate.getDate()).padStart(2, '0');
+        }
         return eventDateString === targetDateString;
       });
     };

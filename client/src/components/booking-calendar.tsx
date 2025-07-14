@@ -220,7 +220,7 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
         title: profileType === 'artist' 
           ? `Booking at ${request.venueProfile.name}` 
           : `Booking with ${request.artistProfile.name}`,
-        date: new Date(request.eventDate!),
+        date: new Date(request.eventDate! + 'T00:00:00'), // Add time to prevent timezone issues
         startTime: request.eventTime || '20:00',
         endTime: '', // Can be calculated or added later
         type: 'booking' as const,
@@ -397,23 +397,48 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
   };
 
   const getDayEvents = (dayDate: Date) => {
-    const targetDateString = dayDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+    // Use local date string to avoid timezone issues
+    const targetDateString = dayDate.getFullYear() + '-' + 
+      String(dayDate.getMonth() + 1).padStart(2, '0') + '-' + 
+      String(dayDate.getDate()).padStart(2, '0');
 
     return calendarEvents.filter(event => {
-      // Ensure consistent date comparison without timezone adjustment
-      const eventDate = new Date(event.date);
-      const eventDateString = eventDate.toISOString().split('T')[0];
+      // Handle both Date objects and date strings consistently
+      let eventDateString;
+      if (event.date instanceof Date) {
+        // Use local date to avoid timezone conversion
+        eventDateString = event.date.getFullYear() + '-' + 
+          String(event.date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(event.date.getDate()).padStart(2, '0');
+      } else {
+        // If it's a string, parse it correctly
+        const eventDate = new Date(event.date + 'T00:00:00');
+        eventDateString = eventDate.getFullYear() + '-' + 
+          String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(eventDate.getDate()).padStart(2, '0');
+      }
       return eventDateString === targetDateString;
     });
   };
 
   const getSelectedDateEvents = () => {
     if (!selectedDate) return [];
-    const targetDateString = selectedDate.toISOString().split('T')[0];
+    const targetDateString = selectedDate.getFullYear() + '-' + 
+      String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + 
+      String(selectedDate.getDate()).padStart(2, '0');
 
     return calendarEvents.filter(event => {
-      const eventDate = new Date(event.date);
-      const eventDateString = eventDate.toISOString().split('T')[0];
+      let eventDateString;
+      if (event.date instanceof Date) {
+        eventDateString = event.date.getFullYear() + '-' + 
+          String(event.date.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(event.date.getDate()).padStart(2, '0');
+      } else {
+        const eventDate = new Date(event.date + 'T00:00:00');
+        eventDateString = eventDate.getFullYear() + '-' + 
+          String(eventDate.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(eventDate.getDate()).padStart(2, '0');
+      }
       return eventDateString === targetDateString;
     });
   };

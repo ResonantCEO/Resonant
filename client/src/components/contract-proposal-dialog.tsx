@@ -325,10 +325,10 @@ export default function ContractProposalDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex h-full max-h-[calc(90vh-80px)] relative">
+        <div className="flex h-[calc(90vh-140px)] overflow-hidden">
           {/* Sidebar Navigation */}
-          <div className="w-52 min-w-52 max-w-52 border-r border-gray-700 bg-gray-900 p-2 rounded-l-lg overflow-y-auto flex-shrink-0 self-start">
-            <div className="space-y-1">
+          <div className="w-52 min-w-52 max-w-52 border-r border-gray-700 bg-gray-900 p-2 rounded-l-lg flex-shrink-0 h-full">
+            <div className="space-y-1 h-full overflow-y-auto">
               <Button
                 variant={currentPage === 'event-terms' ? "default" : "ghost"}
                 className={`w-full justify-start text-white ${
@@ -417,7 +417,8 @@ export default function ContractProposalDialog({
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 p-3 space-y-3 overflow-y-auto min-h-0 min-w-0 self-start">
+          <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <div className="flex-1 p-3 space-y-3 overflow-y-auto">
             {currentPage === 'event-terms' && (
               <>
                 {/* Venue Selection (only for direct proposals) */}
@@ -1498,8 +1499,10 @@ export default function ContractProposalDialog({
               </>
             )}
 
+            </div>
+            
             {/* Action Buttons */}
-            <div className="flex justify-between items-center pt-3 border-t mt-4">
+            <div className="flex justify-between items-center p-3 border-t bg-background">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>

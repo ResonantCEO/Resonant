@@ -982,11 +982,9 @@ export default function ContractProposalDialog({
 
             {currentPage === 'artist-docs' && (
               <>
-                {/* Required Documents from Artist */}
-```text
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
+                    <CardTitle className="flex items-centerThe goal is to remove the extra text that appears before the "Required Documents from Artist" section. space-x-2">
                       <FileText className="w-5 h-5" />
                       <span>Required Documents from Artist</span>
                     </CardTitle>
@@ -1500,7 +1498,7 @@ export default function ContractProposalDialog({
             )}
 
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex justify-between items-center p-3 border-t bg-background">
               <Button variant="outline" onClick={() => onOpenChange(false)}>

@@ -317,7 +317,7 @@ export default function ContractProposalDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[90vw] max-w-4xl h-[85vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <FileText className="w-5 h-5" />
@@ -325,9 +325,9 @@ export default function ContractProposalDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex h-full">
+        <div className="flex h-full max-h-[calc(85vh-120px)]">
           {/* Sidebar Navigation */}
-          <div className="w-64 border-r border-gray-700 bg-gray-900 p-4 rounded-l-lg">
+          <div className="w-64 border-r border-gray-700 bg-gray-900 p-4 rounded-l-lg overflow-y-auto">
             <div className="space-y-2">
               <Button
                 variant={currentPage === 'event-terms' ? "default" : "ghost"}
@@ -417,7 +417,7 @@ export default function ContractProposalDialog({
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 p-6 space-y-6 overflow-y-auto min-w-[600px] min-h-[600px]">
+          <div className="flex-1 p-6 space-y-6 overflow-y-auto min-w-[600px] h-[600px]">
             {currentPage === 'event-terms' && (
               <>
                 {/* Venue Selection (only for direct proposals) */}

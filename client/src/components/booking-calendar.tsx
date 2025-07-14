@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { Calendar, Plus, ChevronLeft, ChevronRight, Clock, MapPin, User, Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
@@ -498,6 +498,9 @@ export default function BookingCalendar({ profileType }: BookingCalendarProps) {
                     <DialogTitle>
                       {editingBooking ? 'Edit' : 'New'} {profileType === 'artist' ? 'Booking' : 'Event'}
                     </DialogTitle>
+                    <DialogDescription className="text-sm text-gray-600">
+                      {editingBooking ? 'Update the details for this' : 'Create a new'} {profileType === 'artist' ? 'booking or rehearsal' : 'event or booking'}.
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div>

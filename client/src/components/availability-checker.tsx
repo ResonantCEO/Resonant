@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Calendar, ChevronLeft, ChevronRight, Clock, X, AlertTriangle, User } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -307,6 +307,9 @@ export default function AvailabilityChecker({
             <Calendar className="w-5 h-5" />
             <span>Check Available Dates - {artistName} & {venueName}</span>
           </DialogTitle>
+          <DialogDescription className="text-sm text-gray-600">
+            View calendar availability for both {artistName} and {venueName} to find suitable booking dates.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">

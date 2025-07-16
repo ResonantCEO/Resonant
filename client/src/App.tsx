@@ -85,7 +85,7 @@ function Router() {
           <Route path="/tickets" component={Tickets} />
           <Route path="/booking-request/:venueId" component={BookingRequestPage} />
           <Route path="/manage-bookings" component={ManageBookings} />
-          <Route path="/*" component={Profile} />
+          <Route path="/*" component={NotFound} />
         </Switch>
         <BottomNav />
       </div>
@@ -105,7 +105,7 @@ function Router() {
           <Route path="/tickets" component={Tickets} />
           <Route path="/booking-request/:venueId" component={BookingRequestPage} />
           <Route path="/manage-bookings" component={ManageBookings} />
-          <Route path="/*" component={Profile} />
+          <Route path="/*" component={NotFound} />
         </Switch>
       </div>
     </div>

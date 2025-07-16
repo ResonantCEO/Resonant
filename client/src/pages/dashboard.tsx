@@ -378,7 +378,7 @@ export default function Dashboard() {
                       <Button
                         variant="outline"
                         className="w-full justify-start"
-                        onClick={() => setLocation("/bookings")}
+                        onClick={() => setLocation("/manage-bookings")}
                       >
                         <Building className="w-4 h-4 mr-2" />
                         Manage bookings

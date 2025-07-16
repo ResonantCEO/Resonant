@@ -22,6 +22,7 @@ import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import NotificationsPage from "./pages/notifications";
 import { useWebSocket } from "./hooks/useWebSocket";
+import ManageBookings from "@/pages/manage-bookings";
 
 function LoadingScreen() {
   return (
@@ -83,6 +84,7 @@ function Router() {
           <Route path="/messages" component={Messages} />
           <Route path="/tickets" component={Tickets} />
           <Route path="/booking-request/:venueId" component={BookingRequestPage} />
+          <Route path="/manage-bookings" component={ManageBookings} />
           <Route path="/*" component={Profile} />
         </Switch>
         <BottomNav />
@@ -102,6 +104,7 @@ function Router() {
           <Route path="/messages" component={Messages} />
           <Route path="/tickets" component={Tickets} />
           <Route path="/booking-request/:venueId" component={BookingRequestPage} />
+          <Route path="/manage-bookings" component={ManageBookings} />
           <Route path="/*" component={Profile} />
         </Switch>
       </div>

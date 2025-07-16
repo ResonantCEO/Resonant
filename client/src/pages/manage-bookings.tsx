@@ -20,6 +20,7 @@ import {
   MessageSquare,
   ChevronRight
 } from "lucide-react";
+import EventManagement from "@/components/event-management";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BookingManagement from "@/components/booking-management";
@@ -237,9 +238,10 @@ export default function ManageBookings() {
 
           {/* Main Content */}
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="requests">Requests</TabsTrigger>
+              <TabsTrigger value="events">Events</TabsTrigger>
               <TabsTrigger value="calendar">Calendar</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
             </TabsList>
@@ -401,6 +403,11 @@ export default function ManageBookings() {
             {/* Requests Tab */}
             <TabsContent value="requests">
               <BookingManagement profileType={activeProfile.type as 'artist' | 'venue'} />
+            </TabsContent>
+
+            {/* Events Tab */}
+            <TabsContent value="events">
+              <EventManagement activeProfile={activeProfile} />
             </TabsContent>
 
             {/* Calendar Tab */}

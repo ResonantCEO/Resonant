@@ -624,10 +624,10 @@ export default function ContractProposalDialog({
                         />
                       </div>
                       <div>
-                        <Label htmlFor="soundCheckLength">Sound Check Length</Label>
+                        <Label htmlFor="soundCheckLength">Number of Sets</Label>
                         <Input
                           id="soundCheckLength"
-                          placeholder="e.g., 30 minutes"
+                          placeholder="e.g., 2 sets"
                           value={terms.soundCheckLength}
                           onChange={(e) => setTerms({...terms, soundCheckLength: e.target.value})}
                         />

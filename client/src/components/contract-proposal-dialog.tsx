@@ -1498,9 +1498,6 @@ export default function ContractProposalDialog({
                 )}
               </>
             )}
-
-            </div>
-
             </div>
 
             {/* Action Buttons */}

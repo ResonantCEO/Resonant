@@ -8,8 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { FileText, DollarSign, Calendar, Clock } from "lucide-react";
+import { FileText, DollarSign, Calendar, Clock, Users, Plus } from "lucide-react";
 import AvailabilityChecker from "./availability-checker";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 
 interface ContractProposalDialogProps {
   open: boolean;
@@ -46,6 +48,7 @@ interface ContractTerms {
     exceptions: string;
     enforcement: string;
   };
+  performers: PerformerRole[];
 }
 
 interface PaymentTerms {
@@ -59,6 +62,19 @@ interface PaymentTerms {
   penaltyClause: string;
 }
 
+interface PerformerRole {
+  id: string;
+  name: string;
+  profileId?: string;
+  profileName: string;
+  performanceOrder: number;
+  setDuration: string;
+  soundCheckTime: string;
+  setupTime: string;
+  paymentAmount: string;
+  specialRequirements: string;
+}
+
 export default function ContractProposalDialog({ 
   open, 
   onOpenChange, 
@@ -68,6 +84,21 @@ export default function ContractProposalDialog({
   const [selectedVenueForContract, setSelectedVenueForContract] = useState<any>(null);
   const [showAvailabilityChecker, setShowAvailabilityChecker] = useState(false);
   const [currentPage, setCurrentPage] = useState('event-terms');
+  const [performers, setPerformers] = useState<PerformerRole[]>([
+    {
+      id: 'performer-1',
+      name: 'Headliner',
+      profileId: bookingRequest?.artistProfile?.id,
+      profileName: bookingRequest?.artistProfile?.name,
+      performanceOrder: 1,
+      setDuration: '60',
+      soundCheckTime: '30',
+      setupTime: '15',
+      paymentAmount: '',
+      specialRequirements: ''
+    }
+  ]);
+  const [currentPerformer, setCurrentPerformer] = useState<string>(performers[0].id);
 
   // Generate default contract title
   const getDefaultTitle = () => {
@@ -120,6 +151,7 @@ export default function ContractProposalDialog({
       exceptions: "",
       enforcement: "",
     },
+    performers: []
   });
 
   const [payment, setPayment] = useState<PaymentTerms>({
@@ -232,6 +264,7 @@ export default function ContractProposalDialog({
         exceptions: "",
         enforcement: "",
       },
+      performers: []
     });
     setPayment({
       totalAmount: "",
@@ -318,12 +351,42 @@ export default function ContractProposalDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[90vw] max-w-4xl h-[90vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <FileText className="w-5 h-5" />
-            <span>Propose Contract - {bookingRequest?.artistProfile?.name}</span>
-          </DialogTitle>
-        </DialogHeader>
+        {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-center space-x-2">
+              <FileText className="w-5 h-5" />
+              <span className="font-medium">Propose Contract</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Performer Selector - Show on all pages except event-terms */}
+          {currentPage !== 'event-terms' && (
+            <div className="p-4 border-b bg-gray-50 dark:bg-gray-800">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium">Configure terms for:</span>
+                <Select value={currentPerformer} onValueChange={setCurrentPerformer}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {performers.map((performer) => (
+                      <SelectItem key={performer.id} value={performer.id}>
+                        {performer.name} {performer.profileName && `(${performer.profileName})`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
 
         <div className="flex h-[calc(90vh-140px)] overflow-hidden">
           {/* Sidebar Navigation */}
@@ -505,9 +568,163 @@ export default function ContractProposalDialog({
                   </CardContent>
                 </Card>
 
+                {/* Performer Lineup */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Users className="w-5 h-5" />
+                      <span>Performer Lineup</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {performers.map((performer, index) => (
+                      <div key={performer.id} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium">{performer.name}</span>
+                            <Badge variant="outline">Order: {performer.performanceOrder}</Badge>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const newPerformers = performers.filter(p => p.id !== performer.id);
+                              setPerformers(newPerformers);
+                            }}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor={`${performer.id}-name`}>Artist/Band Name</Label>
+                            <Input
+                              id={`${performer.id}-name`}
+                              value={performer.profileName}
+                              onChange={(e) => {
+                                const newPerformers = [...performers];
+                                newPerformers[index].profileName = e.target.value;
+                                setPerformers(newPerformers);
+                              }}
+                              placeholder="Enter artist name"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`${performer.id}-order`}>Performance Order</Label>
+                            <Select 
+                              value={performer.performanceOrder.toString()}
+                              onValueChange={(value) => {
+                                const newPerformers = [...performers];
+                                newPerformers[index].performanceOrder = parseInt(value);
+                                setPerformers(newPerformers);
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1st (Main Act)</SelectItem>
+                                <SelectItem value="2">2nd</SelectItem>
+                                <SelectItem value="3">3rd</SelectItem>
+                                <SelectItem value="4">4th</SelectItem>
+                                <SelectItem value="5">5th</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-3">
+                          <div>
+                            <Label htmlFor={`${performer.id}-duration`}>Set Duration (mins)</Label>
+                            <Input
+                              id={`${performer.id}-duration`}
+                              type="number"
+                              value={performer.setDuration}
+                              onChange={(e) => {
+                                const newPerformers = [...performers];
+                                newPerformers[index].setDuration = e.target.value;
+                                setPerformers(newPerformers);
+                              }}
+                              placeholder="60"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`${performer.id}-soundcheck`}>Sound Check (mins)</Label>
+                            <Input
+                              id={`${performer.id}-soundcheck`}
+                              type="number"
+                              value={performer.soundCheckTime}
+                              onChange={(e) => {
+                                const newPerformers = [...performers];
+                                newPerformers[index].soundCheckTime = e.target.value;
+                                setPerformers(newPerformers);
+                              }}
+                              placeholder="30"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`${performer.id}-setup`}>Setup Time (mins)</Label>
+                            <Input
+                              id={`${performer.id}-setup`}
+                              type="number"
+                              value={performer.setupTime}
+                              onChange={(e) => {
+                                const newPerformers = [...performers];
+                                newPerformers[index].setupTime = e.target.value;
+                                setPerformers(newPerformers);
+                              }}
+                              placeholder="15"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label htmlFor={`${performer.id}-requirements`}>Special Requirements</Label>
+                          <Textarea
+                            id={`${performer.id}-requirements`}
+                            value={performer.specialRequirements}
+                            onChange={(e) => {
+                              const newPerformers = [...performers];
+                              newPerformers[index].specialRequirements = e.target.value;
+                              setPerformers(newPerformers);
+                            }}
+                            placeholder="Any special requirements for this performer..."
+                            rows={2}
+                          />
+                        </div>
+                      </div>
+                    ))}
+
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const newPerformer: PerformerRole = {
+                          id: `performer-${Date.now()}`,
+                          name: `Performer ${performers.length + 1}`,
+                          profileId: undefined,
+                          profileName: '',
+                          performanceOrder: performers.length + 1,
+                          setDuration: '30',
+                          soundCheckTime: '15',
+                          setupTime: '10',
+                          paymentAmount: '',
+                          specialRequirements: ''
+                        };
+                        setPerformers([...performers, newPerformer]);
+                      }}
+                      className="w-full"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Another Performer
+                    </Button>
+                  </CardContent>
+                </Card>
+
                 {/* Event Timing */}
                 <Card>
-                  <CardHeader className="pb-3">
+                  <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <Clock className="w-5 h-5" />
                       <span>Event Timing</span>
@@ -595,12 +812,11 @@ export default function ContractProposalDialog({
 
             {currentPage === 'artist-terms' && (
               <>
-                {/* Performance Schedule */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
-                      <Clock className="w-5 h-5" />
-                      <span>Performance Schedule</span>
+                      <FileText className="w-5 h-5" />
+                      <span>Performance Terms - {performers.find(p => p.id === currentPerformer)?.name}</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -753,7 +969,7 @@ export default function ContractProposalDialog({
                           type="number"
                           placeholder="0.00"
                           // value={ticketData.generalPrice}
-                          // onChange={(e) => setTicketData({...ticketData, generalPrice: e.target.value})}
+                          // onChangeing performer details in contract proposal form.//(e) => setTicketData({...ticketData, generalPrice: e.target.value})}
                         />
                       </div>
                       <div>
@@ -763,7 +979,7 @@ export default function ContractProposalDialog({
                           type="number"
                           placeholder="0.00"
                           // value={ticketData.vipPrice}
-                          // onChange={(e) => setTicketData({...ticketData, vipPrice: e.target.value})}
+                          // onChangeing performer details in contract proposal form.
                         />
                       </div>
                     </div>
@@ -775,7 +991,7 @@ export default function ContractProposalDialog({
                           type="number"
                           placeholder="e.g., 500"
                           // value={ticketData.capacity}
-                          // onChange={(e) => setTicketData({...ticketData, capacity: e.target.value})}
+                          // onChangeing performer details in contract proposal form.
                         />
                       </div>
                       <div>
@@ -784,7 +1000,7 @@ export default function ContractProposalDialog({
                           id="ticketSalesStart"
                           type="date"
                           // value={ticketData.salesStartDate}
-                          // onChange={(e) => setTicketData({...ticketData, salesStartDate: e.target.value})}
+                          // onChangeing performer details in contract proposal form.
                         />
                       </div>
                     </div>
@@ -822,67 +1038,11 @@ export default function ContractProposalDialog({
 
             {currentPage === 'payment' && (
               <>
-                {/* Revenue Sharing */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Revenue Sharing</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="revenueModel">Revenue Model</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select revenue sharing model" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="door_split">Door Split (% of ticket sales)</SelectItem>
-                          <SelectItem value="guarantee">Guarantee Only</SelectItem>
-                          <SelectItem value="guarantee_plus">Guarantee Plus % Over</SelectItem>
-                          <SelectItem value="artist_keeps_all">Artist Keeps All Ticket Revenue</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="artistPercentage">Artist Percentage</Label>
-                        <Input
-                          id="artistPercentage"
-                          type="number"
-                          placeholder="e.g., 70"
-                          // value={ticketData.artistPercentage}
-                          // onChange={(e) => setTicketData({...ticketData, artistPercentage: e.target.value})}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="venuePercentage">Venue Percentage</Label>
-                        <Input
-                          id="venuePercentage"
-                          type="number"
-                          placeholder="e.g., 30"
-                          // value={ticketData.venuePercentage}
-                          // onChange={(e) => setTicketData({...ticketData, venuePercentage: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="ticketProcessingFees">Ticket Processing Fees</Label>
-                      <Textarea
-                        id="ticketProcessingFees"
-                        placeholder="Describe who pays processing fees, service charges, etc..."
-                        rows={3}
-                        // value={ticketData.processingFees}
-                        // onChange={(e) => setTicketData({...ticketData, processingFees: e.target.value})}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Payment Terms */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <DollarSign className="w-5 h-5" />
-                      <span>Payment Terms</span>
+                      <span>Payment Terms - {performers.find(p => p.id === currentPerformer)?.name}</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">

@@ -208,6 +208,50 @@ export default function ContractViewer({
               </CardContent>
             </Card>
 
+            {/* Performer Lineup */}
+            {contract.terms.performers && contract.terms.performers.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Calendar className="w-5 h-5" />
+                    <span>Performer Lineup</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {contract.terms.performers
+                    .sort((a, b) => a.performanceOrder - b.performanceOrder)
+                    .map((performer, index) => (
+                    <div key={performer.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium">{performer.profileName}</h4>
+                        <Badge variant="outline">{performer.name}</Badge>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="font-medium">Set Duration:</span>
+                          <p className="text-gray-600">{performer.setDuration} minutes</p>
+                        </div>
+                        <div>
+                          <span className="font-medium">Sound Check:</span>
+                          <p className="text-gray-600">{performer.soundCheckTime} minutes</p>
+                        </div>
+                        <div>
+                          <span className="font-medium">Setup Time:</span>
+                          <p className="text-gray-600">{performer.setupTime} minutes</p>
+                        </div>
+                      </div>
+                      {performer.specialRequirements && (
+                        <div className="mt-2">
+                          <span className="font-medium text-sm">Special Requirements:</span>
+                          <p className="text-gray-600 text-sm">{performer.specialRequirements}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Performance Terms */}
             <Card>
               <CardHeader>

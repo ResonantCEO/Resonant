@@ -607,22 +607,22 @@ export default function ContractProposalDialog({
                               size="sm"
                               onClick={() => {
                                 const newPerformers = performers.filter(p => p.id !== performer.id);
-                                
+
                                 // Reorder remaining performers to fill gaps, keeping headliner last
                                 const headliner = newPerformers.find(p => p.name === 'Headliner');
                                 const supportActs = newPerformers.filter(p => p.name !== 'Headliner');
-                                
+
                                 // Reassign orders: support acts get 1, 2, 3... and headliner gets the last position
                                 supportActs.forEach((p, i) => {
                                   p.performanceOrder = i + 1;
                                 });
-                                
+
                                 if (headliner) {
                                   headliner.performanceOrder = supportActs.length + 1;
                                 }
-                                
+
                                 setPerformers(newPerformers);
-                                
+
                                 // If we removed the current performer, switch to the first available performer
                                 if (currentPerformer === performer.id && newPerformers.length > 0) {
                                   setCurrentPerformer(newPerformers[0].id);
@@ -658,7 +658,7 @@ export default function ContractProposalDialog({
                                 const newPerformers = [...performers];
                                 const currentPerformer = newPerformers[index];
                                 const oldOrder = currentPerformer.performanceOrder;
-                                
+
                                 // If this is the headliner, always make it the last act
                                 if (currentPerformer.name === 'Headliner') {
                                   const maxOrder = Math.max(...newPerformers.map(p => p.performanceOrder));
@@ -682,7 +682,7 @@ export default function ContractProposalDialog({
                                   });
                                   currentPerformer.performanceOrder = newOrder;
                                 }
-                                
+
                                 // Sort by performance order
                                 newPerformers.sort((a, b) => a.performanceOrder - b.performanceOrder);
                                 setPerformers(newPerformers);
@@ -772,10 +772,10 @@ export default function ContractProposalDialog({
                       onClick={() => {
                         const headliner = performers.find(p => p.name === 'Headliner');
                         const supportActCount = performers.filter(p => p.name !== 'Headliner').length;
-                        
+
                         // New support act gets the next available position before headliner
                         const newOrder = supportActCount + 1;
-                        
+
                         const newPerformer: PerformerRole = {
                           id: `performer-${Date.now()}`,
                           name: `Support ${supportActCount + 1}`,
@@ -788,7 +788,7 @@ export default function ContractProposalDialog({
                           paymentAmount: '',
                           specialRequirements: ''
                         };
-                        
+
                         // Update headliner to be last
                         const updatedPerformers = performers.map(p => {
                           if (p.name === 'Headliner') {
@@ -796,7 +796,7 @@ export default function ContractProposalDialog({
                           }
                           return p;
                         });
-                        
+
                         setPerformers([...updatedPerformers, newPerformer]);
                       }}
                       className="w-full"

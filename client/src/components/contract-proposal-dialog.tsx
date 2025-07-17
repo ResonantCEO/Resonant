@@ -978,7 +978,9 @@ export default function ContractProposalDialog({
                       />
                     </div>
                   </CardContent>
-                </Card>)}
+                </Card>
+              </>
+            )}
 
             {currentPage === 'artist-docs' && (
               <>

@@ -585,9 +585,9 @@ export default function ContractProposalDialog({
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {performers.sort((a, b) => {
-                      // If one is headliner and the other isn't, headliner goes last
-                      if (a.name === 'Headliner' && b.name !== 'Headliner') return 1;
-                      if (b.name === 'Headliner' && a.name !== 'Headliner') return -1;
+                      // If one is headliner and the other isn't, headliner goes first
+                      if (a.name === 'Headliner' && b.name !== 'Headliner') return -1;
+                      if (b.name === 'Headliner' && a.name !== 'Headliner') return 1;
                       // Otherwise sort by performance order
                       return a.performanceOrder - b.performanceOrder;
                     }).map((performer, index) => (

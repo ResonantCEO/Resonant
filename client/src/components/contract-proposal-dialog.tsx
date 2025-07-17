@@ -594,11 +594,18 @@ export default function ContractProposalDialog({
                             onClick={() => {
                               const newPerformers = performers.filter(p => p.id !== performer.id);
                               
-                              // Reorder remaining performers to fill gaps
-                              newPerformers.sort((a, b) => a.performanceOrder - b.performanceOrder);
-                              newPerformers.forEach((p, i) => {
+                              // Reorder remaining performers to fill gaps, keeping headliner last
+                              const headliner = newPerformers.find(p => p.name === 'Headliner');
+                              const supportActs = newPerformers.filter(p => p.name !== 'Headliner');
+                              
+                              // Reassign orders: support acts get 1, 2, 3... and headliner gets the last position
+                              supportActs.forEach((p, i) => {
                                 p.performanceOrder = i + 1;
                               });
+                              
+                              if (headliner) {
+                                headliner.performanceOrder = supportActs.length + 1;
+                              }
                               
                               setPerformers(newPerformers);
                             }}
@@ -629,18 +636,32 @@ export default function ContractProposalDialog({
                               onValueChange={(value) => {
                                 const newOrder = parseInt(value);
                                 const newPerformers = [...performers];
+                                const currentPerformer = newPerformers[index];
+                                const oldOrder = currentPerformer.performanceOrder;
                                 
-                                // Update the selected performer's order
-                                newPerformers[index].performanceOrder = newOrder;
-                                
-                                // Reorder other performers to maintain sequence
-                                newPerformers.forEach((p, i) => {
-                                  if (i !== index) {
-                                    if (p.performanceOrder >= newOrder) {
-                                      p.performanceOrder = p.performanceOrder + 1;
+                                // If this is the headliner, always make it the last act
+                                if (currentPerformer.name === 'Headliner') {
+                                  const maxOrder = Math.max(...newPerformers.map(p => p.performanceOrder));
+                                  currentPerformer.performanceOrder = maxOrder;
+                                } else {
+                                  // For other performers, shift orders as needed
+                                  newPerformers.forEach((p, i) => {
+                                    if (i !== index) {
+                                      if (oldOrder < newOrder) {
+                                        // Moving performer later in order
+                                        if (p.performanceOrder > oldOrder && p.performanceOrder <= newOrder) {
+                                          p.performanceOrder--;
+                                        }
+                                      } else {
+                                        // Moving performer earlier in order
+                                        if (p.performanceOrder >= newOrder && p.performanceOrder < oldOrder) {
+                                          p.performanceOrder++;
+                                        }
+                                      }
                                     }
-                                  }
-                                });
+                                  });
+                                  currentPerformer.performanceOrder = newOrder;
+                                }
                                 
                                 // Sort by performance order
                                 newPerformers.sort((a, b) => a.performanceOrder - b.performanceOrder);
@@ -651,14 +672,14 @@ export default function ContractProposalDialog({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="1">1st (Opening Act)</SelectItem>
-                                <SelectItem value="2">2nd</SelectItem>
-                                <SelectItem value="3">3rd</SelectItem>
-                                <SelectItem value="4">4th</SelectItem>
-                                <SelectItem value="5">5th</SelectItem>
-                                <SelectItem value="6">6th</SelectItem>
-                                <SelectItem value="7">7th</SelectItem>
-                                <SelectItem value="8">8th (Headliner)</SelectItem>
+                                {Array.from({ length: performers.length }, (_, i) => i + 1).map(num => (
+                                  <SelectItem key={num} value={num.toString()}>
+                                    {num === 1 ? '1st (Opening Act)' : 
+                                     num === performers.length && performers.find(p => p.name === 'Headliner') ? 
+                                     `${num}${num === 2 ? 'nd' : num === 3 ? 'rd' : 'th'} (Headliner)` :
+                                     `${num}${num === 2 ? 'nd' : num === 3 ? 'rd' : 'th'}`}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                           </div>
@@ -729,16 +750,15 @@ export default function ContractProposalDialog({
                     <Button
                       variant="outline"
                       onClick={() => {
-                        // Find the headliner (should have the highest performance order)
                         const headliner = performers.find(p => p.name === 'Headliner');
-                        const maxOrder = Math.max(...performers.map(p => p.performanceOrder));
+                        const supportActCount = performers.filter(p => p.name !== 'Headliner').length;
                         
-                        // Insert new performer before the headliner
-                        const newOrder = headliner ? maxOrder : maxOrder + 1;
+                        // New support act gets the next available position before headliner
+                        const newOrder = supportActCount + 1;
                         
                         const newPerformer: PerformerRole = {
                           id: `performer-${Date.now()}`,
-                          name: performers.length === 1 ? '1st Support' : `Support ${performers.length}`,
+                          name: `Support ${supportActCount + 1}`,
                           profileId: undefined,
                           profileName: '',
                           performanceOrder: newOrder,
@@ -749,7 +769,7 @@ export default function ContractProposalDialog({
                           specialRequirements: ''
                         };
                         
-                        // Update existing performers' orders if needed
+                        // Update headliner to be last
                         const updatedPerformers = performers.map(p => {
                           if (p.name === 'Headliner') {
                             return { ...p, performanceOrder: newOrder + 1 };

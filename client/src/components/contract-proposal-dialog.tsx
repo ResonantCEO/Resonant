@@ -624,15 +624,6 @@ export default function ContractProposalDialog({
                         />
                       </div>
                       <div>
-                        <Label htmlFor="soundCheckLength">Number of Sets</Label>
-                        <Input
-                          id="soundCheckLength"
-                          placeholder="e.g., 2 sets"
-                          value={terms.soundCheckLength}
-                          onChange={(e) => setTerms({...terms, soundCheckLength: e.target.value})}
-                        />
-                      </div>
-                      <div>
                         <Label htmlFor="startTime">Start Time</Label>
                         <Input
                           id="startTime"
@@ -648,6 +639,15 @@ export default function ContractProposalDialog({
                           placeholder="e.g., 90 minutes"
                           value={terms.performanceDuration}
                           onChange={(e) => setTerms({...terms, performanceDuration: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="soundCheckLength">Number of Sets</Label>
+                        <Input
+                          id="soundCheckLength"
+                          placeholder="e.g., 2 sets"
+                          value={terms.soundCheckLength}
+                          onChange={(e) => setTerms({...terms, soundCheckLength: e.target.value})}
                         />
                       </div>
                       <div>

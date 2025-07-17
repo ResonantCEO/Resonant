@@ -1499,6 +1499,8 @@ export default function ContractProposalDialog({
 
             </div>
 
+            </div>
+
             {/* Action Buttons */}
             <div className="flex justify-between items-center p-3 border-t bg-background">
               <Button variant="outline" onClick={() => onOpenChange(false)}>

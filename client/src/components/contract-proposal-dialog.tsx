@@ -792,6 +792,36 @@ export default function ContractProposalDialog({
                   </CardContent>
                 </Card>
 
+                {/* Guest List & Comps */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Guest List & Complimentary Tickets</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="artistGuestList">Artist Guest List Limit</Label>
+                      <Input
+                        id="artistGuestList"
+                        type="number"
+                        placeholder="e.g., 10"
+                        className="max-w-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="guestListPolicy">Guest List Policy</Label>
+                      <Textarea
+                        id="guestListPolicy"
+                        placeholder="Additional guest list terms, restrictions, or requirements..."
+                        rows={3}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {currentPage === 'payment' && (
+              <>
                 {/* Revenue Sharing */}
                 <Card>
                   <CardHeader>
@@ -835,46 +865,18 @@ export default function ContractProposalDialog({
                       </div>
                     </div>
                     <div>
-                      <Label htmlFor="ticketFees">Ticket Processing Fees</Label>
+                      <Label htmlFor="ticketProcessingFees">Ticket Processing Fees</Label>
                       <Textarea
-                        id="ticketFees"
+                        id="ticketProcessingFees"
                         placeholder="Describe who pays processing fees, service charges, etc..."
                         rows={3}
+                        // value={ticketData.processingFees}
+                        // onChange={(e) => setTicketData({...ticketData, processingFees: e.target.value})}
                       />
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Guest List & Comps */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Guest List & Complimentary Tickets</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="artistGuestList">Artist Guest List Limit</Label>
-                      <Input
-                        id="artistGuestList"
-                        type="number"
-                        placeholder="e.g., 10"
-                        className="max-w-sm"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="guestListPolicy">Guest List Policy</Label>
-                      <Textarea
-                        id="guestListPolicy"
-                        placeholder="Additional guest list terms, restrictions, or requirements..."
-                        rows={3}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            )}
-
-            {currentPage === 'payment' && (
-              <>
                 {/* Payment Terms */}
                 <Card>
                   <CardHeader>
@@ -976,9 +978,7 @@ export default function ContractProposalDialog({
                       />
                     </div>
                   </CardContent>
-                </Card>
-              </>
-            )}
+                </Card>)}
 
             {currentPage === 'artist-docs' && (
               <>

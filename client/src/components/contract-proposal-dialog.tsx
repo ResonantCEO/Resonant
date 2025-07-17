@@ -577,18 +577,29 @@ export default function ContractProposalDialog({
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {performers.map((performer, index) => (
+                    {performers.sort((a, b) => a.performanceOrder - b.performanceOrder).map((performer, index) => (
                       <div key={performer.id} className="border rounded-lg p-4 space-y-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
                             <span className="font-medium">{performer.name}</span>
-                            <Badge variant="outline">Order: {performer.performanceOrder}</Badge>
+                            <Badge variant="outline">
+                              {performer.name === 'Headliner' ? 'Headliner' : 
+                               performer.performanceOrder === 1 ? 'Opening Act' : 
+                               `${performer.performanceOrder}${performer.performanceOrder === 2 ? 'nd' : performer.performanceOrder === 3 ? 'rd' : 'th'} Act`}
+                            </Badge>
                           </div>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => {
                               const newPerformers = performers.filter(p => p.id !== performer.id);
+                              
+                              // Reorder remaining performers to fill gaps
+                              newPerformers.sort((a, b) => a.performanceOrder - b.performanceOrder);
+                              newPerformers.forEach((p, i) => {
+                                p.performanceOrder = i + 1;
+                              });
+                              
                               setPerformers(newPerformers);
                             }}
                             className="text-red-500 hover:text-red-700"
@@ -616,8 +627,23 @@ export default function ContractProposalDialog({
                             <Select 
                               value={performer.performanceOrder.toString()}
                               onValueChange={(value) => {
+                                const newOrder = parseInt(value);
                                 const newPerformers = [...performers];
-                                newPerformers[index].performanceOrder = parseInt(value);
+                                
+                                // Update the selected performer's order
+                                newPerformers[index].performanceOrder = newOrder;
+                                
+                                // Reorder other performers to maintain sequence
+                                newPerformers.forEach((p, i) => {
+                                  if (i !== index) {
+                                    if (p.performanceOrder >= newOrder) {
+                                      p.performanceOrder = p.performanceOrder + 1;
+                                    }
+                                  }
+                                });
+                                
+                                // Sort by performance order
+                                newPerformers.sort((a, b) => a.performanceOrder - b.performanceOrder);
                                 setPerformers(newPerformers);
                               }}
                             >
@@ -625,11 +651,14 @@ export default function ContractProposalDialog({
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="1">1st (Main Act)</SelectItem>
+                                <SelectItem value="1">1st (Opening Act)</SelectItem>
                                 <SelectItem value="2">2nd</SelectItem>
                                 <SelectItem value="3">3rd</SelectItem>
                                 <SelectItem value="4">4th</SelectItem>
                                 <SelectItem value="5">5th</SelectItem>
+                                <SelectItem value="6">6th</SelectItem>
+                                <SelectItem value="7">7th</SelectItem>
+                                <SelectItem value="8">8th (Headliner)</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -700,24 +729,40 @@ export default function ContractProposalDialog({
                     <Button
                       variant="outline"
                       onClick={() => {
+                        // Find the headliner (should have the highest performance order)
+                        const headliner = performers.find(p => p.name === 'Headliner');
+                        const maxOrder = Math.max(...performers.map(p => p.performanceOrder));
+                        
+                        // Insert new performer before the headliner
+                        const newOrder = headliner ? maxOrder : maxOrder + 1;
+                        
                         const newPerformer: PerformerRole = {
                           id: `performer-${Date.now()}`,
-                          name: `Performer ${performers.length + 1}`,
+                          name: performers.length === 1 ? '1st Support' : `Support ${performers.length}`,
                           profileId: undefined,
                           profileName: '',
-                          performanceOrder: performers.length + 1,
+                          performanceOrder: newOrder,
                           setDuration: '30',
                           soundCheckTime: '15',
                           setupTime: '10',
                           paymentAmount: '',
                           specialRequirements: ''
                         };
-                        setPerformers([...performers, newPerformer]);
+                        
+                        // Update existing performers' orders if needed
+                        const updatedPerformers = performers.map(p => {
+                          if (p.name === 'Headliner') {
+                            return { ...p, performanceOrder: newOrder + 1 };
+                          }
+                          return p;
+                        });
+                        
+                        setPerformers([...updatedPerformers, newPerformer]);
                       }}
                       className="w-full"
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Add Another Performer
+                      Add Support Act
                     </Button>
                   </CardContent>
                 </Card>

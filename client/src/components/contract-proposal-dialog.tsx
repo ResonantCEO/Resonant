@@ -588,8 +588,8 @@ export default function ContractProposalDialog({
                       // If one is headliner and the other isn't, headliner goes first
                       if (a.name === 'Headliner' && b.name !== 'Headliner') return -1;
                       if (b.name === 'Headliner' && a.name !== 'Headliner') return 1;
-                      // Otherwise sort by performance order
-                      return a.performanceOrder - b.performanceOrder;
+                      // Otherwise sort by performance order in reverse (higher order first, opening act last)
+                      return b.performanceOrder - a.performanceOrder;
                     }).map((performer, index) => (
                       <div key={performer.id} className="border rounded-lg p-4 space-y-3">
                         <div className="flex items-center justify-between">

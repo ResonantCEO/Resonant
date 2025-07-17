@@ -1089,7 +1089,6 @@ export default function ContractProposalDialog({
                         />
                       </div>
                     </div>
-
                   </CardContent>
                 </Card>
 
@@ -1220,6 +1219,56 @@ export default function ContractProposalDialog({
                         value={payment.penaltyClause}
                         onChange={(e) => setPayment({...payment, penaltyClause: e.target.value})}
                         rows={2}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Revenue Sharing */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Revenue Sharing</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="revenueModel">Revenue Model</Label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select revenue sharing model" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="flat_fee">Flat Fee (No Revenue Share)</SelectItem>
+                          <SelectItem value="percentage_split">Percentage Split</SelectItem>
+                          <SelectItem value="door_split">Door Split</SelectItem>
+                          <SelectItem value="guarantee_plus">Guarantee Plus Percentage</SelectItem>
+                          <SelectItem value="merchandise_split">Merchandise Revenue Split</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="artistPercentage">Artist Percentage</Label>
+                        <Input
+                          id="artistPercentage"
+                          type="number"
+                          placeholder="e.g., 70"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="venuePercentage">Venue Percentage</Label>
+                        <Input
+                          id="venuePercentage"
+                          type="number"
+                          placeholder="e.g., 30"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="ticketProcessingFees">Ticket Processing Fees</Label>
+                      <Textarea
+                        id="ticketProcessingFees"
+                        placeholder="Describe who pays processing fees, service charges, etc..."
+                        rows={3}
                       />
                     </div>
                   </CardContent>

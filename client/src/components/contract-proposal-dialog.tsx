@@ -98,7 +98,7 @@ export default function ContractProposalDialog({
       specialRequirements: ''
     }
   ]);
-  const [currentPerformer, setCurrentPerformer] = useState<string>(performers[0].id);
+  const [currentPerformer, setCurrentPerformer] = useState<string>(performers[0]?.id || '');
 
   // Generate default contract title
   const getDefaultTitle = () => {
@@ -200,6 +200,13 @@ export default function ContractProposalDialog({
       }));
     }
   }, [bookingRequest, selectedVenueForContract]);
+
+  // Update currentPerformer if it becomes invalid
+  useEffect(() => {
+    if (performers.length > 0 && !performers.find(p => p.id === currentPerformer)) {
+      setCurrentPerformer(performers[0].id);
+    }
+  }, [performers, currentPerformer]);
 
   const createProposalMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -588,31 +595,38 @@ export default function ContractProposalDialog({
                                `${performer.performanceOrder}${performer.performanceOrder === 2 ? 'nd' : performer.performanceOrder === 3 ? 'rd' : 'th'} Act`}
                             </Badge>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              const newPerformers = performers.filter(p => p.id !== performer.id);
-                              
-                              // Reorder remaining performers to fill gaps, keeping headliner last
-                              const headliner = newPerformers.find(p => p.name === 'Headliner');
-                              const supportActs = newPerformers.filter(p => p.name !== 'Headliner');
-                              
-                              // Reassign orders: support acts get 1, 2, 3... and headliner gets the last position
-                              supportActs.forEach((p, i) => {
-                                p.performanceOrder = i + 1;
-                              });
-                              
-                              if (headliner) {
-                                headliner.performanceOrder = supportActs.length + 1;
-                              }
-                              
-                              setPerformers(newPerformers);
-                            }}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
+                          {performer.name !== 'Headliner' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const newPerformers = performers.filter(p => p.id !== performer.id);
+                                
+                                // Reorder remaining performers to fill gaps, keeping headliner last
+                                const headliner = newPerformers.find(p => p.name === 'Headliner');
+                                const supportActs = newPerformers.filter(p => p.name !== 'Headliner');
+                                
+                                // Reassign orders: support acts get 1, 2, 3... and headliner gets the last position
+                                supportActs.forEach((p, i) => {
+                                  p.performanceOrder = i + 1;
+                                });
+                                
+                                if (headliner) {
+                                  headliner.performanceOrder = supportActs.length + 1;
+                                }
+                                
+                                setPerformers(newPerformers);
+                                
+                                // If we removed the current performer, switch to the first available performer
+                                if (currentPerformer === performer.id && newPerformers.length > 0) {
+                                  setCurrentPerformer(newPerformers[0].id);
+                                }
+                              }}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">

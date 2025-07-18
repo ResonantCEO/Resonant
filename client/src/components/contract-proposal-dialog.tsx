@@ -179,7 +179,7 @@ export default function ContractProposalDialog({
 
   const [requiredVenueDocuments, setRequiredVenueDocuments] = useState<{
     [key: string]: boolean;
-  }>({
+    }>({
     venueInsurance: false,
     loadInSpecs: false,
     parkingInfo: false,
@@ -575,6 +575,56 @@ export default function ContractProposalDialog({
                   </CardContent>
                 </Card>
 
+                {/* Event Timing */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Clock className="w-5 h-5" />
+                      <span>Event Timing</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="doorsOpenTime">Doors Open Time</Label>
+                        <Input
+                          id="doorsOpenTime"
+                          type="time"
+                          value={terms.doorsOpenTime}
+                          onChange={(e) => setTerms({...terms, doorsOpenTime: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="eventStartTime">Event Start Time</Label>
+                        <Input
+                          id="eventStartTime"
+                          type="time"
+                          value={terms.eventStartTime}
+                          onChange={(e) => setTerms({...terms, eventStartTime: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="setChangeWindow">Set Change Window Length</Label>
+                        <Input
+                          id="setChangeWindow"
+                          placeholder="e.g., 15 minutes"
+                          value={terms.setChangeWindow}
+                          onChange={(e) => setTerms({...terms, setChangeWindow: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hardStopTime">Hard Stop Time</Label>
+                        <Input
+                          id="hardStopTime"
+                          type="time"
+                          value={terms.hardStopTime}
+                          onChange={(e) => setTerms({...terms, hardStopTime: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {/* Performer Lineup */}
                 <Card>
                   <CardHeader>
@@ -804,56 +854,6 @@ export default function ContractProposalDialog({
                       <Plus className="w-4 h-4 mr-2" />
                       Add Support Act
                     </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Event Timing */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Clock className="w-5 h-5" />
-                      <span>Event Timing</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="doorsOpenTime">Doors Open Time</Label>
-                        <Input
-                          id="doorsOpenTime"
-                          type="time"
-                          value={terms.doorsOpenTime}
-                          onChange={(e) => setTerms({...terms, doorsOpenTime: e.target.value})}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="eventStartTime">Event Start Time</Label>
-                        <Input
-                          id="eventStartTime"
-                          type="time"
-                          value={terms.eventStartTime}
-                          onChange={(e) => setTerms({...terms, eventStartTime: e.target.value})}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="setChangeWindow">Set Change Window Length</Label>
-                        <Input
-                          id="setChangeWindow"
-                          placeholder="e.g., 15 minutes"
-                          value={terms.setChangeWindow}
-                          onChange={(e) => setTerms({...terms, setChangeWindow: e.target.value})}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="hardStopTime">Hard Stop Time</Label>
-                        <Input
-                          id="hardStopTime"
-                          type="time"
-                          value={terms.hardStopTime}
-                          onChange={(e) => setTerms({...terms, hardStopTime: e.target.value})}
-                        />
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
 
@@ -1684,10 +1684,12 @@ export default function ContractProposalDialog({
                             <Select value={terms.radiusClause.timeUnit} onValueChange={(value) => setTerms(prev => ({
                               ...prev,
                               radiusClause: {
-                                ...prev.radiusClause,
-                                timeUnit: value
-                              }
-                            }))}>
+                                ...prev,
+                                radiusClause: {
+                                  ...prev.radiusClause,
+                                  timeUnit: value
+                                }
+                              }))}>
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>

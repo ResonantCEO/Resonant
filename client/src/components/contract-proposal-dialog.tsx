@@ -940,8 +940,7 @@ export default function ContractProposalDialog({
                           placeholder="e.g., 90 minutes"
                           value={terms.performanceDuration}
                           onChange={(e) => setTerms({...terms, performanceDuration: e.target.value})}
-                        />
-                      </div>
+                        />                      </div>
                       <div>
                         <Label htmlFor="soundCheckLength">Number of Sets</Label>
                         <Input
@@ -1684,12 +1683,10 @@ export default function ContractProposalDialog({
                             <Select value={terms.radiusClause.timeUnit} onValueChange={(value) => setTerms(prev => ({
                               ...prev,
                               radiusClause: {
-                                ...prev,
-                                radiusClause: {
-                                  ...prev.radiusClause,
-                                  timeUnit: value
-                                }
-                              }))}>
+                                ...prev.radiusClause,
+                                timeUnit: value
+                              }
+                            }))}>
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>

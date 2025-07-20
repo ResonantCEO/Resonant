@@ -777,17 +777,21 @@ export default function ContractProposalDialog({
                                   // Show dropdown if query is long enough
                                   setShowArtistDropdown(prev => ({
                                     ...prev,
-                                    [performer.id]: query.length >= 1
+                                    [performer.id]: query.length >= 2
                                   }));
                                   
                                   // Also update the performer name as they type
                                   const newPerformers = [...performers];
                                   newPerformers[index].profileName = query;
                                   setPerformers(newPerformers);
+                                  
+                                  // Set current performer for API calls
+                                  setCurrentPerformer(performer.id);
                                 }}
                                 onFocus={() => {
                                   const query = getCurrentSearchQuery(performer.id);
-                                  if (query.length >= 1) {
+                                  setCurrentPerformer(performer.id);
+                                  if (query.length >= 2) {
                                     setShowArtistDropdown(prev => ({
                                       ...prev,
                                       [performer.id]: true
@@ -810,7 +814,7 @@ export default function ContractProposalDialog({
                             </div>
                             
                             {/* Artist Search Dropdown */}
-                            {showArtistDropdown[performer.id] && currentPerformer === performer.id && debouncedSearchQuery.length >= 2 && (
+                            {showArtistDropdown[performer.id] && debouncedSearchQuery.length >= 2 && (
                               <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
                                 {isSearching ? (
                                   <div className="p-3 text-sm text-gray-500 text-center">

@@ -231,55 +231,74 @@ export class Storage {
 
   // Search and Discovery functions
   async searchProfiles(query?: string, type?: string, location?: string, limit: number = 20, offset: number = 0) {
-    let whereConditions = [];
+    try {
+      console.log('Storage.searchProfiles called with:', { query, type, location, limit, offset });
+      
+      let whereConditions = [];
 
-    if (query) {
-      whereConditions.push(
-        or(
-          ilike(profiles.name, `%${query}%`),
-          ilike(profiles.bio, `%${query}%`),
-          ilike(profiles.genre, `%${query}%`)
-        )
-      );
+      if (query && query.trim()) {
+        const trimmedQuery = query.trim();
+        whereConditions.push(
+          or(
+            ilike(profiles.name, `%${trimmedQuery}%`),
+            ilike(profiles.bio, `%${trimmedQuery}%`),
+            ilike(profiles.genre, `%${trimmedQuery}%`)
+          )
+        );
+      }
+
+      if (type && type.trim()) {
+        whereConditions.push(eq(profiles.type, type.trim() as any));
+      }
+
+      if (location && location.trim()) {
+        whereConditions.push(ilike(profiles.location, `%${location.trim()}%`));
+      }
+
+      // Only show non-deleted profiles
+      whereConditions.push(isNull(profiles.deletedAt));
+
+      console.log('Search conditions count:', whereConditions.length);
+
+      if (whereConditions.length === 1) {
+        // Only deletedAt condition - return empty if no other filters
+        if (!query && !type && !location) {
+          console.log('No search criteria provided, returning empty array');
+          return [];
+        }
+      }
+
+      const searchResults = await db
+        .select({
+          id: profiles.id,
+          name: profiles.name,
+          type: profiles.type,
+          bio: profiles.bio,
+          genre: profiles.genre,
+          location: profiles.location,
+          profileImageUrl: profiles.profileImageUrl,
+          coverImageUrl: profiles.coverImageUrl,
+          createdAt: profiles.createdAt,
+        })
+        .from(profiles)
+        .where(and(...whereConditions))
+        .orderBy(sql`
+          CASE 
+            WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `${query.trim()}%` : ''}) THEN 1
+            WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `%${query.trim()}%` : ''}) THEN 2
+            ELSE 3
+          END,
+          ${profiles.name} ASC
+        `)
+        .limit(limit)
+        .offset(offset);
+
+      console.log(`Search query returned ${searchResults.length} results`);
+      return searchResults;
+    } catch (error) {
+      console.error("Error in searchProfiles:", error);
+      throw error;
     }
-
-    if (type) {
-      whereConditions.push(eq(profiles.type, type));
-    }
-
-    if (location) {
-      whereConditions.push(ilike(profiles.location, `%${location}%`));
-    }
-
-    // Only show non-deleted profiles
-    whereConditions.push(isNull(profiles.deletedAt));
-
-    const searchResults = await db
-      .select({
-        id: profiles.id,
-        name: profiles.name,
-        type: profiles.type,
-        bio: profiles.bio,
-        genre: profiles.genre,
-        location: profiles.location,
-        profileImageUrl: profiles.profileImageUrl,
-        coverImageUrl: profiles.coverImageUrl,
-        createdAt: profiles.createdAt,
-      })
-      .from(profiles)
-      .where(and(...whereConditions))
-      .orderBy(sql`
-        CASE 
-          WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `${query}%` : ''}) THEN 1
-          WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `%${query}%` : ''}) THEN 2
-          ELSE 3
-        END,
-        ${profiles.name} ASC
-      `)
-      .limit(limit)
-      .offset(offset);
-
-    return searchResults;
   }
 
   async discoverProfiles(type?: string, location?: string, genre?: string, limit: number = 20, offset: number = 0, excludeProfileId?: number): Promise<Profile[]> {

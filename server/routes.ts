@@ -944,15 +944,19 @@ export function registerRoutes(app: Express): Server {
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
 
+      console.log('Search request:', { query, type, location, limit, offset });
+
       if (!query && !type && !location) {
+        console.log('No search parameters provided, returning empty array');
         return res.json([]);
       }
 
       const profiles = await storage.searchProfiles(query, type, location, limit, offset);
+      console.log(`Search found ${profiles.length} profiles`);
       res.json(profiles);
     } catch (error) {
       console.error("Error searching profiles:", error);
-      res.status(500).json({ message: "Failed to search profiles" });
+      res.status(500).json({ message: "Failed to search profiles", error: error.message });
     }
   });
 

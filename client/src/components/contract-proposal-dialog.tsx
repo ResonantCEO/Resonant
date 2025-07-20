@@ -101,12 +101,28 @@ export default function ContractProposalDialog({
     }
   ]);
   const [currentPerformer, setCurrentPerformer] = useState<string>(performers[0]?.id || '');
-  const [artistSearchQuery, setArtistSearchQuery] = useState<string>('');
-  const [showArtistDropdown, setShowArtistDropdown] = useState<boolean>(false);
+  const [artistSearchQueries, setArtistSearchQueries] = useState<Record<string, string>>({});
+  const [showArtistDropdown, setShowArtistDropdown] = useState<Record<string, boolean>>({});
   const [selectedArtistProfile, setSelectedArtistProfile] = useState<any>(null);
   
+  // Get search query for current performer
+  const getCurrentSearchQuery = (performerId: string) => {
+    return artistSearchQueries[performerId] || '';
+  };
+
+  // Set search query for specific performer
+  const setSearchQueryForPerformer = (performerId: string, query: string) => {
+    setArtistSearchQueries(prev => ({
+      ...prev,
+      [performerId]: query
+    }));
+  };
+
+  // Get current performer's search query
+  const currentSearchQuery = getCurrentSearchQuery(currentPerformer);
+  
   // Debounce the search query
-  const debouncedSearchQuery = useDebounce(artistSearchQuery, 300);
+  const debouncedSearchQuery = useDebounce(currentSearchQuery, 300);
 
   // Search for artist profiles
   const { data: artistSearchResults = [], isLoading: isSearching } = useQuery({
@@ -245,13 +261,28 @@ export default function ContractProposalDialog({
     }
   }, [performers, currentPerformer]);
 
+  // Initialize search queries for performers
+  useEffect(() => {
+    const newQueries: Record<string, string> = {};
+    performers.forEach(performer => {
+      if (!artistSearchQueries[performer.id]) {
+        newQueries[performer.id] = performer.profileName || '';
+      }
+    });
+    
+    if (Object.keys(newQueries).length > 0) {
+      setArtistSearchQueries(prev => ({
+        ...prev,
+        ...newQueries
+      }));
+    }
+  }, [performers]);
+
   // Update search query when current performer changes
   useEffect(() => {
     const currentPerformerData = performers.find(p => p.id === currentPerformer);
-    if (currentPerformerData?.profileName) {
-      setArtistSearchQuery(currentPerformerData.profileName);
-    } else {
-      setArtistSearchQuery('');
+    if (currentPerformerData?.profileName && !getCurrentSearchQuery(currentPerformer)) {
+      setSearchQueryForPerformer(currentPerformer, currentPerformerData.profileName);
     }
   }, [currentPerformer, performers]);
 
@@ -738,23 +769,39 @@ export default function ContractProposalDialog({
                             <div className="relative">
                               <Input
                                 id={`${performer.id}-name`}
-                                value={artistSearchQuery}
+                                value={getCurrentSearchQuery(performer.id)}
                                 onChange={(e) => {
-                                  setArtistSearchQuery(e.target.value);
-                                  setShowArtistDropdown(true);
+                                  const query = e.target.value;
+                                  setSearchQueryForPerformer(performer.id, query);
+                                  
+                                  // Show dropdown if query is long enough
+                                  setShowArtistDropdown(prev => ({
+                                    ...prev,
+                                    [performer.id]: query.length >= 1
+                                  }));
+                                  
                                   // Also update the performer name as they type
                                   const newPerformers = [...performers];
-                                  newPerformers[index].profileName = e.target.value;
+                                  newPerformers[index].profileName = query;
                                   setPerformers(newPerformers);
                                 }}
                                 onFocus={() => {
-                                  if (artistSearchQuery.length >= 2) {
-                                    setShowArtistDropdown(true);
+                                  const query = getCurrentSearchQuery(performer.id);
+                                  if (query.length >= 1) {
+                                    setShowArtistDropdown(prev => ({
+                                      ...prev,
+                                      [performer.id]: true
+                                    }));
                                   }
                                 }}
                                 onBlur={() => {
                                   // Delay hiding to allow for selection
-                                  setTimeout(() => setShowArtistDropdown(false), 200);
+                                  setTimeout(() => {
+                                    setShowArtistDropdown(prev => ({
+                                      ...prev,
+                                      [performer.id]: false
+                                    }));
+                                  }, 200);
                                 }}
                                 placeholder="Search for artist profile..."
                                 className="pr-10"
@@ -763,7 +810,7 @@ export default function ContractProposalDialog({
                             </div>
                             
                             {/* Artist Search Dropdown */}
-                            {showArtistDropdown && debouncedSearchQuery.length >= 2 && (
+                            {showArtistDropdown[performer.id] && currentPerformer === performer.id && debouncedSearchQuery.length >= 2 && (
                               <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
                                 {isSearching ? (
                                   <div className="p-3 text-sm text-gray-500 text-center">
@@ -782,9 +829,12 @@ export default function ContractProposalDialog({
                                         setPerformers(newPerformers);
                                         
                                         // Update search state
-                                        setArtistSearchQuery(artist.name);
+                                        setSearchQueryForPerformer(performer.id, artist.name);
                                         setSelectedArtistProfile(artist);
-                                        setShowArtistDropdown(false);
+                                        setShowArtistDropdown(prev => ({
+                                          ...prev,
+                                          [performer.id]: false
+                                        }));
                                       }}
                                     >
                                       <div className="flex items-center space-x-3">

@@ -150,22 +150,25 @@ export default function Sidebar() {
 
   const unreadNotificationCount = getActiveProfileNotificationCount();
 
-  // Profile activation mutation
-  const activateProfileMutation = useMutation({
-    mutationFn: async (profileId: number) => {
-      return await apiRequest("POST", `/api/profiles/${profileId}/activate`);
-    },
-    onSuccess: () => {
-      // Clear message-related caches that might block profile switching
-      queryClient.removeQueries({ queryKey: ["/api/conversations"] });
-      queryClient.removeQueries({ queryKey: ["/api/friends"] });
+  // Debounced profile activation to prevent rapid-fire API calls
+  const rawActivateProfile = async (profileId: number) => {
+    await apiRequest("POST", `/api/profiles/${profileId}/activate`);
 
-      // Invalidate core profile queries
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
-    },
-    onError: (error: any) => {
-      console.error("Error activating profile:", error);
+    // Clear message-related caches that might block profile switching
+    queryClient.removeQueries({ queryKey: ["/api/conversations"] });
+    queryClient.removeQueries({ queryKey: ["/api/friends"] });
+
+    // Invalidate core profile queries
+    queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+  };
+
+  const debouncedActivateProfile = useDebounce(rawActivateProfile, 300);
+
+  const activateProfileMutation = useMutation({
+    mutationFn: debouncedActivateProfile,
+    onSuccess: () => {
+      // Additional success logic can go here if needed
     },
   });
 

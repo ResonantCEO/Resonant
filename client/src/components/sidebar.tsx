@@ -150,25 +150,22 @@ export default function Sidebar() {
 
   const unreadNotificationCount = getActiveProfileNotificationCount();
 
-  // Debounced profile activation to prevent rapid-fire API calls
-  const rawActivateProfile = async (profileId: number) => {
-    await apiRequest("POST", `/api/profiles/${profileId}/activate`);
-
-    // Clear message-related caches that might block profile switching
-    queryClient.removeQueries({ queryKey: ["/api/conversations"] });
-    queryClient.removeQueries({ queryKey: ["/api/friends"] });
-
-    // Invalidate core profile queries
-    queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
-    queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
-  };
-
-  const debouncedActivateProfile = useDebounce(rawActivateProfile, 300);
-
+  // Profile activation mutation
   const activateProfileMutation = useMutation({
-    mutationFn: debouncedActivateProfile,
+    mutationFn: async (profileId: number) => {
+      return await apiRequest("POST", `/api/profiles/${profileId}/activate`);
+    },
     onSuccess: () => {
-      // Additional success logic can go here if needed
+      // Clear message-related caches that might block profile switching
+      queryClient.removeQueries({ queryKey: ["/api/conversations"] });
+      queryClient.removeQueries({ queryKey: ["/api/friends"] });
+
+      // Invalidate core profile queries
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles/active"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/profiles"] });
+    },
+    onError: (error: any) => {
+      console.error("Error activating profile:", error);
     },
   });
 

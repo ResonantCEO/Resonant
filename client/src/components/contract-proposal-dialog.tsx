@@ -249,7 +249,7 @@ export default function ContractProposalDialog({
       
       // Initialize search query with artist name if available
       if (bookingRequest.artistProfile?.name) {
-        setArtistSearchQuery(bookingRequest.artistProfile.name);
+        setSearchQueryForPerformer(performers[0]?.id || '', bookingRequest.artistProfile.name);
       }
     }
   }, [bookingRequest, selectedVenueForContract]);

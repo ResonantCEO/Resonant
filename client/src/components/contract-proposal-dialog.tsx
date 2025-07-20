@@ -118,21 +118,27 @@ export default function ContractProposalDialog({
     }));
   };
 
-  // Get current performer's search query
+  // Get current performer's search query - use the actual input value being typed
   const currentSearchQuery = getCurrentSearchQuery(currentPerformer);
   
   // Debounce the search query
   const debouncedSearchQuery = useDebounce(currentSearchQuery, 300);
 
-  // Search for artist profiles
+  // Search for artist profiles with better debugging
   const { data: artistSearchResults = [], isLoading: isSearching } = useQuery({
     queryKey: ['/api/profiles/search', debouncedSearchQuery, 'artist'],
     queryFn: async () => {
+      console.log('Search API call triggered with query:', debouncedSearchQuery);
       if (!debouncedSearchQuery || debouncedSearchQuery.length < 2) return [];
       
       const response = await fetch(`/api/profiles/search?q=${encodeURIComponent(debouncedSearchQuery)}&type=artist&limit=10`);
-      if (!response.ok) throw new Error('Failed to search artists');
-      return response.json();
+      if (!response.ok) {
+        console.error('Search API failed:', response.status, response.statusText);
+        throw new Error('Failed to search artists');
+      }
+      const results = await response.json();
+      console.log('Search results:', results);
+      return results;
     },
     enabled: debouncedSearchQuery.length >= 2,
   });
@@ -772,6 +778,12 @@ export default function ContractProposalDialog({
                                 value={getCurrentSearchQuery(performer.id)}
                                 onChange={(e) => {
                                   const query = e.target.value;
+                                  console.log('Input changed for performer', performer.id, 'query:', query);
+                                  
+                                  // Set current performer FIRST for API calls
+                                  setCurrentPerformer(performer.id);
+                                  
+                                  // Update search query
                                   setSearchQueryForPerformer(performer.id, query);
                                   
                                   // Show dropdown if query is long enough
@@ -784,13 +796,11 @@ export default function ContractProposalDialog({
                                   const newPerformers = [...performers];
                                   newPerformers[index].profileName = query;
                                   setPerformers(newPerformers);
-                                  
-                                  // Set current performer for API calls
-                                  setCurrentPerformer(performer.id);
                                 }}
                                 onFocus={() => {
-                                  const query = getCurrentSearchQuery(performer.id);
+                                  console.log('Input focused for performer', performer.id);
                                   setCurrentPerformer(performer.id);
+                                  const query = getCurrentSearchQuery(performer.id);
                                   if (query.length >= 2) {
                                     setShowArtistDropdown(prev => ({
                                       ...prev,
@@ -814,7 +824,7 @@ export default function ContractProposalDialog({
                             </div>
                             
                             {/* Artist Search Dropdown */}
-                            {showArtistDropdown[performer.id] && debouncedSearchQuery.length >= 2 && (
+                            {showArtistDropdown[performer.id] && getCurrentSearchQuery(performer.id).length >= 2 && currentPerformer === performer.id && (
                               <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
                                 {isSearching ? (
                                   <div className="p-3 text-sm text-gray-500 text-center">
@@ -826,6 +836,7 @@ export default function ContractProposalDialog({
                                       key={artist.id}
                                       className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-600 last:border-b-0"
                                       onClick={() => {
+                                        console.log('Artist selected:', artist);
                                         // Update the performer with selected artist data
                                         const newPerformers = [...performers];
                                         newPerformers[index].profileName = artist.name;
@@ -868,7 +879,7 @@ export default function ContractProposalDialog({
                                   ))
                                 ) : (
                                   <div className="p-3 text-sm text-gray-500 text-center">
-                                    No artists found matching "{debouncedSearchQuery}"
+                                    No artists found matching "{getCurrentSearchQuery(performer.id)}"
                                   </div>
                                 )}
                               </div>

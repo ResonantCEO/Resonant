@@ -233,7 +233,7 @@ export class Storage {
   async searchProfiles(query?: string, type?: string, location?: string, limit: number = 20, offset: number = 0) {
     try {
       console.log('Storage.searchProfiles called with:', { query, type, location, limit, offset });
-      
+
       let whereConditions = [];
 
       if (query && query.trim()) {
@@ -2142,6 +2142,102 @@ export class Storage {
     } catch (error) {
       console.error("Error deleting calendar event:", error);
       throw new Error(`Failed to delete calendar event: ${error.message}`);
+    }
+  }
+
+  // searchProfiles(query: string, type?: string, limit: number = 10): Promise<any[]> {
+  //   let sql = `
+  //     SELECT id, name, type, bio, genre, location, profileImageUrl, coverImageUrl
+  //     FROM profiles 
+  //     WHERE name LIKE ?
+  //   `;
+
+  //   const params = [`%${query}%`];
+
+  //   if (type) {
+  //     sql += ` AND type = ?`;
+  //     params.push(type);
+  //   }
+
+  //   sql += ` ORDER BY name ASC LIMIT ?`;
+  //   params.push(limit);
+
+  //   console.log('SearchProfiles SQL:', sql);
+  //   console.log('SearchProfiles params:', params);
+
+  //   const profiles = this.db.prepare(sql).all(...params);
+  //   console.log('SearchProfiles results:', profiles);
+  //   return profiles;
+  // }
+
+  async searchProfiles(query?: string, type?: string, location?: string, limit: number = 20, offset: number = 0) {
+    try {
+      console.log('Storage.searchProfiles called with:', { query, type, location, limit, offset });
+
+      let whereConditions = [];
+
+      if (query && query.trim()) {
+        const trimmedQuery = query.trim();
+        whereConditions.push(
+          or(
+            ilike(profiles.name, `%${trimmedQuery}%`),
+            ilike(profiles.bio, `%${trimmedQuery}%`),
+            ilike(profiles.genre, `%${trimmedQuery}%`)
+          )
+        );
+      }
+
+      if (type && type.trim()) {
+        whereConditions.push(eq(profiles.type, type.trim() as any));
+      }
+
+      if (location && location.trim()) {
+        whereConditions.push(ilike(profiles.location, `%${location.trim()}%`));
+      }
+
+      // Only show non-deleted profiles
+      whereConditions.push(isNull(profiles.deletedAt));
+
+      console.log('Search conditions count:', whereConditions.length);
+
+      if (whereConditions.length === 1) {
+        // Only deletedAt condition - return empty if no other filters
+        if (!query && !type && !location) {
+          console.log('No search criteria provided, returning empty array');
+          return [];
+        }
+      }
+
+      const searchResults = await db
+        .select({
+          id: profiles.id,
+          name: profiles.name,
+          type: profiles.type,
+          bio: profiles.bio,
+          genre: profiles.genre,
+          location: profiles.location,
+          profileImageUrl: profiles.profileImageUrl,
+          coverImageUrl: profiles.coverImageUrl,
+          createdAt: profiles.createdAt,
+        })
+        .from(profiles)
+        .where(and(...whereConditions))
+        .orderBy(sql`
+          CASE 
+            WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `${query.trim()}%` : ''}) THEN 1
+            WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `%${query.trim()}%` : ''}) THEN 2
+            ELSE 3
+          END,
+          ${profiles.name} ASC
+        `)
+        .limit(limit)
+        .offset(offset);
+
+      console.log(`Search query returned ${searchResults.length} results`);
+      return searchResults;
+    } catch (error) {
+      console.error("Error in searchProfiles:", error);
+      throw error;
     }
   }
 }

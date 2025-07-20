@@ -230,38 +230,56 @@ export class Storage {
   }
 
   // Search and Discovery functions
-  async searchProfiles(query?: string, type?: string, location?: string, limit: number = 20, offset: number = 0): Promise<Profile[]> {
-    try {
-      let whereConditions = [isNull(profiles.deletedAt)];
+  async searchProfiles(query?: string, type?: string, location?: string, limit: number = 20, offset: number = 0) {
+    let whereConditions = [];
 
-      if (query) {
-        whereConditions.push(
-          or(
-            ilike(profiles.name, `%${query}%`),
-            ilike(profiles.bio, `%${query}%`)
-          )
-        );
-      }
-
-      if (type && type !== 'all') {
-        whereConditions.push(eq(profiles.type, type as any));
-      }
-
-      if (location && location !== 'all-locations') {
-        whereConditions.push(ilike(profiles.location, `%${location}%`));
-      }
-
-      return await db
-        .select()
-        .from(profiles)
-        .where(and(...whereConditions))
-        .orderBy(desc(profiles.createdAt))
-        .limit(limit)
-        .offset(offset);
-    } catch (error) {
-      console.error("Error searching profiles:", error);
-      throw error;
+    if (query) {
+      whereConditions.push(
+        or(
+          ilike(profiles.name, `%${query}%`),
+          ilike(profiles.bio, `%${query}%`),
+          ilike(profiles.genre, `%${query}%`)
+        )
+      );
     }
+
+    if (type) {
+      whereConditions.push(eq(profiles.type, type));
+    }
+
+    if (location) {
+      whereConditions.push(ilike(profiles.location, `%${location}%`));
+    }
+
+    // Only show non-deleted profiles
+    whereConditions.push(isNull(profiles.deletedAt));
+
+    const searchResults = await db
+      .select({
+        id: profiles.id,
+        name: profiles.name,
+        type: profiles.type,
+        bio: profiles.bio,
+        genre: profiles.genre,
+        location: profiles.location,
+        profileImageUrl: profiles.profileImageUrl,
+        coverImageUrl: profiles.coverImageUrl,
+        createdAt: profiles.createdAt,
+      })
+      .from(profiles)
+      .where(and(...whereConditions))
+      .orderBy(sql`
+        CASE 
+          WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `${query}%` : ''}) THEN 1
+          WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `%${query}%` : ''}) THEN 2
+          ELSE 3
+        END,
+        ${profiles.name} ASC
+      `)
+      .limit(limit)
+      .offset(offset);
+
+    return searchResults;
   }
 
   async discoverProfiles(type?: string, location?: string, genre?: string, limit: number = 20, offset: number = 0, excludeProfileId?: number): Promise<Profile[]> {
@@ -1011,8 +1029,7 @@ export class Storage {
         .returning();
 
       return request;
-    } catch (error) {
-      console.error("Error updating booking request status:", error);
+    } catch (error) {      console.error("Error updating booking request status:", error);
       throw error;
     }
   }

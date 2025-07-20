@@ -89,7 +89,7 @@ export default function ContractProposalDialog({
       id: 'performer-1',
       name: 'Headliner',
       profileId: bookingRequest?.artistProfile?.id,
-      profileName: bookingRequest?.artistProfile?.name,
+      profileName: bookingRequest?.artistProfile?.name || '',
       performanceOrder: 1,
       setDuration: '60',
       soundCheckTime: '30',
@@ -198,6 +198,17 @@ export default function ContractProposalDialog({
         ...prev,
         title: getDefaultTitle()
       }));
+      
+      // Update headliner performer with artist profile name
+      setPerformers(prev => prev.map(performer => 
+        performer.name === 'Headliner' 
+          ? { 
+              ...performer, 
+              profileId: bookingRequest.artistProfile?.id,
+              profileName: bookingRequest.artistProfile?.name || ''
+            }
+          : performer
+      ));
     }
   }, [bookingRequest, selectedVenueForContract]);
 

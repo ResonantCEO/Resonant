@@ -699,36 +699,16 @@ export default function ContractProposalDialog({
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <Label htmlFor={`${performer.id}-name`}>Artist/Band Name</Label>
-                            <div className="flex items-center space-x-3 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
-                              {performer.profileId && bookingRequest?.artistProfile?.profileImageUrl ? (
-                                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                                  <img
-                                    src={bookingRequest.artistProfile.profileImageUrl}
-                                    alt={performer.profileName}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              ) : (
-                                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                                  <span className="text-gray-600 dark:text-gray-400 text-sm font-medium">
-                                    {performer.profileName ? performer.profileName.charAt(0).toUpperCase() : '?'}
-                                  </span>
-                                </div>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <Input
-                                  id={`${performer.id}-name`}
-                                  value={performer.profileName}
-                                  onChange={(e) => {
-                                    const newPerformers = [...performers];
-                                    newPerformers[index].profileName = e.target.value;
-                                    setPerformers(newPerformers);
-                                  }}
-                                  placeholder="Enter artist name"
-                                  className="border-0 bg-transparent p-0 focus:ring-0 focus:ring-offset-0 font-medium"
-                                />
-                              </div>
-                            </div>
+                            <Input
+                              id={`${performer.id}-name`}
+                              value={performer.profileName}
+                              onChange={(e) => {
+                                const newPerformers = [...performers];
+                                newPerformers[index].profileName = e.target.value;
+                                setPerformers(newPerformers);
+                              }}
+                              placeholder="Enter artist name"
+                            />
                           </div>
                           <div>
                             <Label htmlFor={`${performer.id}-order`}>Performance Order</Label>

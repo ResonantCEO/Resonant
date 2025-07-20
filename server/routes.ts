@@ -810,21 +810,7 @@ export function registerRoutes(app: Express): Server {
 
   app.post('/api/profiles/:id/activate', isAuthenticated, async (req: any, res) => {
     try {
-      const profileIdParam = req.params.id;
-      
-      // Validate that the profile ID is a valid number
-      if (!profileIdParam || profileIdParam === 'undefined' || profileIdParam === 'null' || profileIdParam.includes('object') || profileIdParam.includes('Promise')) {
-        console.error("Invalid profile ID received:", profileIdParam);
-        return res.status(400).json({ message: "Invalid profile ID" });
-      }
-      
-      const profileId = parseInt(profileIdParam);
-      
-      if (isNaN(profileId)) {
-        console.error("Profile ID is not a valid number:", profileIdParam);
-        return res.status(400).json({ message: "Invalid profile ID" });
-      }
-      
+      const profileId = parseInt(req.params.id);
       const userId = req.user.id;
 
       // Verify ownership

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,10 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { FileText, DollarSign, Calendar, Clock, Users, Plus } from "lucide-react";
+import { FileText, DollarSign, Calendar, Clock, Users, Plus, Search } from "lucide-react";
 import AvailabilityChecker from "./availability-checker";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface ContractProposalDialogProps {
   open: boolean;
@@ -99,6 +100,9 @@ export default function ContractProposalDialog({
     }
   ]);
   const [currentPerformer, setCurrentPerformer] = useState<string>(performers[0]?.id || '');
+  const [artistSearchQuery, setArtistSearchQuery] = useState<{ [key: string]: string }>({});
+  const [showArtistSuggestions, setShowArtistSuggestions] = useState<{ [key: string]: boolean }>({});
+  const [selectedArtists, setSelectedArtists] = useState<{ [key: string]: any }>({});
 
   // Generate default contract title
   const getDefaultTitle = () => {
@@ -218,6 +222,32 @@ export default function ContractProposalDialog({
       setCurrentPerformer(performers[0].id);
     }
   }, [performers, currentPerformer]);
+
+  // Debounce search queries for each performer
+  const debouncedSearchQueries = Object.keys(artistSearchQuery).reduce((acc, performerId) => {
+    acc[performerId] = useDebounce(artistSearchQuery[performerId] || '', 300);
+    return acc;
+  }, {} as { [key: string]: string });
+
+  // Search for artists based on debounced query
+  const useArtistSearch = (performerId: string, query: string) => {
+    return useQuery({
+      queryKey: ['artist-search', query],
+      queryFn: async () => {
+        if (!query || query.length < 2) return [];
+        const params = new URLSearchParams();
+        params.append('q', query);
+        params.append('type', 'artist');
+        params.append('limit', '10');
+        
+        const response = await fetch(`/api/profiles/search?${params}`);
+        if (!response.ok) throw new Error('Failed to search artists');
+        return response.json();
+      },
+      enabled: !!query && query.length >= 2,
+      staleTime: 5 * 60 * 1000,
+    });
+  };
 
   const createProposalMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -697,18 +727,117 @@ export default function ContractProposalDialog({
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                          <div>
+                          <div className="relative">
                             <Label htmlFor={`${performer.id}-name`}>Artist/Band Name</Label>
-                            <Input
-                              id={`${performer.id}-name`}
-                              value={performer.profileName}
-                              onChange={(e) => {
-                                const newPerformers = [...performers];
-                                newPerformers[index].profileName = e.target.value;
-                                setPerformers(newPerformers);
-                              }}
-                              placeholder="Enter artist name"
-                            />
+                            <div className="relative">
+                              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
+                              <Input
+                                id={`${performer.id}-name`}
+                                value={artistSearchQuery[performer.id] || performer.profileName}
+                                onChange={(e) => {
+                                  const query = e.target.value;
+                                  setArtistSearchQuery(prev => ({ ...prev, [performer.id]: query }));
+                                  setShowArtistSuggestions(prev => ({ ...prev, [performer.id]: query.length >= 2 }));
+                                  
+                                  // Update performer name immediately for manual typing
+                                  const newPerformers = [...performers];
+                                  newPerformers[index].profileName = query;
+                                  newPerformers[index].profileId = undefined; // Clear profile ID when manually typing
+                                  setPerformers(newPerformers);
+                                }}
+                                onFocus={() => {
+                                  const query = artistSearchQuery[performer.id] || '';
+                                  if (query.length >= 2) {
+                                    setShowArtistSuggestions(prev => ({ ...prev, [performer.id]: true }));
+                                  }
+                                }}
+                                placeholder="Search for artist..."
+                                className="pl-10"
+                              />
+                              
+                              {/* Artist Search Suggestions Dropdown */}
+                              {showArtistSuggestions[performer.id] && (() => {
+                                const searchQuery = debouncedSearchQueries[performer.id] || '';
+                                const { data: searchResults, isLoading } = useArtistSearch(performer.id, searchQuery);
+                                
+                                if (!searchQuery || searchQuery.length < 2) return null;
+                                
+                                return (
+                                  <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                    {isLoading ? (
+                                      <div className="p-3 text-center text-gray-500">
+                                        <div className="flex items-center justify-center">
+                                          <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin mr-2"></div>
+                                          Searching...
+                                        </div>
+                                      </div>
+                                    ) : searchResults && searchResults.length > 0 ? (
+                                      <>
+                                        {searchResults.map((artist: any) => (
+                                          <div
+                                            key={artist.id}
+                                            className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-600 last:border-b-0"
+                                            onClick={() => {
+                                              // Update performer with selected artist
+                                              const newPerformers = [...performers];
+                                              newPerformers[index].profileName = artist.name;
+                                              newPerformers[index].profileId = artist.id;
+                                              setPerformers(newPerformers);
+                                              
+                                              // Update search state
+                                              setArtistSearchQuery(prev => ({ ...prev, [performer.id]: artist.name }));
+                                              setSelectedArtists(prev => ({ ...prev, [performer.id]: artist }));
+                                              setShowArtistSuggestions(prev => ({ ...prev, [performer.id]: false }));
+                                            }}
+                                          >
+                                            <div className="flex items-center space-x-3">
+                                              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                                {artist.profileImageUrl ? (
+                                                  <img
+                                                    src={artist.profileImageUrl}
+                                                    alt={artist.name}
+                                                    className="w-full h-full object-cover"
+                                                  />
+                                                ) : (
+                                                  <div className="w-full h-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                                    <span className="text-gray-600 dark:text-gray-400 text-sm font-medium">
+                                                      {artist.name.charAt(0).toUpperCase()}
+                                                    </span>
+                                                  </div>
+                                                )}
+                                              </div>
+                                              <div className="flex-1 min-w-0">
+                                                <div className="font-medium text-gray-900 dark:text-white">
+                                                  {artist.name}
+                                                </div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                                  Artist
+                                                  {artist.location && ` • ${artist.location}`}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </>
+                                    ) : (
+                                      <div className="p-3 text-center text-gray-500">
+                                        No artists found matching "{searchQuery}"
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                            
+                            {/* Click outside to close suggestions */}
+                            {showArtistSuggestions[performer.id] && (
+                              <div 
+                                className="fixed inset-0 z-40" 
+                                onClick={() => {
+                                  setShowArtistSuggestions(prev => ({ ...prev, [performer.id]: false }));
+                                }}
+                              />
+                            )}
                           </div>
                           <div>
                             <Label htmlFor={`${performer.id}-order`}>Performance Order</Label>

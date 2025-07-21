@@ -236,6 +236,9 @@ export class Storage {
 
       let whereConditions = [];
 
+      // Always include non-deleted profiles condition
+      whereConditions.push(isNull(profiles.deletedAt));
+
       if (query && query.trim()) {
         const trimmedQuery = query.trim();
         whereConditions.push(
@@ -255,17 +258,12 @@ export class Storage {
         whereConditions.push(ilike(profiles.location, `%${location.trim()}%`));
       }
 
-      // Only show non-deleted profiles
-      whereConditions.push(isNull(profiles.deletedAt));
-
       console.log('Search conditions count:', whereConditions.length);
 
-      if (whereConditions.length === 1) {
-        // Only deletedAt condition - return empty if no other filters
-        if (!query && !type && !location) {
-          console.log('No search criteria provided, returning empty array');
-          return [];
-        }
+      // If only deletedAt condition and no search criteria, return empty
+      if (whereConditions.length === 1 && !query && !type && !location) {
+        console.log('No search criteria provided, returning empty array');
+        return [];
       }
 
       const searchResults = await db
@@ -284,8 +282,8 @@ export class Storage {
         .where(and(...whereConditions))
         .orderBy(sql`
           CASE 
-            WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `${query.trim()}%` : ''}) THEN 1
-            WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `%${query.trim()}%` : ''}) THEN 2
+            WHEN ${query ? `LOWER(${profiles.name}) LIKE LOWER(${`${query.trim()}%`})` : 'false'} THEN 1
+            WHEN ${query ? `LOWER(${profiles.name}) LIKE LOWER(${`%${query.trim()}%`})` : 'false'} THEN 2
             ELSE 3
           END,
           ${profiles.name} ASC
@@ -293,7 +291,17 @@ export class Storage {
         .limit(limit)
         .offset(offset);
 
-      console.log(`Search query returned ${searchResults.length} results`);
+      console.log(`Search query returned ${searchResults.length} results for:`, {
+        query: query?.trim(),
+        type: type?.trim(),
+        conditions: whereConditions.length
+      });
+
+      // Log sample results for debugging
+      if (searchResults.length > 0) {
+        console.log('Sample search results:', searchResults.slice(0, 3).map(r => ({ id: r.id, name: r.name, type: r.type })));
+      }
+
       return searchResults;
     } catch (error) {
       console.error("Error in searchProfiles:", error);
@@ -2176,6 +2184,9 @@ export class Storage {
 
       let whereConditions = [];
 
+      // Always include non-deleted profiles condition
+      whereConditions.push(isNull(profiles.deletedAt));
+
       if (query && query.trim()) {
         const trimmedQuery = query.trim();
         whereConditions.push(
@@ -2195,17 +2206,12 @@ export class Storage {
         whereConditions.push(ilike(profiles.location, `%${location.trim()}%`));
       }
 
-      // Only show non-deleted profiles
-      whereConditions.push(isNull(profiles.deletedAt));
-
       console.log('Search conditions count:', whereConditions.length);
 
-      if (whereConditions.length === 1) {
-        // Only deletedAt condition - return empty if no other filters
-        if (!query && !type && !location) {
-          console.log('No search criteria provided, returning empty array');
-          return [];
-        }
+      // If only deletedAt condition and no search criteria, return empty
+      if (whereConditions.length === 1 && !query && !type && !location) {
+        console.log('No search criteria provided, returning empty array');
+        return [];
       }
 
       const searchResults = await db
@@ -2224,8 +2230,8 @@ export class Storage {
         .where(and(...whereConditions))
         .orderBy(sql`
           CASE 
-            WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `${query.trim()}%` : ''}) THEN 1
-            WHEN LOWER(${profiles.name}) LIKE LOWER(${query ? `%${query.trim()}%` : ''}) THEN 2
+            WHEN ${query ? `LOWER(${profiles.name}) LIKE LOWER(${`${query.trim()}%`})` : 'false'} THEN 1
+            WHEN ${query ? `LOWER(${profiles.name}) LIKE LOWER(${`%${query.trim()}%`})` : 'false'} THEN 2
             ELSE 3
           END,
           ${profiles.name} ASC
@@ -2233,7 +2239,17 @@ export class Storage {
         .limit(limit)
         .offset(offset);
 
-      console.log(`Search query returned ${searchResults.length} results`);
+      console.log(`Search query returned ${searchResults.length} results for:`, {
+        query: query?.trim(),
+        type: type?.trim(),
+        conditions: whereConditions.length
+      });
+
+      // Log sample results for debugging
+      if (searchResults.length > 0) {
+        console.log('Sample search results:', searchResults.slice(0, 3).map(r => ({ id: r.id, name: r.name, type: r.type })));
+      }
+
       return searchResults;
     } catch (error) {
       console.error("Error in searchProfiles:", error);

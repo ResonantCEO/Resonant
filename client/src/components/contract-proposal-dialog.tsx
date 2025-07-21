@@ -131,9 +131,17 @@ export default function ContractProposalDialog({
       console.log('Search API call triggered with query:', debouncedSearchQuery);
       if (!debouncedSearchQuery || debouncedSearchQuery.length < 2) return [];
       
-      const response = await fetch(`/api/profiles/search?q=${encodeURIComponent(debouncedSearchQuery)}&type=artist&limit=10`);
+      const searchParams = new URLSearchParams({
+        q: debouncedSearchQuery,
+        type: 'artist',
+        limit: '10'
+      });
+      
+      const response = await fetch(`/api/profiles/search?${searchParams.toString()}`);
       if (!response.ok) {
         console.error('Search API failed:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
         throw new Error('Failed to search artists');
       }
       const results = await response.json();
